@@ -1,0 +1,20 @@
+/* DigitalBoost Store Builder — chrome profesional */
+[data-store-builder], [data-db-studio], [data-website-builder] {
+  --sb-bg: #070B14;
+  --sb-line: rgba(247,250,255,.08);
+}
+#db-studio-dock { font-family: ui-sans-serif, system-ui, sans-serif; }
+#db-studio-dock .db-ide-bar {
+  border: 1px solid var(--sb-line, rgba(255,255,255,.1));
+  background: rgba(8,14,28,.94);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 -8px 32px rgba(0,0,0,.35);
+}
+#db-studio-dock .db-ide-bar button {
+  font-size: 11px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+body.db-pulse-open #db-studio-dock { display: none !important; }
+
+body.db-seo-open #db-studio-dock { display: none !important; }

@@ -1,0 +1,450 @@
+/* ============================================================
+   DIGITALBOOST — STORE BUILDER JEWEL V2
+   STORE BUILDER = COMMERCE STUDIO
+   ============================================================ */
+
+[data-store-builder-jewel="true"] {
+  --db-jewel-bg-0: #07111f;
+  --db-jewel-bg-1: #0a1730;
+  --db-jewel-bg-2: #101a35;
+  --db-jewel-panel: #111f3b;
+  --db-jewel-panel-2: #142846;
+
+  --db-jewel-violet: #9b6cff;
+  --db-jewel-violet-bright: #bd9aff;
+
+  --db-jewel-cyan: #22d3ee;
+  --db-jewel-cyan-bright: #67e8f9;
+
+  --db-jewel-magenta: #ec4899;
+  --db-jewel-blue: #5b9cff;
+
+  --db-jewel-text: #f8fbff;
+  --db-jewel-muted: #a7bad0;
+
+  position: relative !important;
+  isolation: isolate !important;
+  color-scheme: dark !important;
+  background:
+    radial-gradient(
+      circle at 4% 0%,
+      rgba(34,211,238,.19),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 96% 8%,
+      rgba(155,108,255,.23),
+      transparent 31%
+    ),
+    radial-gradient(
+      circle at 70% 100%,
+      rgba(236,72,153,.11),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      var(--db-jewel-bg-0) 0%,
+      var(--db-jewel-bg-1) 46%,
+      var(--db-jewel-bg-2) 100%
+    ) !important;
+}
+
+/* ------------------------------------------------------------
+   ATMÓSFERA
+   ------------------------------------------------------------ */
+
+[data-store-builder-jewel="true"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(91,156,255,.045),
+      transparent 28%,
+      rgba(155,108,255,.055) 66%,
+      transparent
+    ),
+
+    repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,.014) 0,
+      rgba(255,255,255,.014) 1px,
+      transparent 1px,
+      transparent 64px
+    ),
+
+    repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,.010) 0,
+      rgba(255,255,255,.010) 1px,
+      transparent 1px,
+      transparent 64px
+    );
+
+  opacity: .95;
+}
+
+/* ------------------------------------------------------------
+   SHELL PRINCIPAL
+   ------------------------------------------------------------ */
+
+[data-store-builder-jewel="true"].db-store-jewel-shell {
+  min-height: 100vh !important;
+
+  background:
+    radial-gradient(
+      circle at 15% 12%,
+      rgba(34,211,238,.11),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 86% 18%,
+      rgba(155,108,255,.14),
+      transparent 28%
+    ),
+    linear-gradient(
+      135deg,
+      #07111f,
+      #0a1730 48%,
+      #111a35
+    ) !important;
+}
+
+/* ------------------------------------------------------------
+   HEADER
+   ------------------------------------------------------------ */
+
+[data-store-builder-jewel="true"]
+.db-store-jewel-header {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(12,27,52,.96),
+      rgba(9,20,39,.91)
+    ) !important;
+
+  border-bottom-color:
+    rgba(91,231,255,.12) !important;
+
+  box-shadow:
+    0 10px 35px rgba(0,0,0,.20),
+    inset 0 -1px 0 rgba(255,255,255,.035);
+
+  backdrop-filter: blur(22px);
+}
+
+/* ------------------------------------------------------------
+   SIDEBAR
+   ------------------------------------------------------------ */
+
+[data-store-builder-jewel="true"]
+.db-store-jewel-sidebar {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10,24,47,.98),
+      rgba(8,18,37,.97)
+    ) !important;
+
+  border-right-color:
+    rgba(155,108,255,.13) !important;
+
+  box-shadow:
+    16px 0 55px rgba(0,0,0,.16);
+}
+
+/* ------------------------------------------------------------
+   MAIN CANVAS
+   ------------------------------------------------------------ */
+
+[data-store-builder-jewel="true"]
+.db-store-jewel-main {
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(34,211,238,.055),
+      transparent 30%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(10,24,47,.35),
+      rgba(7,17,31,.70)
+    ) !important;
+}
+
+/* ------------------------------------------------------------
+   OLD BACKGROUND TOKENS → JEWEL
+   ------------------------------------------------------------ */
+
+[data-store-builder-jewel="true"]
+[class*="bg-[#02050d]"],
+[data-store-builder-jewel="true"]
+[class*="bg-[#020711]"],
+[data-store-builder-jewel="true"]
+[class*="bg-[#02050a]"] {
+  background:
+    linear-gradient(
+      145deg,
+      #081528,
+      #0b1b36
+    ) !important;
+}
+
+[data-store-builder-jewel="true"]
+[class*="bg-[#030711]"],
+[data-store-builder-jewel="true"]
+[class*="bg-[#030914]"] {
+  background:
+    linear-gradient(
+      145deg,
+      #0c1a33,
+      #102342
+    ) !important;
+}
+
+[data-store-builder-jewel="true"]
+[class*="bg-[#070b14]"],
+[data-store-builder-jewel="true"]
+[class*="bg-[#070d18]"] {
+  background:
+    linear-gradient(
+      145deg,
+      #10203d,
+      #142a4a
+    ) !important;
+}
+
+[data-store-builder-jewel="true"]
+[class*="bg-[#0a0f1c]"] {
+  background:
+    linear-gradient(
+      145deg,
+      #142846,
+      #183153
+    ) !important;
+}
+
+/* ------------------------------------------------------------
+   CARDS
+   ------------------------------------------------------------ */
+
+[data-store-builder-jewel="true"]
+[class*="rounded-2xl"][class*="border-white"],
+[data-store-builder-jewel="true"]
+[class*="rounded-xl"][class*="border-white"] {
+  border-color:
+    rgba(148,163,184,.14) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 12px 34px rgba(0,0,0,.15);
+
+  transition:
+    transform .20s ease,
+    border-color .20s ease,
+    box-shadow .20s ease,
+    background .20s ease;
+}
+
+[data-store-builder-jewel="true"]
+[class*="rounded-2xl"][class*="border-white"]:hover,
+[data-store-builder-jewel="true"]
+[class*="rounded-xl"][class*="border-white"]:hover {
+  border-color:
+    rgba(91,231,255,.22) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 16px 42px rgba(0,0,0,.19),
+    0 0 0 1px rgba(34,211,238,.045);
+}
+
+/* ------------------------------------------------------------
+   TYPOGRAPHY
+   ------------------------------------------------------------ */
+
+[data-store-builder-jewel="true"]
+[class*="text-slate-700"] {
+  color: #8ea4c0 !important;
+}
+
+[data-store-builder-jewel="true"]
+[class*="text-slate-600"] {
+  color: #9db1c8 !important;
+}
+
+[data-store-builder-jewel="true"]
+[class*="text-slate-500"] {
+  color: #aebfd3 !important;
+}
+
+[data-store-builder-jewel="true"]
+[class*="text-slate-400"] {
+  color: #bcc9d8 !important;
+}
+
+[data-store-builder-jewel="true"]
+[class*="text-cyan-300"] {
+  color: #67e8f9 !important;
+}
+
+[data-store-builder-jewel="true"]
+[class*="text-violet-300"] {
+  color: #bd9aff !important;
+}
+
+[data-store-builder-jewel="true"]
+[class*="text-violet-200"] {
+  color: #d8ccff !important;
+}
+
+/* ------------------------------------------------------------
+   ACCENTOS
+   ------------------------------------------------------------ */
+
+[data-store-builder-jewel="true"]
+[class*="bg-violet-500"]:not([class*="bg-violet-500/"]) {
+  background:
+    linear-gradient(
+      135deg,
+      #8b5cf6,
+      #a855f7
+    ) !important;
+}
+
+[data-store-builder-jewel="true"]
+[class*="bg-cyan-400"]:not([class*="bg-cyan-400/"]) {
+  background:
+    linear-gradient(
+      135deg,
+      #22d3ee,
+      #38bdf8
+    ) !important;
+}
+
+/* ------------------------------------------------------------
+   BOTONES
+   ------------------------------------------------------------ */
+
+[data-store-builder-jewel="true"] button {
+  transition:
+    transform .18s ease,
+    background-color .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    color .18s ease;
+}
+
+[data-store-builder-jewel="true"] button:hover {
+  transform: translateY(-1px);
+}
+
+[data-store-builder-jewel="true"]
+button[class*="bg-violet-500"] {
+  box-shadow:
+    0 8px 28px rgba(139,92,246,.20);
+}
+
+[data-store-builder-jewel="true"]
+button[class*="bg-violet-500"]:hover {
+  box-shadow:
+    0 10px 34px rgba(139,92,246,.28),
+    0 0 0 1px rgba(189,154,255,.16);
+}
+
+[data-store-builder-jewel="true"]
+button[class*="border-cyan-400"] {
+  box-shadow:
+    0 0 20px rgba(34,211,238,.07);
+}
+
+[data-store-builder-jewel="true"]
+button[class*="border-cyan-400"]:hover {
+  box-shadow:
+    0 0 28px rgba(34,211,238,.12);
+}
+
+/* ------------------------------------------------------------
+   INPUTS
+   ------------------------------------------------------------ */
+
+[data-store-builder-jewel="true"]
+input,
+[data-store-builder-jewel="true"]
+textarea,
+[data-store-builder-jewel="true"]
+select {
+  background:
+    rgba(7,18,36,.82) !important;
+
+  border-color:
+    rgba(148,163,184,.16) !important;
+
+  color:
+    #f7fbff !important;
+}
+
+[data-store-builder-jewel="true"]
+input:focus,
+[data-store-builder-jewel="true"]
+textarea:focus,
+[data-store-builder-jewel="true"]
+select:focus {
+  border-color:
+    rgba(103,232,249,.60) !important;
+
+  box-shadow:
+    0 0 0 3px rgba(34,211,238,.08),
+    0 0 28px rgba(34,211,238,.07) !important;
+}
+
+/* ------------------------------------------------------------
+   GLASS
+   ------------------------------------------------------------ */
+
+[data-store-builder-jewel="true"]
+[class*="backdrop-blur"] {
+  backdrop-filter:
+    blur(20px) saturate(1.12);
+}
+
+/* ------------------------------------------------------------
+   SCROLLBAR
+   ------------------------------------------------------------ */
+
+[data-store-builder-jewel="true"]::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+[data-store-builder-jewel="true"]::-webkit-scrollbar-track {
+  background: #07111f;
+}
+
+[data-store-builder-jewel="true"]::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(
+      180deg,
+      #35527a,
+      #6645b7
+    );
+
+  border-radius: 999px;
+  border: 2px solid #07111f;
+}
+
+/* ------------------------------------------------------------
+   ACTIVE STATE
+   ------------------------------------------------------------ */
+
+[data-store-builder-jewel="true"]
+[class*="bg-violet-500/10"],
+[data-store-builder-jewel="true"]
+[class*="bg-cyan-400/10"] {
+  box-shadow:
+    inset 0 0 24px rgba(91,231,255,.035);
+}

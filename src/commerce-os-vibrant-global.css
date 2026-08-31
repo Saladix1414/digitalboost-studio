@@ -1,0 +1,172 @@
+
+/* ============================================================
+   DIGITALBOOST — COMMERCE OS VIBRANT V5
+   Visual reinforcement layer
+   ============================================================ */
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"] {
+  --db-violet: #8b5cf6;
+  --db-violet-bright: #a78bfa;
+  --db-cyan: #22d3ee;
+  --db-cyan-bright: #67e8f9;
+  --db-magenta: #d946ef;
+  --db-surface: #071022;
+  --db-surface-2: #09142a;
+  --db-border: rgba(255,255,255,.14);
+
+  position: relative;
+  isolation: isolate;
+  color-scheme: dark;
+
+  background:
+    radial-gradient(
+      circle at 8% 8%,
+      rgba(34,211,238,.16),
+      transparent 27%
+    ),
+    radial-gradient(
+      circle at 92% 18%,
+      rgba(139,92,246,.17),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 55% 100%,
+      rgba(217,70,239,.09),
+      transparent 35%
+    ),
+    #030817 !important;
+}
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(34,211,238,.035),
+      transparent 35%,
+      rgba(139,92,246,.045)
+    );
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.08),
+    inset 0 0 90px rgba(34,211,238,.045);
+}
+
+/* Superficies */
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"] .bg-\[\#050912\],
+[data-commerce-os="true"][data-commerce-os-vibrant="true"] .bg-\[\#071022\],
+[data-commerce-os="true"][data-commerce-os-vibrant="true"] .bg-\[\#071125\] {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 12px 40px rgba(0,0,0,.22);
+}
+
+/* Botones cyan */
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"] button:hover {
+  transition:
+    border-color .18s ease,
+    background-color .18s ease,
+    color .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease;
+
+  box-shadow:
+    0 0 0 1px rgba(34,211,238,.08),
+    0 0 24px rgba(34,211,238,.08);
+}
+
+/* Acciones principales */
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.bg-gradient-to-r {
+  filter: saturate(1.18);
+  box-shadow:
+    0 8px 30px rgba(139,92,246,.18),
+    0 0 28px rgba(34,211,238,.08);
+}
+
+/* Texto de navegación */
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.text-slate-300 {
+  color: #cbd5e1 !important;
+}
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.text-slate-400 {
+  color: #aebdce !important;
+}
+
+/* Cyan principal */
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.text-cyan-200,
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.text-cyan-300 {
+  color: #67e8f9 !important;
+}
+
+/* Violet principal */
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.text-violet-100,
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.text-violet-200 {
+  color: #c4b5fd !important;
+}
+
+/* Bordes */
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.border-white\/10 {
+  border-color: rgba(255,255,255,.14) !important;
+}
+
+/* Active cyan */
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.border-cyan-400\/32,
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.border-cyan-300\/32 {
+  border-color: rgba(103,232,249,.40) !important;
+}
+
+/* Active violet */
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.border-violet-400\/30 {
+  border-color: rgba(167,139,250,.38) !important;
+}
+
+/* Glass surfaces */
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.backdrop-blur-xl {
+  background-color: rgba(7,17,37,.88) !important;
+  backdrop-filter: blur(18px);
+}
+
+/* Preview / panels */
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.border-white\/\[0\.14\],
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.border-white\/\[0\.16\],
+[data-commerce-os="true"][data-commerce-os-vibrant="true"]
+.border-white\/\[0\.18\] {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+/* Mantener el layout sin alterar dimensiones */
+
+[data-commerce-os="true"][data-commerce-os-vibrant="true"] * {
+  box-sizing: border-box;
+}

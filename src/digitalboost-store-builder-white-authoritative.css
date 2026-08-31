@@ -1,0 +1,582 @@
+/* ============================================================
+   DIGITALBOOST
+   STORE BUILDER — AUTHORITATIVE WHITE SYSTEM
+   ============================================================
+
+   Regla:
+   - Commerce OS / Store Builder = LIGHT
+   - Website Builder = LIGHT
+   - Acentos = Azul / Violeta / Cian / Verde
+   - Nada de neon oscuro
+   - Nada de fondos negros
+   ============================================================ */
+
+
+/* ============================================================
+   BASE STORE BUILDER
+   ============================================================ */
+
+[data-store-builder="true"] {
+  --db-bg: #F5F7FB;
+  --db-surface: #FFFFFF;
+  --db-surface-2: #F8FAFC;
+  --db-surface-3: #EEF2F7;
+
+  --db-text: #172033;
+  --db-text-2: #475569;
+  --db-text-3: #64748B;
+
+  --db-border: #DFE7EF;
+  --db-border-strong: #CBD5E1;
+
+  --db-blue: #2563EB;
+  --db-blue-dark: #1D4ED8;
+
+  --db-violet: #7C3AED;
+  --db-violet-dark: #6D28D9;
+
+  --db-cyan: #0891B2;
+  --db-green: #059669;
+  --db-green-dark: #047857;
+
+  min-width: 0 !important;
+  width: 100% !important;
+
+  background: #F5F7FB !important;
+  background-color: #F5F7FB !important;
+
+  color: #172033 !important;
+}
+
+
+/* ============================================================
+   TODA LA SUPERFICIE PRINCIPAL
+   ============================================================ */
+
+[data-store-builder="true"] > aside,
+[data-store-builder="true"] > main,
+[data-store-builder="true"] > section,
+[data-store-builder="true"] > div {
+  background-color: #F5F7FB !important;
+  color: #172033 !important;
+}
+
+
+/* ============================================================
+   SIDEBAR STORE BUILDER
+   ============================================================ */
+
+[data-store-builder="true"] > aside {
+  background:
+    linear-gradient(
+      180deg,
+      #FFFFFF 0%,
+      #F8FAFC 100%
+    ) !important;
+
+  border-color: #DFE7EF !important;
+}
+
+[data-store-builder="true"] > aside header,
+[data-store-builder="true"] > aside nav,
+[data-store-builder="true"] > aside section,
+[data-store-builder="true"] > aside div {
+  border-color: #DFE7EF !important;
+}
+
+
+/* ============================================================
+   TODAS LAS SUPERFICIES DARK DEL STORE BUILDER
+   ============================================================ */
+
+[data-store-builder="true"]
+[class*="bg-[#02050"],
+[data-store-builder="true"]
+[class*="bg-[#030817"],
+[data-store-builder="true"]
+[class*="bg-[#050"],
+[data-store-builder="true"]
+[class*="bg-[#070"],
+[data-store-builder="true"]
+[class*="bg-[#071"],
+[data-store-builder="true"]
+[class*="bg-[#0B1B30"],
+[data-store-builder="true"]
+[class*="bg-[#0E2945"],
+[data-store-builder="true"]
+[class*="bg-black"] {
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+}
+
+
+/* ============================================================
+   SLATE LIGHT
+   ============================================================ */
+
+[data-store-builder="true"]
+[class*="bg-slate-50"] {
+  background-color: #F8FAFC !important;
+}
+
+[data-store-builder="true"]
+[class*="bg-slate-100"] {
+  background-color: #F1F5F9 !important;
+}
+
+[data-store-builder="true"]
+[class*="bg-slate-200"] {
+  background-color: #E2E8F0 !important;
+}
+
+
+/* ============================================================
+   TEXTOS
+   ============================================================ */
+
+[data-store-builder="true"]
+[class*="text-white"] {
+  color: #172033 !important;
+}
+
+[data-store-builder="true"]
+[class*="text-slate-300"] {
+  color: #475569 !important;
+}
+
+[data-store-builder="true"]
+[class*="text-slate-400"] {
+  color: #64748B !important;
+}
+
+[data-store-builder="true"]
+[class*="text-slate-500"] {
+  color: #64748B !important;
+}
+
+[data-store-builder="true"]
+[class*="text-slate-600"] {
+  color: #475569 !important;
+}
+
+
+/* ============================================================
+   BORDES
+   ============================================================ */
+
+[data-store-builder="true"]
+[class*="border-white"] {
+  border-color: #DFE7EF !important;
+}
+
+[data-store-builder="true"]
+[class*="border-[#1D4260"] {
+  border-color: #DFE7EF !important;
+}
+
+[data-store-builder="true"]
+[class*="border-[#123755"] {
+  border-color: #DFE7EF !important;
+}
+
+
+/* ============================================================
+   TARJETAS
+   ============================================================ */
+
+[data-store-builder="true"]
+[class*="rounded-xl"][class*="border"],
+[data-store-builder="true"]
+[class*="rounded-2xl"][class*="border"] {
+  background-color: #FFFFFF !important;
+  border-color: #DFE7EF !important;
+
+  box-shadow:
+    0 4px 18px rgba(15,23,42,.045) !important;
+}
+
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+
+[data-store-builder="true"] input,
+[data-store-builder="true"] textarea,
+[data-store-builder="true"] select {
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+
+  color: #172033 !important;
+
+  border:
+    1px solid #CBD5E1 !important;
+
+  border-radius:
+    10px !important;
+}
+
+
+/* ============================================================
+   MODALES / SEARCH
+   ============================================================ */
+
+[data-store-builder="true"]
+.fixed.inset-0 {
+  background:
+    rgba(15,23,42,.16) !important;
+}
+
+[data-store-builder="true"]
+.fixed.inset-0 > div {
+  background:
+    #FFFFFF !important;
+
+  color:
+    #172033 !important;
+
+  border-color:
+    #DFE7EF !important;
+}
+
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+
+[data-store-builder="true"] table {
+  color: #172033 !important;
+}
+
+[data-store-builder="true"] tr {
+  border-color: #DFE7EF !important;
+}
+
+[data-store-builder="true"] tbody tr:hover {
+  background: #F8FAFC !important;
+}
+
+
+/* ============================================================
+   ACCENTOS — NO LOS APAGAMOS
+   ============================================================ */
+
+[data-store-builder="true"]
+[class*="text-violet"] {
+  color: #7C3AED !important;
+}
+
+[data-store-builder="true"]
+[class*="text-cyan"] {
+  color: #0891B2 !important;
+}
+
+[data-store-builder="true"]
+[class*="text-emerald"] {
+  color: #047857 !important;
+}
+
+[data-store-builder="true"]
+[class*="text-blue"] {
+  color: #2563EB !important;
+}
+
+
+/* ============================================================
+   ACCIONES
+   ============================================================ */
+
+[data-store-builder="true"]
+[class*="bg-violet-500"],
+[data-store-builder="true"]
+[class*="bg-violet-600"] {
+  background:
+    linear-gradient(
+      135deg,
+      #7C3AED,
+      #6D28D9
+    ) !important;
+
+  color:
+    #FFFFFF !important;
+}
+
+[data-store-builder="true"]
+[class*="bg-blue-500"],
+[data-store-builder="true"]
+[class*="bg-blue-600"] {
+  background:
+    linear-gradient(
+      135deg,
+      #2563EB,
+      #1D4ED8
+    ) !important;
+
+  color:
+    #FFFFFF !important;
+}
+
+[data-store-builder="true"]
+[class*="bg-cyan-400"],
+[data-store-builder="true"]
+[class*="bg-cyan-500"] {
+  background:
+    #0891B2 !important;
+
+  color:
+    #FFFFFF !important;
+}
+
+[data-store-builder="true"]
+[class*="bg-emerald-500"],
+[data-store-builder="true"]
+[class*="bg-emerald-600"] {
+  background:
+    linear-gradient(
+      135deg,
+      #059669,
+      #047857
+    ) !important;
+
+  color:
+    #FFFFFF !important;
+}
+
+
+/* ============================================================
+   COMMERCE OS REAL
+   ============================================================ */
+
+[data-store-builder="true"]
+[data-commerce-os="true"],
+[data-store-builder="true"]
+[data-commerce-os-vibrant="true"] {
+  background:
+    #FFFFFF !important;
+
+  background-color:
+    #FFFFFF !important;
+
+  color:
+    #172033 !important;
+
+  color-scheme:
+    light !important;
+
+  border-color:
+    #DFE7EF !important;
+}
+
+
+/* Hijack de fondos dark internos de Commerce OS */
+
+[data-store-builder="true"]
+[data-commerce-os="true"]
+[class*="bg-[#030817"],
+[data-store-builder="true"]
+[data-commerce-os="true"]
+[class*="bg-[#09142a"],
+[data-store-builder="true"]
+[data-commerce-os="true"]
+[class*="bg-[#070b14"],
+[data-store-builder="true"]
+[data-commerce-os="true"]
+[class*="bg-[#071022"] {
+  background:
+    #FFFFFF !important;
+
+  background-color:
+    #FFFFFF !important;
+
+  background-image:
+    none !important;
+}
+
+
+/* Commerce OS texto */
+
+[data-store-builder="true"]
+[data-commerce-os="true"]
+[class*="text-white"] {
+  color: #172033 !important;
+}
+
+[data-store-builder="true"]
+[data-commerce-os="true"]
+[class*="text-slate-300"] {
+  color: #475569 !important;
+}
+
+[data-store-builder="true"]
+[data-commerce-os="true"]
+[class*="text-slate-400"] {
+  color: #64748B !important;
+}
+
+
+/* ============================================================
+   DIRECT FINAL BUILDER
+   ============================================================ */
+
+.dbf-shell {
+  width:
+    100% !important;
+
+  min-height:
+    calc(100vh - 20px) !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      #FAFCFE 0%,
+      #F3F6FA 100%
+    ) !important;
+
+  color:
+    #172033 !important;
+
+  border-color:
+    #DFE7EF !important;
+
+  color-scheme:
+    light !important;
+}
+
+
+/* Topbar */
+
+.dbf-shell .dbf-topbar {
+  background:
+    #FFFFFF !important;
+
+  border-color:
+    #DFE7EF !important;
+}
+
+
+/* Sidebars */
+
+.dbf-shell .dbf-sidebar {
+  background:
+    linear-gradient(
+      180deg,
+      #FFFFFF,
+      #F8FAFC
+    ) !important;
+
+  border-color:
+    #DFE7EF !important;
+}
+
+
+/* Main canvas */
+
+.dbf-shell .dbf-canvas {
+  background:
+    radial-gradient(
+      circle at top,
+      #FFFFFF 0%,
+      #F4F7FA 55%,
+      #EEF2F7 100%
+    ) !important;
+}
+
+
+/* Browser */
+
+.dbf-shell .dbf-browser-bar {
+  background:
+    #F8FAFC !important;
+
+  border-color:
+    #DFE7EF !important;
+
+  color:
+    #64748B !important;
+}
+
+
+/* Site */
+
+.dbf-shell .dbf-site {
+  background:
+    #FFFFFF !important;
+
+  color:
+    #172033 !important;
+}
+
+
+/* Preview */
+
+.dbf-shell .dbf-preview-header {
+  background:
+    #FFFFFF !important;
+
+  border-color:
+    #DFE7EF !important;
+}
+
+.dbf-shell .dbf-preview-stage {
+  background:
+    #EEF2F7 !important;
+}
+
+.dbf-shell .dbf-store-preview {
+  background:
+    #FFFFFF !important;
+
+  border-color:
+    #DFE7EF !important;
+}
+
+
+/* Inputs directos */
+
+.dbf-shell input,
+.dbf-shell textarea,
+.dbf-shell select {
+  background:
+    #FFFFFF !important;
+
+  background-color:
+    #FFFFFF !important;
+
+  color:
+    #172033 !important;
+
+  border-color:
+    #CBD5E1 !important;
+}
+
+
+/* ============================================================
+   ANIMACIÓN SUAVE
+   ============================================================ */
+
+.dbf-shell button {
+  transition:
+    transform .15s ease,
+    box-shadow .15s ease,
+    border-color .15s ease,
+    background-color .15s ease !important;
+}
+
+.dbf-shell button:hover {
+  transform:
+    translateY(-1px);
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .dbf-shell {
+    min-height:
+      100vh !important;
+
+    border-radius:
+      14px !important;
+  }
+}

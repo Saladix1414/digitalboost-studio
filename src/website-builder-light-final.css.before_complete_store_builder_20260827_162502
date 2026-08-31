@@ -1,0 +1,560 @@
+/* ============================================================
+   DIGITALBOOST — STORE BUILDER
+   FINAL LIGHT DESIGN SYSTEM
+   ============================================================ */
+
+.website-builder-light-shell {
+  --db-bg: #f5f7fb;
+  --db-surface: #ffffff;
+  --db-surface-soft: #f8fafc;
+  --db-surface-muted: #f1f5f9;
+
+  --db-text: #172033;
+  --db-text-2: #475569;
+  --db-text-3: #64748b;
+
+  --db-border: #e2e8f0;
+  --db-border-2: #d7e0ea;
+
+  --db-blue: #2563eb;
+  --db-blue-dark: #1d4ed8;
+  --db-violet: #7c3aed;
+  --db-cyan: #0891b2;
+  --db-green: #059669;
+
+  width: 100%;
+  min-height: 820px;
+
+  background: #f5f7fb !important;
+  background-color: #f5f7fb !important;
+
+  color: var(--db-text) !important;
+
+  border: 1px solid var(--db-border) !important;
+  border-radius: 24px !important;
+
+  box-shadow:
+    0 20px 50px rgba(15, 23, 42, .08),
+    0 4px 16px rgba(15, 23, 42, .04) !important;
+
+  overflow: hidden;
+}
+
+/* ============================================================
+   SHELL
+   ============================================================ */
+
+.website-builder-light-shell .studio-v2 {
+  background: #f5f7fb !important;
+  background-color: #f5f7fb !important;
+  color: var(--db-text) !important;
+}
+
+.website-builder-light-shell .studio-layout {
+  background: #f5f7fb !important;
+  background-color: #f5f7fb !important;
+}
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+
+.website-builder-light-shell .studio-topbar {
+  min-height: 68px;
+
+  background: rgba(255,255,255,.96) !important;
+  background-color: #ffffff !important;
+
+  color: var(--db-text) !important;
+
+  border-bottom: 1px solid var(--db-border) !important;
+
+  box-shadow:
+    0 1px 0 rgba(15,23,42,.03),
+    0 8px 25px rgba(15,23,42,.03) !important;
+
+  backdrop-filter: blur(18px);
+}
+
+.website-builder-light-shell .studio-brand-name {
+  color: #111827 !important;
+  letter-spacing: .08em;
+}
+
+.website-builder-light-shell .studio-brand-path {
+  color: #64748b !important;
+}
+
+.website-builder-light-shell .studio-brand-orb {
+  width: 34px;
+  height: 34px;
+
+  background: linear-gradient(135deg,#eff6ff,#e0f2fe) !important;
+  color: #2563eb !important;
+
+  border: 1px solid #bfdbfe !important;
+
+  box-shadow:
+    0 4px 12px rgba(37,99,235,.10);
+}
+
+.website-builder-light-shell .studio-live-badge {
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+  border: 1px solid #a7f3d0 !important;
+}
+
+.website-builder-light-shell .studio-live-badge span {
+  background: #10b981 !important;
+  box-shadow: 0 0 0 4px rgba(16,185,129,.10);
+}
+
+/* ============================================================
+   BOTONES
+   ============================================================ */
+
+.website-builder-light-shell .studio-icon-button,
+.website-builder-light-shell .studio-button {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #334155 !important;
+
+  border: 1px solid var(--db-border) !important;
+  border-radius: 10px !important;
+
+  box-shadow: 0 1px 2px rgba(15,23,42,.03);
+
+  transition:
+    background-color .16s ease,
+    border-color .16s ease,
+    box-shadow .16s ease,
+    transform .16s ease;
+}
+
+.website-builder-light-shell .studio-icon-button:hover,
+.website-builder-light-shell .studio-button:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+
+  box-shadow:
+    0 4px 12px rgba(15,23,42,.06);
+
+  transform: translateY(-1px);
+}
+
+.website-builder-light-shell .studio-button-primary {
+  background: linear-gradient(135deg,#7c3aed,#6d28d9) !important;
+  color: #ffffff !important;
+
+  border-color: transparent !important;
+
+  box-shadow:
+    0 8px 20px rgba(124,58,237,.20);
+}
+
+.website-builder-light-shell .studio-button-save {
+  background: linear-gradient(135deg,#059669,#047857) !important;
+  color: #ffffff !important;
+
+  border-color: transparent !important;
+}
+
+.website-builder-light-shell .studio-publish {
+  background: linear-gradient(135deg,#2563eb,#1d4ed8) !important;
+  color: #ffffff !important;
+
+  border-color: transparent !important;
+
+  box-shadow:
+    0 8px 20px rgba(37,99,235,.18);
+}
+
+/* ============================================================
+   DEVICE CONTROLS
+   ============================================================ */
+
+.website-builder-light-shell .studio-device-controls {
+  background: #f8fafc !important;
+  background-color: #f8fafc !important;
+
+  border: 1px solid var(--db-border) !important;
+
+  border-radius: 12px !important;
+}
+
+.website-builder-light-shell .studio-device-controls button {
+  color: #64748b !important;
+
+  border-radius: 8px !important;
+}
+
+.website-builder-light-shell .studio-device-controls button.active {
+  background: #ffffff !important;
+  color: #2563eb !important;
+
+  box-shadow:
+    0 2px 8px rgba(15,23,42,.08);
+}
+
+/* ============================================================
+   V2 ROOT
+   ============================================================ */
+
+.website-builder-light-shell [data-website-builder-v2] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: var(--db-text) !important;
+
+  border: 1px solid var(--db-border) !important;
+  border-radius: 18px !important;
+
+  box-shadow:
+    0 14px 35px rgba(15,23,42,.07) !important;
+
+  overflow: hidden;
+}
+
+/* ============================================================
+   V2 HEADER
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2] > header {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: var(--db-text) !important;
+
+  border-color: var(--db-border) !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2] header
+[class*="text-white"] {
+  color: #172033 !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2] header
+[class*="text-slate-300"],
+.website-builder-light-shell
+[data-website-builder-v2] header
+[class*="text-slate-400"] {
+  color: #64748b !important;
+}
+
+/* ============================================================
+   SIDEBARS
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2] aside {
+  background: #f8fafc !important;
+  background-color: #f8fafc !important;
+
+  color: var(--db-text) !important;
+
+  border-color: var(--db-border) !important;
+}
+
+/* ============================================================
+   CANVAS
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2] main {
+  background: #f1f5f9 !important;
+  background-color: #f1f5f9 !important;
+
+  color: var(--db-text) !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2] main > div {
+  color: var(--db-text) !important;
+}
+
+/* ============================================================
+   WEBSITE CANVAS — BLANCO
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-white"] {
+  background-color: #ffffff !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-[#030914]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-[#02050a]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-[#02050A]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-[#050913]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-[#050B18]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-[#0a0e16]"] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+}
+
+/* ============================================================
+   SOFT CARDS
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-white/[.02]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-white/[.03]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-white/[.04]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-white/[.05]"] {
+  background: #f8fafc !important;
+  background-color: #f8fafc !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-black/20"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-black/30"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-black/40"] {
+  background: #f8fafc !important;
+  background-color: #f8fafc !important;
+}
+
+/* ============================================================
+   BORDERS
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="border-white/10"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="border-white/15"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="border-white/20"] {
+  border-color: #e2e8f0 !important;
+}
+
+/* ============================================================
+   TEXT
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-white"] {
+  color: #172033 !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-slate-300"] {
+  color: #475569 !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-slate-400"] {
+  color: #64748b !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-slate-500"] {
+  color: #64748b !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-slate-600"] {
+  color: #475569 !important;
+}
+
+/* ============================================================
+   ACCENTOS
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-violet-300"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-violet-400"] {
+  color: #7c3aed !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-cyan-300"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-cyan-400"] {
+  color: #0891b2 !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-emerald-300"] {
+  color: #047857 !important;
+}
+
+/* ============================================================
+   BOTONES DEL BUILDER
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-violet-500"] {
+  background: #7c3aed !important;
+  color: #ffffff !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-blue-500"] {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-emerald-500"] {
+  background: #059669 !important;
+  color: #ffffff !important;
+}
+
+/* ============================================================
+   INPUTS / SELECTS / TEXTAREA
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2] input,
+.website-builder-light-shell
+[data-website-builder-v2] textarea,
+.website-builder-light-shell
+[data-website-builder-v2] select {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #172033 !important;
+
+  border: 1px solid #d9e2ec !important;
+  border-radius: 10px !important;
+
+  box-shadow:
+    0 1px 2px rgba(15,23,42,.02);
+}
+
+.website-builder-light-shell
+[data-website-builder-v2] input:focus,
+.website-builder-light-shell
+[data-website-builder-v2] textarea:focus,
+.website-builder-light-shell
+[data-website-builder-v2] select:focus {
+  border-color: #93c5fd !important;
+
+  box-shadow:
+    0 0 0 3px rgba(37,99,235,.10) !important;
+
+  outline: none !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2] input::placeholder,
+.website-builder-light-shell
+[data-website-builder-v2] textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* ============================================================
+   DASHBOARD-LIKE CARDS DEL INSPECTOR
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="rounded-xl"][class*="border"] {
+  border-color: #e2e8f0 !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="border-dashed"] {
+  border-color: #cbd5e1 !important;
+}
+
+/* ============================================================
+   PREVIEW
+   ============================================================ */
+
+.website-builder-light-shell.studio-preview {
+  background: #f1f5f9 !important;
+  background-color: #f1f5f9 !important;
+
+  color: #172033 !important;
+}
+
+.website-builder-light-shell .studio-preview-top {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #172033 !important;
+
+  border-color: #e2e8f0 !important;
+}
+
+.website-builder-light-shell .studio-preview-canvas {
+  background: #f1f5f9 !important;
+  background-color: #f1f5f9 !important;
+}
+
+.website-builder-light-shell .preview-site {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #172033 !important;
+
+  border-color: #e2e8f0 !important;
+
+  box-shadow:
+    0 24px 60px rgba(15,23,42,.10) !important;
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .website-builder-light-shell {
+    border-radius: 18px !important;
+  }
+
+  .website-builder-light-shell .studio-topbar {
+    min-height: 60px;
+  }
+
+  .website-builder-light-shell
+  [data-website-builder-v2] {
+    border-radius: 14px !important;
+  }
+}

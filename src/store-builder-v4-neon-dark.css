@@ -1,0 +1,398 @@
+/*
+ * ============================================================
+ * DIGITALBOOST — STORE BUILDER V4
+ * DARK NEON BLUE EDITION
+ * ============================================================
+ *
+ * SOLO STORE BUILDER.
+ *
+ * No afecta:
+ * - Commerce OS
+ * - Web Builder
+ * - Security Lab
+ * - NFT
+ * - App.tsx
+ * - navegación
+ *
+ * Objetivo:
+ * CERO SUPERFICIES BLANCAS.
+ * CERO BORDES BLANCOS.
+ *
+ * ============================================================
+ */
+
+.store-builder-v4 {
+  --sb-bg: #050B18;
+  --sb-bg-2: #071426;
+  --sb-surface: #0B1B30;
+  --sb-surface-2: #0E2945;
+  --sb-surface-3: #102F4D;
+
+  --sb-border: #1D4260;
+  --sb-border-soft: #17344E;
+  --sb-border-neon: rgba(0,183,255,.42);
+
+  --sb-text: #F8FCFF;
+  --sb-text-secondary: #B7D2E2;
+  --sb-text-muted: #7895A8;
+
+  --sb-primary: #2563EB;
+  --sb-neon: #00B7FF;
+  --sb-cyan: #06B6D4;
+  --sb-violet: #7C3AED;
+
+  background: #050B18 !important;
+  background-color: #050B18 !important;
+  color: #F8FCFF !important;
+}
+
+/* ============================================================
+   ROOT / CONTENEDORES
+   ============================================================ */
+
+.store-builder-v4,
+.store-builder-v4 * {
+  box-sizing: border-box;
+}
+
+.store-builder-v4 {
+  color-scheme: dark;
+}
+
+/* Cualquier div estructural sin background explícito */
+.store-builder-v4 {
+  background-color: #050B18 !important;
+}
+
+/* ============================================================
+   ELIMINAR BLANCOS
+   ============================================================ */
+
+.store-builder-v4 .bg-white,
+.store-builder-v4 [class~="bg-white"],
+.store-builder-v4 [class*="bg-white/"],
+.store-builder-v4 [style*="background: white"],
+.store-builder-v4 [style*="background-color: white"],
+.store-builder-v4 [style*="background:#fff"],
+.store-builder-v4 [style*="background-color:#fff"] {
+  background: #0B1B30 !important;
+  background-color: #0B1B30 !important;
+}
+
+.store-builder-v4 .bg-slate-50,
+.store-builder-v4 .bg-slate-100,
+.store-builder-v4 .bg-gray-50,
+.store-builder-v4 .bg-gray-100 {
+  background-color: #0B1B30 !important;
+}
+
+/* ============================================================
+   SUPERFICIES
+   ============================================================ */
+
+.store-builder-v4 .bg-\[\#050B18\] {
+  background-color: #050B18 !important;
+}
+
+.store-builder-v4 .bg-\[\#071426\] {
+  background-color: #071426 !important;
+}
+
+.store-builder-v4 .bg-\[\#0B1B30\] {
+  background-color: #0B1B30 !important;
+}
+
+.store-builder-v4 .bg-\[\#0E2945\] {
+  background-color: #0E2945 !important;
+}
+
+.store-builder-v4 .bg-\[\#123B63\] {
+  background-color: #123B63 !important;
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+
+.store-builder-v4 aside {
+  background: #071426 !important;
+  background-color: #071426 !important;
+  border-color: #1D4260 !important;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.store-builder-v4 header {
+  background: #071426 !important;
+  background-color: #071426 !important;
+  border-color: #1D4260 !important;
+}
+
+/* ============================================================
+   MAIN / WORKSPACE
+   ============================================================ */
+
+.store-builder-v4 main {
+  background: #050B18 !important;
+  background-color: #050B18 !important;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+
+.store-builder-v4 .rounded-xl,
+.store-builder-v4 .rounded-2xl {
+  border-color: #1D4260 !important;
+}
+
+.store-builder-v4 [class*="border-white"],
+.store-builder-v4 [class*="border-slate"] {
+  border-color: #1D4260 !important;
+}
+
+/* ============================================================
+   NEON BORDERS
+   ============================================================ */
+
+.store-builder-v4 [class*="border-cyan"] {
+  border-color: rgba(0,183,255,.38) !important;
+}
+
+.store-builder-v4 [class*="border-violet"] {
+  border-color: rgba(124,58,237,.36) !important;
+}
+
+.store-builder-v4 [class*="border-blue"] {
+  border-color: rgba(37,99,235,.40) !important;
+}
+
+/* ============================================================
+   TEXTO
+   ============================================================ */
+
+.store-builder-v4 .text-white {
+  color: #F8FCFF !important;
+}
+
+.store-builder-v4 [class*="text-slate-300"] {
+  color: #B7D2E2 !important;
+}
+
+.store-builder-v4 [class*="text-slate-400"] {
+  color: #7895A8 !important;
+}
+
+.store-builder-v4 [class*="text-slate-500"] {
+  color: #7895A8 !important;
+}
+
+.store-builder-v4 [class*="text-slate-600"],
+.store-builder-v4 [class*="text-slate-700"],
+.store-builder-v4 [class*="text-slate-800"],
+.store-builder-v4 [class*="text-slate-900"] {
+  color: #D9EEF9 !important;
+}
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+
+.store-builder-v4 input,
+.store-builder-v4 textarea,
+.store-builder-v4 select {
+  background: #071426 !important;
+  background-color: #071426 !important;
+  color: #F8FCFF !important;
+  border-color: #1D4260 !important;
+}
+
+.store-builder-v4 input::placeholder,
+.store-builder-v4 textarea::placeholder {
+  color: #66879B !important;
+}
+
+.store-builder-v4 input:focus,
+.store-builder-v4 textarea:focus,
+.store-builder-v4 select:focus {
+  border-color: #00B7FF !important;
+  box-shadow: 0 0 0 2px rgba(0,183,255,.12) !important;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.store-builder-v4 button {
+  color: inherit;
+  border-color: #1D4260;
+}
+
+.store-builder-v4 button:hover {
+  border-color: rgba(0,183,255,.55) !important;
+}
+
+.store-builder-v4 button:focus-visible,
+.store-builder-v4 input:focus-visible,
+.store-builder-v4 textarea:focus-visible,
+.store-builder-v4 select:focus-visible {
+  outline: 2px solid rgba(0,183,255,.70) !important;
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   NEON PRIMARY
+   ============================================================ */
+
+.store-builder-v4 .store-builder-primary {
+  background: #2563EB !important;
+  background-color: #2563EB !important;
+  color: #FFFFFF !important;
+}
+
+.store-builder-v4 .store-builder-primary:hover {
+  background: #1D4ED8 !important;
+  background-color: #1D4ED8 !important;
+  box-shadow:
+    0 0 20px rgba(0,183,255,.22),
+    0 8px 30px rgba(37,99,235,.28) !important;
+}
+
+/* ============================================================
+   CYAN / NEON ACCENTS
+   ============================================================ */
+
+.store-builder-v4 [class*="text-cyan"] {
+  color: #06B6D4 !important;
+}
+
+.store-builder-v4 [class*="text-blue"] {
+  color: #55CFFF !important;
+}
+
+.store-builder-v4 [class*="text-violet"] {
+  color: #A78BFA !important;
+}
+
+/* ============================================================
+   HOVER SURFACES
+   ============================================================ */
+
+.store-builder-v4 [class*="hover\:bg-white"]:hover {
+  background-color: #0E2945 !important;
+}
+
+.store-builder-v4 [class*="hover\:bg-slate"]:hover {
+  background-color: #0E2945 !important;
+}
+
+/* ============================================================
+   TABLES / LISTAS
+   ============================================================ */
+
+.store-builder-v4 tr,
+.store-builder-v4 [role="row"] {
+  border-color: #17344E !important;
+}
+
+.store-builder-v4 tbody tr:hover {
+  background-color: rgba(0,183,255,.045) !important;
+}
+
+/* ============================================================
+   MODALES
+   ============================================================ */
+
+.store-builder-v4 .fixed.inset-0 {
+  background-color: rgba(2,8,23,.86) !important;
+}
+
+.store-builder-v4 .fixed.inset-0 > div {
+  background-color: #0B1B30 !important;
+  border-color: #1D4260 !important;
+}
+
+/* ============================================================
+   DIVISORES
+   ============================================================ */
+
+.store-builder-v4 [class*="border-b"],
+.store-builder-v4 [class*="border-t"],
+.store-builder-v4 [class*="border-r"],
+.store-builder-v4 [class*="border-l"] {
+  border-color: #1D4260 !important;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+.store-builder-v4 ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.store-builder-v4 ::-webkit-scrollbar-track {
+  background: #050B18 !important;
+}
+
+.store-builder-v4 ::-webkit-scrollbar-thumb {
+  background: #1D4260 !important;
+  border-radius: 999px;
+}
+
+.store-builder-v4 ::-webkit-scrollbar-thumb:hover {
+  background: #00B7FF !important;
+}
+
+/* ============================================================
+   NEON GLOW
+   ============================================================ */
+
+.store-builder-v4 .store-builder-neon {
+  box-shadow:
+    0 0 0 1px rgba(0,183,255,.16),
+    0 0 24px rgba(0,183,255,.07),
+    0 12px 35px rgba(0,0,0,.22) !important;
+}
+
+.store-builder-v4 .store-builder-neon-accent {
+  color: #00B7FF !important;
+  text-shadow: 0 0 14px rgba(0,183,255,.35);
+}
+
+/* ============================================================
+   ELIMINAR POSIBLES FONDOS CLAROS INLINE
+   ============================================================ */
+
+.store-builder-v4 [style*="#fff"],
+.store-builder-v4 [style*="#FFF"],
+.store-builder-v4 [style*="#ffffff"],
+.store-builder-v4 [style*="#FFFFFF"],
+.store-builder-v4 [style*="#f7f7fa"],
+.store-builder-v4 [style*="#fafafa"] {
+  background-color: #0B1B30 !important;
+}
+
+/* ============================================================
+   IDENTIDAD DEL EDITOR
+   ============================================================ */
+
+.store-builder-v4 [class*="shadow"] {
+  --tw-shadow-color: rgba(0,0,0,.30);
+}
+
+/* ============================================================
+   PROHIBICIÓN VISUAL DE BLANCO EN SUPERFICIES
+   ============================================================ */
+
+.store-builder-v4 > div,
+.store-builder-v4 > section {
+  border-color: #1D4260;
+}
+
+/* ============================================================
+   FIN V4
+   ============================================================ */

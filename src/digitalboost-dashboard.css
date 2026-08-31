@@ -1,0 +1,20 @@
+
+[data-commerce-os="true"] h1,
+[data-commerce-os="true"] h2,
+[data-commerce-os="true"] h3 {
+  color: #F7FAFF;
+}
+[data-commerce-os="true"] p,
+[data-commerce-os="true"] span,
+[data-commerce-os="true"] li {
+  color: #D7E2F0;
+}
+[data-commerce-os="true"] [class*="text-[#475569]"],
+[data-commerce-os="true"] [class*="text-slate-500"] {
+  color: #AFC0D5 !important;
+}
+[data-commerce-os="true"] [class*="rounded-xl"],
+[data-commerce-os="true"] [class*="rounded-2xl"] {
+  background: #101B32;
+  border-color: rgba(247,250,255,.12);
+}

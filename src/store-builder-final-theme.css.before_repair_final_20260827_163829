@@ -1,0 +1,667 @@
+/* ============================================================
+   DIGITALBOOST — STORE BUILDER
+   FINAL VISUAL THEME
+   ============================================================ */
+
+.store-builder-final-root {
+  --db-bg: #F5F7FB;
+  --db-surface: #FFFFFF;
+  --db-soft: #F8FAFC;
+  --db-muted: #EEF3F8;
+
+  --db-text: #172033;
+  --db-text-secondary: #475569;
+  --db-text-muted: #64748B;
+
+  --db-border: #DFE7EF;
+  --db-border-strong: #CBD5E1;
+
+  --db-blue: #2563EB;
+  --db-blue-dark: #1D4ED8;
+  --db-violet: #7C3AED;
+  --db-violet-dark: #6D28D9;
+  --db-cyan: #0891B2;
+  --db-green: #059669;
+
+  width: 100%;
+  min-width: 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      #F8FAFC 0%,
+      #F5F7FB 100%
+    ) !important;
+
+  color: #172033 !important;
+}
+
+
+/* ============================================================
+   SHELL
+   ============================================================ */
+
+.store-builder-final-shell {
+  background:
+    linear-gradient(
+      180deg,
+      #F8FAFC 0%,
+      #F5F7FB 100%
+    ) !important;
+
+  background-color:
+    #F5F7FB !important;
+
+  color:
+    #172033 !important;
+}
+
+
+/* ============================================================
+   STUDIO ROOT
+   ============================================================ */
+
+.store-builder-final-shell.studio-v2,
+.store-builder-final-shell .studio-v2 {
+
+  background:
+    linear-gradient(
+      180deg,
+      #F8FAFC 0%,
+      #F5F7FB 100%
+    ) !important;
+
+  background-color:
+    #F5F7FB !important;
+
+  color:
+    #172033 !important;
+}
+
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+
+.store-builder-final-shell .studio-topbar {
+
+  min-height:
+    68px;
+
+  background:
+    rgba(255,255,255,.98) !important;
+
+  background-color:
+    #FFFFFF !important;
+
+  color:
+    #172033 !important;
+
+  border-bottom:
+    1px solid #DFE7EF !important;
+
+  box-shadow:
+    0 1px 0 rgba(15,23,42,.03),
+    0 8px 24px rgba(15,23,42,.045) !important;
+
+  backdrop-filter:
+    blur(18px);
+}
+
+
+.store-builder-final-shell .studio-brand-name {
+  color:
+    #111827 !important;
+
+  font-weight:
+    800 !important;
+
+  letter-spacing:
+    .07em !important;
+}
+
+
+.store-builder-final-shell .studio-brand-path {
+  color:
+    #64748B !important;
+}
+
+
+.store-builder-final-shell .studio-brand-orb {
+
+  background:
+    linear-gradient(
+      135deg,
+      #EFF6FF,
+      #DBEAFE
+    ) !important;
+
+  background-color:
+    #E0F2FE !important;
+
+  color:
+    #2563EB !important;
+
+  border:
+    1px solid #BFDBFE !important;
+
+  box-shadow:
+    0 5px 16px rgba(37,99,235,.10) !important;
+}
+
+
+/* ============================================================
+   LIVE
+   ============================================================ */
+
+.store-builder-final-shell .studio-live-badge {
+
+  background:
+    #ECFDF5 !important;
+
+  background-color:
+    #ECFDF5 !important;
+
+  color:
+    #047857 !important;
+
+  border:
+    1px solid #A7F3D0 !important;
+
+  border-radius:
+    999px !important;
+}
+
+
+.store-builder-final-shell .studio-live-badge span {
+  background:
+    #10B981 !important;
+}
+
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.store-builder-final-shell .studio-icon-button,
+.store-builder-final-shell .studio-button {
+
+  background:
+    #FFFFFF !important;
+
+  background-color:
+    #FFFFFF !important;
+
+  color:
+    #334155 !important;
+
+  border:
+    1px solid #DFE7EF !important;
+
+  border-radius:
+    10px !important;
+
+  box-shadow:
+    0 1px 2px rgba(15,23,42,.03) !important;
+}
+
+
+.store-builder-final-shell .studio-button-primary {
+
+  background:
+    linear-gradient(
+      135deg,
+      #7C3AED,
+      #6D28D9
+    ) !important;
+
+  background-color:
+    #7C3AED !important;
+
+  color:
+    #FFFFFF !important;
+
+  border-color:
+    transparent !important;
+
+  box-shadow:
+    0 8px 20px rgba(124,58,237,.18) !important;
+}
+
+
+.store-builder-final-shell .studio-button-save {
+
+  background:
+    linear-gradient(
+      135deg,
+      #059669,
+      #047857
+    ) !important;
+
+  background-color:
+    #059669 !important;
+
+  color:
+    #FFFFFF !important;
+
+  border-color:
+    transparent !important;
+}
+
+
+.store-builder-final-shell .studio-publish {
+
+  background:
+    linear-gradient(
+      135deg,
+      #2563EB,
+      #1D4ED8
+    ) !important;
+
+  background-color:
+    #2563EB !important;
+
+  color:
+    #FFFFFF !important;
+
+  border-color:
+    transparent !important;
+
+  box-shadow:
+    0 8px 20px rgba(37,99,235,.18) !important;
+}
+
+
+/* ============================================================
+   DEVICE SWITCHER
+   ============================================================ */
+
+.store-builder-final-shell .studio-device-controls {
+
+  background:
+    #F8FAFC !important;
+
+  background-color:
+    #F8FAFC !important;
+
+  border:
+    1px solid #DFE7EF !important;
+
+  border-radius:
+    12px !important;
+}
+
+
+.store-builder-final-shell
+.studio-device-controls button {
+
+  color:
+    #64748B !important;
+
+  border-radius:
+    8px !important;
+}
+
+
+.store-builder-final-shell
+.studio-device-controls button.active {
+
+  background:
+    #FFFFFF !important;
+
+  background-color:
+    #FFFFFF !important;
+
+  color:
+    #2563EB !important;
+
+  box-shadow:
+    0 2px 8px rgba(15,23,42,.08) !important;
+}
+
+
+/* ============================================================
+   V2
+   ============================================================ */
+
+.store-builder-final-shell
+[data-website-builder-v2] {
+
+  background:
+    #FFFFFF !important;
+
+  background-color:
+    #FFFFFF !important;
+
+  color:
+    #172033 !important;
+
+  border:
+    1px solid #DFE7EF !important;
+
+  border-radius:
+    18px !important;
+
+  box-shadow:
+    0 18px 45px rgba(15,23,42,.07) !important;
+}
+
+
+/* HEADER */
+.store-builder-final-shell
+[data-website-builder-v2] header {
+
+  background:
+    #FFFFFF !important;
+
+  background-color:
+    #FFFFFF !important;
+
+  color:
+    #172033 !important;
+
+  border-color:
+    #DFE7EF !important;
+}
+
+
+/* SIDEBARS */
+.store-builder-final-shell
+[data-website-builder-v2] aside {
+
+  background:
+    linear-gradient(
+      180deg,
+      #FBFCFE,
+      #F8FAFC
+    ) !important;
+
+  background-color:
+    #F8FAFC !important;
+
+  color:
+    #172033 !important;
+
+  border-color:
+    #DFE7EF !important;
+}
+
+
+/* CANVAS */
+.store-builder-final-shell
+[data-website-builder-v2] main {
+
+  background:
+    radial-gradient(
+      circle at top,
+      #FFFFFF 0%,
+      #F3F6FA 50%,
+      #EEF2F7 100%
+    ) !important;
+
+  background-color:
+    #EEF2F7 !important;
+
+  color:
+    #172033 !important;
+}
+
+
+/* CARDS */
+.store-builder-final-shell
+[data-website-builder-v2]
+[class*="rounded-xl"][class*="border"] {
+
+  background:
+    #FFFFFF !important;
+
+  background-color:
+    #FFFFFF !important;
+
+  border-color:
+    #DFE7EF !important;
+
+  box-shadow:
+    0 3px 12px rgba(15,23,42,.035) !important;
+}
+
+
+/* SOFT */
+.store-builder-final-shell
+[data-website-builder-v2]
+[class*="bg-black"] {
+
+  background:
+    #F8FAFC !important;
+
+  background-color:
+    #F8FAFC !important;
+}
+
+
+/* TEXT */
+.store-builder-final-shell
+[data-website-builder-v2]
+[class*="text-white"] {
+  color:
+    #172033 !important;
+}
+
+
+.store-builder-final-shell
+[data-website-builder-v2]
+[class*="text-slate-300"] {
+  color:
+    #475569 !important;
+}
+
+
+.store-builder-final-shell
+[data-website-builder-v2]
+[class*="text-slate-400"] {
+  color:
+    #64748B !important;
+}
+
+
+.store-builder-final-shell
+[data-website-builder-v2]
+[class*="text-slate-500"] {
+  color:
+    #64748B !important;
+}
+
+
+/* ACCENTS */
+.store-builder-final-shell
+[data-website-builder-v2]
+[class*="text-violet"] {
+  color:
+    #7C3AED !important;
+}
+
+
+.store-builder-final-shell
+[data-website-builder-v2]
+[class*="text-cyan"] {
+  color:
+    #0891B2 !important;
+}
+
+
+.store-builder-final-shell
+[data-website-builder-v2]
+[class*="text-emerald"] {
+  color:
+    #047857 !important;
+}
+
+
+/* BORDERS */
+.store-builder-final-shell
+[data-website-builder-v2]
+[class*="border-white"] {
+  border-color:
+    #DFE7EF !important;
+}
+
+
+/* ACTION COLORS */
+.store-builder-final-shell
+[data-website-builder-v2]
+[class*="bg-violet-500"] {
+  background:
+    #7C3AED !important;
+
+  color:
+    #FFFFFF !important;
+}
+
+
+.store-builder-final-shell
+[data-website-builder-v2]
+[class*="bg-blue-500"] {
+  background:
+    #2563EB !important;
+
+  color:
+    #FFFFFF !important;
+}
+
+
+.store-builder-final-shell
+[data-website-builder-v2]
+[class*="bg-emerald-500"] {
+  background:
+    #059669 !important;
+
+  color:
+    #FFFFFF !important;
+}
+
+
+/* INPUTS */
+.store-builder-final-shell
+[data-website-builder-v2]
+input,
+.store-builder-final-shell
+[data-website-builder-v2]
+textarea,
+.store-builder-final-shell
+[data-website-builder-v2]
+select {
+
+  background:
+    #FFFFFF !important;
+
+  background-color:
+    #FFFFFF !important;
+
+  color:
+    #172033 !important;
+
+  border:
+    1px solid #CBD5E1 !important;
+
+  border-radius:
+    10px !important;
+}
+
+
+.store-builder-final-shell
+[data-website-builder-v2]
+input:focus,
+.store-builder-final-shell
+[data-website-builder-v2]
+textarea:focus,
+.store-builder-final-shell
+[data-website-builder-v2]
+select:focus {
+
+  border-color:
+    #93C5FD !important;
+
+  box-shadow:
+    0 0 0 3px rgba(37,99,235,.10) !important;
+
+  outline:
+    none !important;
+}
+
+
+/* PREVIEW */
+.store-builder-final-shell.studio-preview {
+
+  background:
+    #F5F7FB !important;
+
+  background-color:
+    #F5F7FB !important;
+
+  color:
+    #172033 !important;
+}
+
+
+.store-builder-final-shell
+.studio-preview-top {
+
+  background:
+    #FFFFFF !important;
+
+  background-color:
+    #FFFFFF !important;
+
+  color:
+    #172033 !important;
+
+  border-color:
+    #DFE7EF !important;
+}
+
+
+.store-builder-final-shell
+.studio-preview-canvas {
+
+  background:
+    #EEF2F7 !important;
+
+  background-color:
+    #EEF2F7 !important;
+}
+
+
+.store-builder-final-shell
+.preview-site {
+
+  background:
+    #FFFFFF !important;
+
+  background-color:
+    #FFFFFF !important;
+
+  color:
+    #172033 !important;
+
+  border:
+    1px solid #DFE7EF !important;
+
+  box-shadow:
+    0 24px 60px rgba(15,23,42,.10) !important;
+}
+
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+
+  .store-builder-final-root {
+    border-radius:
+      16px !important;
+  }
+
+  .store-builder-final-shell
+  [data-website-builder-v2] {
+    border-radius:
+      14px !important;
+  }
+}

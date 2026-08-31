@@ -1,0 +1,721 @@
+import React, { useState } from "react";
+import "./store-builder-studio-v2.css";
+import "./store-builder-real-final.css";
+import {
+  ArrowLeft,
+  Bot,
+  ChevronDown,
+  ChevronRight,
+  Code2,
+  Eye,
+  FileText,
+  Globe2,
+  Layers3,
+  LayoutDashboard,
+  Monitor,
+  MousePointer2,
+  Palette,
+  PanelRight,
+  Play,
+  Plus,
+  Rocket,
+  Save,
+  Settings2,
+  Smartphone,
+  Sparkles,
+  Tablet,
+  Type,
+  Wand2,
+  Zap,
+} from "lucide-react";
+
+type Props = {
+  children?: React.ReactNode;
+  onBack?: () => void;
+};
+
+type Device = "desktop" | "tablet" | "mobile";
+
+const blocks = [
+  { id: "hero", label: "Hero", icon: Sparkles },
+  { id: "section", label: "Section", icon: LayoutDashboard },
+  { id: "text", label: "Text", icon: Type },
+  { id: "products", label: "Products", icon: Globe2 },
+  { id: "features", label: "Features", icon: Zap },
+  { id: "media", label: "Media", icon: Eye },
+  { id: "cta", label: "Call to action", icon: Rocket },
+];
+
+const pages = [
+  "Inicio",
+  "Productos",
+  "Colecciones",
+  "Nosotros",
+  "Contacto",
+];
+
+export default function StoreBuilderStudioShell({
+  children,
+  onBack,
+}: Props) {
+  const [device, setDevice] = useState<Device>("desktop");
+  const [activePage, setActivePage] = useState("Inicio");
+  const [selected, setSelected] = useState("hero");
+  const [leftOpen, setLeftOpen] = useState(true);
+  const [rightOpen, setRightOpen] = useState(true);
+  const [saved, setSaved] = useState(true);
+  const [preview, setPreview] = useState(false);
+
+  const canvasWidth =
+    device === "desktop"
+      ? "studio-canvas-desktop"
+      : device === "tablet"
+      ? "studio-canvas-tablet"
+      : "studio-canvas-mobile";
+
+  if (preview) {
+    return (
+      <div className="studio-v2 studio-preview store-builder-authoritative-shell">
+        <div className="studio-preview-top">
+          <div>
+            <span className="studio-eyebrow">DIGITALBOOST</span>
+            <span className="studio-preview-title">
+              Store Builder Preview
+            </span>
+          </div>
+
+          <button
+            className="studio-button studio-button-primary"
+            onClick={() => setPreview(false)}
+          >
+            <ArrowLeft size={15} />
+            Volver al Studio
+          </button>
+        </div>
+
+        <div className="studio-preview-canvas">
+          <div className="preview-site">
+            <div className="preview-site-glow" />
+
+            <div className="preview-nav">
+              <strong>YOUR BRAND</strong>
+              <div>
+                <span>Inicio</span>
+                <span>Productos</span>
+                <span>Nosotros</span>
+                <span>Contacto</span>
+              </div>
+            </div>
+
+            <section className="preview-hero">
+              <div className="preview-pill">
+                <Sparkles size={13} />
+                EXPERIENCIA DIGITAL
+              </div>
+
+              <h1>
+                Una tienda que
+                <br />
+                <span>se siente propia.</span>
+              </h1>
+
+              <p>
+                Diseñá una experiencia memorable, rápida y preparada
+                para convertir visitantes en clientes.
+              </p>
+
+              <button className="preview-cta">
+                Explorar colección
+                <ChevronRight size={15} />
+              </button>
+            </section>
+
+            <section className="preview-products">
+              {[1, 2, 3].map((item) => (
+                <div className="preview-product" key={item}>
+                  <div className="preview-product-image" />
+                  <span>Producto destacado</span>
+                  <strong>$ 49.900</strong>
+                </div>
+              ))}
+            </section>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="studio-v2 store-builder-authoritative-shell">
+
+      {/* TOP SYSTEM BAR */}
+      <header className="studio-topbar">
+
+        <div className="studio-brand-zone">
+
+          <button
+            className="studio-icon-button"
+            onClick={onBack}
+            title="Volver a Commerce OS"
+          >
+            <ArrowLeft size={17} />
+          </button>
+
+          <div className="studio-brand-mark">
+            <div className="studio-brand-orb">
+              <Sparkles size={15} />
+            </div>
+
+            <div>
+              <div className="studio-brand-name">
+                STORE BUILDER
+              </div>
+
+              <div className="studio-brand-path">
+                COMMERCE OS / VISUAL STUDIO
+              </div>
+            </div>
+          </div>
+
+          <div className="studio-live-badge">
+            <span />
+            LIVE
+          </div>
+
+        </div>
+
+        <div className="studio-device-controls">
+
+          <button
+            className={device === "desktop" ? "active" : ""}
+            onClick={() => setDevice("desktop")}
+          >
+            <Monitor size={14} />
+          </button>
+
+          <button
+            className={device === "tablet" ? "active" : ""}
+            onClick={() => setDevice("tablet")}
+          >
+            <Tablet size={14} />
+          </button>
+
+          <button
+            className={device === "mobile" ? "active" : ""}
+            onClick={() => setDevice("mobile")}
+          >
+            <Smartphone size={14} />
+          </button>
+
+        </div>
+
+        <div className="studio-actions">
+
+          <button
+            className="studio-button"
+            onClick={() => setPreview(true)}
+          >
+            <Eye size={14} />
+            Preview
+          </button>
+
+          <button
+            className="studio-button studio-button-save"
+            onClick={() => setSaved(true)}
+          >
+            <Save size={14} />
+            Guardar
+          </button>
+
+          <button className="studio-publish">
+            <Rocket size={14} />
+            Publicar
+          </button>
+
+        </div>
+
+      </header>
+
+      {/* MAIN STUDIO */}
+      <div className="studio-layout">
+
+        {/* LEFT RAIL */}
+        <aside
+          className={
+            leftOpen
+              ? "studio-left-panel"
+              : "studio-left-panel collapsed"
+          }
+        >
+
+          <div className="studio-panel-header">
+            <div>
+              <span className="studio-panel-kicker">
+                BUILD
+              </span>
+              <strong>Crear</strong>
+            </div>
+
+            <button
+              onClick={() => setLeftOpen(false)}
+              className="studio-panel-collapse"
+            >
+              <ChevronLeftIcon />
+            </button>
+          </div>
+
+          <div className="studio-tool-section">
+
+            <div className="studio-section-title">
+              <span>ELEMENTOS</span>
+              <Plus size={13} />
+            </div>
+
+            <div className="studio-block-grid">
+
+              {blocks.map((block) => {
+                const Icon = block.icon;
+
+                return (
+                  <button
+                    key={block.id}
+                    className={
+                      selected === block.id
+                        ? "studio-block active"
+                        : "studio-block"
+                    }
+                    onClick={() => setSelected(block.id)}
+                  >
+                    <Icon size={17} />
+                    <span>{block.label}</span>
+                  </button>
+                );
+              })}
+
+            </div>
+
+          </div>
+
+          <div className="studio-tool-section">
+
+            <div className="studio-section-title">
+              <span>PÁGINAS</span>
+            </div>
+
+            <div className="studio-pages">
+
+              {pages.map((page) => (
+                <button
+                  key={page}
+                  className={
+                    activePage === page
+                      ? "studio-page active"
+                      : "studio-page"
+                  }
+                  onClick={() => setActivePage(page)}
+                >
+                  <FileText size={13} />
+                  <span>{page}</span>
+
+                  {activePage === page && (
+                    <span className="studio-page-dot" />
+                  )}
+                </button>
+              ))}
+
+            </div>
+
+          </div>
+
+          <div className="studio-left-footer">
+
+            <button>
+              <Bot size={15} />
+              <span>AI Store Operator</span>
+              <Sparkles size={11} />
+            </button>
+
+            <button>
+              <Code2 size={15} />
+              <span>Code</span>
+            </button>
+
+          </div>
+
+        </aside>
+
+        {!leftOpen && (
+          <button
+            className="studio-expand-left"
+            onClick={() => setLeftOpen(true)}
+          >
+            <ChevronRight size={15} />
+          </button>
+        )}
+
+        {/* CANVAS */}
+        <main className="studio-canvas-area">
+
+          <div className="studio-canvas-toolbar">
+
+            <div className="studio-breadcrumb">
+              <span>Store Builder</span>
+              <ChevronRight size={12} />
+              <strong>{activePage}</strong>
+            </div>
+
+            <div className="studio-canvas-tools">
+
+              <span
+                className={
+                  saved
+                    ? "studio-save-status saved"
+                    : "studio-save-status"
+                }
+              >
+                <span />
+                {saved ? "Todos los cambios guardados" : "Cambios pendientes"}
+              </span>
+
+              <button title="Seleccionar">
+                <MousePointer2 size={14} />
+              </button>
+
+              <button title="Capas">
+                <Layers3 size={14} />
+              </button>
+
+            </div>
+
+          </div>
+
+          <div className="studio-canvas">
+
+            <div className="studio-canvas-grid" />
+
+            <div className={`studio-website ${canvasWidth}`}>
+
+              <div className="studio-site-header">
+
+                <div className="studio-site-logo">
+                  YOUR BRAND
+                </div>
+
+                <div className="studio-site-nav">
+                  <span>Inicio</span>
+                  <span>Productos</span>
+                  <span>Nosotros</span>
+                  <span>Contacto</span>
+                </div>
+
+                <button className="studio-site-cart">
+                  Bag · 0
+                </button>
+
+              </div>
+
+              <section
+                className={
+                  selected === "hero"
+                    ? "studio-site-hero selected"
+                    : "studio-site-hero"
+                }
+                onClick={() => setSelected("hero")}
+              >
+
+                <div className="studio-selection-label">
+                  <MousePointer2 size={11} />
+                  Hero section
+                </div>
+
+                <div className="studio-hero-content">
+
+                  <div className="studio-hero-chip">
+                    <Sparkles size={12} />
+                    NUEVA EXPERIENCIA
+                  </div>
+
+                  <h1>
+                    Diseñá algo que
+                    <br />
+                    <span>la gente recuerde.</span>
+                  </h1>
+
+                  <p>
+                    Tu sitio, tu identidad y tu comercio,
+                    conectados desde Commerce OS.
+                  </p>
+
+                  <div className="studio-hero-actions">
+                    <button>
+                      Explorar colección
+                      <ChevronRight size={14} />
+                    </button>
+
+                    <button className="secondary">
+                      Ver productos
+                    </button>
+                  </div>
+
+                </div>
+
+                <div className="studio-hero-art">
+
+                  <div className="studio-orbit orbit-one" />
+                  <div className="studio-orbit orbit-two" />
+
+                  <div className="studio-art-card">
+                    <div />
+                    <span>NEW DROP</span>
+                  </div>
+
+                </div>
+
+              </section>
+
+              <section className="studio-site-feature-strip">
+
+                {[
+                  ["01", "Identidad", "Una experiencia que representa tu marca."],
+                  ["02", "Conversión", "Diseñada para convertir atención en acción."],
+                  ["03", "Commerce OS", "Todo conectado con tu operación."],
+                ].map(([number, title, text]) => (
+                  <div key={number}>
+                    <span>{number}</span>
+                    <strong>{title}</strong>
+                    <p>{text}</p>
+                  </div>
+                ))}
+
+              </section>
+
+              <section className="studio-site-product-section">
+
+                <div className="studio-section-heading">
+                  <div>
+                    <span>COLECCIÓN</span>
+                    <h2>Lo nuevo.</h2>
+                  </div>
+
+                  <button>Ver todo →</button>
+                </div>
+
+                <div className="studio-products">
+
+                  {[1, 2, 3].map((item) => (
+                    <article key={item}>
+                      <div className="studio-product-image">
+                        <div />
+                      </div>
+
+                      <div className="studio-product-meta">
+                        <span>Digital Collection</span>
+                        <strong>Producto {item}</strong>
+                        <b>$ 49.900</b>
+                      </div>
+                    </article>
+                  ))}
+
+                </div>
+
+              </section>
+
+              {children}
+
+            </div>
+
+          </div>
+
+          <footer className="studio-bottom-bar">
+
+            <div>
+              <span className="studio-bottom-live">
+                ●
+              </span>
+              Canvas conectado
+            </div>
+
+            <div>
+              <span>Zoom</span>
+              <button>−</button>
+              <strong>100%</strong>
+              <button>+</button>
+            </div>
+
+            <div>
+              <Wand2 size={13} />
+              AI Design Assist
+            </div>
+
+          </footer>
+
+        </main>
+
+        {/* RIGHT INSPECTOR */}
+        <aside
+          className={
+            rightOpen
+              ? "studio-right-panel"
+              : "studio-right-panel collapsed"
+          }
+        >
+
+          <div className="studio-panel-header">
+
+            <div>
+              <span className="studio-panel-kicker">
+                INSPECTOR
+              </span>
+              <strong>{selected}</strong>
+            </div>
+
+            <button
+              onClick={() => setRightOpen(false)}
+              className="studio-panel-collapse"
+            >
+              <ChevronRightIcon />
+            </button>
+
+          </div>
+
+          <div className="studio-inspector-tabs">
+            <button className="active">
+              <Settings2 size={13} />
+              Propiedades
+            </button>
+            <button>
+              <Palette size={13} />
+              Diseño
+            </button>
+          </div>
+
+          <div className="studio-inspector-content">
+
+            <InspectorGroup
+              title="Contenido"
+              icon={<Type size={13} />}
+            >
+              <label>
+                Título
+                <input defaultValue="Diseñá algo que la gente recuerde." />
+              </label>
+
+              <label>
+                Descripción
+                <textarea defaultValue="Tu sitio, tu identidad y tu comercio, conectados desde Commerce OS." />
+              </label>
+
+              <label>
+                Texto del botón
+                <input defaultValue="Explorar colección" />
+              </label>
+            </InspectorGroup>
+
+            <InspectorGroup
+              title="Apariencia"
+              icon={<Palette size={13} />}
+            >
+              <div className="studio-color-row">
+                <span>Primario</span>
+                <div className="studio-color violet" />
+                <code>#8B5CF6</code>
+              </div>
+
+              <div className="studio-color-row">
+                <span>Accent</span>
+                <div className="studio-color cyan" />
+                <code>#22D3EE</code>
+              </div>
+
+              <div className="studio-color-row">
+                <span>Highlight</span>
+                <div className="studio-color magenta" />
+                <code>#EC4899</code>
+              </div>
+            </InspectorGroup>
+
+            <InspectorGroup
+              title="Layout"
+              icon={<PanelRight size={13} />}
+            >
+              <label>
+                Alineación
+                <select defaultValue="left">
+                  <option value="left">Izquierda</option>
+                  <option value="center">Centro</option>
+                  <option value="right">Derecha</option>
+                </select>
+              </label>
+
+              <label>
+                Espaciado
+                <input type="range" defaultValue="72" />
+              </label>
+            </InspectorGroup>
+
+          </div>
+
+          <div className="studio-inspector-ai">
+            <div className="studio-ai-icon">
+              <Sparkles size={14} />
+            </div>
+
+            <div>
+              <strong>AI Design Assist</strong>
+              <p>
+                Pedile a Commerce OS que transforme esta sección.
+              </p>
+            </div>
+
+            <button>
+              <Wand2 size={13} />
+            </button>
+          </div>
+
+        </aside>
+
+        {!rightOpen && (
+          <button
+            className="studio-expand-right"
+            onClick={() => setRightOpen(true)}
+          >
+            <ChevronLeft size={15} />
+          </button>
+        )}
+
+      </div>
+
+    </div>
+  );
+}
+
+function InspectorGroup({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="studio-inspector-group">
+      <div className="studio-inspector-group-title">
+        {icon}
+        <span>{title}</span>
+      </div>
+
+      <div className="studio-inspector-fields">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function ChevronLeftIcon() {
+  return <ChevronDown size={14} className="-rotate-90" />;
+}
+
+function ChevronRightIcon() {
+  return <ChevronDown size={14} className="-rotate-90 rotate-90" />;
+}

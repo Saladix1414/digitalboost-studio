@@ -1,0 +1,47 @@
+/*
+============================================================
+DIGITALBOOST — COMMERCE OS
+PALETA OFICIAL DE ESTA ITERACIÓN
+============================================================
+*/
+
+:root {
+
+  /* BASE */
+  --db-commerce-bg: #0A1020;
+  --db-commerce-surface: #101B32;
+  --db-commerce-surface-2: #14233F;
+  --db-commerce-surface-3: #183052;
+
+  /* PRIMARY */
+  --db-commerce-violet: #8B5CF6;
+  --db-commerce-violet-bright: #A36BFF;
+
+  /* SECONDARY */
+  --db-commerce-blue: #3B82F6;
+  --db-commerce-blue-bright: #5A96FF;
+
+  /* TECHNOLOGY */
+  --db-commerce-cyan: #22D3EE;
+  --db-commerce-cyan-bright: #2DE4FF;
+
+  /* ACCENT */
+  --db-commerce-magenta: #EC4899;
+
+  /* TEXT */
+  --db-commerce-text: #F7FAFF;
+  --db-commerce-text-secondary: #D7E2F0;
+  --db-commerce-muted: #AFC0D5;
+  --db-commerce-muted-2: #7E90AA;
+}
+
+/* PARTE MAX */
+[data-commerce-os="true"] {
+  color-scheme: dark;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(34,211,238,.18), transparent 28%),
+    radial-gradient(circle at 92% 16%, rgba(139,92,246,.20), transparent 32%),
+    radial-gradient(circle at 50% 100%, rgba(236,72,153,.10), transparent 36%),
+    var(--db-commerce-bg, #0A1020) !important;
+  color: var(--db-commerce-text, #F7FAFF);
+}

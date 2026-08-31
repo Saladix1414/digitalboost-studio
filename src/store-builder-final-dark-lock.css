@@ -1,0 +1,33 @@
+html, body, #root {
+  background: #02050A !important;
+}
+
+[data-store-builder="true"] {
+  background: #02050A !important;
+  color: #FFFFFF !important;
+}
+
+[data-store-builder="true"] header {
+  background-color: rgba(5,9,19,.96) !important;
+}
+
+[data-store-builder="true"] main {
+  background-color: #0A0E16 !important;
+}
+
+[data-store-builder="true"] .bg-white {
+  background-color: #050913 !important;
+}
+
+[data-store-builder="true"] input,
+[data-store-builder="true"] textarea,
+[data-store-builder="true"] select {
+  background-color: #050913 !important;
+  color: #FFFFFF !important;
+  border-color: rgba(255,255,255,.10) !important;
+}
+
+[data-store-builder="true"] input::placeholder,
+[data-store-builder="true"] textarea::placeholder {
+  color: #64748B !important;
+}

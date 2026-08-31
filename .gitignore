@@ -1,0 +1,23 @@
+# deps
+node_modules/
+.pnp/
+# build
+dist/
+build/
+.vite/
+# env
+.env
+.env.local
+# python
+__pycache__/
+*.pyc
+.venv/
+# models / ollama — NO subir
+ollama/
+models/
+*.gguf
+*.bin
+# logs
+npm-debug.log*
+logs/
+.DS_Store

@@ -1,0 +1,608 @@
+/* ============================================================
+   DIGITALBOOST
+   WEBSITE BUILDER V2
+   LIGHT FINAL OVERRIDE
+   ============================================================ */
+
+/* CONTENEDOR PRINCIPAL */
+.website-builder-light-shell {
+  background: #F1F5F9 !important;
+  color: #172033 !important;
+  border: 1px solid #D9E2EC !important;
+  box-shadow: 0 24px 70px rgba(15,23,42,.10) !important;
+}
+
+/* STUDIO COMPLETO */
+.website-builder-light-shell .studio-v2 {
+  background: #F1F5F9 !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+}
+
+/* TOP BAR */
+.website-builder-light-shell .studio-topbar {
+  background: rgba(255,255,255,.97) !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+  box-shadow: 0 1px 0 rgba(15,23,42,.04) !important;
+}
+
+/* MARCA */
+.website-builder-light-shell .studio-brand-name {
+  color: #172033 !important;
+}
+
+.website-builder-light-shell .studio-brand-path {
+  color: #64748B !important;
+}
+
+.website-builder-light-shell .studio-brand-orb {
+  background: #E8F5FF !important;
+  color: #2563EB !important;
+  border-color: #BFDBFE !important;
+}
+
+/* LIVE */
+.website-builder-light-shell .studio-live-badge {
+  background: #ECFDF5 !important;
+  color: #047857 !important;
+  border-color: #A7F3D0 !important;
+}
+
+.website-builder-light-shell .studio-live-badge span {
+  background: #10B981 !important;
+}
+
+/* BOTONES DEL SHELL */
+.website-builder-light-shell .studio-icon-button,
+.website-builder-light-shell .studio-button {
+  background: #FFFFFF !important;
+  color: #334155 !important;
+  border-color: #D9E2EC !important;
+}
+
+.website-builder-light-shell .studio-icon-button:hover,
+.website-builder-light-shell .studio-button:hover {
+  background: #F8FAFC !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell .studio-button-primary {
+  background: #7C3AED !important;
+  color: #FFFFFF !important;
+}
+
+.website-builder-light-shell .studio-button-save {
+  background: #0F766E !important;
+  color: #FFFFFF !important;
+}
+
+.website-builder-light-shell .studio-publish {
+  background: #2563EB !important;
+  color: #FFFFFF !important;
+}
+
+/* CONTROLES DE DISPOSITIVO */
+.website-builder-light-shell .studio-device-controls {
+  background: #F8FAFC !important;
+  border-color: #D9E2EC !important;
+}
+
+.website-builder-light-shell .studio-device-controls button {
+  background: transparent !important;
+  color: #64748B !important;
+}
+
+.website-builder-light-shell .studio-device-controls button.active {
+  background: #E8F5FF !important;
+  color: #2563EB !important;
+}
+
+/* ============================================================
+   WEBSITE BUILDER V2
+   ============================================================ */
+
+.website-builder-light-shell [data-website-builder-v2] {
+  background: #FFFFFF !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+  box-shadow: 0 18px 50px rgba(15,23,42,.08) !important;
+}
+
+/* HEADER */
+.website-builder-light-shell
+[data-website-builder-v2] > header {
+  background: #FFFFFF !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+}
+
+/* SIDEBARS */
+.website-builder-light-shell
+[data-website-builder-v2] > div > aside {
+  background: #F8FAFC !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+}
+
+/* CANVAS PRINCIPAL */
+.website-builder-light-shell
+[data-website-builder-v2] main {
+  background: #F1F5F9 !important;
+  color: #172033 !important;
+}
+
+/* CANVAS INTERNO */
+.website-builder-light-shell
+[data-website-builder-v2] main > div {
+  color: #172033 !important;
+}
+
+/* TODAS LAS SUPERFICIES OSCURAS */
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-[#02050a]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-[#02050A]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-[#050913]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-[#050B18]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-[#0a0e16]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-[#030914]"] {
+  background: #FFFFFF !important;
+}
+
+/* CANVAS DEL SITIO */
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-[#030914]"] {
+  background: #FFFFFF !important;
+  border-color: #D9E2EC !important;
+  box-shadow: 0 12px 35px rgba(15,23,42,.08) !important;
+}
+
+/* FONDOS NEGROS SEMITRANSPARENTES */
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-black/20"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-black/30"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-black/40"] {
+  background: #F8FAFC !important;
+}
+
+/* FONDOS BLANCOS TRANSPARENTES */
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-white/[.02]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-white/[.03]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-white/[.04]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-white/[.05]"] {
+  background: #F8FAFC !important;
+}
+
+/* BORDES */
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="border-white/10"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="border-white/15"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="border-white/20"] {
+  border-color: #D9E2EC !important;
+}
+
+/* ============================================================
+   TIPOGRAFIA
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-white"] {
+  color: #172033 !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-slate-300"] {
+  color: #475569 !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-slate-400"] {
+  color: #64748B !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-slate-500"] {
+  color: #64748B !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-slate-600"] {
+  color: #475569 !important;
+}
+
+/* VIOLETA */
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-violet-300"] {
+  color: #7C3AED !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-violet-400"] {
+  color: #7C3AED !important;
+}
+
+/* CYAN */
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-cyan-300"] {
+  color: #0891B2 !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-cyan-400"] {
+  color: #0891B2 !important;
+}
+
+/* VERDE */
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-emerald-300"] {
+  color: #047857 !important;
+}
+
+/* ============================================================
+   BLOQUES
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="border-dashed"] {
+  border-color: #CBD5E1 !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="hover:bg-white"] {
+  background: #FFFFFF !important;
+}
+
+/* TARJETAS */
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="rounded-xl"][class*="border"] {
+  border-color: #D9E2EC !important;
+}
+
+/* INPUTS */
+.website-builder-light-shell
+[data-website-builder-v2] input,
+.website-builder-light-shell
+[data-website-builder-v2] textarea,
+.website-builder-light-shell
+[data-website-builder-v2] select {
+  background: #FFFFFF !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2] input::placeholder,
+.website-builder-light-shell
+[data-website-builder-v2] textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* BOTONES DE ACCION */
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-violet-500"] {
+  background: #7C3AED !important;
+  color: #FFFFFF !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-blue-500"] {
+  background: #2563EB !important;
+  color: #FFFFFF !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-emerald-500"] {
+  background: #059669 !important;
+  color: #FFFFFF !important;
+}
+
+/* ============================================================
+   PREVIEW
+   ============================================================ */
+
+.website-builder-light-shell .studio-preview {
+  background: #F1F5F9 !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell .studio-preview-top {
+  background: #FFFFFF !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+}
+
+.website-builder-light-shell .studio-preview-canvas {
+  background: #F1F5F9 !important;
+}
+
+.website-builder-light-shell .preview-site {
+  background: #FFFFFF !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+  box-shadow: 0 20px 60px rgba(15,23,42,.10) !important;
+}
+
+.website-builder-light-shell .preview-nav {
+  color: #172033 !important;
+}
+
+.website-builder-light-shell .preview-hero p {
+  color: #64748B !important;
+}
+
+.website-builder-light-shell .preview-product {
+  background: #FFFFFF !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+}
+
+/* ============================================================
+   EVITAR QUE EL ROOT DARK VUELVA A PINTAR EL CONTENEDOR
+   ============================================================ */
+
+.website-builder-light-shell,
+.website-builder-light-shell > .studio-v2,
+.website-builder-light-shell .studio-layout {
+  background-color: #F1F5F9 !important;
+}
+
+.website-builder-light-shell .studio-topbar,
+.website-builder-light-shell .studio-preview-top {
+  background-color: #FFFFFF !important;
+}
+
+
+/* ============================================================
+   ESTRUCTURAL LIGHT LOCK
+   Se aplica después de los estilos Light anteriores.
+   ============================================================ */
+
+.website-builder-light-shell {
+  background-color: #F1F5F9 !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell .studio-v2 {
+  background-color: #F1F5F9 !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell .studio-layout {
+  background-color: #F1F5F9 !important;
+}
+
+.website-builder-light-shell .studio-topbar {
+  background-color: #FFFFFF !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] {
+  background-color: #FFFFFF !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] > header {
+  background-color: #FFFFFF !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] main {
+  background-color: #F1F5F9 !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] aside {
+  background-color: #F8FAFC !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] input,
+.website-builder-light-shell [data-website-builder-v2] textarea,
+.website-builder-light-shell [data-website-builder-v2] select {
+  background-color: #FFFFFF !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+}
+
+/* Cualquier superficie estructural oscura heredada */
+.website-builder-light-shell [data-website-builder-v2] [class*="bg-[#02050a]"],
+.website-builder-light-shell [data-website-builder-v2] [class*="bg-[#050913]"],
+.website-builder-light-shell [data-website-builder-v2] [class*="bg-[#0a0e16]"],
+.website-builder-light-shell [data-website-builder-v2] [class*="bg-[#030914]"] {
+  background-color: #FFFFFF !important;
+}
+
+/* Bordes light */
+.website-builder-light-shell [data-website-builder-v2] [class*="border-white/"] {
+  border-color: #D9E2EC !important;
+}
+
+/* Texto */
+.website-builder-light-shell [data-website-builder-v2] [class*="text-slate-300"] {
+  color: #475569 !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] [class*="text-slate-400"] {
+  color: #64748B !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] [class*="text-slate-500"] {
+  color: #64748B !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] [class*="text-slate-600"] {
+  color: #475569 !important;
+}
+
+/* Preview */
+.website-builder-light-shell.studio-preview {
+  background-color: #F1F5F9 !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell .studio-preview-top {
+  background-color: #FFFFFF !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+}
+
+.website-builder-light-shell .studio-preview-canvas {
+  background-color: #F1F5F9 !important;
+}
+
+.website-builder-light-shell .preview-site {
+  background-color: #FFFFFF !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+}
+
+
+/* ============================================================
+   ESTRUCTURAL LIGHT LOCK
+   Se aplica después de los estilos Light anteriores.
+   ============================================================ */
+
+.website-builder-light-shell {
+  background-color: #F1F5F9 !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell .studio-v2 {
+  background-color: #F1F5F9 !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell .studio-layout {
+  background-color: #F1F5F9 !important;
+}
+
+.website-builder-light-shell .studio-topbar {
+  background-color: #FFFFFF !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] {
+  background-color: #FFFFFF !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] > header {
+  background-color: #FFFFFF !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] main {
+  background-color: #F1F5F9 !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] aside {
+  background-color: #F8FAFC !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] input,
+.website-builder-light-shell [data-website-builder-v2] textarea,
+.website-builder-light-shell [data-website-builder-v2] select {
+  background-color: #FFFFFF !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+}
+
+/* Cualquier superficie estructural oscura heredada */
+.website-builder-light-shell [data-website-builder-v2] [class*="bg-[#02050a]"],
+.website-builder-light-shell [data-website-builder-v2] [class*="bg-[#050913]"],
+.website-builder-light-shell [data-website-builder-v2] [class*="bg-[#0a0e16]"],
+.website-builder-light-shell [data-website-builder-v2] [class*="bg-[#030914]"] {
+  background-color: #FFFFFF !important;
+}
+
+/* Bordes light */
+.website-builder-light-shell [data-website-builder-v2] [class*="border-white/"] {
+  border-color: #D9E2EC !important;
+}
+
+/* Texto */
+.website-builder-light-shell [data-website-builder-v2] [class*="text-slate-300"] {
+  color: #475569 !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] [class*="text-slate-400"] {
+  color: #64748B !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] [class*="text-slate-500"] {
+  color: #64748B !important;
+}
+
+.website-builder-light-shell [data-website-builder-v2] [class*="text-slate-600"] {
+  color: #475569 !important;
+}
+
+/* Preview */
+.website-builder-light-shell.studio-preview {
+  background-color: #F1F5F9 !important;
+  color: #172033 !important;
+}
+
+.website-builder-light-shell .studio-preview-top {
+  background-color: #FFFFFF !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+}
+
+.website-builder-light-shell .studio-preview-canvas {
+  background-color: #F1F5F9 !important;
+}
+
+.website-builder-light-shell .preview-site {
+  background-color: #FFFFFF !important;
+  color: #172033 !important;
+  border-color: #D9E2EC !important;
+}

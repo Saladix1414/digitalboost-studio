@@ -1,0 +1,597 @@
+/* ============================================================
+   DIGITALBOOST
+   STORE BUILDER
+   COMPLETE LIGHT DESIGN SYSTEM
+   ============================================================ */
+
+.website-builder-light-shell {
+  --db-bg: #f5f7fb;
+  --db-surface: #ffffff;
+  --db-surface-soft: #f8fafc;
+  --db-surface-muted: #eef3f8;
+
+  --db-text: #172033;
+  --db-text-secondary: #475569;
+  --db-text-muted: #64748b;
+
+  --db-border: #dfe7ef;
+  --db-border-strong: #cbd5e1;
+
+  --db-blue: #2563eb;
+  --db-blue-dark: #1d4ed8;
+  --db-cyan: #0891b2;
+  --db-violet: #7c3aed;
+  --db-violet-dark: #6d28d9;
+  --db-green: #059669;
+
+  width: 100%;
+  min-height: 820px;
+
+  background: #f5f7fb !important;
+  background-color: #f5f7fb !important;
+
+  color: #172033 !important;
+
+  border: 1px solid #dfe7ef !important;
+  border-radius: 24px !important;
+
+  box-shadow:
+    0 24px 70px rgba(15,23,42,.08),
+    0 8px 24px rgba(15,23,42,.04) !important;
+
+  overflow: hidden;
+}
+
+/* ============================================================
+   ROOT
+   ============================================================ */
+
+.website-builder-light-shell,
+.website-builder-light-shell .studio-v2 {
+  background-color: #f5f7fb !important;
+  color: #172033 !important;
+}
+
+/* ============================================================
+   TOPBAR
+   ============================================================ */
+
+.website-builder-light-shell .studio-topbar {
+  min-height: 68px;
+
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #172033 !important;
+
+  border-bottom: 1px solid #dfe7ef !important;
+
+  box-shadow:
+    0 1px 0 rgba(15,23,42,.03),
+    0 6px 20px rgba(15,23,42,.03) !important;
+
+  backdrop-filter: blur(18px);
+}
+
+.website-builder-light-shell .studio-brand-name {
+  color: #111827 !important;
+}
+
+.website-builder-light-shell .studio-brand-path {
+  color: #64748b !important;
+}
+
+.website-builder-light-shell .studio-brand-orb {
+  background:
+    linear-gradient(135deg,#eff6ff,#e0f2fe) !important;
+
+  color: #2563eb !important;
+
+  border: 1px solid #bfdbfe !important;
+
+  box-shadow:
+    0 5px 15px rgba(37,99,235,.10) !important;
+}
+
+.website-builder-light-shell .studio-live-badge {
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+  border: 1px solid #a7f3d0 !important;
+}
+
+.website-builder-light-shell .studio-live-badge span {
+  background: #10b981 !important;
+
+  box-shadow:
+    0 0 0 4px rgba(16,185,129,.10);
+}
+
+/* ============================================================
+   BOTONES SHELL
+   ============================================================ */
+
+.website-builder-light-shell .studio-icon-button,
+.website-builder-light-shell .studio-button {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #334155 !important;
+
+  border: 1px solid #dfe7ef !important;
+  border-radius: 10px !important;
+
+  box-shadow:
+    0 1px 2px rgba(15,23,42,.03);
+
+  transition:
+    transform .16s ease,
+    box-shadow .16s ease,
+    border-color .16s ease,
+    background-color .16s ease;
+}
+
+.website-builder-light-shell .studio-icon-button:hover,
+.website-builder-light-shell .studio-button:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 5px 14px rgba(15,23,42,.07);
+}
+
+.website-builder-light-shell .studio-button-primary {
+  background:
+    linear-gradient(135deg,#7c3aed,#6d28d9) !important;
+
+  color: #ffffff !important;
+
+  border-color: transparent !important;
+
+  box-shadow:
+    0 8px 22px rgba(124,58,237,.20);
+}
+
+.website-builder-light-shell .studio-button-save {
+  background:
+    linear-gradient(135deg,#059669,#047857) !important;
+
+  color: #ffffff !important;
+
+  border-color: transparent !important;
+}
+
+.website-builder-light-shell .studio-publish {
+  background:
+    linear-gradient(135deg,#2563eb,#1d4ed8) !important;
+
+  color: #ffffff !important;
+
+  border-color: transparent !important;
+
+  box-shadow:
+    0 8px 22px rgba(37,99,235,.18);
+}
+
+/* ============================================================
+   DEVICE SWITCHER
+   ============================================================ */
+
+.website-builder-light-shell .studio-device-controls {
+  background: #f8fafc !important;
+  background-color: #f8fafc !important;
+
+  border: 1px solid #dfe7ef !important;
+  border-radius: 12px !important;
+}
+
+.website-builder-light-shell .studio-device-controls button {
+  background: transparent !important;
+  color: #64748b !important;
+
+  border-radius: 8px !important;
+}
+
+.website-builder-light-shell .studio-device-controls button.active {
+  background: #ffffff !important;
+  color: #2563eb !important;
+
+  box-shadow:
+    0 2px 8px rgba(15,23,42,.08);
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+
+.website-builder-light-shell .studio-layout {
+  background: #f5f7fb !important;
+  background-color: #f5f7fb !important;
+}
+
+/* ============================================================
+   WEBSITE BUILDER V2 — ROOT
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #172033 !important;
+
+  border: 1px solid #dfe7ef !important;
+  border-radius: 18px !important;
+
+  box-shadow:
+    0 18px 45px rgba(15,23,42,.07) !important;
+
+  overflow: hidden;
+}
+
+/* ============================================================
+   V2 HEADER
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2] > header {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #172033 !important;
+
+  border-color: #dfe7ef !important;
+}
+
+/* ============================================================
+   SIDEBARS
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2] aside {
+  background: #f8fafc !important;
+  background-color: #f8fafc !important;
+
+  color: #172033 !important;
+
+  border-color: #dfe7ef !important;
+}
+
+/* ============================================================
+   MAIN CANVAS
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2] main {
+  background: #eef3f8 !important;
+  background-color: #eef3f8 !important;
+
+  color: #172033 !important;
+}
+
+/* ============================================================
+   WEBSITE CANVAS
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-white"] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-slate-50"] {
+  background: #f8fafc !important;
+  background-color: #f8fafc !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-slate-100"] {
+  background: #eef3f8 !important;
+  background-color: #eef3f8 !important;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="rounded-xl"][class*="border"] {
+  background: #ffffff !important;
+  border-color: #dfe7ef !important;
+
+  box-shadow:
+    0 3px 12px rgba(15,23,42,.035) !important;
+}
+
+/* ============================================================
+   TRANSPARENT / SOFT SURFACES
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-black/"] {
+  background: #f8fafc !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-white/[.02]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-white/[.03]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-white/[.04]"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-white/[.05]"] {
+  background: #f8fafc !important;
+}
+
+/* ============================================================
+   BORDERS
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="border-white/"] {
+  border-color: #dfe7ef !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="border-dashed"] {
+  border-color: #cbd5e1 !important;
+}
+
+/* ============================================================
+   TEXTO
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-white"] {
+  color: #172033 !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-slate-300"] {
+  color: #475569 !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-slate-400"] {
+  color: #64748b !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-slate-500"] {
+  color: #64748b !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-slate-600"] {
+  color: #475569 !important;
+}
+
+/* ============================================================
+   ACCENTOS DIGITALBOOST
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-violet-300"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-violet-400"] {
+  color: #7c3aed !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-cyan-300"],
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-cyan-400"] {
+  color: #0891b2 !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="text-emerald-300"] {
+  color: #047857 !important;
+}
+
+/* ============================================================
+   ACCENT SURFACES
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-violet-500/10"] {
+  background: #f5f3ff !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-violet-400/"] {
+  background: #f5f3ff !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-cyan-400/"] {
+  background: #ecfeff !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-emerald-400/"] {
+  background: #ecfdf5 !important;
+}
+
+/* ============================================================
+   ACTION BUTTONS
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-violet-500"] {
+  background: #7c3aed !important;
+  color: #ffffff !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-blue-500"] {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2]
+[class*="bg-emerald-500"] {
+  background: #059669 !important;
+  color: #ffffff !important;
+}
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2] input,
+.website-builder-light-shell
+[data-website-builder-v2] textarea,
+.website-builder-light-shell
+[data-website-builder-v2] select {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #172033 !important;
+
+  border: 1px solid #dfe7ef !important;
+  border-radius: 10px !important;
+
+  box-shadow:
+    inset 0 1px 2px rgba(15,23,42,.02);
+}
+
+.website-builder-light-shell
+[data-website-builder-v2] input:focus,
+.website-builder-light-shell
+[data-website-builder-v2] textarea:focus,
+.website-builder-light-shell
+[data-website-builder-v2] select:focus {
+  border-color: #93c5fd !important;
+
+  box-shadow:
+    0 0 0 3px rgba(37,99,235,.10) !important;
+
+  outline: none !important;
+}
+
+.website-builder-light-shell
+[data-website-builder-v2] input::placeholder,
+.website-builder-light-shell
+[data-website-builder-v2] textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* ============================================================
+   INSPECTOR
+   ============================================================ */
+
+.website-builder-light-shell
+[data-website-builder-v2] aside section,
+.website-builder-light-shell
+[data-website-builder-v2] aside > div {
+  color: #172033;
+}
+
+/* ============================================================
+   PREVIEW
+   ============================================================ */
+
+.website-builder-light-shell.studio-preview {
+  background: #f5f7fb !important;
+  background-color: #f5f7fb !important;
+
+  color: #172033 !important;
+}
+
+.website-builder-light-shell .studio-preview-top {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #172033 !important;
+
+  border-color: #dfe7ef !important;
+}
+
+.website-builder-light-shell .studio-preview-canvas {
+  background: #eef3f8 !important;
+  background-color: #eef3f8 !important;
+}
+
+.website-builder-light-shell .preview-site {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #172033 !important;
+
+  border-color: #dfe7ef !important;
+
+  box-shadow:
+    0 24px 60px rgba(15,23,42,.10) !important;
+}
+
+.website-builder-light-shell .preview-nav {
+  color: #172033 !important;
+}
+
+/* ============================================================
+   GENERAL SAFETY
+   ============================================================ */
+
+.website-builder-light-shell button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.website-builder-light-shell [data-website-builder-v2] button {
+  transition:
+    background-color .15s ease,
+    border-color .15s ease,
+    color .15s ease,
+    transform .15s ease,
+    box-shadow .15s ease;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .website-builder-light-shell {
+    border-radius: 18px !important;
+  }
+
+  .website-builder-light-shell .studio-topbar {
+    min-height: 60px;
+  }
+
+  .website-builder-light-shell
+  [data-website-builder-v2] {
+    border-radius: 14px !important;
+  }
+}

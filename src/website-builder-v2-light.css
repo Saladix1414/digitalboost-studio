@@ -1,0 +1,166 @@
+
+/*
+ * DigitalBoost — Website Builder V2
+ * Light Surface Layer
+ *
+ * IMPORTANTE:
+ * Este CSS solamente modifica la interfaz del editor.
+ * Los fondos inline de los bloques del sitio NO se fuerzan.
+ */
+
+[data-website-builder-v2] {
+  color: #172033 !important;
+}
+
+/* Fondo general del editor */
+[data-website-builder-v2] .bg-\[\#02050a\] {
+  background: #f5f7fb !important;
+}
+
+[data-website-builder-v2] .bg-\[\#050913\] {
+  background: #ffffff !important;
+}
+
+[data-website-builder-v2] .bg-\[\#0a0e16\] {
+  background: #eef2f7 !important;
+}
+
+[data-website-builder-v2] .bg-black\/20 {
+  background: rgba(15, 23, 42, 0.055) !important;
+}
+
+/* Bordes */
+[data-website-builder-v2] .border-white\/10 {
+  border-color: #dce3ec !important;
+}
+
+[data-website-builder-v2] .border-white\/15 {
+  border-color: #cbd5e1 !important;
+}
+
+[data-website-builder-v2] .border-white\/\[\.02\] {
+  border-color: #e5eaf1 !important;
+}
+
+/* Texto gris de la interfaz */
+[data-website-builder-v2] .text-slate-300 {
+  color: #475569 !important;
+}
+
+[data-website-builder-v2] .text-slate-400 {
+  color: #64748b !important;
+}
+
+[data-website-builder-v2] .text-slate-500 {
+  color: #64748b !important;
+}
+
+[data-website-builder-v2] .text-slate-600 {
+  color: #475569 !important;
+}
+
+[data-website-builder-v2] .text-slate-700 {
+  color: #334155 !important;
+}
+
+/* Texto blanco usado por los controles del editor */
+[data-website-builder-v2] > .text-white,
+[data-website-builder-v2] .text-white {
+  color: #172033 !important;
+}
+
+/*
+ * Excepción: elementos que son realmente contenido del sitio
+ * pueden conservar color blanco mediante estilos inline.
+ */
+[data-website-builder-v2] [style*="color"] {
+  color: revert-layer;
+}
+
+/* Botones de navegación y controles */
+[data-website-builder-v2] button {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+/* Hover claro para controles */
+[data-website-builder-v2] button:hover {
+  background-color: rgba(99, 102, 241, 0.07);
+}
+
+/* Inputs */
+[data-website-builder-v2] input,
+[data-website-builder-v2] textarea,
+[data-website-builder-v2] select {
+  background-color: #f8fafc !important;
+  color: #172033 !important;
+  border-color: #d8e0ea !important;
+}
+
+[data-website-builder-v2] input::placeholder,
+[data-website-builder-v2] textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Panel de bloques */
+[data-website-builder-v2] aside {
+  background-color: #ffffff !important;
+}
+
+/* Canvas */
+[data-website-builder-v2] main {
+  background-color: #eef2f7 !important;
+}
+
+/*
+ * El canvas que representa la web conserva su identidad.
+ * No se fuerza su fondo aquí porque V2 utiliza los colores
+ * configurados por cada bloque.
+ */
+
+/* Separadores */
+[data-website-builder-v2] .bg-white\/10 {
+  background-color: #dce3ec !important;
+}
+
+[data-website-builder-v2] .bg-white\/5 {
+  background-color: rgba(99, 102, 241, 0.06) !important;
+}
+
+/* Estados seleccionados */
+[data-website-builder-v2] .bg-violet-400\/\[\.04\] {
+  background-color: rgba(124, 58, 237, 0.055) !important;
+}
+
+/* Overlay de etiquetas del canvas */
+[data-website-builder-v2] .backdrop-blur {
+  backdrop-filter: blur(10px);
+}
+
+/*
+ * Accesibilidad visual.
+ * Mantiene buen contraste en iconos violeta/cian.
+ */
+[data-website-builder-v2] .text-violet-300 {
+  color: #6d28d9 !important;
+}
+
+[data-website-builder-v2] .text-violet-100 {
+  color: #5b21b6 !important;
+}
+
+[data-website-builder-v2] .text-cyan-300 {
+  color: #0e7490 !important;
+}
+
+[data-website-builder-v2] .text-cyan-200 {
+  color: #0e7490 !important;
+}
+
+/* No permitir que el contenedor externo vuelva a oscurecer V2 */
+[data-website-builder-v2] {
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.10) !important;
+}
