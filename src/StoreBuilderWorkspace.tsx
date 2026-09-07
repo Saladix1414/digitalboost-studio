@@ -301,13 +301,6 @@ export default function StoreBuilderWorkspace({
         "website-builder",
       ];
 
-      // Recuperación segura:
-      // si la última sección guardada provoca un error al recargar,
-      // comenzamos nuevamente desde Inicio sin borrar los datos del Store.
-      if (saved === "analytics") {
-        return "dashboard";
-      }
-
       if (saved && validSections.includes(saved as StoreSection)) {
         return saved as StoreSection;
       }
@@ -3701,7 +3694,7 @@ const filteredProducts = useMemo(() => {
         </div>
       </main>
 
-      {<DigitalBoostCommandCenter onNavigate={setSection} onOpenAI={() => setShowAI(true)} onOpenSearch={() => setShowSearch(true)} onOpenHealth={() => setShowHealth(true)} onOpenIntegrations={() => setShowIntegrations(true)} onOpenAutomations={() => setShowAutomations(true)} onOpenConsole={() => setShowConsole(true)} onOpenIntegrations={() => setShowIntegrations(true)} onOpenNotes={() => setShowNotes(true)} onOpenShortcuts={() => setShowShortcuts(true)} />}
+      <DigitalBoostCommandCenter onNavigate={setSection} onOpenAI={() => setShowAI(true)} onOpenSearch={() => setShowSearch(true)} onOpenHealth={() => setShowHealth(true)} onOpenIntegrations={() => setShowIntegrations(true)} onOpenAutomations={() => setShowAutomations(true)} onOpenConsole={() => setShowConsole(true)} onOpenNotes={() => setShowNotes(true)} onOpenShortcuts={() => setShowShortcuts(true)} />
       {showShortcuts && (<DigitalBoostShortcuts onClose={() => setShowShortcuts(false)} />)}
       {showNotes && (<DigitalBoostNotifications onClose={() => setShowNotes(false)} />)}
       {showConsole && (<DigitalBoostConsole onClose={() => setShowConsole(false)} />)}
