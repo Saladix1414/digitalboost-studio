@@ -123,6 +123,27 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
   const [future, setFuture] = useState<CanvasBlock[][]>([]);
 
   useEffect(() => { setBlocks(loadCanvasPage(page)); setHistory(loadHistory()); setTheme(loadTheme()); setReady(true); }, []);
+  useEffect(() => {
+    function pull(next?: unknown) {
+      if (Array.isArray(next) && next.length) {
+        setBlocks(next as CanvasBlock[]);
+        return;
+      }
+      setBlocks(loadCanvasPage(page));
+    }
+    function onReload(ev: Event) {
+      const detail = (ev as CustomEvent).detail;
+      pull(detail);
+    }
+    try { (window as any).__dbSetBlocks = function (next: CanvasBlock[]) { pull(next); }; } catch {}
+    window.addEventListener("db-canvas-reload", onReload);
+    window.addEventListener("db-pulse-apply", onReload);
+    return function () {
+      window.removeEventListener("db-canvas-reload", onReload);
+      window.removeEventListener("db-pulse-apply", onReload);
+      try { delete (window as any).__dbSetBlocks; } catch {}
+    };
+  }, [page]);
   useEffect(() => { if (ready) saveCanvasPage(page, blocks); }, [blocks, ready]);
   useEffect(() => { if (selected && inspectRef.current) inspectRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, [selected]);
   useEffect(() => { if (ready) saveTheme(theme); }, [theme, ready]);
