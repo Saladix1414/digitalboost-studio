@@ -231,8 +231,8 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
           {([["desktop", Monitor], ["tablet", Tablet], ["mobile", Smartphone]] as const).map(([id, Icon]) => (
             <button key={id} type="button" onClick={() => setDevice(id)} className={cx("grid h-10 w-10 place-items-center rounded-md", device === id ? "bg-[#101B32] text-cyan-300" : "text-slate-500")} aria-label={id}><Icon size={15} /></button>
           ))}
-          <button type="button" onClick={() => setShowTheme(true)} className="hidden h-10 items-center rounded-md border border-white/10 px-3 text-xs text-slate-400 sm:inline-flex">Theme</button>
-          <button type="button" onClick={() => setPreview((v) => !v)} className="ml-1 hidden h-10 items-center gap-1 rounded-md border border-white/10 px-3 text-xs text-slate-400 sm:inline-flex"><Eye size={13} /> {preview ? "Editar" : "Preview"}</button>
+          <button type="button" onClick={() => setShowTheme(true)} className="h-10 items-center rounded-md border border-white/10 px-3 text-xs text-slate-400 inline-flex">Theme</button>
+          <button type="button" onClick={() => setPreview((v) => !v)} className="ml-1 h-10 items-center gap-1 rounded-md border border-white/10 px-3 text-xs text-slate-400 inline-flex"><Eye size={13} /> {preview ? "Editar" : "Preview"}</button>
           <button type="button" onClick={publish} className="ml-1 h-10 rounded-md bg-emerald-400 px-3 text-xs font-semibold text-[#070d18]">{saved ? "Guardado" : "Publicar"}</button>
         </div>
       </div>
@@ -302,6 +302,13 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
                   <p className="mt-3 text-xs leading-5 text-slate-400">El canvas usa el theme Nimbus: paper #F4F1EA, tinta #101820, acento cyan. Tokens editables en la fase Theme System.</p>
                 )}
               </div>
+              <button type="button" className="h-11 w-full rounded-md bg-cyan-400 text-xs font-semibold text-[#070d18]" onClick={function () {
+                try {
+                  const q = "reescribi el bloque " + current.type + " titulado " + current.title + " para la tienda nimbus";
+                  localStorage.setItem("db-pulse-seed", q);
+                  window.dispatchEvent(new Event("db-open-pulse"));
+                } catch {}
+              }}>PULSE · reescribir este bloque</button>
               <div className="flex gap-1">
                 <button type="button" onClick={() => move(-1)} className="grid h-11 w-11 place-items-center rounded-md border border-white/10" aria-label="Subir"><ChevronUp size={16} /></button>
                 <button type="button" onClick={() => move(1)} className="grid h-11 w-11 place-items-center rounded-md border border-white/10" aria-label="Bajar"><ChevronDown size={16} /></button>
