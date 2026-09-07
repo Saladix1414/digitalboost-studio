@@ -63,15 +63,15 @@ export function toolScoreLine(f: PulseFacts) {
 }
 
 export function toolMap(f: PulseFacts) {
-  if (!f.map.length) return "El canvas de " + f.page + " está vacío o no lo pude leer en localStorage.";
-  return "Mapa de " + f.page + " (" + f.blocks + "):\n" + f.map.join("\n");
+  if (!f.map.length) return "No pude leer " + f.page + ". El canvas está vacío o no está guardado.";
+  return "Así está armado " + f.page + " (" + f.blocks + " bloques):\n" + f.map.join("\n");
 }
 
 export function toolNba(f: PulseFacts): { title: string; body: string; action: string; label: string; draft?: { kind: string; title: string; body: string; cta: string } } {
   if (f.genericHero) {
     return {
       title: "PULSE · Siguiente golpe",
-      body: toolScoreLine(f) + ". El mayor recorte está en el hero de plantilla («" + (f.heroTitle || "—") + "»). Reescribirlo es L1 y reversible. Después: CTA y un solo theme (" + f.theme + ").",
+      body: "Lo primero es el hero. Hoy dice «" + (f.heroTitle || "—") + "» y se lee a plantilla.\nTe dejo una línea. La aplicás vos. Después unificamos botones y un solo theme (" + f.theme + ").",
       action: "website-builder",
       label: "Ir al canvas",
       draft: { kind: "hero", title: "La colección que no pide permiso.", body: "Una promesa. Un botón.", cta: "Entrar" }
@@ -80,7 +80,7 @@ export function toolNba(f: PulseFacts): { title: string; body: string; action: s
   if (f.missingCta > 0) {
     return {
       title: "PULSE · Siguiente golpe",
-      body: toolScoreLine(f) + ". El hero ya tiene voz. Faltan " + f.missingCta + " CTA. Unificar a «Comprar ahora» es el golpe más barato.",
+      body: "El hero ya habla. Lo barato ahora: " + f.missingCta + " bloque" + (f.missingCta === 1 ? "" : "s") + " sin un pedido claro.\nLos unifico a «Comprar ahora» si me das OK.",
       action: "website-builder",
       label: "Unificar CTA",
       draft: { kind: "cta", title: "CTA único", body: "Todos los botones dicen Comprar ahora.", cta: "Comprar ahora" }
@@ -88,7 +88,7 @@ export function toolNba(f: PulseFacts): { title: string; body: string; action: s
   }
   return {
     title: "PULSE · Siguiente golpe",
-    body: toolScoreLine(f) + ". El canvas no es el cuello. Operación: 1047 en preparación y cap fino. Campaña de carritos queda en Pulse Card (L3).",
+    body: "El canvas no es el problema.\nEl 1047 está cobrado y no sale, y el cap está justo.\nCampaña de carritos la armo, no la publico sola.",
     action: "orders",
     label: "Ir a Pedidos"
   };
@@ -97,7 +97,7 @@ export function toolNba(f: PulseFacts): { title: string; body: string; action: s
 export function toolOrders(f: PulseFacts) {
   return {
     title: "PULSE · Pedidos",
-    body: f.store + " · " + f.range + ". 1048 pagado. 1047 en preparación: plata cobrada que no sale. " + f.orders + " pedidos en el cálculo de demo de este rango. El cuello es despacho, no la vitrina.",
+    body: "En " + f.store + " el 1048 ya está pago.\nEl 1047 sigue en preparación: plata cobrada que no sale.\nEl cuello es despacho, no la vitrina.",
     action: "orders",
     label: "Abrir Pedidos"
   };
@@ -106,7 +106,7 @@ export function toolOrders(f: PulseFacts) {
 export function toolStock(f: PulseFacts) {
   return {
     title: "PULSE · Stock",
-    body: "Cap Digital Blue fino en " + f.store + ". Anotar el faltante es L0. Comprar al proveedor sería L3 (Pulse Card). No invento depósito físico: esto es la semilla del OS. " + toolScoreLine(f) + ".",
+    body: "El Cap Digital Blue está justo en " + f.store + ".\nAnotar el faltante es inocuo. Comprar al proveedor ya es una decisión tuya, no mía.",
     action: "products",
     label: "Abrir Productos"
   };
@@ -116,7 +116,7 @@ export function toolTheme(f: PulseFacts) {
   const next = f.theme === "noir" ? "Nimbus" : "Noir";
   return {
     title: "PULSE Design · Theme",
-    body: "Ahora el canvas está en «" + f.theme + "». Nimbus = calma. Noir = filo. Mezclarlos mata el carácter. Te propongo pasar a " + next + " (L1, reversible).",
+    body: "Ahora el canvas está en «" + f.theme + "».\nNimbus es calma. Noir es filo. Si mezclás los dos, la tienda no tiene cara.\nTe propongo pasar a " + next + ". Lo revertís con History.",
     action: "website-builder",
     label: "Aplicar theme",
     draft: { kind: "theme", title: next, body: "Preset " + next + " en todo el canvas.", cta: "Aplicar " + next }
@@ -127,7 +127,7 @@ export function toolDiff(f: PulseFacts) {
   const proposed = "La colección que no pide permiso.";
   return {
     title: "PULSE Design · Diff",
-    body: "Ahora: «" + (f.heroTitle || "—") + "».\nPropuesta: «" + proposed + "».\n" + (f.genericHero ? "El actual es plantilla." : "El actual ya tiene voz; la propuesta es más corta.") + " Aplicar es L1.",
+    body: "Ahora: «" + (f.heroTitle || "—") + "».\nTe propongo: «" + proposed + "».\n" + (f.genericHero ? "La de ahora es plantilla." : "La de ahora ya tiene voz; esta es más corta.") + "\nSi te cierra, Aplicar. Si no, History.",
     action: "website-builder",
     label: "Aplicar hero",
     draft: { kind: "hero", title: proposed, body: "Una promesa. Un botón.", cta: "Entrar" }

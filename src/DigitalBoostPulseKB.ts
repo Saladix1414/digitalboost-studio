@@ -157,8 +157,8 @@ export function decide(input: PulseInput): PulseDecision {
   if (q === "hero" || q.indexOf("arreglar hero") !== -1) return finish(input, skillHero(input));
 
   if (inStudio && (!q || q.indexOf("hola") !== -1 || q.indexOf("quien") !== -1)) {
-    const hero = input.heroTitle ? "Hero actual: «" + input.heroTitle + "». " : "El hero sigue generico. ";
-    return finish(input, { title: "PULSE Design", body: "Canvas " + input.store + " · " + (input.page || "Inicio") + " · " + String(input.blockCount || 0) + " bloques. " + hero + "¿Lo reescribimos, cambiamos theme, o miramos los CTA?", action: "website-builder", label: "Seguir en el canvas" });
+    const hero = input.heroTitle ? "El hero dice «" + input.heroTitle + "»." : "El hero todavía es genérico.";
+    return finish(input, { title: "PULSE Design", body: "Estamos en " + (input.page || "Inicio") + " · " + String(input.blockCount || 0) + " bloques.\n" + hero + "\n¿Lo reescribimos, cambiamos el theme, o afinamos los botones?", action: "website-builder", label: "Seguir en el canvas" });
   }
 
   const m = mul(input);
@@ -170,7 +170,7 @@ export function decide(input: PulseInput): PulseDecision {
     const s = score(q, keys);
     if (s > 0) packs.push({ title: title, body: body, action: action, label: label, confirm: confirm, score: s });
   }
-  add(["hola", "quien", "sos", "pulse"], "PULSE", st(input) + ". Orquestador del OS. ¿Briefing del dia, un pedido, o el canvas?", "dashboard", "Seguir aca");
+  add(["hola", "quien", "sos", "pulse"], "PULSE", st(input) + ". Estoy acá. ¿Vemos el día, un pedido, o el canvas?", "dashboard", "Seguir aca");
   add(["venta", "plata", "ingreso", "analytics", "factur"], "PULSE · Ventas", "" + st(input) + ". " + money(salesN) + " · " + ordersN + " pedidos · ticket " + money(ticket) + ". Mobile recorta. ¿Abro Analytics?", "analytics", "Abrir Analytics");
   add(["pedido", "orden", "envio", "despacho", "1048", "1047"], "PULSE · Pedidos", "El 1048 está pagado. El 1047 sigue en preparación: el cuello es despacho, no la vitrina. Cada hora ahí es plata cobrada que no sale. ¿Entro a Pedidos?", "orders", "Abrir Pedidos");
   add(["stock", "invent", "sku", "producto", "cap"], "PULSE · Stock", "El Cap Digital Blue está fino. Si el drop llega sin reposición, la ficha se ve y no hay talle. Anotar el faltante es L0; comprar al proveedor ya sería L3 y Pulse Card. ¿Abrimos Productos?", "products", "Abrir Productos");
@@ -180,7 +180,7 @@ export function decide(input: PulseInput): PulseDecision {
   add(["automat", "flujo"], "PULSE · Flujos", "L1: preparar flujos. Activarlos puede pedir aprobacion.", "__automations", "Abrir Automations");
   add(["integr", "stripe"], "PULSE · Integrations", "L4 de gobernanza si se tocan credenciales. Solo abro el panel.", "__integrations", "Abrir Integrations");
   add(["campan", "promo", "descuento"], "PULSE · Campana", "L3. Preparo recuperacion de carritos 10%/48h. No publico hasta que confirmes la Pulse Card.", "campaigns", "Crear campana", true);
-  add(["hero", "homepage", "redisen", "canvas", "titulo"], "PULSE Design", "El hero actual no cierra en 3 segundos. Abajo te dejo el reemplazo: aplicarlo es L1, reversible.", "website-builder", "Aplicar hero");
+  add(["hero", "homepage", "redisen", "canvas", "titulo"], "PULSE Design", "El hero no cierra en tres segundos. Abajo te dejo otra línea. La aplicás vos.", "website-builder", "Aplicar hero");
   add(["theme", "noir", "color", "preset"], "PULSE Design", "Nimbus es calma (luz, aire). Noir es filo (contraste, menos gris). Mezclar los dos hace que la tienda no tenga carácter. Yo iría Noir en este canvas y dejaría Nimbus para otra marca. El cambio es L1 y se revierte.", "website-builder", "Seguir en el canvas");
   add(["conver", "cta", "boton"], "PULSE Design", "Hay bloques que informan y no piden. El visitante no adivina el siguiente paso. Unificar a «Comprar ahora» / «Entrar» en hero, destacados y cierre. Es un cambio chico y se nota en mobile.", "website-builder", "Seguir en el canvas");
 
