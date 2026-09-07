@@ -12,11 +12,11 @@ export const BLOCK_META: Record<BlockType, { label: string; hint: string }> = {
 export function newId() { return "b-" + Math.random().toString(36).slice(2, 9); }
 export function defaultBlock(type: BlockType): CanvasBlock {
   const map: Record<BlockType, Omit<CanvasBlock, "id" | "type">> = {
-    hero: { title: "Crea algo extraordinario.", body: "Disena una tienda con la identidad de tu marca.", cta: "Comprar ahora" },
-    features: { title: "Por que Nimbus", body: "Envios simples · Checkout seguro · Soporte humano", cta: "" },
-    products: { title: "Destacados", body: "Campera Nimbus · Tote Cyan · Hoodie Violet", cta: "Ver todo" },
-    text: { title: "Una tienda tambien puede contar quien sos.", body: "Usa contenido e imagenes para convertir identidad en experiencia.", cta: "" },
-    cta: { title: "Listo para publicar.", body: "Lanza la coleccion de temporada.", cta: "Publicar tienda" },
+    hero: { title: "La pieza que se explica sola.", body: "Una promesa. Un boton. La coleccion de temporada, sin ruido.", cta: "Entrar" },
+    features: { title: "Por que Nimbus", body: "Envios en 48h · Checkout en un paso · Atencion humana", cta: "" },
+    products: { title: "Destacados", body: "Campera Nimbus · Tote Cyan · Hoodie Violet", cta: "Ver drop" },
+    text: { title: "Una tienda tambien puede contar quien sos.", body: "Menos plantilla, mas voz. Tres bloques bien dichos valen mas que doce genericos.", cta: "" },
+    cta: { title: "El drop no espera.", body: "Publica Inicio cuando el hero cierre en tres segundos.", cta: "Publicar tienda" },
     media: { title: "Drop Studio 09", body: "Lookbook en movimiento", cta: "" },
   };
   return { id: newId(), type, ...map[type] };

@@ -278,7 +278,12 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
         </div>
 
         <aside ref={inspectRef} className={cx("overflow-y-auto border-white/10 p-3", current ? "block border-t lg:border-l lg:border-t-0" : "hidden lg:block lg:border-l")}>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Inspector</div>
+          <div className="flex items-center justify-between">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Inspector</div>
+            {current ? (
+              <button type="button" className="grid h-11 w-11 place-items-center rounded-md border border-white/10 text-slate-400" aria-label="Cerrar inspector" onClick={function () { setSelected(null); }}>x</button>
+            ) : null}
+          </div>
           {!current ? (
             <p className="mt-4 text-xs leading-5 text-slate-400">Selecciona un bloque en el canvas o agrega uno.</p>
           ) : (
