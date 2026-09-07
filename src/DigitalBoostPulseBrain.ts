@@ -29,6 +29,12 @@ export async function analyzeSmart(input: PulseInput) {
    */
 
   const decision = decide(input);
+  const qn = String(input.q || "").trim().toLowerCase();
+  const skipAi = !qn || qn.split(/\s+/).length <= 2;
+
+  if (skipAi) {
+    return { decision, engine: "rules" as const };
+  }
 
   try {
     const contextBuilder = new DigitalBoostContextBuilder();
