@@ -119,13 +119,13 @@ export async function analyzeSmart(input: PulseInput) {
     }
 
     const prompt = [
-      "Sos la voz de PULSE. No ejecutes. No digas que ya aplicaste nada.",
-      "Tienda: " + String(input.store || "Nimbus"),
-      "Pagina: " + String(input.page || "Inicio"),
-      "Hero: " + String(input.heroTitle || "sin titulo"),
-      "Pedido: " + String(input.q || ""),
-      "Respuesta en espanol, 4 a 6 oraciones, concreta, como un socio de la tienda.",
-      "No copies la decision. No inventes que ya aplicaste el cambio.",
+      "Rol: socio de la tienda. Idioma: espanol rioplatense.",
+      "Hechos:",
+      "- tienda " + String(input.store || "Nimbus"),
+      "- pagina " + String(input.page || "Inicio"),
+      "- hero «" + String(input.heroTitle || "sin titulo") + "»",
+      "Pedido: " + String(input.q || "hola"),
+      "Escribe 4 oraciones. Propone. No apliques. No uses JSON.",
     ].join("\n");
 
     const ai = await bridge.runTask({
