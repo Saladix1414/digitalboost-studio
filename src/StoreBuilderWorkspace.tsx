@@ -265,7 +265,7 @@ function publishSection(id: string) {
 export default function StoreBuilderWorkspace({
   onBack,
 }: {
-  onBack: () => void;
+  onBack?: () => void;
 }) {
 
   // ----------------------------------------------------------
@@ -283,7 +283,6 @@ export default function StoreBuilderWorkspace({
   const [section, setSection] = useState<StoreSection>(() => {
     try {
       const saved = localStorage.getItem("digitalboost_store_section");
-  useEffect(function () { publishSection(String(section)); }, [section]);
 
 
       const validSections: StoreSection[] = [
@@ -295,9 +294,11 @@ export default function StoreBuilderWorkspace({
         "themes",
         "marketing",
         "analytics",
+        "seo",
         "payments",
         "campaigns",
         "settings",
+        "website-builder",
       ];
 
       // Recuperación segura:
@@ -322,6 +323,7 @@ export default function StoreBuilderWorkspace({
       "digitalboost_store_section",
       section
     );
+    publishSection(String(section));
   }, [section]);
   const [products, setProducts] = useState(productsSeed);
   const [orders, setOrders] = useState(ordersSeed);
@@ -3495,7 +3497,8 @@ const filteredProducts = useMemo(() => {
       >
         <div className="flex h-[72px] items-center justify-between border-b border-[#1D4260] px-5">
           <button
-            onClick={onBack}
+            type="button"
+            onClick={() => onBack?.()}
             className="flex items-center gap-2 text-sm font-black"
           >
             <div className="rounded-lg bg-gradient-to-br from-violet-500 to-cyan-300 p-2">
@@ -3636,7 +3639,8 @@ const filteredProducts = useMemo(() => {
           </button>
 
           <button
-            onClick={onBack}
+            type="button"
+            onClick={() => onBack?.()}
             className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#475569] hover:bg-[#0A0E16] hover:text-white"
           >
             <ArrowLeft size={17} />

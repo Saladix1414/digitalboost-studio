@@ -1044,7 +1044,7 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
     document.body.removeChild(element);
   };
 
-  if (activeTab === 'store') { return (<div className="min-h-screen bg-[#030308]"><StoreBuilderWorkspace /></div>); }
+  if (activeTab === 'store') { return (<div className="min-h-screen bg-[#030308]"><StoreBuilderWorkspace onBack={onBack} /></div>); }
 
   return (
     <div className="min-h-screen bg-[#030308] text-white flex flex-col">
