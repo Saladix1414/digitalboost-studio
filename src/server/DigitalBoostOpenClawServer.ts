@@ -288,6 +288,8 @@ async function discoverDefaultModel(): Promise<string | undefined> {
   return qwen || models[0];
 }
 
+let inferBusy = false;
+
 export function registerOpenClawRoutes(app: any) {
   app.get("/api/openclaw/status", async (_req: any, res: any) => {
     try {
@@ -328,6 +330,11 @@ export function registerOpenClawRoutes(app: any) {
   });
 
   app.post("/api/openclaw/task", async (req: any, res: any) => {
+    if (inferBusy) {
+      res.status(429).json({ ok: false, error: "OpenClaw ocupado" });
+      return;
+    }
+    inferBusy = true;
     try {
       const body = (req.body || {}) as OpenClawTaskRequest;
 
@@ -395,6 +402,8 @@ export function registerOpenClawRoutes(app: any) {
         provider: "openclaw",
         error: "Internal OpenClaw bridge error",
       });
+    } finally {
+      inferBusy = false;
     }
   });
 }

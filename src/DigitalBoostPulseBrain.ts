@@ -128,29 +128,12 @@ export async function analyzeSmart(input: PulseInput) {
     }
 
     const prompt = [
-      "Actúa como componente de IA interno de DigitalBoost.",
-      "PULSE es el cerebro y conserva la decisión final.",
-      "No ejecutes acciones.",
-      "No inventes que una acción fue ejecutada.",
-      "No modifiques permisos.",
-      "No reduzcas requisitos de aprobación.",
-      "",
-      "DECISIÓN DE PULSE:",
-      JSON.stringify({
-        title: decision.title,
-        action: decision.action,
-        risk: decision.risk,
-        intent: decision.intent,
-        confirm: decision.confirm,
-      }),
-      "",
-      "CONTEXTO SEGURO:",
-      JSON.stringify(context),
-      "",
-      "SOLICITUD:",
-      input.q || "",
-      "",
-      "Responde de forma breve y útil para PULSE.",
+      "Sos la voz de PULSE. No ejecutes. No digas que ya aplicaste nada.",
+      "Tienda: " + String(input.store || "Nimbus"),
+      "Pagina: " + String(input.page || "Inicio"),
+      "Hero: " + String(input.heroTitle || "sin titulo"),
+      "Pedido: " + String(input.q || ""),
+      "Respuesta breve, en espanol, util para el dueno de la tienda.",
     ].join("\n");
 
     const ai = await bridge.runTask({
