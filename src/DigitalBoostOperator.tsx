@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
-import { explain, analyzeSmart, isBuilder, type PulseDecision } from "./DigitalBoostPulseBrain";
+import { explain, analyze, analyzeSmart, isBuilder, type PulseDecision } from "./DigitalBoostPulseBrain";
 import {
   approvePulseAction,
   rejectPulseAction,
@@ -87,8 +87,15 @@ export default function DigitalBoostOperator(props: {
     const c = ctx();
     const cv = readCanvas();
     const payload = { q: raw, section: section, store: c.store, range: c.range, live: c.live, page: cv.page, blockCount: cv.n, heroTitle: cv.hero };
-    const r = raw === "debug" ? explain(payload) : await analyzeSmart(payload);
-    const result = "decision" in r ? r.decision : r;
+    let result = raw === "debug" ? explain(payload) : analyze(payload);
+    try {
+      if (raw !== "debug") {
+        const timed = new Promise((_, reject) => setTimeout(function () { reject(new Error("pulse-ai-timeout")); }, 2500));
+        const r = await Promise.race([analyzeSmart(payload), timed]);
+        if (r && typeof r === "object" && "decision" in r) result = r.decision;
+        else if (r && typeof r === "object" && "body" in r) result = r;
+      }
+    } catch {}
     setLastKey(raw.toLowerCase());
     setApplied(false);
     setOut(result);
