@@ -29,15 +29,6 @@ export async function analyzeSmart(input: PulseInput) {
    */
 
   const decision = decide(input);
-  const qn = String(input.q || "").trim().toLowerCase();
-  const chip = /^(hola|mapa|golpe|diff|hero|seo|plan|briefing|publicar|inspeccionar|pedidos|stock|theme|cta|alerta|ventas)$/;
-  const phrase = /diferencia del hero|siguiente golpe|mapa del canvas|como esta el seo|podemos publicar|reescribamos el hero|probemos otro theme/;
-  const skipAi = !qn || chip.test(qn) || phrase.test(qn) || qn.split(/\s+/).length <= 2;
-
-  if (skipAi) {
-    return { decision, engine: "rules" as const };
-  }
-
   try {
     const contextBuilder = new DigitalBoostContextBuilder();
 
@@ -133,7 +124,8 @@ export async function analyzeSmart(input: PulseInput) {
       "Pagina: " + String(input.page || "Inicio"),
       "Hero: " + String(input.heroTitle || "sin titulo"),
       "Pedido: " + String(input.q || ""),
-      "Respuesta breve, en espanol, util para el dueno de la tienda.",
+      "Respuesta en espanol, 4 a 6 oraciones, concreta, como un socio de la tienda.",
+      "No copies la decision. No inventes que ya aplicaste el cambio.",
     ].join("\n");
 
     const ai = await bridge.runTask({
