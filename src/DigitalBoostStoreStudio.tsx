@@ -309,7 +309,7 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
               </div>
               <button type="button" className="h-11 w-full rounded-md bg-cyan-400 text-xs font-semibold text-[#070d18]" onClick={function () {
                 try {
-                  const q = "reescribi el bloque " + current.type + " titulado " + current.title + " para la tienda nimbus";
+                  const q = "reescribi el texto del bloque " + current.type + " que hoy dice " + current.title;
                   localStorage.setItem("db-pulse-seed", q);
                   window.dispatchEvent(new Event("db-open-pulse"));
                 } catch {}
