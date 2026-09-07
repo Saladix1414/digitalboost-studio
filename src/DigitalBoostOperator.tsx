@@ -72,6 +72,7 @@ export default function DigitalBoostOperator(props: {
   });
   const [lastKey, setLastKey] = useState("");
   const [applied, setApplied] = useState(false);
+  const [busy, setBusy] = useState(false);
   const scroller = useRef<HTMLDivElement | null>(null);
   useEffect(function () { document.body.classList.add('db-pulse-open'); return function () { document.body.classList.remove('db-pulse-open'); }; }, []);
   function follows(action: string, used: string) {
@@ -87,6 +88,13 @@ export default function DigitalBoostOperator(props: {
     const c = ctx();
     const cv = readCanvas();
     const payload = { q: raw, section: section, store: c.store, range: c.range, live: c.live, page: cv.page, blockCount: cv.n, heroTitle: cv.hero };
+    setBusy(true);
+    setQ("");
+    setMsgs(function (m) {
+      const last = m[m.length - 1];
+      if (last && last.role === "user" && last.text === line) return m;
+      return m.concat([{ role: "user", text: line }]).slice(-12);
+    });
     let result = raw === "debug" ? explain(payload) : analyze(payload);
     try {
       if (raw !== "debug") {
@@ -99,13 +107,11 @@ export default function DigitalBoostOperator(props: {
     setLastKey(raw.toLowerCase());
     setApplied(false);
     setOut(result);
-    setQ("");
+    setBusy(false);
     setMsgs(function (m) {
       const last = m[m.length - 1];
       if (last && last.role === "pulse" && last.text === result.body) return m;
-      const prev = m[m.length - 2];
-      if (prev && prev.role === "user" && prev.text === line && last && last.text === result.body) return m;
-      return m.concat([{ role: "user", text: line }, { role: "pulse", text: result.body }]).slice(-12);
+      return m.concat([{ role: "pulse", text: result.body }]).slice(-12);
     });
   }
   function applyDraft() {
@@ -150,7 +156,7 @@ export default function DigitalBoostOperator(props: {
 
     setMsgs(function (m) {
       return m.concat([{ role: "pulse", text: ok
-        ? "Listo: el canvas ya muestra el cambio. Cerrá PULSE un segundo y mirá el hero. History lo revierte si no te cierra."
+        ? "Listo. El canvas ya tiene el cambio. History lo revierte si no te cierra."
         : result.state === "AWAITING_APPROVAL"
           ? "La propuesta requiere aprobación antes de aplicar el cambio."
           : "No se aplicó el cambio. PULSE bloqueó la ejecución." }]).slice(-10);
@@ -225,7 +231,7 @@ export default function DigitalBoostOperator(props: {
       } catch {}
       setApplied(true);
       setMsgs(function (m) {
-        return m.concat([{ role: "pulse", text: "Listo: el canvas ya muestra el cambio. Cerrá PULSE un segundo y mirá el hero. History lo revierte si no te cierra." }]).slice(-10);
+        return m.concat([{ role: "pulse", text: "Listo. El canvas ya tiene el cambio. History lo revierte si no te cierra." }]).slice(-10);
       });
       return;
     }
@@ -252,7 +258,7 @@ export default function DigitalBoostOperator(props: {
         <div ref={scroller} className="min-h-[280px] flex-1 space-y-3 overflow-y-auto px-3 py-3">
           {msgs.length === 0 && (
             <div className="max-w-[90%] rounded-2xl rounded-bl-sm bg-[#132033] px-3.5 py-2.5 text-[13px] leading-6 text-[#D5E4F5]">
-              Estoy en el canvas de {c0.store}. Abajo tenés las herramientas: golpe, mapa, diff, hero, theme.
+              Estoy en {c0.store}. Preguntame como al socio, o usá los chips de abajo.
             </div>
           )}
           {msgs.map(function (m, i) {
@@ -262,12 +268,19 @@ export default function DigitalBoostOperator(props: {
                 <div className={mine
                   ? "max-w-[80%] rounded-2xl rounded-br-sm bg-[#1E3A5F] px-3.5 py-2.5 text-[13px] leading-6"
                   : "max-w-[88%] rounded-2xl rounded-bl-sm bg-[#132033] px-3.5 py-2.5 text-[13px] leading-6 text-[#D5E4F5]"}>
-                  <div className="mb-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-cyan-300">PULSE</div>
-                  {m.text}
+                  <div className={"mb-1 text-[9px] font-semibold uppercase tracking-[0.16em] " + (mine ? "text-[#7F9CB8] text-right" : "text-cyan-300")}>{mine ? "Vos" : "PULSE"}</div>
+                  <div className="whitespace-pre-wrap">{m.text}</div>
                 </div>
               </div>
             );
           })}
+          {busy && (
+            <div className="flex justify-start">
+              <div className="rounded-2xl rounded-bl-sm bg-[#132033] px-3.5 py-2.5 text-[13px] text-[#AFC0D5]">
+                PULSE está pensando…
+              </div>
+            </div>
+          )}
           {out && out.draft && !applied && (
             <div className="rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-3">
               <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-300">Propuesta · {out.draft.kind}</div>
@@ -318,7 +331,7 @@ export default function DigitalBoostOperator(props: {
             })}
           </div>
           <form className="flex gap-2" onSubmit={function (e) { e.preventDefault(); think(q || "hola"); }}>
-            <input className="h-11 flex-1 rounded-xl border border-white/10 bg-[#0A1020] px-3 text-sm outline-none" placeholder="Escribí como al socio…" value={q} onChange={function (e) { setQ(e.target.value); }} />
+            <input className="h-11 flex-1 rounded-xl border border-white/10 bg-[#0A1020] px-3 text-sm outline-none" placeholder="Preguntale a PULSE…" value={q} onChange={function (e) { setQ(e.target.value); }} />
             <button type="submit" className="h-11 rounded-xl bg-cyan-400 px-4 text-sm font-semibold text-[#070D18]">Enviar</button>
           </form>
         </div>
