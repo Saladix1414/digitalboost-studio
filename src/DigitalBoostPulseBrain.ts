@@ -202,8 +202,13 @@ export async function analyzeSmart(input: PulseInput) {
       decision: {
         ...decision,
         body:
-          `${decision.body}\n\n` +
-          `IA ${selection.model.modelId}: ${aiText}`,
+          aiText +
+          "\n\n— " +
+          selection.model.modelId +
+          " · " +
+          String(decision.action || "") +
+          " · " +
+          String(decision.risk || "L0"),
       },
       engine: "openclaw" as const,
       model: selection.model.modelId,
