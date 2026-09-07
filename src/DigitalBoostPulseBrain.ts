@@ -1,6 +1,5 @@
 
 import { decide, explain, type PulseInput, type PulseDecision } from "./DigitalBoostPulseKB";
-import { getPulseBriefingWithOllama } from "./ollama/pulseAdapter";
 import { buildPulseContext, type PulseContext } from "./DigitalBoostPulseContext";
 import DigitalBoostContextBuilder from "./context/DigitalBoostContextBuilder";
 import DigitalBoostModelRegistry from "./ai/DigitalBoostModelRegistry";
@@ -30,14 +29,6 @@ export async function analyzeSmart(input: PulseInput) {
    */
 
   const decision = decide(input);
-  const builder = isBuilder(input.section);
-
-  if (!builder) {
-    return {
-      decision,
-      engine: "rules" as const,
-    };
-  }
 
   try {
     const contextBuilder = new DigitalBoostContextBuilder();
@@ -74,7 +65,12 @@ export async function analyzeSmart(input: PulseInput) {
 
     if (!status.providerAvailable || !status.models.length) {
       return {
-        decision,
+        decision: {
+          ...decision,
+          body:
+            decision.body +
+            "\n\nIA local no disponible. Arrancá Ollama (11434) y usá npm run dev. Mientras tanto responde el motor de reglas.",
+        },
         engine: "rules" as const,
       };
     }
