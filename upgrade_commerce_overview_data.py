@@ -1,0 +1,663 @@
+from pathlib import Path
+from datetime import datetime
+import shutil
+import subprocess
+import sys
+
+root = Path.cwd()
+target = root / "src" / "CommerceOSOverview.tsx"
+
+if not target.exists():
+    print("❌ No existe src/CommerceOSOverview.tsx")
+    sys.exit(1)
+
+stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+backup = target.with_name(
+    f"CommerceOSOverview.tsx.before_data_{stamp}.bak"
+)
+
+shutil.copy2(target, backup)
+print(f"✓ Backup creado: {backup.name}")
+
+new_code = r'''import {
+  Activity,
+  ArrowDownRight,
+  ArrowUpRight,
+  BarChart3,
+  Boxes,
+  ChevronRight,
+  CircleDollarSign,
+  Clock3,
+  Megaphone,
+  Package,
+  ShoppingCart,
+  Sparkles,
+  TrendingUp,
+  Users,
+  Zap,
+} from "lucide-react";
+
+type CommerceProduct = {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  status: "Activo" | "Borrador";
+};
+
+type CommerceOrder = {
+  id: string;
+  customer: string;
+  total: number;
+  status: string;
+  date: string;
+  items: number;
+};
+
+type CommerceCustomer = {
+  name: string;
+  spent: number;
+};
+
+type CommerceOSOverviewProps = {
+  products: CommerceProduct[];
+  orders: CommerceOrder[];
+  customers: CommerceCustomer[];
+  onNavigate?: (section: string) => void;
+};
+
+function money(value: number) {
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+export default function CommerceOSOverview({
+  products,
+  orders,
+  customers,
+  onNavigate,
+}: CommerceOSOverviewProps) {
+  const navigate = (section: string) => {
+    onNavigate?.(section);
+  };
+
+  const totalSales = orders.reduce(
+    (sum, order) => sum + Number(order.total || 0),
+    0
+  );
+
+  const totalOrders = orders.length;
+  const totalCustomers = customers.length;
+  const activeProducts = products.filter(
+    (product) => product.status === "Activo"
+  ).length;
+
+  const lowStockProducts = products.filter(
+    (product) => product.stock > 0 && product.stock < 10
+  );
+
+  const outOfStockProducts = products.filter(
+    (product) => product.stock <= 0
+  );
+
+  const pendingOrders = orders.filter(
+    (order) =>
+      order.status === "Pagado" ||
+      order.status === "En preparación"
+  );
+
+  const shippedOrders = orders.filter(
+    (order) => order.status === "Enviado"
+  );
+
+  const deliveredOrders = orders.filter(
+    (order) => order.status === "Entregado"
+  );
+
+  const averageOrder =
+    totalOrders > 0 ? totalSales / totalOrders : 0;
+
+  const conversionRate =
+    totalCustomers > 0
+      ? (deliveredOrders.length / totalCustomers) * 100
+      : 0;
+
+  const metrics = [
+    {
+      label: "Ventas",
+      value: money(totalSales),
+      subtitle: `${totalOrders} pedidos registrados`,
+      icon: CircleDollarSign,
+      accent:
+        "bg-emerald-400/10 text-emerald-300 border border-emerald-400/10",
+    },
+    {
+      label: "Pedidos",
+      value: String(totalOrders),
+      subtitle: `${pendingOrders.length} requieren atención`,
+      icon: ShoppingCart,
+      accent:
+        "bg-cyan-400/10 text-cyan-300 border border-cyan-400/10",
+    },
+    {
+      label: "Clientes",
+      value: String(totalCustomers),
+      subtitle: "clientes registrados",
+      icon: Users,
+      accent:
+        "bg-violet-400/10 text-violet-300 border border-violet-400/10",
+    },
+    {
+      label: "Conversión",
+      value: `${conversionRate.toFixed(2)}%`,
+      subtitle: `${deliveredOrders.length} pedidos entregados`,
+      icon: TrendingUp,
+      accent:
+        "bg-amber-400/10 text-amber-300 border border-amber-400/10",
+    },
+  ];
+
+  const quickActions = [
+    {
+      title: "Agregar producto",
+      description: "Incorporá un nuevo producto a tu tienda.",
+      icon: Package,
+      section: "products",
+    },
+    {
+      title: "Crear campaña",
+      description: "Lanzá una campaña para aumentar tus ventas.",
+      icon: Megaphone,
+      section: "campaigns",
+    },
+    {
+      title: "Ver pedidos",
+      description: "Revisá y gestioná tus pedidos.",
+      icon: ShoppingCart,
+      section: "orders",
+    },
+    {
+      title: "Analizar negocio",
+      description: "Consultá el rendimiento de tu comercio.",
+      icon: BarChart3,
+      section: "analytics",
+    },
+  ];
+
+  const activity = orders
+    .slice(-4)
+    .reverse()
+    .map((order) => ({
+      title: `Pedido ${order.id}`,
+      description: `${order.customer} · ${order.status}`,
+      value: money(Number(order.total || 0)),
+    }));
+
+  return (
+    <div className="space-y-6">
+
+      {/* HERO */}
+      <section className="relative overflow-hidden rounded-2xl border border-cyan-400/15 bg-gradient-to-br from-[#07101e] via-[#071326] to-[#090817] p-6">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl" />
+
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-cyan-300">
+              <Sparkles size={14} />
+              DIGITALBOOST COMMERCE OS
+            </div>
+
+            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+              Centro de control
+            </h1>
+
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+              Tu operación comercial, métricas y oportunidades
+              importantes reunidas en un solo lugar.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 rounded-xl border border-emerald-400/20 bg-emerald-400/5 px-4 py-3">
+            <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400" />
+            <div>
+              <div className="text-xs font-semibold text-emerald-300">
+                Commerce OS activo
+              </div>
+              <div className="text-[11px] text-slate-500">
+                Datos sincronizados con tu tienda
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* KPI */}
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {metrics.map((metric) => {
+          const Icon = metric.icon;
+
+          return (
+            <div
+              key={metric.label}
+              className="group rounded-xl border border-white/10 bg-[#070b14] p-5 transition hover:-translate-y-0.5 hover:border-cyan-400/25"
+            >
+              <div className="flex items-start justify-between">
+                <div className={`rounded-lg p-2.5 ${metric.accent}`}>
+                  <Icon size={18} />
+                </div>
+
+                <ArrowUpRight
+                  size={15}
+                  className="text-slate-600"
+                />
+              </div>
+
+              <div className="mt-5 text-2xl font-bold text-white">
+                {metric.value}
+              </div>
+
+              <div className="mt-1 text-xs font-medium text-slate-300">
+                {metric.label}
+              </div>
+
+              <div className="mt-1 text-[11px] text-slate-500">
+                {metric.subtitle}
+              </div>
+            </div>
+          );
+        })}
+      </section>
+
+      {/* QUICK ACTIONS */}
+      <section>
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-white">
+              Acciones rápidas
+            </h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Accesos directos a las tareas principales.
+            </p>
+          </div>
+
+          <Zap size={17} className="text-violet-300" />
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {quickActions.map((action) => {
+            const Icon = action.icon;
+
+            return (
+              <button
+                key={action.title}
+                type="button"
+                onClick={() => navigate(action.section)}
+                className="group rounded-xl border border-white/10 bg-[#070b14] p-4 text-left transition hover:-translate-y-0.5 hover:border-cyan-400/25 hover:bg-[#09101d]"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="rounded-lg border border-violet-400/15 bg-violet-400/5 p-2 text-violet-300">
+                    <Icon size={17} />
+                  </div>
+
+                  <ChevronRight
+                    size={16}
+                    className="text-slate-600 transition group-hover:translate-x-1 group-hover:text-cyan-300"
+                  />
+                </div>
+
+                <div className="mt-4 text-sm font-semibold text-white">
+                  {action.title}
+                </div>
+
+                <div className="mt-1 text-xs leading-5 text-slate-500">
+                  {action.description}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* BUSINESS INTELLIGENCE */}
+      <section className="grid gap-4 xl:grid-cols-[1.35fr_.65fr]">
+
+        <div className="rounded-xl border border-white/10 bg-[#070b14] p-5">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-white">
+                Rendimiento comercial
+              </h2>
+
+              <p className="mt-1 text-xs text-slate-500">
+                Indicadores calculados sobre la operación actual.
+              </p>
+            </div>
+
+            <Activity size={18} className="text-cyan-300" />
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3">
+
+            <div className="rounded-lg border border-white/5 bg-black/20 p-4">
+              <div className="text-[11px] text-slate-500">
+                Ticket promedio
+              </div>
+
+              <div className="mt-2 text-lg font-semibold text-white">
+                {money(averageOrder)}
+              </div>
+
+              <div className="mt-1 text-[11px] text-cyan-300">
+                por pedido
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-white/5 bg-black/20 p-4">
+              <div className="text-[11px] text-slate-500">
+                Productos activos
+              </div>
+
+              <div className="mt-2 text-lg font-semibold text-white">
+                {activeProducts}
+              </div>
+
+              <div className="mt-1 text-[11px] text-violet-300">
+                catálogo publicado
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-white/5 bg-black/20 p-4">
+              <div className="text-[11px] text-slate-500">
+                Pedidos enviados
+              </div>
+
+              <div className="mt-2 text-lg font-semibold text-white">
+                {shippedOrders.length}
+              </div>
+
+              <div className="mt-1 text-[11px] text-emerald-400">
+                en logística
+              </div>
+            </div>
+
+          </div>
+
+          <div className="mt-5 rounded-lg border border-white/5 bg-gradient-to-b from-cyan-400/[0.04] to-transparent p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xs font-semibold text-white">
+                  Actividad de pedidos
+                </div>
+                <div className="mt-1 text-[11px] text-slate-500">
+                  Últimos movimientos disponibles.
+                </div>
+              </div>
+
+              <Clock3 size={16} className="text-slate-500" />
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {activity.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-white/10 p-5 text-center text-xs text-slate-500">
+                  Todavía no hay actividad de pedidos.
+                </div>
+              ) : (
+                activity.map((item) => (
+                  <div
+                    key={`${item.title}-${item.value}`}
+                    className="flex items-center justify-between gap-4 rounded-lg border border-white/5 bg-black/20 px-4 py-3"
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate text-xs font-medium text-white">
+                        {item.title}
+                      </div>
+
+                      <div className="mt-1 truncate text-[11px] text-slate-500">
+                        {item.description}
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 text-xs font-semibold text-cyan-300">
+                      {item.value}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* OPERATIONAL STATUS */}
+        <div className="rounded-xl border border-white/10 bg-[#070b14] p-5">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-white">
+                Estado operativo
+              </h2>
+
+              <p className="mt-1 text-xs text-slate-500">
+                Señales que requieren atención.
+              </p>
+            </div>
+
+            <Boxes size={18} className="text-violet-300" />
+          </div>
+
+          <div className="space-y-3">
+
+            <button
+              type="button"
+              onClick={() => navigate("inventory")}
+              className="group flex w-full items-center justify-between rounded-lg border border-white/5 bg-black/20 p-4 text-left transition hover:border-amber-400/20"
+            >
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-amber-400/10 p-2 text-amber-300">
+                  <Boxes size={16} />
+                </div>
+
+                <div>
+                  <div className="text-xs font-semibold text-white">
+                    Stock crítico
+                  </div>
+                  <div className="mt-1 text-[11px] text-slate-500">
+                    {lowStockProducts.length} productos con stock bajo
+                  </div>
+                </div>
+              </div>
+
+              <ChevronRight
+                size={15}
+                className="text-slate-600 transition group-hover:translate-x-1"
+              />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("orders")}
+              className="group flex w-full items-center justify-between rounded-lg border border-white/5 bg-black/20 p-4 text-left transition hover:border-cyan-400/20"
+            >
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-cyan-400/10 p-2 text-cyan-300">
+                  <ShoppingCart size={16} />
+                </div>
+
+                <div>
+                  <div className="text-xs font-semibold text-white">
+                    Pedidos pendientes
+                  </div>
+                  <div className="mt-1 text-[11px] text-slate-500">
+                    {pendingOrders.length} pedidos por gestionar
+                  </div>
+                </div>
+              </div>
+
+              <ChevronRight
+                size={15}
+                className="text-slate-600 transition group-hover:translate-x-1"
+              />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("inventory")}
+              className="group flex w-full items-center justify-between rounded-lg border border-white/5 bg-black/20 p-4 text-left transition hover:border-rose-400/20"
+            >
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-rose-400/10 p-2 text-rose-300">
+                  <Package size={16} />
+                </div>
+
+                <div>
+                  <div className="text-xs font-semibold text-white">
+                    Sin stock
+                  </div>
+                  <div className="mt-1 text-[11px] text-slate-500">
+                    {outOfStockProducts.length} productos agotados
+                  </div>
+                </div>
+              </div>
+
+              <ChevronRight
+                size={15}
+                className="text-slate-600 transition group-hover:translate-x-1"
+              />
+            </button>
+
+          </div>
+
+          <div className="mt-5 rounded-lg border border-emerald-400/10 bg-emerald-400/[0.03] p-4">
+            <div className="flex items-center gap-2">
+              <ArrowUpRight
+                size={15}
+                className="text-emerald-300"
+              />
+
+              <span className="text-xs font-semibold text-emerald-300">
+                Sistema operativo
+              </span>
+            </div>
+
+            <p className="mt-2 text-[11px] leading-5 text-slate-500">
+              Commerce OS está utilizando los datos actuales de tu tienda.
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+      {/* FOOTER INSIGHT */}
+      <section className="rounded-xl border border-violet-400/10 bg-gradient-to-r from-violet-400/[0.04] to-cyan-400/[0.03] p-5">
+        <div className="flex items-start gap-3">
+          <div className="rounded-lg bg-violet-400/10 p-2 text-violet-300">
+            <Sparkles size={16} />
+          </div>
+
+          <div>
+            <div className="text-xs font-semibold text-white">
+              Commerce Intelligence
+            </div>
+
+            <p className="mt-1 text-[11px] leading-5 text-slate-500">
+              Esta capa será la base para incorporar recomendaciones,
+              automatizaciones y señales inteligentes sobre tu negocio.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  );
+}
+'''
+
+target.write_text(new_code, encoding="utf-8")
+
+print("✓ CommerceOSOverview actualizado.")
+print("✓ Datos demo eliminados del componente.")
+print("✓ Nuevo componente preparado para datos reales.")
+print()
+
+# ------------------------------------------------------------
+# Encontrar la invocación actual y agregar props reales
+# ------------------------------------------------------------
+
+workspace = root / "src" / "StoreBuilderWorkspace.tsx"
+text = workspace.read_text(encoding="utf-8")
+
+old = '''<CommerceOSOverview
+            onNavigate={(target) => setSection(target as StoreSection)}
+          />'''
+
+new = '''<CommerceOSOverview
+            products={products}
+            orders={orders}
+            customers={customers}
+            onNavigate={(target) => setSection(target as StoreSection)}
+          />'''
+
+if old not in text:
+    print("⚠️ No encontré la invocación actual de CommerceOSOverview.")
+    print("Restaurando CommerceOSOverview...")
+    shutil.copy2(backup, target)
+    sys.exit(1)
+
+if text.count(old) != 1:
+    print("⚠️ La invocación de CommerceOSOverview no es única.")
+    print("No se modificará StoreBuilderWorkspace.")
+    shutil.copy2(backup, target)
+    sys.exit(1)
+
+text = text.replace(old, new, 1)
+workspace.write_text(text, encoding="utf-8")
+
+print("✓ products conectado.")
+print("✓ orders conectado.")
+print("✓ customers conectado.")
+print()
+
+print("=" * 64)
+print("BUILD DE VERIFICACIÓN")
+print("=" * 64)
+
+result = subprocess.run(
+    ["npm", "run", "build"],
+    cwd=root,
+    text=True
+)
+
+if result.returncode != 0:
+    print()
+    print("❌ BUILD FALLÓ.")
+    print("Restaurando CommerceOSOverview...")
+    shutil.copy2(backup, target)
+
+    # Restaurar workspace desde el último backup de conexión disponible
+    backups = sorted(
+        workspace.parent.glob(
+            "StoreBuilderWorkspace.tsx.before_overview_connect_*.bak"
+        )
+    )
+
+    if backups:
+        latest = backups[-1]
+        shutil.copy2(latest, workspace)
+        print(f"✓ Workspace restaurado desde {latest.name}")
+
+    sys.exit(result.returncode)
+
+print()
+print("=" * 64)
+print("✅ COMMERCE OS DATA LAYER CONECTADA")
+print("=" * 64)
+print()
+print("El Overview ahora consume:")
+print("  • products")
+print("  • orders")
+print("  • customers")
+print()
+print("Las métricas demo fueron eliminadas.")
+print(f"Backup: {backup.name}")

@@ -1,0 +1,741 @@
+DIGITALBOOST STUDIO — CANONICAL CLEANUP
+==============================================================================
+Fecha: 2026-09-04T01:50:04.454458
+Proyecto: /root/digitalboost-studio
+Backup completo: /root/digitalboost_pre_canonical_cleanup_20260904_005703
+
+ARCHIVOS ARCHIVADOS
+------------------------------------------------------------------------------
+- DIGITALBOOST_HANDOFF.txt
+  Motivo: documento de handoff/inventario histórico; sustituido por documentación canónica
+- src/StoreBuilderWorkspace_backup_hoy.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/App_12_LINEAS_HOY_BACKUP.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/CommerceOSOverview_151_LINEAS_BACKUP_1804.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/CommerceOSOverview.before_visual_rebuild_20260830_063259.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/CommerceOSOverview.before_visual_rebuild_20260830_063538.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260830_051332.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260830_055111.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260830_055216.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260830_060318.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260830_062849.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260830_063130.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260830_063418.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260830_063648.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260830_082339.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260830_083503.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260830_084335.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260830_100124.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260830_152643.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostPulseBrain.before_visual_rebuild_20260830_063923.ts
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostPulseBrain.before_visual_rebuild_20260830_082339.ts
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostPulseBrain.before_visual_rebuild_20260830_082925.ts
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostPulseBrain.before_visual_rebuild_20260830_083503.ts
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostPulseKB.before_visual_rebuild_20260830_100124.ts
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.tsx.before_hook_fix_20260826_005807.bak
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.tsx.before_exact_fix_20260826_025614.bak
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.tsx.before_real_hook_fix_20260826_030551.bak
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.tsx.before_environment_20260826_141805.bak
+  Motivo: backup/versión histórica separada de producción
+- src/VisualBuilderShell.before_editor_core_20260826_144734.bak
+  Motivo: backup/versión histórica separada de producción
+- src/VisualBuilderShell.tsx.before_shell_v2_20260826_145257.bak
+  Motivo: backup/versión histórica separada de producción
+- src/VisualBuilderShell.before_editor_core_20260826_162614.bak
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostPulseBrain.before_visual_rebuild_20260830_084122.ts
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostPulseKB.before_visual_rebuild_20260830_152643.ts
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.tsx.before_precise_fix_20260826_025327.bak
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.tsx.before_exact2_20260826_025819.bak
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.tsx.before_line_fix_20260826_025923.bak
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.tsx.before_final_hook_fix_20260826_030029.bak
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.tsx.before_overview_20260826_031413.bak
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.tsx.before_overview_connect_20260826_031755.bak
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.tsx.before_environment_20260826_140450.bak
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.tsx.before_website_builder_20260826_152000.bak
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.tsx.before_website_builder_v2_20260826_154246.bak
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostCommandCenter.before_visual_rebuild_20260829_211055.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostStoreStudio.before_visual_rebuild_20260829_211540.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostAutomations.before_visual_rebuild_20260829_214510.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostConsole.before_visual_rebuild_20260829_214510.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_environment_shell_20260826_142133.bak
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostCommandCenter.before_visual_rebuild_20260829_232427.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostCommandCenter.before_visual_rebuild_20260829_232517.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostStoreStudio.before_visual_rebuild_20260829_233959.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/CommerceOSOverview.before_visual_rebuild_20260830_060517.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostPulseCard.before_visual_rebuild_20260830_152643.ts
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostStoreCanvas.before_visual_rebuild_20260829_211540.ts
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260829_214510.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostHealth.before_visual_rebuild_20260829_214510.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostStoreStudio.before_visual_rebuild_20260829_233005.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostStoreStudio.before_visual_rebuild_20260829_233511.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostStoreStudio.before_visual_rebuild_20260829_234842.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_214510.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostCommandCenter.before_visual_rebuild_20260830_001241.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostOperator.before_visual_rebuild_20260830_055033.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_220248.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_220534.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_231959.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/CommerceOSOverview.before_visual_rebuild_20260830_060900.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260830_001134.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260830_055111.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostStoreStudio.before_visual_rebuild_20260829_212155.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostStoreStudio.before_visual_rebuild_20260829_212517.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostCommandCenter.before_visual_rebuild_20260829_212949.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostIntegrations.before_visual_rebuild_20260829_214510.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostNotifications.before_visual_rebuild_20260829_214510.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostThemePanel.before_visual_rebuild_20260829_214510.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostHistoryPanel.before_visual_rebuild_20260829_214510.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_211055.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostCommandCenter.before_visual_rebuild_20260829_220534.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_environment_shell_20260826_142000.bak
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostCommandCenter.before_visual_rebuild_20260829_214510.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostShortcuts.before_visual_rebuild_20260829_214510.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostStoreStudio.before_visual_rebuild_20260829_233325.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostStoreCanvas.before_visual_rebuild_20260829_234753.ts
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostStoreStudio.before_visual_rebuild_20260829_234753.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_232517.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_213827.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_214240.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_232134.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260830_000525.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_211540.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_212949.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_220024.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_231441.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_235911.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostPulseBrain.before_visual_rebuild_20260830_152643.ts
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostPulseLog.before_visual_rebuild_20260830_152643.ts
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_builder_20260826_144246.bak
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_210619.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_213300.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_214908.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_221620.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260830_000752.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260830_063821.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostStoreStudio.before_visual_rebuild_20260829_232735.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_214020.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_221308.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_231115.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_232427.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260829_234939.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260830_060318.tsx
+  Motivo: backup/versión histórica separada de producción
+- src/DigitalBoostPulseConst.before_visual_rebuild_20260830_152643.ts
+  Motivo: backup/versión histórica separada de producción
+- src/StoreBuilderWorkspace.before_visual_rebuild_20260830_061147.tsx
+  Motivo: backup/versión histórica separada de producción
+- fix_volver.py
+  Motivo: script histórico de instalación/build/patch
+- fix_v3.py
+  Motivo: script histórico de instalación/build/patch
+- fix_commerce_hooks.py
+  Motivo: script histórico de instalación/build/patch
+- fix_commerce_hooks_safe.py
+  Motivo: script histórico de instalación/build/patch
+- fix_commerce_hooks_precise.py
+  Motivo: script histórico de instalación/build/patch
+- fix_commerce_hooks_exact.py
+  Motivo: script histórico de instalación/build/patch
+- fix_commerce_hooks_exact2.py
+  Motivo: script histórico de instalación/build/patch
+- fix_commerce_hooks_lines.py
+  Motivo: script histórico de instalación/build/patch
+- fix_commerce_hooks_final.py
+  Motivo: script histórico de instalación/build/patch
+- fix_commerce_hooks_real.py
+  Motivo: script histórico de instalación/build/patch
+- build_commerce_os_overview.py
+  Motivo: script histórico de instalación/build/patch
+- build_store_builder_environment.py
+  Motivo: script histórico de instalación/build/patch
+- build_visual_builder_shell.py
+  Motivo: script histórico de instalación/build/patch
+- build_visual_editor_core.py
+  Motivo: script histórico de instalación/build/patch
+- build_store_builder_shell_v2.py
+  Motivo: script histórico de instalación/build/patch
+- build_website_builder_v1.py
+  Motivo: script histórico de instalación/build/patch
+- build_website_builder_v2.py
+  Motivo: script histórico de instalación/build/patch
+- build_commerce_os_jewel.py
+  Motivo: script histórico de instalación/build/patch
+- build_visual_editor_vibrant.py
+  Motivo: script histórico de instalación/build/patch
+- build_visual_editor_art_direction.py
+  Motivo: script histórico de instalación/build/patch
+- build_store_builder_studio_shell.py
+  Motivo: script histórico de instalación/build/patch
+- build_store_builder_studio_connection.py
+  Motivo: script histórico de instalación/build/patch
+- build_store_builder_studio_v2.py
+  Motivo: script histórico de instalación/build/patch
+- build_commerce_os_vibrant_dragon_core.py
+  Motivo: script histórico de instalación/build/patch
+- build_commerce_os_vibrant_core.py
+  Motivo: script histórico de instalación/build/patch
+- build_commerce_os_vibrant_core_v2.py
+  Motivo: script histórico de instalación/build/patch
+- build_commerce_os_vibrant_core_safe.py
+  Motivo: script histórico de instalación/build/patch
+- build_commerce_os_visual_refinement.py
+  Motivo: script histórico de instalación/build/patch
+- build_commerce_os_vibrant_visual_v4.py
+  Motivo: script histórico de instalación/build/patch
+- build_commerce_os_vibrant_v5.py
+  Motivo: script histórico de instalación/build/patch
+- build_store_builder_vibrant_v1.py
+  Motivo: script histórico de instalación/build/patch
+- build_store_builder_vibrant_v3.py
+  Motivo: script histórico de instalación/build/patch
+- fix_store_builder_background.py
+  Motivo: script histórico de instalación/build/patch
+- build_commerce_store_jewel_v2.py
+  Motivo: script histórico de instalación/build/patch
+- build_commerce_store_visual_v2.py
+  Motivo: script histórico de instalación/build/patch
+- fix_store_builder_vibrant_scope.py
+  Motivo: script histórico de instalación/build/patch
+- fix_scope_final.py
+  Motivo: script histórico de instalación/build/patch
+- build_store_builder_visual_v2_final.py
+  Motivo: script histórico de instalación/build/patch
+- build_commerce_os_digitalboost_palette.py
+  Motivo: script histórico de instalación/build/patch
+- fix_commerce_os_css.py
+  Motivo: script histórico de instalación/build/patch
+
+ARCHIVOS CONSERVADOS POR SEGURIDAD
+------------------------------------------------------------------------------
+- src/DigitalBoostMainPage.tsx.backup-cta
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.tsx.backup-posiciones
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.tsx.backup-final
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.tsx.backup-logo-cta
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.tsx.backup-20260821-032321
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.tsx.backup
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/App.tsx.backup-20260821-041404
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/App.tsx.backup-before-landing-fix
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.backup.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/App.backup.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.backup-20260822-050846.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.backup-20260822-051032.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.backup-20260822-051226.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.backup-footer-20260822-051320.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.backup-login-20260822-051413.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.backup-login-20260822-051613.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/App.tsx.backup-store-20260822-130326
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.products-backup-20260822-172917.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.bak_UNICA_155K
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/main.tsx.bak
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.bak
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/App.backup-before-screen-persistence-20260822-224422.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/App.backup-before-screen-persistence-20260822-224618.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/App.backup-before-tool-persistence-20260822-225057.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.bak_metrics
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-20260822-173544.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-AI-20260822-191725.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-AI-FINAL-20260822-193246.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-ai-20260822-184038.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-ai-20260822-193529.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-ai-20260822-193658.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-ai-fix-20260822-184725.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-advance-order-20260823-014013.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-ai-copy-20260823-011330.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-ai-real-data-20260822-230417.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-campaign-delete-ui-20260823-022021.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-campaign-toggle-ui-20260823-021333.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-commerce-os-20260825-040417.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-contextual-order-ai-20260823-014426.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-customer-profile-20260822-234004.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-customers-20260822-233016.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.backup-20260825-033116.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-delete-modal-function-20260823-022844.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-order-ai-20260823-001515.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_commerce_overview_real_20260826_125305.bak
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/CommerceOSOverview.tsx.before_data_20260826_135341.bak
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-delete-modal-state-20260823-022835.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-inventory-ai-20260823-015937.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-restock-20260822-231326.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/CommerceOSOverview.tsx.before_jewel_20260826_160301.bak
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/WebsiteBuilderV1.before_art_direction_20260826_164323.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-manual-campaign-20260823-025427.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-campaign-20260822-213325.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/CommerceOSOverview.before_vibrant_core_v2_20260826_193207.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/CommerceOSOverview.before_vibrant_safe_20260826_194924.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/commerce-os-vibrant-global.before_vibrant_safe_20260826_194924.css
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/commerce-os-vibrant-global.before_visual_refinement_20260826_195500.css
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/CommerceOSOverview.before_vibrant_v5_20260826_202501.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-manual-campaign-20260823-025828.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-order-advance-button-20260823-014126.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup_20260828_021929.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-20260822-145216.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-ai-final-20260822-185633.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-ai-fix-20260822-190936.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-ai-fix-20260822-191052.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-ai-operator-20260822-190745.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-ai-copy-20260823-011003.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-ai-format-20260822-231638.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-ai-format-20260823-000225.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-ai-polish-20260823-004835.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-ai-sales-20260822-232154.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-campaign-delete-20260823-021911.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-campaign-metrics-20260823-023948.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-campaign-metrics-ui-20260823-024234.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-campaign-toggle-20260823-021130.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-customer-ai-20260822-235113.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-customer-ai-button-20260822-235734.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-customer-segments-20260822-233513.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-delete-modal-ui-20260823-022949.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.hooks-backup
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.backup-before-nexus-20260825-035530.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/DigitalBoostMainPage.backup-current-before-restore.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/App.tsx.before_commerce_boot_20260826_002912.bak
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/App.tsx.before_commerce_boot_20260826_004928.bak
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/WebsiteBuilderV1.before_vibrant_ui_20260826_163210.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-restock-20260822-231103.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderStudioShell.before_v2_20260826_184918.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderStudioShell.before_v2_20260826_185033.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/store-builder-studio-v2.before_20260826_185033.css
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/CommerceOSOverview.before_vibrant_core_20260826_192644.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/CommerceOSOverview.before_visual_refinement_20260826_195500.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/CommerceOSOverview.before_vibrant_v4_20260826_200630.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-commerce-os-20260825-034734.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-campaign-20260822-213801.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/commerce-os-vibrant-global.before_light_bg_20260827_131927.css
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-order-newline-final-20260823-012258.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-campaign-ui-20260822-215200.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-campaigns-state-20260822-215716.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/WebsiteBuilderV2.tsx.before_light_v2_20260827_160950
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_structural_light_20260827_161559
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderStudioShell.tsx.before_final_20260827_163622
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_repair_final_20260827_163829
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/store-builder-final-theme.css.before_repair_final_20260827_163829
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_force_final_20260827_171855
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderDirectFinal.tsx.before_force_final_20260827_171855
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_force_final_20260827_172107
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderDirectFinal.tsx.before_force_final_20260827_172107
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderStudioShell.tsx.before_white_restore_20260827_173015
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_truth_fix_20260827_174630
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/store-builder-direct-final.css.before_final_redesign_20260827_175704
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-order-state-20260823-013814.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/store-builder-vibrant-global.before_visual_v2_final_20260828_022457.css
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-operator-actions-20260822-194903.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_light_fix_20260826_230843.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_light_surface_20260826_223223.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_scope_fix_20260828_021725.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_store_name_20260826.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_studio_connection_20260826_175804.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_v3_20260827_150520.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_v4_20260827_151043.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_v4_20260827_151413.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-dashboard-20260825-030409.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/store-builder-studio-shell.before_light_bg_20260827_131927.css
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/store-builder-studio-v2.before_light_bg_20260827_131927.css
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-order-ai-panel-20260823-002941.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/WebsiteBuilderV2.before_light_surface_20260827_155047.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_light_final_20260827_160809
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/WebsiteBuilderV2.tsx.before_light_final_20260827_160809
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderStudioShell.tsx.before_light_v2_20260827_160950
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/WebsiteBuilderV2.tsx.before_structural_light_20260827_161221
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/website-builder-light-final.css.before_structural_light_20260827_161221
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderStudioShell.tsx.before_store_builder_final_20260827_162116
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/WebsiteBuilderV2.tsx.before_store_builder_final_20260827_162116
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_complete_store_builder_20260827_162502
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderStudioShell.tsx.before_complete_store_builder_20260827_162502
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/WebsiteBuilderV2.tsx.before_complete_store_builder_20260827_162502
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_final_20260827_163622
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_real_final_20260827_164045
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/WebsiteBuilderV2.tsx.before_real_final_20260827_164045
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_force_final_20260827_171828
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderDirectFinal.tsx.before_STORE_BUILDER_FINAL_20260827_181712
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/store-builder-direct-final.css.before_STORE_BUILDER_FINAL_20260827_181712
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-products-20260822-173200.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/CommerceOSOverview.tsx.backup-commerce-css-20260828_031139
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_light_store_surface_20260826.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_studio_shell_20260826_175124.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_v3_20260827_150555.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/store-builder-vibrant-global.before_light_bg_20260827_131927.css
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderStudioShell.tsx.before_light_final_20260827_160809
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/WebsiteBuilderV2.tsx.before_structural_light_20260827_161559
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_store_builder_final_20260827_162116
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/website-builder-light-final.css.before_store_builder_final_20260827_162116
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_authoritative_20260827_163012
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderStudioShell.tsx.before_authoritative_20260827_163012
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/WebsiteBuilderV2.tsx.before_authoritative_20260827_163012
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/WebsiteBuilderV2.tsx.before_final_20260827_163622
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderStudioShell.tsx.before_real_final_20260827_164045
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/store-builder-direct-final.css.before_force_final_20260827_171855
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_white_restore_20260827_173015
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/WebsiteBuilderV2.tsx.before_white_restore_20260827_173015
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderDirectFinal.tsx.before_design_upgrade_20260827_174941
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_final_redesign_20260827_175704
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderDirectFinal.tsx.before_final_redesign_20260827_175704
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_STORE_BUILDER_FINAL_20260827_181218
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderDirectFinal.tsx.before_STORE_BUILDER_FINAL_20260827_181218
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/store-builder-direct-final.css.before_STORE_BUILDER_FINAL_20260827_181218
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-orders-20260822-173258.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/CommerceOSOverview.before_visual_v2_20260828_021117.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderEnvironment.before_visual_v2_final_20260828_022457.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/CommerceOSOverview.before_digitalboost_palette_20260828_022952.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-order-ai-action-20260823-003525.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-persistence-20260822-223932.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-orders2-20260822-173450.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_jewel_v2_20260828_015730.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-section-persistence-20260822-225328.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_light_store_surface_20260826-225649.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/App.backup-before-screen-persistence-20260822-224422.before_store_builder_vibrant_v1_20260826_203306.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/CommerceOSOverview.before_store_builder_name_20260826.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-low-stock-20260822-195507.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_structural_light_20260827_161221
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderStudioShell.tsx.before_structural_light_20260827_161221
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderStudioShell.tsx.before_structural_light_20260827_161559
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/website-builder-light-final.css.before_structural_light_20260827_161559
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_workspace_root_light_20260827_161739
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/website-builder-light-final.css.before_complete_store_builder_20260827_162502
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_visual_final_20260827_162827
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/store-builder-studio-v2.css.before_authoritative_20260827_163012
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderStudioShell.tsx.before_repair_final_20260827_163829
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/WebsiteBuilderV2.tsx.before_repair_final_20260827_163829
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_direct_studio_20260827_171456
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/store-builder-direct-final.css.before_force_final_20260827_172107
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_design_upgrade_20260827_174941
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/store-builder-direct-final.css.before_design_upgrade_20260827_174941
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.before_STORE_BUILDER_FINAL_20260827_181712
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/CommerceOSOverview.before_jewel_v2_20260828_015730.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderEnvironment.before_scope_fix_20260828_021725.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderEnvironment.backup_20260828_021929.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-menu-20260825-025312.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-order-ai-modal-20260823-003743.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-seo-20260825-032614.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/CommerceOSBoot.tsx.bak
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-order-ai-panel-20260823-003236.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-order-profile-20260823-000918.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.backup-before-order-tracking-20260823-013356.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_restore_light_fix.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.backup-20260822-174004.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.bak_original
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.backup-20260823-141812
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_vibrant_core_20260826_191701.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_visual_v2_20260828_021117.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.before_visual_v2_final_20260828_022457.tsx
+  Motivo: parece histórico pero todavía tiene referencias activas
+- src/StoreBuilderWorkspace.tsx.backup-20260823-142028
+  Motivo: parece histórico pero todavía tiene referencias activas
+
+ERRORES
+------------------------------------------------------------------------------
+(ninguno)

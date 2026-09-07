@@ -1,0 +1,219 @@
+import React from "react";
+import {
+  ArrowRight, ChevronDown, Moon, Check, Code2, ShoppingCart,
+  LayoutTemplate, Hexagon, Terminal, Sparkles, ShieldCheck,
+  Heart, Users, FolderKanban, Gauge, Github, Twitter, Instagram,
+  Youtube, MessageCircle
+} from "lucide-react";
+
+const neon = "bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400";
+
+function DragonMark({ small = false }: { small?: boolean }) {
+  return (
+    <div className={`relative ${small ? "h-11 w-11" : "h-64 w-64 md:h-[330px] md:w-[330px]"}`}>
+      <div className="absolute inset-0 rounded-full bg-cyan-500/10 blur-3xl" />
+      <div className="absolute inset-[8%] rounded-full border border-cyan-400/30 shadow-[0_0_70px_rgba(0,190,255,.22),inset_0_0_50px_rgba(100,60,255,.12)]" />
+      <svg viewBox="0 0 300 300" className="relative h-full w-full drop-shadow-[0_0_20px_rgba(0,190,255,.7)]">
+        <defs>
+          <linearGradient id="dbDragon" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#18e8ff"/>
+            <stop offset=".48" stopColor="#176dff"/>
+            <stop offset="1" stopColor="#a500ff"/>
+          </linearGradient>
+        </defs>
+        <circle cx="150" cy="150" r="120" fill="none" stroke="url(#dbDragon)" strokeWidth="2" opacity=".35"/>
+        <path d="M65 188c35 27 74 39 111 17 35-20 55-57 44-92-7-24-28-41-54-46 19 13 27 30 22 47-7 23-32 32-50 22 4-16 2-29-8-39-14-14-34-15-51-3 17-2 30 7 35 19 6 14 0 28-12 37-13 10-27 13-42 8 7 13 7 22 5 30z" fill="url(#dbDragon)" opacity=".95"/>
+        <path d="M139 88c-2-20 5-36 22-50l8 25 25-18-7 31 27-3-25 20 20 10-35 7z" fill="url(#dbDragon)"/>
+        <path d="M101 194c-18 14-30 30-38 48 25-8 48-19 68-35M192 197c17 8 34 21 48 39-25-2-48-9-68-23" fill="none" stroke="url(#dbDragon)" strokeWidth="8" strokeLinecap="round"/>
+        <circle cx="178" cy="108" r="4" fill="#fff"/>
+      </svg>
+    </div>
+  );
+}
+
+const stats = [
+  ["15K+", "Usuarios activos", Users],
+  ["2.5K+", "Proyectos creados", FolderKanban],
+  ["850+", "Tiendas online", ShoppingCart],
+  ["1.2K+", "NFTs generados", Hexagon],
+  ["99.9%", "Uptime garantizado", Gauge],
+];
+
+const tools = [
+  [Code2, "Desarrollo Web con IA", "Crea sitios web completos con inteligencia artificial."],
+  [ShoppingCart, "Tiendas Virtuales", "Crea tu tienda online profesional al estilo Shopify."],
+  [LayoutTemplate, "Landing Pages", "Diseña landing pages que convierten con la IA."],
+  [Hexagon, "NFTs & Marketplace", "Crea, vende y gestiona tus NFTs con facilidad."],
+  [Terminal, "Herramientas Pro", "Herramientas avanzadas para desarrolladores."],
+];
+
+export default function DigitalBoostMainPage() {
+  const go = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+
+  return (
+    <main className="min-h-screen overflow-hidden bg-[#02050d] text-white selection:bg-fuchsia-500/30">
+      <header className="sticky top-0 z-50 border-b border-white/[.07] bg-[#02050d]/90 backdrop-blur-xl">
+
+
+        <div className="mx-auto flex h-[72px] max-w-[1200px] items-center justify-between px-5">
+          <button onClick={() => go("top")} className="flex items-center gap-2">
+            <DragonMark small />
+            <span className="text-xl font-black tracking-tight">
+              DIGITAL<span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">BOOST</span>
+            </span>
+          </button>
+          <nav className="hidden items-center gap-7 text-sm lg:flex">
+            <button onClick={() => go("top")} className="text-cyan-300">Inicio</button>
+            <button onClick={() => go("tools")} className="flex items-center gap-1">Herramientas <ChevronDown size={14}/></button>
+            <button onClick={() => go("pricing")}>Precios</button>
+            <button onClick={() => go("resources")} className="flex items-center gap-1">Recursos <ChevronDown size={14}/></button>
+            <button onClick={() => go("resources")}>Docs</button>
+            <button onClick={() => go("footer")} className="flex items-center gap-1">Empresa <ChevronDown size={14}/></button>
+          </nav>
+          <div className="flex items-center gap-3">
+            <button className="hidden p-2 text-slate-300 sm:block"><Moon size={17}/></button>
+            <button className="hidden rounded-lg border border-indigo-400/40 px-4 py-2.5 text-sm sm:block">Iniciar sesión</button>
+            <button onClick={() => go("cta")} className={`rounded-lg px-5 py-2.5 text-sm font-bold shadow-[0_0_25px_rgba(90,70,255,.35)] ${neon}`}>Comenzar ahora</button>
+          </div>
+        </div>
+      </header>
+
+      <section id="top" className="relative border-b border-white/[.05]">
+        <div className="absolute inset-0 opacity-40" style={{backgroundImage:"linear-gradient(rgba(38,113,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(38,113,255,.12) 1px,transparent 1px)",backgroundSize:"58px 58px",maskImage:"linear-gradient(to bottom,black,transparent 85%)"}} />
+        <div className="relative mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-8 px-5 py-12 md:grid-cols-[1fr_.95fr] md:py-14 lg:min-h-[465px]">
+          <div>
+            
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+  <div className="min-w-0">
+    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight">
+      Crea. Impulsa.
+      <br />
+      <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-fuchsia-500 bg-clip-text text-transparent">
+        Escala. Innova.
+      </span>
+    </h1>
+  </div>
+
+  <div className="flex justify-center lg:justify-end items-center">
+    <img
+      src="/logo.png"
+      alt="DigitalBoost"
+      className="w-[300px] sm:w-[360px] lg:w-[430px] xl:w-[480px] max-w-full object-contain"
+    />
+  </div>
+</div>
+
+
+
+            <p className="mt-5 max-w-[570px] text-[15px] leading-6 text-slate-300">DigitalBoost es la plataforma todo en uno para desarrolladores, emprendedores y creadores.</p>
+            <p className="mt-2 max-w-[570px] text-[14px] leading-6 text-slate-200">Desarrolla web con IA, tiendas virtuales, landing pages, NFTs y herramientas profesionales para llevar tus ideas al siguiente nivel.</p>
+            <div className="mt-6 flex flex-wrap gap-4">
+              <button onClick={() => go("tools")} className={`rounded-lg px-7 py-3 font-bold shadow-[0_0_28px_rgba(100,40,255,.3)] ${neon}`}>Comenzar gratis <ArrowRight className="ml-2 inline" size={16}/></button>
+              <button onClick={() => go("tools")} className="rounded-lg border border-indigo-400/50 px-7 py-3 font-semibold">Explorar herramientas</button>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-5 text-xs text-slate-300">
+              <span><Check size={15} className="mr-1 inline text-cyan-300"/>No se requiere tarjeta</span>
+              <span><Check size={15} className="mr-1 inline text-cyan-300"/>IA integrada</span>
+              <span><Check size={15} className="mr-1 inline text-cyan-300"/>Sin límites creativos</span>
+            </div>
+          </div>
+          <div className="flex justify-center md:justify-end">
+            <div className="relative flex h-[340px] w-[460px] items-center justify-center">
+              <div className="absolute h-72 w-72 rounded-full bg-blue-500/10 blur-3xl"/>
+              <DragonMark/>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1200px] px-5 py-4">
+        <div className="grid grid-cols-2 divide-x divide-white/[.08] rounded-lg border border-indigo-400/20 bg-[#030914]/70 md:grid-cols-5">
+          {stats.map(([n,l,I]) => <div key={l as string} className="flex items-center gap-3 px-5 py-5">
+            <I size={28} className="text-cyan-400"/><div><div className="text-xl font-medium">{n as string}</div><div className="text-xs text-slate-400">{l as string}</div></div>
+          </div>)}
+        </div>
+      </section>
+
+      <section id="tools" className="mx-auto max-w-[1200px] px-5 py-7">
+        <h2 className="mb-5 text-center text-sm font-medium tracking-wide text-slate-200">TODO LO QUE NECESITAS EN <span className="text-cyan-300">UN SOLO LUGAR</span></h2>
+        <div className="grid gap-3 md:grid-cols-5">
+          {tools.map(([I,title,desc]) => <article key={title as string} className="min-h-[174px] rounded-lg border border-indigo-400/20 bg-[#030914] p-4 transition hover:border-cyan-400/50">
+            <I size={34} className="mb-5 text-cyan-400"/>
+            <h3 className="font-semibold">{title as string}</h3><p className="mt-2 text-xs leading-5 text-slate-400">{desc as string}</p>
+            <button className="mt-3 text-xs text-cyan-300">Explorar <ArrowRight size={13} className="inline"/></button>
+          </article>)}
+        </div>
+      </section>
+
+      <section id="resources" className="mx-auto grid max-w-[1200px] gap-8 px-5 py-8 md:grid-cols-[280px_1fr]">
+        <div>
+          <h2 className="text-xl font-medium">IA QUE IMPULSA TU<br/><span className="text-2xl font-bold text-violet-500">CREATIVIDAD</span></h2>
+          <p className="mt-3 text-sm leading-6 text-slate-400">Nuestra IA entiende tus ideas y las convierte en soluciones reales. Desde código hasta diseño, contenido y automatización.</p>
+          {["Generación de código y sitios web","Diseño UI/UX inteligente","Contenido y copys que convierten"].map(x=><div key={x} className="mt-5 text-sm text-slate-300"><Sparkles size={16} className="mr-3 inline text-violet-400"/>{x}</div>)}
+          <button className="mt-7 rounded-lg border border-indigo-400/40 px-6 py-2.5 text-sm">Conocer más sobre IA</button>
+        </div>
+        <div className="overflow-hidden rounded-lg border border-indigo-400/25 bg-[#06101d] shadow-[0_0_45px_rgba(0,80,255,.12)]">
+          <div className="flex h-8 items-center gap-2 border-b border-white/10 px-3 text-[9px] text-slate-400"><span className="text-cyan-300">AI WEB BUILDER</span><span className="ml-auto">＋　□　◉</span></div>
+          <div className="grid min-h-[280px] md:grid-cols-2">
+            <pre className="overflow-hidden border-r border-white/10 p-5 text-[10px] leading-5 text-slate-400">{`<!DOCTYPE html>\n<html lang="es">\n<head>\n  <meta charset="UTF-8" />\n  <meta name="viewport"\n    content="width=device-width,\n    initial-scale=1.0" />\n</head>\n<body>\n  <header class="hero">\n    <h1>Impulsa tu negocio\n      al siguiente nivel</h1>\n    <p>Herramientas digitales para crear,\n      escalar e innovar sin límites.</p>\n  </header>\n</body>\n</html>`}</pre>
+            <div className="relative p-6">
+              <div className="text-[9px] text-slate-500">PREVIEW</div>
+              <div className="mt-8 text-2xl font-semibold leading-tight">Impulsa tu negocio<br/>al siguiente nivel</div>
+              <p className="mt-3 text-xs text-slate-400">Herramientas digitales para crear, escalar e innovar sin límites.</p>
+              <button className={`mt-5 rounded-md px-5 py-2 text-xs font-bold ${neon}`}>Comenzar ahora</button>
+              
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1200px] px-5 py-3">
+        <div className="rounded-lg border border-indigo-400/20 bg-[#030914] px-6 py-5">
+          <div className="mb-4 text-center text-xs font-semibold tracking-[.18em] text-cyan-300">INTEGRACIONES CON LO MEJOR</div>
+          <div className="grid grid-cols-2 items-center gap-5 text-center text-lg font-semibold text-slate-300 md:grid-cols-7">
+            <span className="text-cyan-400">◉ OpenAI</span><span>stripe</span><span className="text-blue-400">PayPal</span><span>◐ MongoDB</span><span>▲ Vercel</span><span>☁ Cloudflare</span><span>◇ IPFS</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1200px] px-5 py-4">
+        <div className="grid grid-cols-2 divide-x divide-white/[.08] rounded-lg border border-indigo-400/20 bg-[#030914]/70 md:grid-cols-5">
+          {stats.map(([n,l,I]) => <div key={"b"+l} className="flex items-center gap-3 px-5 py-4"><I size={25} className="text-violet-500"/><div><div className="text-lg">{n as string}</div><div className="text-xs text-slate-500">{l as string}</div></div></div>)}
+        </div>
+      </section>
+
+      <section id="cta" className="mx-auto max-w-[1200px] px-5 py-4">
+        <div className="relative overflow-hidden rounded-lg border border-indigo-400/25 bg-[#030914] px-7 py-8 md:flex md:items-center md:justify-between">
+          <div><h2 className="text-2xl font-semibold">¿Listo para llevar tus ideas<br/>al siguiente nivel?</h2><p className="mt-3 text-sm text-slate-400">Únete a miles de creadores, desarrolladores y emprendedores que ya están construyendo el futuro con DigitalBoost.</p></div>
+          <div className="mt-6 text-center md:mt-0"><button className={`rounded-lg px-8 py-3 font-bold ${neon}`}>Comenzar ahora gratis <ArrowRight className="ml-2 inline" size={16}/></button><div className="mt-2 text-xs text-slate-500">No se requiere tarjeta de crédito</div></div>
+          <div className="hidden md:block"><DragonMark small/></div>
+        </div>
+      </section>
+
+      
+<div className="flex justify-center items-center py-10">
+  
+<div className="w-full rounded-3xl bg-[#030308] border border-white/5 overflow-hidden flex justify-center items-center py-10 px-6">
+  <img
+    src="/cta-dragon.png"
+    alt="DigitalBoost"
+    className="w-[180px] sm:w-[230px] object-contain"
+  />
+</div>
+
+</div>
+<footer id="footer" className="mt-4 border-t border-white/[.07] bg-[#020711]">
+        <div className="mx-auto grid max-w-[1200px] gap-8 px-5 py-9 md:grid-cols-5">
+          <div className="flex items-start gap-2"><DragonMark small/><span className="mt-3 text-lg font-bold">DIGITAL<span className="text-violet-500">BOOST</span></span></div>
+          {[
+            ["Producto","Herramientas","Precios","Novedades","Roadmap"],
+            ["Recursos","Docs","Blog","Tutoriales","Comunidad"],
+            ["Empresa","Sobre nosotros","Contacto","Trabaja con nosotros","Afiliados"],
+            ["Legal","Términos","Privacidad","Cookies","Licencias"]
+          ].map(c=><div key={c[0]}><h4 className="mb-3 text-sm">{c[0]}</h4>{c.slice(1).map(x=><div key={x} className="mb-2 text-xs text-slate-500">{x}</div>)}</div>)}
+        </div>
+        <div className="mx-auto flex max-w-[1200px] items-center justify-between border-t border-white/[.06] px-5 py-5 text-xs text-slate-500"><div>© 2025 DigitalBoost.<br/>Todos los derechos reservados.</div><div className="flex gap-3"><MessageCircle/><MessageCircle/><MessageCircle/><MessageCircle/><MessageCircle/></div></div>
+      </footer>
+    </main>
+  );
+}
+

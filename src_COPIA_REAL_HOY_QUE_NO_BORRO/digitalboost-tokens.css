@@ -1,0 +1,7 @@
+ :root{
+  --db-navy-950:#070D18; --db-navy-900:#0A1020; --db-navy-800:#101B32; --db-navy-700:#14233F;
+  --db-violet:#7C3AED; --db-violet-400:#A78BFA; --db-cyan:#06B6D4; --db-cyan-300:#67E8F9;
+  --db-text:#F7FAFF; --db-text-muted:#AFC0D5; --db-border:rgba(247,250,255,0.10);
+}
+[data-commerce-os]{ background:var(--db-navy-900); color:var(--db-text); }
+.db-commerce-white{ background:var(--db-navy-900) !important; color:var(--db-text) !important; }

@@ -1,0 +1,364 @@
+[2026-08-29T16:17:45.490Z] info  Wrote default config file to /root/.config/code-server/config.yaml
+[2026-08-29T16:17:48.887Z] info  code-server 4.135.0 de89acbcdce9d9b870008a270c9f6466993d91f4
+[2026-08-29T16:17:48.894Z] info  Using user-data-dir /root/.local/share/code-server
+[2026-08-29T16:17:48.977Z] info  Using config file /root/.config/code-server/config.yaml
+[2026-08-29T16:17:48.977Z] info  HTTP server listening on http://127.0.0.1:8080/
+[2026-08-29T16:17:48.978Z] info    - Authentication is disabled
+[2026-08-29T16:17:48.979Z] info    - Not serving HTTPS
+[2026-08-29T16:17:48.979Z] info  Session server listening on /root/.local/share/code-server/code-server-ipc.sock
+[16:17:51] 
+
+
+
+
+[16:17:52] Error: Unable to retrieve mac address (unexpected format)
+    at oN (file:///usr/lib/code-server/lib/vscode/out/server-main.js:486:33651)
+    at H3 (file:///usr/lib/code-server/lib/vscode/out/server-main.js:486:33975)
+    at async file:///usr/lib/code-server/lib/vscode/out/server-main.js:486:33894
+    at async Promise.all (index 2)
+    at async w7 (file:///usr/lib/code-server/lib/vscode/out/server-main.js:624:403)
+    at async L7 (file:///usr/lib/code-server/lib/vscode/out/server-main.js:625:1562)
+[reconnection-grace-time] No CLI argument provided, using default: 10800000ms (10800s)
+[16:17:53] [AgentHostChannel] Registered lazy IPC channel 'agentHostProxy' (upstream: /tmp/vscode-ipc-486873c1-3b66-470b-8384-19736b2eddbc.sock)
+[16:17:53] Extension host agent started.
+[16:17:53] Started initializing default profile extensions in extensions installation folder. file:///root/.local/share/code-server/extensions
+[16:17:55] Completed initializing default profile extensions in extensions installation folder. file:///root/.local/share/code-server/extensions
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js
+[16:17:59] [127.0.0.1][184a68aa][ManagementConnection] New connection established.
+[16:18:05] [127.0.0.1][f6f20e34][ExtensionHostConnection] New connection established.
+[16:18:05] [127.0.0.1][f6f20e34][ExtensionHostConnection] Starting extension host process...
+[16:18:07] [127.0.0.1][f6f20e34][ExtensionHostConnection] <25293> Launched Extension Host Process.
+[16:18:07] [AgentHostChannel] Renderer ctx=[object Object] requested connect to upstream
+[16:18:11] [127.0.0.1][f6f20e34][ExtensionHostConnection] <25293> [reconnection-grace-time] Extension host: read VSCODE_RECONNECTION_GRACE_TIME=10800000ms (10800s)
+
+[IPC Library: Agent Host] Agent host server listening on /tmp/vscode-ipc-486873c1-3b66-470b-8384-19736b2eddbc.sock
+[16:18:17] ServerAgentHostManager: agent host started
+[16:18:17] [AgentHostChannel] Opening upstream to /tmp/vscode-ipc-486873c1-3b66-470b-8384-19736b2eddbc.sock
+[16:21:09] [127.0.0.1][184a68aa][ManagementConnection] The client has reconnected.
+[16:21:09] [127.0.0.1][f6f20e34][ExtensionHostConnection] The client has reconnected.
+[16:21:37] [127.0.0.1][184a68aa][ManagementConnection] The client has disconnected gracefully, so the connection will be disposed.
+[16:21:38] [127.0.0.1][f6f20e34][ExtensionHostConnection] <25293> Extension Host Process exited with code: 0, signal: null.
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js
+[16:21:43] [127.0.0.1][0750bf41][ManagementConnection] New connection established.
+[16:21:49] [127.0.0.1][79a56c27][ExtensionHostConnection] New connection established.
+[16:21:49] [127.0.0.1][79a56c27][ExtensionHostConnection] Starting extension host process...
+[16:21:49] [127.0.0.1][79a56c27][ExtensionHostConnection] <26768> Launched Extension Host Process.
+[16:21:50] [AgentHostChannel] Renderer ctx=[object Object] requested connect to upstream
+[16:21:50] [AgentHostChannel] Opening upstream to /tmp/vscode-ipc-486873c1-3b66-470b-8384-19736b2eddbc.sock
+[16:21:54] [127.0.0.1][79a56c27][ExtensionHostConnection] <26768> [reconnection-grace-time] Extension host: read VSCODE_RECONNECTION_GRACE_TIME=10800000ms (10800s)
+
+[16:23:11] [127.0.0.1][0750bf41][ManagementConnection] The client has disconnected gracefully, so the connection will be disposed.
+[16:23:12] [127.0.0.1][79a56c27][ExtensionHostConnection] <26768> Extension Host Process exited with code: 0, signal: null.
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js
+[16:23:16] [127.0.0.1][9906a1c8][ManagementConnection] New connection established.
+[16:23:20] [127.0.0.1][4a77c0ae][ExtensionHostConnection] New connection established.
+[16:23:20] [127.0.0.1][4a77c0ae][ExtensionHostConnection] Starting extension host process...
+[16:23:20] [127.0.0.1][4a77c0ae][ExtensionHostConnection] <27315> Launched Extension Host Process.
+[16:23:21] [AgentHostChannel] Renderer ctx=[object Object] requested connect to upstream
+[16:23:21] [AgentHostChannel] Opening upstream to /tmp/vscode-ipc-486873c1-3b66-470b-8384-19736b2eddbc.sock
+[16:23:25] [127.0.0.1][4a77c0ae][ExtensionHostConnection] <27315> [reconnection-grace-time] Extension host: read VSCODE_RECONNECTION_GRACE_TIME=10800000ms (10800s)
+
+[16:23:37] [127.0.0.1][9906a1c8][ManagementConnection] The client has disconnected gracefully, so the connection will be disposed.
+[16:23:38] [127.0.0.1][4a77c0ae][ExtensionHostConnection] <27315> Extension Host Process exited with code: 0, signal: null.
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js
+[16:23:42] [127.0.0.1][7bfda170][ManagementConnection] New connection established.
+[16:23:46] [127.0.0.1][7eac216b][ExtensionHostConnection] New connection established.
+[16:23:46] [127.0.0.1][7eac216b][ExtensionHostConnection] Starting extension host process...
+[16:23:46] [127.0.0.1][7eac216b][ExtensionHostConnection] <27368> Launched Extension Host Process.
+[16:23:47] [AgentHostChannel] Renderer ctx=[object Object] requested connect to upstream
+[16:23:47] [AgentHostChannel] Opening upstream to /tmp/vscode-ipc-486873c1-3b66-470b-8384-19736b2eddbc.sock
+[16:23:50] [127.0.0.1][7eac216b][ExtensionHostConnection] <27368> [reconnection-grace-time] Extension host: read VSCODE_RECONNECTION_GRACE_TIME=10800000ms (10800s)
+
+[16:23:57] [127.0.0.1][7bfda170][ManagementConnection] The client has disconnected gracefully, so the connection will be disposed.
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js
+[16:24:03] [127.0.0.1][e55a8e00][ManagementConnection] New connection established.
+[16:24:07] [127.0.0.1][b4d5d4c5][ExtensionHostConnection] New connection established.
+[16:24:07] [127.0.0.1][b4d5d4c5][ExtensionHostConnection] Starting extension host process...
+[16:24:07] [127.0.0.1][b4d5d4c5][ExtensionHostConnection] <27440> Launched Extension Host Process.
+[16:24:09] [AgentHostChannel] Renderer ctx=[object Object] requested connect to upstream
+[16:24:09] [AgentHostChannel] Opening upstream to /tmp/vscode-ipc-486873c1-3b66-470b-8384-19736b2eddbc.sock
+[16:24:12] [127.0.0.1][b4d5d4c5][ExtensionHostConnection] <27440> [reconnection-grace-time] Extension host: read VSCODE_RECONNECTION_GRACE_TIME=10800000ms (10800s)
+
+[16:29:04] [127.0.0.1][7eac216b][ExtensionHostConnection] <27368> Extension Host Process exited with code: 0, signal: null.
+[16:31:33] [127.0.0.1][e55a8e00][ManagementConnection] The client has reconnected.
+[16:31:33] [127.0.0.1][b4d5d4c5][ExtensionHostConnection] The client has reconnected.
+[16:33:26] Getting Manifest... timsexperiments.vscode-tailwindcss
+(node:25160) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[16:33:30] Installing extension: timsexperiments.vscode-tailwindcss {
+  isMachineScoped: false,
+  installPreReleaseVersion: false,
+  pinned: false,
+  isBuiltin: false,
+  isApplicationScoped: false,
+  profileLocation: Sa {
+    scheme: 'file',
+    authority: '',
+    path: '/root/.local/share/code-server/extensions/extensions.json',
+    query: '',
+    fragment: '',
+    _formatted: 'file:///root/.local/share/code-server/extensions/extensions.json',
+    _fsPath: '/root/.local/share/code-server/extensions/extensions.json'
+  },
+  productVersion: { version: '1.135.0', date: '2026-08-25T14:26:52Z' }
+}
+[16:33:36] Extracted extension to file:///root/.local/share/code-server/extensions/timsexperiments.vscode-tailwindcss-0.14.29-universal: timsexperiments.vscode-tailwindcss
+[16:33:36] Renamed to /root/.local/share/code-server/extensions/timsexperiments.vscode-tailwindcss-0.14.29-universal
+[16:33:36] Extension installed successfully: timsexperiments.vscode-tailwindcss file:///root/.local/share/code-server/extensions/extensions.json
+[16:34:33] Getting Manifest... rooveterinaryinc.roo-cline
+[16:34:37] Installing extension: rooveterinaryinc.roo-cline {
+  isMachineScoped: false,
+  installPreReleaseVersion: false,
+  pinned: false,
+  isBuiltin: false,
+  isApplicationScoped: false,
+  profileLocation: Sa {
+    scheme: 'file',
+    authority: '',
+    path: '/root/.local/share/code-server/extensions/extensions.json',
+    query: '',
+    fragment: '',
+    _formatted: 'file:///root/.local/share/code-server/extensions/extensions.json',
+    _fsPath: '/root/.local/share/code-server/extensions/extensions.json'
+  },
+  productVersion: { version: '1.135.0', date: '2026-08-25T14:26:52Z' }
+}
+[16:35:38] Extracted extension to file:///root/.local/share/code-server/extensions/rooveterinaryinc.roo-cline-3.54.0-universal: rooveterinaryinc.roo-cline
+[16:35:40] Renamed to /root/.local/share/code-server/extensions/rooveterinaryinc.roo-cline-3.54.0-universal
+[16:35:41] Extension installed successfully: rooveterinaryinc.roo-cline file:///root/.local/share/code-server/extensions/extensions.json
+[16:45:33] [127.0.0.1][e55a8e00][ManagementConnection] The client has disconnected, will wait for reconnection 3h before disposing...
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js
+[16:51:35] [127.0.0.1][e55a8e00][ManagementConnection] Another client has connected, will shorten the wait for reconnection 5m before disposing...
+[16:51:35] [127.0.0.1][95905335][ManagementConnection] New connection established.
+[16:51:42] [127.0.0.1][34a239ca][ExtensionHostConnection] New connection established.
+[16:51:42] [127.0.0.1][34a239ca][ExtensionHostConnection] Starting extension host process...
+[16:51:43] [127.0.0.1][34a239ca][ExtensionHostConnection] <12385> Launched Extension Host Process.
+[16:51:48] [127.0.0.1][34a239ca][ExtensionHostConnection] <12385> [reconnection-grace-time] Extension host: read VSCODE_RECONNECTION_GRACE_TIME=10800000ms (10800s)
+
+[16:54:06] [127.0.0.1][95905335][ManagementConnection] The client has disconnected, will wait for reconnection 3h before disposing...
+[16:56:37] [127.0.0.1][b4d5d4c5][ExtensionHostConnection] <27440> Extension Host Process exited with code: 0, signal: null.
+[16:56:41] [127.0.0.1][e55a8e00][ManagementConnection] The reconnection short grace time of 5m has expired, so the connection will be disposed.
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js
+[17:02:14] [127.0.0.1][95905335][ManagementConnection] Another client has connected, will shorten the wait for reconnection 5m before disposing...
+[17:02:14] [127.0.0.1][19fa20e4][ManagementConnection] New connection established.
+[17:02:19] [127.0.0.1][76d9fa38][ExtensionHostConnection] New connection established.
+[17:02:19] [127.0.0.1][76d9fa38][ExtensionHostConnection] Starting extension host process...
+[17:02:19] [127.0.0.1][76d9fa38][ExtensionHostConnection] <21812> Launched Extension Host Process.
+[17:02:21] [AgentHostChannel] Renderer ctx=[object Object] requested connect to upstream
+[17:02:21] [AgentHostChannel] Opening upstream to /tmp/vscode-ipc-486873c1-3b66-470b-8384-19736b2eddbc.sock
+[17:02:25] [127.0.0.1][76d9fa38][ExtensionHostConnection] <21812> [reconnection-grace-time] Extension host: read VSCODE_RECONNECTION_GRACE_TIME=10800000ms (10800s)
+
+[17:07:16] [127.0.0.1][34a239ca][ExtensionHostConnection] <12385> Extension Host Process exited with code: 0, signal: null.
+[17:07:16] [127.0.0.1][95905335][ManagementConnection] The reconnection short grace time of 5m has expired, so the connection will be disposed.
+[17:16:50] [127.0.0.1][19fa20e4][ManagementConnection] The client has reconnected.
+[17:16:50] [127.0.0.1][76d9fa38][ExtensionHostConnection] The client has reconnected.
+[17:29:09] [127.0.0.1][76d9fa38][ExtensionHostConnection] The client has reconnected.
+[17:29:09] [127.0.0.1][19fa20e4][ManagementConnection] The client has reconnected.
+[17:29:51] Getting Manifest... eamodio.gitlens
+[17:29:55] Installing extension: eamodio.gitlens {
+  isMachineScoped: false,
+  installPreReleaseVersion: false,
+  pinned: false,
+  isBuiltin: false,
+  isApplicationScoped: false,
+  profileLocation: Sa {
+    scheme: 'file',
+    authority: '',
+    path: '/root/.local/share/code-server/extensions/extensions.json',
+    query: '',
+    fragment: '',
+    _formatted: 'file:///root/.local/share/code-server/extensions/extensions.json',
+    _fsPath: '/root/.local/share/code-server/extensions/extensions.json'
+  },
+  productVersion: { version: '1.135.0', date: '2026-08-25T14:26:52Z' }
+}
+[17:30:07] Extracted extension to file:///root/.local/share/code-server/extensions/eamodio.gitlens-19.0.1-universal: eamodio.gitlens
+[17:30:08] Renamed to /root/.local/share/code-server/extensions/eamodio.gitlens-19.0.1-universal
+[17:30:08] Extension installed successfully: eamodio.gitlens file:///root/.local/share/code-server/extensions/extensions.json
+[17:31:07] Getting Manifest... phil294.git-log--graph
+[17:31:10] Installing extension: phil294.git-log--graph {
+  isMachineScoped: false,
+  installPreReleaseVersion: false,
+  pinned: false,
+  isBuiltin: false,
+  isApplicationScoped: false,
+  profileLocation: Sa {
+    scheme: 'file',
+    authority: '',
+    path: '/root/.local/share/code-server/extensions/extensions.json',
+    query: '',
+    fragment: '',
+    _formatted: 'file:///root/.local/share/code-server/extensions/extensions.json',
+    _fsPath: '/root/.local/share/code-server/extensions/extensions.json'
+  },
+  productVersion: { version: '1.135.0', date: '2026-08-25T14:26:52Z' }
+}
+[17:31:18] Extracted extension to file:///root/.local/share/code-server/extensions/phil294.git-log--graph-0.1.35-universal: phil294.git-log--graph
+[17:31:18] Renamed to /root/.local/share/code-server/extensions/phil294.git-log--graph-0.1.35-universal
+[17:31:18] Extension installed successfully: phil294.git-log--graph file:///root/.local/share/code-server/extensions/extensions.json
+[17:32:00] Getting Manifest... rangav.vscode-thunder-client
+[17:32:03] Installing extension: rangav.vscode-thunder-client {
+  isMachineScoped: false,
+  installPreReleaseVersion: false,
+  pinned: false,
+  isBuiltin: false,
+  isApplicationScoped: false,
+  profileLocation: Sa {
+    scheme: 'file',
+    authority: '',
+    path: '/root/.local/share/code-server/extensions/extensions.json',
+    query: '',
+    fragment: '',
+    _formatted: 'file:///root/.local/share/code-server/extensions/extensions.json',
+    _fsPath: '/root/.local/share/code-server/extensions/extensions.json'
+  },
+  productVersion: { version: '1.135.0', date: '2026-08-25T14:26:52Z' }
+}
+[17:32:11] Extracted extension to file:///root/.local/share/code-server/extensions/rangav.vscode-thunder-client-2.41.1-universal: rangav.vscode-thunder-client
+[17:32:11] Renamed to /root/.local/share/code-server/extensions/rangav.vscode-thunder-client-2.41.1-universal
+[17:32:12] Extension installed successfully: rangav.vscode-thunder-client file:///root/.local/share/code-server/extensions/extensions.json
+[17:32:50] Getting Manifest... ruban-s.fast-import-cost
+[17:32:52] Installing extension: ruban-s.fast-import-cost {
+  isMachineScoped: false,
+  installPreReleaseVersion: false,
+  pinned: false,
+  isBuiltin: false,
+  isApplicationScoped: false,
+  profileLocation: Sa {
+    scheme: 'file',
+    authority: '',
+    path: '/root/.local/share/code-server/extensions/extensions.json',
+    query: '',
+    fragment: '',
+    _formatted: 'file:///root/.local/share/code-server/extensions/extensions.json',
+    _fsPath: '/root/.local/share/code-server/extensions/extensions.json'
+  },
+  productVersion: { version: '1.135.0', date: '2026-08-25T14:26:52Z' }
+}
+[17:32:59] Extracted extension to file:///root/.local/share/code-server/extensions/ruban-s.fast-import-cost-5.7.0-universal: ruban-s.fast-import-cost
+[17:32:59] Renamed to /root/.local/share/code-server/extensions/ruban-s.fast-import-cost-5.7.0-universal
+[17:32:59] Extension installed successfully: ruban-s.fast-import-cost file:///root/.local/share/code-server/extensions/extensions.json
+[17:33:51] Getting Manifest... esbenp.prettier-vscode
+[17:33:54] Installing extension: esbenp.prettier-vscode {
+  isMachineScoped: false,
+  installPreReleaseVersion: false,
+  pinned: false,
+  isBuiltin: false,
+  isApplicationScoped: false,
+  profileLocation: Sa {
+    scheme: 'file',
+    authority: '',
+    path: '/root/.local/share/code-server/extensions/extensions.json',
+    query: '',
+    fragment: '',
+    _formatted: 'file:///root/.local/share/code-server/extensions/extensions.json',
+    _fsPath: '/root/.local/share/code-server/extensions/extensions.json'
+  },
+  productVersion: { version: '1.135.0', date: '2026-08-25T14:26:52Z' }
+}
+[17:34:04] Extracted extension to file:///root/.local/share/code-server/extensions/esbenp.prettier-vscode-12.4.0-universal: esbenp.prettier-vscode
+[17:34:04] Renamed to /root/.local/share/code-server/extensions/esbenp.prettier-vscode-12.4.0-universal
+[17:34:04] Extension installed successfully: esbenp.prettier-vscode file:///root/.local/share/code-server/extensions/extensions.json
+[17:34:31] Getting Manifest... dbaeumer.vscode-eslint
+[17:34:34] Installing extension: dbaeumer.vscode-eslint {
+  isMachineScoped: false,
+  installPreReleaseVersion: false,
+  pinned: false,
+  isBuiltin: false,
+  isApplicationScoped: false,
+  profileLocation: Sa {
+    scheme: 'file',
+    authority: '',
+    path: '/root/.local/share/code-server/extensions/extensions.json',
+    query: '',
+    fragment: '',
+    _formatted: 'file:///root/.local/share/code-server/extensions/extensions.json',
+    _fsPath: '/root/.local/share/code-server/extensions/extensions.json'
+  },
+  productVersion: { version: '1.135.0', date: '2026-08-25T14:26:52Z' }
+}
+[17:34:37] Extracted extension to file:///root/.local/share/code-server/extensions/dbaeumer.vscode-eslint-3.0.34-universal: dbaeumer.vscode-eslint
+[17:34:38] Renamed to /root/.local/share/code-server/extensions/dbaeumer.vscode-eslint-3.0.34-universal
+[17:34:38] Extension installed successfully: dbaeumer.vscode-eslint file:///root/.local/share/code-server/extensions/extensions.json
+[17:35:26] Getting Manifest... usernamehw.errorlens
+[17:35:29] Installing extension: usernamehw.errorlens {
+  isMachineScoped: false,
+  installPreReleaseVersion: false,
+  pinned: false,
+  isBuiltin: false,
+  isApplicationScoped: false,
+  profileLocation: Sa {
+    scheme: 'file',
+    authority: '',
+    path: '/root/.local/share/code-server/extensions/extensions.json',
+    query: '',
+    fragment: '',
+    _formatted: 'file:///root/.local/share/code-server/extensions/extensions.json',
+    _fsPath: '/root/.local/share/code-server/extensions/extensions.json'
+  },
+  productVersion: { version: '1.135.0', date: '2026-08-25T14:26:52Z' }
+}
+[17:35:32] Extracted extension to file:///root/.local/share/code-server/extensions/usernamehw.errorlens-3.28.0-universal: usernamehw.errorlens
+[17:35:32] Renamed to /root/.local/share/code-server/extensions/usernamehw.errorlens-3.28.0-universal
+[17:35:32] Extension installed successfully: usernamehw.errorlens file:///root/.local/share/code-server/extensions/extensions.json
+[17:57:49] [127.0.0.1][19fa20e4][ManagementConnection] The client has reconnected.
+[17:57:49] [127.0.0.1][76d9fa38][ExtensionHostConnection] The client has reconnected.
+[17:59:48] [127.0.0.1][19fa20e4][ManagementConnection] The client has disconnected, will wait for reconnection 3h before disposing...
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js
+[18:31:29] [127.0.0.1][19fa20e4][ManagementConnection] Another client has connected, will shorten the wait for reconnection 5m before disposing...
+[18:31:29] [127.0.0.1][559ff7f0][ManagementConnection] New connection established.
+[18:31:34] [127.0.0.1][5ab93209][ExtensionHostConnection] New connection established.
+[18:31:34] [127.0.0.1][5ab93209][ExtensionHostConnection] Starting extension host process...
+[18:31:34] [127.0.0.1][5ab93209][ExtensionHostConnection] <25372> Launched Extension Host Process.
+[18:31:36] [AgentHostChannel] Renderer ctx=[object Object] requested connect to upstream
+[18:31:36] [AgentHostChannel] Opening upstream to /tmp/vscode-ipc-486873c1-3b66-470b-8384-19736b2eddbc.sock
+[18:31:39] [127.0.0.1][5ab93209][ExtensionHostConnection] <25372> [reconnection-grace-time] Extension host: read VSCODE_RECONNECTION_GRACE_TIME=10800000ms (10800s)
+
+[18:33:45] [127.0.0.1][559ff7f0][ManagementConnection] The client has disconnected gracefully, so the connection will be disposed.
+[18:33:46] [127.0.0.1][5ab93209][ExtensionHostConnection] <25372> Extension Host Process exited with code: 0, signal: null.
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js
+[18:33:51] [127.0.0.1][5829b769][ManagementConnection] New connection established.
+[18:33:54] [AgentHostChannel] Renderer ctx=[object Object] requested connect to upstream
+[18:33:54] [AgentHostChannel] Opening upstream to /tmp/vscode-ipc-486873c1-3b66-470b-8384-19736b2eddbc.sock
+[18:33:57] [127.0.0.1][35996dd3][ExtensionHostConnection] New connection established.
+[18:33:57] [127.0.0.1][35996dd3][ExtensionHostConnection] Starting extension host process...
+[18:33:57] [127.0.0.1][35996dd3][ExtensionHostConnection] <27602> Launched Extension Host Process.
+[18:34:02] [127.0.0.1][35996dd3][ExtensionHostConnection] <27602> [reconnection-grace-time] Extension host: read VSCODE_RECONNECTION_GRACE_TIME=10800000ms (10800s)
+
+[18:36:31] [127.0.0.1][76d9fa38][ExtensionHostConnection] <21812> Extension Host Process exited with code: 0, signal: null.
+[18:36:40] [127.0.0.1][19fa20e4][ManagementConnection] The reconnection short grace time of 5m has expired, so the connection will be disposed.
+[18:38:29] [127.0.0.1][5829b769][ManagementConnection] The client has reconnected.
+[18:38:29] [127.0.0.1][35996dd3][ExtensionHostConnection] The client has reconnected.
+[18:41:36] [127.0.0.1][5829b769][ManagementConnection] The client has disconnected, will wait for reconnection 3h before disposing...
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js
+[18:42:24] [127.0.0.1][5829b769][ManagementConnection] Another client has connected, will shorten the wait for reconnection 5m before disposing...
+[18:42:24] [127.0.0.1][4124c676][ManagementConnection] New connection established.
+[18:42:29] [AgentHostChannel] Renderer ctx=[object Object] requested connect to upstream
+[18:42:29] [AgentHostChannel] Opening upstream to /tmp/vscode-ipc-486873c1-3b66-470b-8384-19736b2eddbc.sock
+[18:42:32] [127.0.0.1][635fa78b][ExtensionHostConnection] New connection established.
+[18:42:32] [127.0.0.1][635fa78b][ExtensionHostConnection] Starting extension host process...
+[18:42:32] [127.0.0.1][635fa78b][ExtensionHostConnection] <31876> Launched Extension Host Process.
+[18:42:38] [127.0.0.1][635fa78b][ExtensionHostConnection] <31876> [reconnection-grace-time] Extension host: read VSCODE_RECONNECTION_GRACE_TIME=10800000ms (10800s)
+
+[18:45:11] [127.0.0.1][4124c676][ManagementConnection] The client has disconnected, will wait for reconnection 3h before disposing...
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
+File not found: /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js
+[18:46:03] [127.0.0.1][4124c676][ManagementConnection] Another client has connected, will shorten the wait for reconnection 5m before disposing...
+[18:46:03] [127.0.0.1][ff0073d7][ManagementConnection] New connection established.
+[18:46:07] [AgentHostChannel] Renderer ctx=[object Object] requested connect to upstream
+[18:46:07] [AgentHostChannel] Opening upstream to /tmp/vscode-ipc-486873c1-3b66-470b-8384-19736b2eddbc.sock
+[18:46:10] [127.0.0.1][0d83d9e1][ExtensionHostConnection] New connection established.
+[18:46:10] [127.0.0.1][0d83d9e1][ExtensionHostConnection] Starting extension host process...
+[18:46:10] [127.0.0.1][0d83d9e1][ExtensionHostConnection] <3153> Launched Extension Host Process.
+[18:46:15] [127.0.0.1][0d83d9e1][ExtensionHostConnection] <3153> [reconnection-grace-time] Extension host: read VSCODE_RECONNECTION_GRACE_TIME=10800000ms (10800s)
+

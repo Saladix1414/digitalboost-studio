@@ -1,0 +1,6 @@
+npm notice run dev
+npm notice run tsx server.ts
+🚀 Servidor backend y frontend corriendo en el puerto 3000
+5:33:56 PM [vite] (client) [optimizer] bundling dependencies...
+5:46:31 PM [vite] (client) hmr update /src/StoreBuilderWorkspace.tsx, /src/index.css
+5:46:31 PM [vite] (client) page reload index.html

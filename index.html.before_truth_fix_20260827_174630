@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DigitalBoost - Crea. Impulsa. Escala. Innova.</title>
+
+<style id="digitalboost-white-root">
+html {
+  color-scheme: light !important;
+}
+
+html,
+body,
+#root {
+  margin: 0 !important;
+  min-height: 100% !important;
+  background: #FFFFFF !important;
+  color: #172033 !important;
+}
+
+body {
+  min-height: 100vh !important;
+}
+
+#root {
+  min-height: 100vh !important;
+}
+</style>
+
+</head>
+  <body class="bg-white text-slate-900 m-0 p-0 min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

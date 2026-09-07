@@ -1,6 +1,6 @@
 import type { PulseInput } from "./DigitalBoostPulseKB";
 import { toolInspect, toolScoreLine } from "./DigitalBoostPulseTools";
-import { seoFixTop, seoSpeak } from "./DigitalBoostPulseSeo";
+import { seoFixProposal, seoSpeak } from "./DigitalBoostPulseSeo";
 function studio(i: PulseInput) { return i.section === 'website-builder' || i.section === 'store-builder' || i.section === 'builder'; }
 function heroDraft(f: { heroTitle: string }) {
   const alt = (f.heroTitle || '').indexOf('permiso') !== -1;
@@ -32,4 +32,4 @@ export function skillHero(i?: PulseInput) {
   const f = toolInspect(i);
   return { title: 'PULSE', body: 'El hero de ' + f.page + ' dice «' + (f.heroTitle || 'sin titulo') + '». ' + (f.genericHero ? 'Es plantilla. Te dejo una linea. L1, History revierte.' : 'Ya tiene voz. Te dejo otra por si queres tensar.') , action: 'website-builder', label: 'Aplicar hero', draft: heroDraft(f) };
 }
-export function skillSeoFix(_i?: PulseInput) { return seoFixTop(); }
+export function skillSeoFix(_i?: PulseInput) { return seoFixProposal(); }

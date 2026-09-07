@@ -22,8 +22,11 @@ export function approvalCard(opts: {
   description: string;
   reason: string;
   tool: string;
+  approvalId?: string;
+  policyPassed?: boolean;
+  policyLimit?: string;
 }): PulseCard {
-  const id = "appr_" + Date.now().toString(36);
+  const id = opts.approvalId ?? ("appr_" + Date.now().toString(36));
   return {
     type: "PULSE_CARD_APPROVAL",
     version: "1.0",
@@ -35,7 +38,10 @@ export function approvalCard(opts: {
     scope: { products_affected: 0, orders_affected: 0, customers_affected: 0 },
     estimated_impact: { note: "Estimacion. No es un hecho auditado.", currency: "USD" },
     tool: { name: opts.tool, parameters: {} },
-    policy_check: { passed: true, limit: "Merchant policy · DigitalBoost OS" },
+    policy_check: {
+      passed: opts.policyPassed ?? false,
+      limit: opts.policyLimit ?? "Policy pendiente de verificacion",
+    },
     buttons: [
       { label: "Confirmar y aplicar", action: "APPROVE" },
       { label: "Rechazar", action: "REJECT" }

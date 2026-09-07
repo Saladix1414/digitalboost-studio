@@ -1,0 +1,694 @@
+/* ============================================================
+   DIGITALBOOST
+   STORE BUILDER — AUTHORITATIVE VISUAL SYSTEM
+   ============================================================ */
+
+.store-builder-authoritative,
+.store-builder-authoritative-shell {
+  --db-bg: #f5f7fb;
+  --db-surface: #ffffff;
+  --db-surface-soft: #f8fafc;
+  --db-surface-muted: #eef3f8;
+
+  --db-text: #172033;
+  --db-text-secondary: #475569;
+  --db-text-muted: #64748b;
+
+  --db-border: #dfe7ef;
+  --db-border-strong: #cbd5e1;
+
+  --db-blue: #2563eb;
+  --db-blue-dark: #1d4ed8;
+
+  --db-violet: #7c3aed;
+  --db-violet-dark: #6d28d9;
+
+  --db-cyan: #0891b2;
+  --db-green: #059669;
+
+  color: #172033 !important;
+  background: #f5f7fb !important;
+  background-color: #f5f7fb !important;
+}
+
+
+/* ============================================================
+   OUTER WORKSPACE
+   ============================================================ */
+
+.store-builder-authoritative {
+  width: 100% !important;
+  min-width: 0 !important;
+
+  color: #172033 !important;
+
+  background: #f5f7fb !important;
+  background-color: #f5f7fb !important;
+}
+
+
+/* ============================================================
+   SHELL ROOT
+   ============================================================ */
+
+.store-builder-authoritative-shell {
+  width: 100% !important;
+  min-width: 0 !important;
+
+  color: #172033 !important;
+
+  background: #f5f7fb !important;
+  background-color: #f5f7fb !important;
+
+  border-color: #dfe7ef !important;
+}
+
+
+/* ============================================================
+   STUDIO ROOT
+   ============================================================ */
+
+.store-builder-authoritative-shell.studio-v2,
+.store-builder-authoritative-shell .studio-v2 {
+  color: #172033 !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      #f8fafc 0%,
+      #f5f7fb 100%
+    ) !important;
+
+  background-color: #f5f7fb !important;
+
+  border-color: #dfe7ef !important;
+
+  box-shadow:
+    0 20px 55px rgba(15,23,42,.08) !important;
+}
+
+
+/* ============================================================
+   TOPBAR
+   ============================================================ */
+
+.store-builder-authoritative-shell .studio-topbar {
+  background:
+    rgba(255,255,255,.97) !important;
+
+  background-color:
+    #ffffff !important;
+
+  color:
+    #172033 !important;
+
+  border-bottom:
+    1px solid #dfe7ef !important;
+
+  box-shadow:
+    0 1px 0 rgba(15,23,42,.03),
+    0 7px 22px rgba(15,23,42,.04) !important;
+}
+
+
+.store-builder-authoritative-shell .studio-brand-name {
+  color: #111827 !important;
+}
+
+
+.store-builder-authoritative-shell .studio-brand-path {
+  color: #64748b !important;
+}
+
+
+.store-builder-authoritative-shell .studio-brand-orb {
+  background:
+    linear-gradient(
+      135deg,
+      #eff6ff,
+      #dbeafe
+    ) !important;
+
+  background-color:
+    #e0f2fe !important;
+
+  color:
+    #2563eb !important;
+
+  border:
+    1px solid #bfdbfe !important;
+
+  box-shadow:
+    0 5px 15px rgba(37,99,235,.10) !important;
+}
+
+
+/* ============================================================
+   LIVE
+   ============================================================ */
+
+.store-builder-authoritative-shell .studio-live-badge {
+  background: #ecfdf5 !important;
+  background-color: #ecfdf5 !important;
+
+  color: #047857 !important;
+
+  border-color: #a7f3d0 !important;
+}
+
+
+.store-builder-authoritative-shell .studio-live-badge span {
+  background: #10b981 !important;
+}
+
+
+/* ============================================================
+   SHELL BUTTONS
+   ============================================================ */
+
+.store-builder-authoritative-shell .studio-icon-button,
+.store-builder-authoritative-shell .studio-button {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #334155 !important;
+
+  border:
+    1px solid #dfe7ef !important;
+
+  border-radius:
+    10px !important;
+
+  box-shadow:
+    0 1px 2px rgba(15,23,42,.03) !important;
+}
+
+
+.store-builder-authoritative-shell .studio-button-primary {
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #6d28d9
+    ) !important;
+
+  background-color:
+    #7c3aed !important;
+
+  color:
+    #ffffff !important;
+
+  border-color:
+    transparent !important;
+}
+
+
+.store-builder-authoritative-shell .studio-button-save {
+  background:
+    linear-gradient(
+      135deg,
+      #059669,
+      #047857
+    ) !important;
+
+  background-color:
+    #059669 !important;
+
+  color:
+    #ffffff !important;
+
+  border-color:
+    transparent !important;
+}
+
+
+.store-builder-authoritative-shell .studio-publish {
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #1d4ed8
+    ) !important;
+
+  background-color:
+    #2563eb !important;
+
+  color:
+    #ffffff !important;
+
+  border-color:
+    transparent !important;
+}
+
+
+/* ============================================================
+   DEVICE CONTROL
+   ============================================================ */
+
+.store-builder-authoritative-shell .studio-device-controls {
+  background: #f8fafc !important;
+  background-color: #f8fafc !important;
+
+  border:
+    1px solid #dfe7ef !important;
+
+  border-radius:
+    12px !important;
+}
+
+
+.store-builder-authoritative-shell
+.studio-device-controls button {
+  background: transparent !important;
+  color: #64748b !important;
+}
+
+
+.store-builder-authoritative-shell
+.studio-device-controls button.active {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #2563eb !important;
+
+  box-shadow:
+    0 2px 8px rgba(15,23,42,.08) !important;
+}
+
+
+/* ============================================================
+   WEBSITE BUILDER ROOT
+   ============================================================ */
+
+.store-builder-authoritative-shell
+[data-website-builder-v2] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #172033 !important;
+
+  border:
+    1px solid #dfe7ef !important;
+
+  border-radius:
+    18px !important;
+
+  box-shadow:
+    0 16px 42px rgba(15,23,42,.07) !important;
+}
+
+
+/* ============================================================
+   ALL V2 HEADERS
+   ============================================================ */
+
+.store-builder-authoritative-shell
+[data-website-builder-v2] header {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+
+  color: #172033 !important;
+
+  border-color: #dfe7ef !important;
+}
+
+
+/* ============================================================
+   SIDEBARS
+   ============================================================ */
+
+.store-builder-authoritative-shell
+[data-website-builder-v2] aside {
+  background:
+    linear-gradient(
+      180deg,
+      #fbfcfe,
+      #f8fafc
+    ) !important;
+
+  background-color: #f8fafc !important;
+
+  color: #172033 !important;
+
+  border-color:
+    #dfe7ef !important;
+}
+
+
+/* ============================================================
+   MAIN CANVAS
+   ============================================================ */
+
+.store-builder-authoritative-shell
+[data-website-builder-v2] main {
+  background:
+    radial-gradient(
+      circle at top,
+      #ffffff 0%,
+      #f3f6fa 50%,
+      #eef2f7 100%
+    ) !important;
+
+  background-color:
+    #eef2f7 !important;
+
+  color:
+    #172033 !important;
+}
+
+
+/* ============================================================
+   CANVAS INTERNAL
+   ============================================================ */
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+main
+[class*="bg-white"] {
+  background-color:
+    #ffffff !important;
+}
+
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+main
+[class*="bg-slate-50"] {
+  background-color:
+    #f8fafc !important;
+}
+
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+main
+[class*="bg-slate-100"] {
+  background-color:
+    #eef2f7 !important;
+}
+
+
+/* ============================================================
+   ANY REMAINING DARK SURFACE
+   ============================================================ */
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="bg-black"],
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="bg-[#02050"],
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="bg-[#0509"],
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="bg-[#0a0e"],
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="bg-[#0309"] {
+  background:
+    #ffffff !important;
+
+  background-color:
+    #ffffff !important;
+}
+
+
+/* ============================================================
+   SOFT SURFACES
+   ============================================================ */
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="bg-white/"] {
+  background:
+    #f8fafc !important;
+}
+
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="bg-white["] {
+  background:
+    #f8fafc !important;
+}
+
+
+/* ============================================================
+   TEXT
+   ============================================================ */
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="text-white"] {
+  color:
+    #172033 !important;
+}
+
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="text-slate-300"] {
+  color:
+    #475569 !important;
+}
+
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="text-slate-400"] {
+  color:
+    #64748b !important;
+}
+
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="text-slate-500"] {
+  color:
+    #64748b !important;
+}
+
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="text-slate-600"] {
+  color:
+    #475569 !important;
+}
+
+
+/* ============================================================
+   ACCENTS DIGITALBOOST
+   ============================================================ */
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="text-violet"] {
+  color:
+    #7c3aed !important;
+}
+
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="text-cyan"] {
+  color:
+    #0891b2 !important;
+}
+
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="text-emerald"] {
+  color:
+    #047857 !important;
+}
+
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="bg-violet-500"] {
+  background:
+    #7c3aed !important;
+
+  background-color:
+    #7c3aed !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="bg-blue-500"] {
+  background:
+    #2563eb !important;
+
+  background-color:
+    #2563eb !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="bg-emerald-500"] {
+  background:
+    #059669 !important;
+
+  background-color:
+    #059669 !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+/* ============================================================
+   BORDERS
+   ============================================================ */
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="border-white"] {
+  border-color:
+    #dfe7ef !important;
+}
+
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+[class*="border-dashed"] {
+  border-color:
+    #cbd5e1 !important;
+}
+
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+input,
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+textarea,
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+select {
+  background:
+    #ffffff !important;
+
+  background-color:
+    #ffffff !important;
+
+  color:
+    #172033 !important;
+
+  border-color:
+    #d5dee9 !important;
+
+  border-radius:
+    10px !important;
+}
+
+
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+input::placeholder,
+.store-builder-authoritative-shell
+[data-website-builder-v2]
+textarea::placeholder {
+  color:
+    #94a3b8 !important;
+}
+
+
+/* ============================================================
+   PREVIEW
+   ============================================================ */
+
+.store-builder-authoritative-shell.studio-preview {
+  background:
+    #f5f7fb !important;
+
+  background-color:
+    #f5f7fb !important;
+
+  color:
+    #172033 !important;
+}
+
+
+.store-builder-authoritative-shell
+.studio-preview-top {
+  background:
+    #ffffff !important;
+
+  background-color:
+    #ffffff !important;
+
+  color:
+    #172033 !important;
+
+  border-color:
+    #dfe7ef !important;
+}
+
+
+.store-builder-authoritative-shell
+.studio-preview-canvas {
+  background:
+    #eef2f7 !important;
+
+  background-color:
+    #eef2f7 !important;
+}
+
+
+.store-builder-authoritative-shell
+.preview-site {
+  background:
+    #ffffff !important;
+
+  background-color:
+    #ffffff !important;
+
+  color:
+    #172033 !important;
+
+  border-color:
+    #dfe7ef !important;
+
+  box-shadow:
+    0 22px 55px rgba(15,23,42,.10) !important;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .store-builder-authoritative,
+  .store-builder-authoritative-shell {
+    border-radius:
+      16px !important;
+  }
+
+  .store-builder-authoritative-shell
+  [data-website-builder-v2] {
+    border-radius:
+      14px !important;
+  }
+}

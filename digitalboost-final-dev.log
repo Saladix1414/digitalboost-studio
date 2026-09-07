@@ -1,0 +1,10 @@
+npm notice run dev
+npm notice run tsx server.ts
+🚀 Servidor backend y frontend corriendo en el puerto 3000
+5:47:02 PM [vite] (client) [optimizer] bundling dependencies...
+5:49:42 PM [vite] (client) hmr update /src/index.css, /src/store-builder-direct-final.css
+5:49:42 PM [vite] (client) hmr update /src/index.css, /src/StoreBuilderDirectFinal.tsx
+5:57:04 PM [vite] (client) hmr update /src/index.css, /src/StoreBuilderDirectFinal.tsx
+5:57:04 PM [vite] (client) hmr update /src/index.css, /src/store-builder-direct-final.css
+6:12:18 PM [vite] (client) hmr update /src/index.css, /src/StoreBuilderDirectFinal.tsx
+6:12:18 PM [vite] (client) hmr update /src/index.css, /src/store-builder-direct-final.css

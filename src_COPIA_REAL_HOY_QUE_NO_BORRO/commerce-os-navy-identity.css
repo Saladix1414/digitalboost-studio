@@ -1,0 +1,5 @@
+[data-commerce-os="true"] .bg-[#0A1020]{ background-color:var(--db-navy-900) !important; }
+[data-commerce-os="true"] .bg-[#101B32]{ background-color:var(--db-navy-800) !important; }
+[data-commerce-os="true"] .bg-[#14233F]{ background-color:var(--db-navy-700) !important; }
+[data-commerce-os="true"] .bg-cyan-400{ background-color:var(--db-cyan) !important; }
+[data-commerce-os="true"] .bg-violet-500{ background-color:var(--db-violet) !important; }

@@ -1,0 +1,311 @@
+/* ============================================================
+   DIGITALBOOST — COMMERCE OS VISUAL V2
+   LIGHT PREMIUM COMMAND CENTER
+   ============================================================ */
+
+[data-commerce-os="true"].db-commerce-visual-v2 {
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+  color: #172033 !important;
+
+  background:
+    radial-gradient(
+      circle at 8% 0%,
+      rgba(34, 211, 238, .11),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 94% 4%,
+      rgba(139, 92, 246, .13),
+      transparent 27%
+    ),
+    linear-gradient(
+      145deg,
+      #eef4fb 0%,
+      #f6f8fc 42%,
+      #f0f3fa 100%
+    ) !important;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.80),
+    0 24px 60px rgba(18,31,56,.10);
+}
+
+[data-commerce-os="true"].db-commerce-visual-v2::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      120deg,
+      rgba(34,211,238,.025),
+      transparent 30%,
+      rgba(139,92,246,.035) 72%,
+      transparent
+    );
+
+  box-shadow:
+    inset 0 -100px 140px rgba(99,102,241,.025);
+}
+
+/* Header */
+[data-commerce-os="true"].db-commerce-visual-v2 header {
+  background:
+    rgba(255,255,255,.86) !important;
+
+  border-bottom-color:
+    rgba(148,163,184,.20) !important;
+
+  box-shadow:
+    0 8px 24px rgba(15,23,42,.055);
+
+  backdrop-filter:
+    blur(20px);
+}
+
+/* Sidebar */
+[data-commerce-os="true"].db-commerce-visual-v2 aside {
+  background:
+    rgba(248,250,253,.94) !important;
+
+  border-right-color:
+    rgba(148,163,184,.17) !important;
+}
+
+/* Main */
+[data-commerce-os="true"].db-commerce-visual-v2 main {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(242,246,251,.76),
+      rgba(247,249,252,.92)
+    ) !important;
+}
+
+/* Common dark backgrounds → light surfaces */
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="bg-[#02050b]"],
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="bg-[#03060d]"],
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="bg-[#040811]"],
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="bg-[#050912]"],
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="bg-[#050a13]"],
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="bg-[#050914]"],
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="bg-[#070b14]"] {
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff 0%,
+      #f8fbff 100%
+    ) !important;
+
+  border-color:
+    rgba(148,163,184,.19) !important;
+
+  color:
+    #172033 !important;
+
+  box-shadow:
+    0 10px 28px rgba(30,41,59,.07),
+    inset 0 1px 0 rgba(255,255,255,.95);
+}
+
+/* Text hierarchy */
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="text-slate-700"] {
+  color: #40506a !important;
+}
+
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="text-slate-600"] {
+  color: #64748b !important;
+}
+
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="text-slate-500"] {
+  color: #708198 !important;
+}
+
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="text-white"] {
+  color: #182338 !important;
+}
+
+/* Cyan */
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="text-cyan-300"] {
+  color: #0891b2 !important;
+}
+
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="text-cyan-200"] {
+  color: #0e7490 !important;
+}
+
+/* Violet */
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="text-violet-300"] {
+  color: #7c3aed !important;
+}
+
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="text-violet-200"] {
+  color: #6d28d9 !important;
+}
+
+/* Buttons */
+[data-commerce-os="true"].db-commerce-visual-v2
+button {
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    border-color .18s ease,
+    background-color .18s ease;
+}
+
+[data-commerce-os="true"].db-commerce-visual-v2
+button:hover {
+  transform:
+    translateY(-1px);
+  box-shadow:
+    0 10px 24px rgba(30,41,59,.08);
+}
+
+/* Primary violet actions */
+[data-commerce-os="true"].db-commerce-visual-v2
+button[class*="bg-violet-500"] {
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #8b5cf6
+    ) !important;
+
+  color: #fff !important;
+
+  box-shadow:
+    0 10px 24px rgba(124,58,237,.22);
+}
+
+/* Cyan actions */
+[data-commerce-os="true"].db-commerce-visual-v2
+button[class*="bg-cyan-400"] {
+  background:
+    linear-gradient(
+      135deg,
+      #06b6d4,
+      #22d3ee
+    ) !important;
+
+  color: #082f49 !important;
+}
+
+/* Cards */
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="rounded-2xl"][class*="border"],
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="rounded-xl"][class*="border"] {
+  border-color:
+    rgba(148,163,184,.18) !important;
+
+  box-shadow:
+    0 10px 24px rgba(15,23,42,.055);
+}
+
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="rounded-2xl"][class*="border"]:hover,
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="rounded-xl"][class*="border"]:hover {
+  border-color:
+    rgba(124,58,237,.20) !important;
+
+  box-shadow:
+    0 14px 30px rgba(15,23,42,.08),
+    0 0 0 1px rgba(124,58,237,.035);
+}
+
+/* Inputs */
+[data-commerce-os="true"].db-commerce-visual-v2
+input,
+[data-commerce-os="true"].db-commerce-visual-v2
+textarea,
+[data-commerce-os="true"].db-commerce-visual-v2
+select {
+  background:
+    rgba(255,255,255,.94) !important;
+
+  color:
+    #172033 !important;
+
+  border-color:
+    rgba(148,163,184,.24) !important;
+}
+
+[data-commerce-os="true"].db-commerce-visual-v2
+input:focus,
+[data-commerce-os="true"].db-commerce-visual-v2
+textarea:focus,
+[data-commerce-os="true"].db-commerce-visual-v2
+select:focus {
+  border-color:
+    rgba(124,58,237,.48) !important;
+
+  box-shadow:
+    0 0 0 3px rgba(124,58,237,.08) !important;
+}
+
+/* Analytics surface */
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="bg-gradient-to-t"],
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="bg-gradient-to-b"] {
+  filter:
+    saturate(1.10);
+}
+
+/* Live / active states */
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="bg-emerald"] {
+  filter:
+    saturate(1.08);
+}
+
+/* Responsive bottom nav */
+[data-commerce-os="true"].db-commerce-visual-v2
+[class*="lg:hidden"] button {
+  background:
+    rgba(255,255,255,.92) !important;
+
+  color:
+    #5b6b80 !important;
+}
+
+/* Scrollbar */
+[data-commerce-os="true"].db-commerce-visual-v2::-webkit-scrollbar {
+  width: 9px;
+}
+
+[data-commerce-os="true"].db-commerce-visual-v2::-webkit-scrollbar-track {
+  background: #eef2f7;
+}
+
+[data-commerce-os="true"].db-commerce-visual-v2::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(
+      180deg,
+      #94a3b8,
+      #8b5cf6
+    );
+
+  border-radius: 999px;
+  border: 2px solid #eef2f7;
+}

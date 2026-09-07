@@ -1,5 +1,5 @@
 import "./store-builder-direct-final.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const __DIGITALBOOST_RUNTIME_MARKER__ = "DIGITALBOOST_STORE_BUILDER_DIRECT_FINAL_2026";
 import {

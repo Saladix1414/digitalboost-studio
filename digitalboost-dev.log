@@ -1,0 +1,4 @@
+npm notice run dev
+npm notice run tsx server.ts
+🚀 Servidor backend y frontend corriendo en el puerto 3000
+5:21:32 PM [vite] (client) [optimizer] bundling dependencies...

@@ -1,0 +1,182 @@
+[1mdiff --git a/src/CommerceOSOverview.tsx b/src/CommerceOSOverview.tsx[m
+[1mindex 4c04097..0b4520e 100644[m
+[1m--- a/src/CommerceOSOverview.tsx[m
+[1m+++ b/src/CommerceOSOverview.tsx[m
+[36m@@ -1,6 +1,8 @@[m
+ import { useMemo } from "react";[m
+ import { rangeMul, useOsRange } from "./DigitalBoostOsRangeData";[m
+[32m+[m[32mimport "./digitalboost-tokens.css";[m
+ import "./commerce-os-core.css";[m
+[32m+[m[32mimport "./commerce-os-navy-identity.css";[m
+ import {[m
+   ArrowUpRight,[m
+   ChevronRight,[m
+[36m@@ -64,13 +66,9 @@[m [mexport default function CommerceOSOverview({[m
+ }: CommerceOSOverviewProps) {[m
+   const osRange = useOsRange();[m
+   const osMul = rangeMul(osRange);[m
+[31m-  const osSales = Math.round(474 * osMul);[m
+[31m-  const osOrders = Math.max(1, Math.round(4 * osMul));[m
+[31m-  const osClients = Math.max(1, Math.round(4 * osMul));[m
+[31m-[m
+   const sales = orders.reduce((s: number, o: any) => s + (Number(o.total) || 0), 0);[m
+[31m-  const ticket = orders.length ? Math.round(sales / orders.length) : 0;[m
+[31m-  const conv = customers.length ? (orders.length / customers.length) * 100 : 0;[m
+[32m+[m[32m  const ticket = orders.length? Math.round(sales / orders.length) : 0;[m
+[32m+[m[32m  const conv = customers.length? (orders.length / customers.length) * 100 : 0;[m
+   const pulse = useMemo(() => [38, 52, 46, 64, 58, 73, 61, 86, 68, 91, 78, 97], []);[m
+ [m
+   const metrics = [[m
+[36m@@ -80,7 +78,7 @@[m [mexport default function CommerceOSOverview({[m
+     { label: "Conversión", value: `${conv.toFixed(0) || 25}%`, delta: "live", tone: "#fbbf24", pct: Math.min(1, conv / 100 || 0.25), go: "analytics" },[m
+   ];[m
+ [m
+[31m-  const feed = (orders.length ? orders : [[m
+[32m+[m[32m  const feed = (orders.length? orders : [[m
+     { id: "DB-1048", customer: "Martín González", status: "Pagado", total: 190 },[m
+     { id: "DB-1047", customer: "Sofía Rodríguez", status: "En preparación", total: 60 },[m
+     { id: "DB-1046", customer: "Lucas Fernández", status: "Enviado", total: 129 },[m
+[36m@@ -88,32 +86,20 @@[m [mexport default function CommerceOSOverview({[m
+   ]).slice(0, 4);[m
+ [m
+   return ([m
+[31m-    <div[m
+[31m-      data-commerce-os="true"[m
+[31m-      data-commerce-os-core="true"[m
+[31m-      data-commerce-os-vibrant="true"[m
+[31m-      className="relative min-h-[760px] overflow-hidden rounded-[28px] border border-white/10 bg-[#0A1020] text-[#F7FAFF]"[m
+[31m-    >[m
+[32m+[m[32m    <div data-commerce-os="true" data-commerce-os-core="true" data-commerce-os-vibrant="true" className="relative min-h-[760px] overflow-hidden rounded-[28px] border border-white/10 bg-[#0A1020] text-[#F7FAFF]">[m
+       <div className="db-grid-field pointer-events-none absolute inset-0" />[m
+       <div className="relative mx-auto max-w-6xl px-4 py-6 sm:px-6">[m
+         <section className="mb-6 grid items-end gap-6 lg:grid-cols-[1.3fr_0.7fr]">[m
+           <div>[m
+             <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-cyan-300">DigitalBoost · Control plane</div>[m
+             <h1 className="mt-3 text-4xl font-semibold leading-[0.95] tracking-tight text-white sm:text-5xl">[m
+[31m-              Tu comercio[m
+[31m-              <span className="mt-1 block text-cyan-300">en movimiento.</span>[m
+[32m+[m[32m              Tu comercio<span className="mt-1 block text-cyan-300">en movimiento.</span>[m
+             </h1>[m
+             <div className="mt-4 h-1 w-24 bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500" />[m
+[31m-            <p className="mt-4 max-w-md text-sm leading-6 text-slate-400">[m
+[31m-              Operá, diseñá y publicá desde un OS navy. El Store Builder es el estudio; este plano es el cerebro.[m
+[31m-            </p>[m
+[32m+[m[32m            <p className="mt-4 max-w-md text-sm leading-6 text-slate-400">Operá, diseñá y publicá desde un OS navy. El Store Builder es el estudio; este plano es el cerebro.</p>[m
+             <div className="mt-6 flex flex-wrap gap-2">[m
+[31m-              <button type="button" onClick={() => onNavigate?.("website-builder")} className="inline-flex h-11 items-center rounded-lg bg-cyan-400 px-5 text-sm font-semibold text-[#070d18]">[m
+[31m-                Abrir Store Builder[m
+[31m-              </button>[m
+[31m-              <button type="button" onClick={() => onNavigate?.("orders")} className="inline-flex h-11 items-center rounded-lg border border-white/10 px-5 text-sm">[m
+[31m-                Ver pedidos[m
+[31m-              </button>[m
+[32m+[m[32m              <button type="button" onClick={() => onNavigate?.("website-builder")} className="inline-flex h-11 items-center rounded-lg bg-cyan-400 px-5 text-sm font-semibold text-[#070d18]">Abrir Store Builder</button>[m
+[32m+[m[32m              <button type="button" onClick={() => onNavigate?.("orders")} className="inline-flex h-11 items-center rounded-lg border border-white/10 px-5 text-sm">Ver pedidos</button>[m
+             </div>[m
+           </div>[m
+           <div className="relative hidden overflow-hidden rounded-2xl border border-white/10 bg-[#070d18] p-4 lg:block">[m
+[36m@@ -125,27 +111,17 @@[m [mexport default function CommerceOSOverview({[m
+         <section className="mb-5 overflow-hidden rounded-2xl border border-white/10 bg-[#14233F]">[m
+           <div className="flex flex-col gap-3 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">[m
+             <div>[m
+[31m-              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-400">[m
+[31m-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />[m
+[31m-                Store live · nimbus.digitalboost.shop[m
+[31m-              </div>[m
+[31m-              <h2 className="mt-2 text-xl font-semibold">Experiencia lista para evolucionar</h2>[m
+[32m+[m[32m              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-400"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" /> Store live · nimbus.digitalboost.shop</div>[m
+[32m+[m[32m              <h2 className="mt-2 text-xl font-semibold">Nimbus Store · lista para evolucionar</h2>[m
+             </div>[m
+[31m-            <button type="button" onClick={() => onNavigate?.("website-builder")} className="inline-flex h-11 items-center gap-2 rounded-lg bg-violet-500 px-4 text-sm font-medium">[m
+[31m-              <Eye size={15} /> Editar en el studio[m
+[31m-            </button>[m
+[32m+[m[32m            <button type="button" onClick={() => onNavigate?.("website-builder")} className="inline-flex h-11 items-center gap-2 rounded-lg bg-violet-500 px-4 text-sm font-medium"><Eye size={15} /> Editar en el studio</button>[m
+           </div>[m
+         </section>[m
+ [m
+         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">[m
+           {metrics.map((m) => ([m
+             <button key={m.label} type="button" onClick={() => onNavigate?.(m.go)} className="rounded-xl border border-white/10 bg-[#101B32] p-4 text-left hover:border-cyan-400/40">[m
+[31m-              <div className="flex items-center justify-between">[m
+[31m-                <SignalRing value={m.pct} tone={m.tone} />[m
+[31m-                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400">[m
+[31m-                  <ArrowUpRight size={12} /> {m.delta}[m
+[31m-                </span>[m
+[31m-              </div>[m
+[32m+[m[32m              <div className="flex items-center justify-between"><SignalRing value={m.pct} tone={m.tone} /><span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400"><ArrowUpRight size={12} /> {m.delta}</span></div>[m
+               <div className="mt-3 text-2xl font-semibold tracking-tight tabular-nums">{m.value}</div>[m
+               <div className="mt-1 text-[11px] uppercase tracking-[0.14em] text-slate-400">{m.label}</div>[m
+             </button>[m
+[36m@@ -154,68 +130,21 @@[m [mexport default function CommerceOSOverview({[m
+ [m
+         <div className="mt-5 grid gap-4 xl:grid-cols-[1.4fr_0.6fr]">[m
+           <section className="rounded-xl border border-white/10 bg-[#101B32] p-4 sm:p-5">[m
+[31m-            <div className="flex items-center justify-between">[m
+[31m-              <h2 className="text-base font-semibold">Rendimiento</h2>[m
+[31m-              <button type="button" onClick={() => onNavigate?.("analytics")} className="text-xs text-slate-400">[m
+[31m-                Analytics <ChevronRight size={12} className="inline" />[m
+[31m-              </button>[m
+[31m-            </div>[m
+[31m-            <div className="mt-4 grid grid-cols-3 gap-2">[m
+[31m-              {[["Ticket", money(Math.round((ticket || 118) * osMul))], ["Productos", String(products.length || 4)], ["Conv.", `${(conv || 25).toFixed(0)}%`]].map(([l, v]) => ([m
+[31m-                <div key={l} className="rounded-lg border border-white/10 bg-[#070d18] p-3">[m
+[31m-                  <div className="text-[10px] uppercase tracking-[0.12em] text-slate-500">{l}</div>[m
+[31m-                  <div className="mt-2 text-sm font-semibold tabular-nums">{v}</div>[m
+[31m-                </div>[m
+[31m-              ))}[m
+[31m-            </div>[m
+[31m-            <div className="mt-5 flex h-36 items-end gap-1.5 rounded-lg border border-white/10 bg-[#070d18] px-3 pb-3 pt-5">[m
+[31m-              {pulse.map((h, i) => ([m
+[31m-                <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-violet-500 to-cyan-400" style={{ height: `${h}%` }} />[m
+[31m-              ))}[m
+[31m-            </div>[m
+[32m+[m[32m            <div className="flex items-center justify-between"><h2 className="text-base font-semibold">Rendimiento</h2><button type="button" onClick={() => onNavigate?.("analytics")} className="text-xs text-slate-400">Analytics <ChevronRight size={12} className="inline" /></button></div>[m
+[32m+[m[32m            <div className="mt-5 flex h-36 items-end gap-1.5 rounded-lg border border-white/10 bg-[#070d18] px-3 pb-3 pt-5">{pulse.map((h, i) => (<div key={i} className="flex-1 rounded-t bg-gradient-to-t from-violet-500 to-cyan-400" style={{ height: `${h}%` }} />))}</div>[m
+           </section>[m
+[31m-[m
+           <section className="relative overflow-hidden rounded-xl border border-violet-500/30 bg-[#14233F] p-4 sm:p-5">[m
+             <div className="absolute -right-6 -top-8 opacity-30"><PrismMark /></div>[m
+             <div className="relative">[m
+[31m-              <div className="flex items-center gap-2 text-violet-300">[m
+[31m-                <Sparkles size={14} />[m
+[31m-                <span className="text-[10px] font-semibold uppercase tracking-[0.16em]">PULSE</span>[m
+[31m-              </div>[m
+[32m+[m[32m              <div className="flex items-center gap-2 text-violet-300"><Sparkles size={14} /><span className="text-[10px] font-semibold uppercase tracking-[0.16em]">PULSE IA</span></div>[m
+               <h2 className="mt-5 text-lg font-semibold">¿Qué quiere PULSE tocar?</h2>[m
+               <div className="mt-5 space-y-2">[m
+[31m-                <button type="button" onClick={() => onNavigate?.("website-builder")} className="w-full rounded-lg border border-white/10 bg-black/20 p-3 text-left hover:border-violet-400/45">[m
+[31m-                  <div className="flex items-center gap-2 text-sm font-medium"><WandSparkles size={14} className="text-violet-300" /> Mejorar homepage</div>[m
+[31m-                </button>[m
+[31m-                <button type="button" onClick={() => onNavigate?.("campaigns")} className="w-full rounded-lg border border-white/10 bg-black/20 p-3 text-left hover:border-cyan-400/40">[m
+[31m-                  <div className="flex items-center gap-2 text-sm font-medium"><Zap size={14} className="text-cyan-300" /> Crear campaña</div>[m
+[31m-                </button>[m
+[31m-                <button type="button" onClick={() => onPulse?.()} className="w-full rounded-lg border border-cyan-400/40 bg-cyan-400/10 p-3 text-left">[m
+[31m-                  <div className="text-sm font-medium text-cyan-300">Hablar con PULSE</div>[m
+[31m-                </button>[m
+[32m+[m[32m                <button type="button" onClick={() => onNavigate?.("website-builder")} className="w-full rounded-lg border border-white/10 bg-black/20 p-3 text-left"><div className="flex items-center gap-2 text-sm font-medium"><WandSparkles size={14} className="text-violet-300" /> Mejorar homepage</div></button>[m
+[32m+[m[32m                <button type="button" onClick={() => onNavigate?.("campaigns")} className="w-full rounded-lg border border-white/10 bg-black/20 p-3 text-left"><div className="flex items-center gap-2 text-sm font-medium"><Zap size={14} className="text-cyan-300" /> Crear campaña</div></button>[m
+               </div>[m
+             </div>[m
+           </section>[m
+         </div>[m
+[31m-[m
+[31m-        <section className="mt-5 rounded-xl border border-white/10 bg-[#101B32] p-4 sm:p-5">[m
+[31m-          <div className="mb-3 flex items-center justify-between">[m
+[31m-            <h2 className="text-base font-semibold">Actividad reciente</h2>[m
+[31m-            <button type="button" onClick={() => onNavigate?.("orders")} className="text-xs text-cyan-300">Ver pedidos</button>[m
+[31m-          </div>[m
+[31m-          <div className="space-y-2">[m
+[31m-            {feed.map((o: any) => ([m
+[31m-              <button key={o.id} type="button" onClick={() => onNavigate?.("orders")} className="flex w-full items-center gap-3 rounded-lg border border-white/10 bg-[#070d18] px-3 py-3 text-left hover:border-cyan-400/30">[m
+[31m-                <div className="min-w-0 flex-1">[m
+[31m-                  <div className="truncate text-sm font-medium">#{o.id}</div>[m
+[31m-                  <div className="truncate text-xs text-slate-500">{o.customer} · {o.status || o.state || ""}</div>[m
+[31m-                </div>[m
+[31m-                <div className="text-sm font-semibold tabular-nums text-cyan-300">{money(Number(o.total) || 0)}</div>[m
+[31m-                <ChevronRight size={14} className="text-slate-600" />[m
+[31m-              </button>[m
+[31m-            ))}[m
+[31m-          </div>[m
+[31m-        </section>[m
+       </div>[m
+     </div>[m
+   );[m

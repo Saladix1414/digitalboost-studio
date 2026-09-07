@@ -1,0 +1,4 @@
+
+.db-store-paper{background:var(--store-bg,#F4F1EA)!important;color:var(--store-text,#101820)!important}
+.db-store-paper [class*="text-black"]{color:var(--store-muted,#5C6570)!important}
+.db-store-cta{background:var(--store-primary,#101820)!important;color:var(--store-bg,#F4F1EA)!important}

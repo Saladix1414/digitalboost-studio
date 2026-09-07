@@ -1,0 +1,685 @@
+from pathlib import Path
+from datetime import datetime
+import shutil
+import subprocess
+import sys
+import re
+
+ROOT = Path.home() / "digitalboost-studio"
+SRC = ROOT / "src"
+WORKSPACE = SRC / "StoreBuilderWorkspace.tsx"
+OVERVIEW = SRC / "CommerceOSOverview.tsx"
+
+print("=" * 64)
+print("DIGITALBOOST COMMERCE OS")
+print("FASE 1 — OVERVIEW + CENTRO DE CONTROL")
+print("=" * 64)
+print()
+
+if not WORKSPACE.exists():
+    raise SystemExit("❌ No existe src/StoreBuilderWorkspace.tsx")
+
+# ============================================================
+# 1. Crear el nuevo Overview aislado
+# ============================================================
+
+overview_code = r'''import {
+  Activity,
+  ArrowUpRight,
+  BarChart3,
+  Boxes,
+  ChevronRight,
+  CircleDollarSign,
+  Clock3,
+  Megaphone,
+  Package,
+  ShoppingCart,
+  Sparkles,
+  TrendingUp,
+  Users,
+  Zap,
+} from "lucide-react";
+
+type CommerceOSOverviewProps = {
+  onNavigate?: (section: string) => void;
+};
+
+const metrics = [
+  {
+    label: "Ventas",
+    value: "$248.390",
+    change: "+18,4%",
+    icon: CircleDollarSign,
+  },
+  {
+    label: "Pedidos",
+    value: "184",
+    change: "+12,1%",
+    icon: ShoppingCart,
+  },
+  {
+    label: "Clientes",
+    value: "1.284",
+    change: "+9,7%",
+    icon: Users,
+  },
+  {
+    label: "Conversión",
+    value: "4,82%",
+    change: "+0,64%",
+    icon: TrendingUp,
+  },
+];
+
+const quickActions = [
+  {
+    title: "Agregar producto",
+    description: "Incorporá un nuevo producto a tu tienda.",
+    icon: Package,
+    section: "products",
+  },
+  {
+    title: "Crear campaña",
+    description: "Lanzá una campaña para aumentar tus ventas.",
+    icon: Megaphone,
+    section: "campaigns",
+  },
+  {
+    title: "Ver pedidos",
+    description: "Revisá y gestioná tus pedidos recientes.",
+    icon: ShoppingCart,
+    section: "orders",
+  },
+  {
+    title: "Analizar negocio",
+    description: "Consultá el rendimiento de tu comercio.",
+    icon: BarChart3,
+    section: "analytics",
+  },
+];
+
+const activity = [
+  ["Pedido #DB-1048", "Nuevo pedido recibido", "$34.990"],
+  ["Pedido #DB-1047", "Pago confirmado", "$18.490"],
+  ["Cliente nuevo", "María González se registró", "Hace 8 min"],
+  ["Campaña", "Recuperación de carrito activada", "Hace 21 min"],
+];
+
+export default function CommerceOSOverview({
+  onNavigate,
+}: CommerceOSOverviewProps) {
+  const navigate = (section: string) => {
+    onNavigate?.(section);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* HEADER */}
+      <section className="relative overflow-hidden rounded-2xl border border-cyan-400/15 bg-gradient-to-br from-[#07101e] via-[#071326] to-[#090817] p-6">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-violet-500/10 blur-3xl" />
+
+        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-cyan-300">
+              <Sparkles size={14} />
+              DIGITALBOOST COMMERCE OS
+            </div>
+
+            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+              Centro de control
+            </h1>
+
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+              Todo lo que necesitás para administrar, analizar y hacer crecer
+              tu comercio desde un solo lugar.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-400/5 px-4 py-3">
+            <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400" />
+            <div>
+              <div className="text-xs font-semibold text-emerald-300">
+                Comercio activo
+              </div>
+              <div className="text-[11px] text-slate-500">
+                Sistema operativo conectado
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* METRICS */}
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {metrics.map((metric) => {
+          const Icon = metric.icon;
+
+          return (
+            <div
+              key={metric.label}
+              className="group rounded-xl border border-white/10 bg-[#070b14] p-5 transition hover:border-cyan-400/25"
+            >
+              <div className="flex items-start justify-between">
+                <div className="rounded-lg border border-cyan-400/10 bg-cyan-400/5 p-2.5 text-cyan-300">
+                  <Icon size={18} />
+                </div>
+
+                <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
+                  <ArrowUpRight size={13} />
+                  {metric.change}
+                </span>
+              </div>
+
+              <div className="mt-5 text-2xl font-bold text-white">
+                {metric.value}
+              </div>
+
+              <div className="mt-1 text-xs text-slate-500">
+                {metric.label}
+              </div>
+            </div>
+          );
+        })}
+      </section>
+
+      {/* QUICK ACTIONS */}
+      <section>
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-white">
+              Acciones rápidas
+            </h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Accedé directamente a las tareas más importantes.
+            </p>
+          </div>
+
+          <Zap size={17} className="text-violet-300" />
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {quickActions.map((action) => {
+            const Icon = action.icon;
+
+            return (
+              <button
+                key={action.title}
+                type="button"
+                onClick={() => navigate(action.section)}
+                className="group rounded-xl border border-white/10 bg-[#070b14] p-4 text-left transition hover:-translate-y-0.5 hover:border-cyan-400/25 hover:bg-[#09101d]"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="rounded-lg border border-violet-400/15 bg-violet-400/5 p-2 text-violet-300">
+                    <Icon size={17} />
+                  </div>
+
+                  <ChevronRight
+                    size={16}
+                    className="text-slate-600 transition group-hover:translate-x-1 group-hover:text-cyan-300"
+                  />
+                </div>
+
+                <div className="mt-4 text-sm font-semibold text-white">
+                  {action.title}
+                </div>
+
+                <div className="mt-1 text-xs leading-5 text-slate-500">
+                  {action.description}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* MAIN CONTROL GRID */}
+      <section className="grid gap-4 xl:grid-cols-[1.35fr_.65fr]">
+        <div className="rounded-xl border border-white/10 bg-[#070b14] p-5">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-white">
+                Rendimiento comercial
+              </h2>
+              <p className="mt-1 text-xs text-slate-500">
+                Evolución de tu actividad reciente.
+              </p>
+            </div>
+
+            <Activity size={18} className="text-cyan-300" />
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-lg border border-white/5 bg-black/20 p-4">
+              <div className="text-[11px] text-slate-500">Ticket promedio</div>
+              <div className="mt-2 text-lg font-semibold text-white">
+                $14.820
+              </div>
+              <div className="mt-1 text-[11px] text-emerald-400">
+                +7,3%
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-white/5 bg-black/20 p-4">
+              <div className="text-[11px] text-slate-500">Productos activos</div>
+              <div className="mt-2 text-lg font-semibold text-white">
+                326
+              </div>
+              <div className="mt-1 text-[11px] text-emerald-400">
+                +24 este mes
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-white/5 bg-black/20 p-4">
+              <div className="text-[11px] text-slate-500">Carritos recuperados</div>
+              <div className="mt-2 text-lg font-semibold text-white">
+                38
+              </div>
+              <div className="mt-1 text-[11px] text-emerald-400">
+                +15,8%
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 h-36 rounded-lg border border-white/5 bg-gradient-to-b from-cyan-400/[0.04] to-transparent p-4">
+            <div className="flex h-full items-end gap-2">
+              {[34, 46, 40, 58, 52, 71, 64, 82, 76, 91, 84, 100].map(
+                (height, index) => (
+                  <div
+                    key={index}
+                    className="flex-1 rounded-t bg-gradient-to-t from-cyan-500/20 to-cyan-300/60 transition hover:from-violet-500/30 hover:to-violet-300/70"
+                    style={{ height: `${height}%` }}
+                  />
+                )
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-violet-400/15 bg-gradient-to-br from-[#0c0a19] to-[#070b14] p-5">
+          <div className="flex items-center gap-2 text-violet-300">
+            <Sparkles size={17} />
+            <span className="text-xs font-semibold tracking-wide">
+              COMMERCE AI
+            </span>
+          </div>
+
+          <h2 className="mt-4 text-lg font-bold text-white">
+            Tu operador comercial
+          </h2>
+
+          <p className="mt-2 text-xs leading-5 text-slate-400">
+            Analizá tu negocio, descubrí oportunidades y generá acciones
+            comerciales asistidas por IA.
+          </p>
+
+          <div className="mt-5 space-y-2">
+            {[
+              "Detectar oportunidades de crecimiento",
+              "Analizar productos con bajo rendimiento",
+              "Crear una campaña de recuperación",
+            ].map((item) => (
+              <div
+                key={item}
+                className="rounded-lg border border-white/5 bg-black/20 px-3 py-2.5 text-xs text-slate-300"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => navigate("marketing")}
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-cyan-500 px-4 py-2.5 text-xs font-semibold text-white"
+          >
+            Abrir Commerce AI
+            <ArrowUpRight size={14} />
+          </button>
+        </div>
+      </section>
+
+      {/* RECENT ACTIVITY */}
+      <section className="rounded-xl border border-white/10 bg-[#070b14] p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-white">
+              Actividad reciente
+            </h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Últimos movimientos de tu comercio.
+            </p>
+          </div>
+
+          <Clock3 size={17} className="text-slate-500" />
+        </div>
+
+        <div className="divide-y divide-white/5">
+          {activity.map(([title, description, value]) => (
+            <div
+              key={`${title}-${description}`}
+              className="flex items-center gap-3 py-3"
+            >
+              <div className="rounded-lg border border-white/5 bg-black/20 p-2 text-slate-400">
+                {title.includes("Pedido") ? (
+                  <ShoppingCart size={15} />
+                ) : title.includes("Cliente") ? (
+                  <Users size={15} />
+                ) : title.includes("Campaña") ? (
+                  <Megaphone size={15} />
+                ) : (
+                  <Activity size={15} />
+                )}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-medium text-slate-200">
+                  {title}
+                </div>
+                <div className="truncate text-[11px] text-slate-500">
+                  {description}
+                </div>
+              </div>
+
+              <div className="text-right">
+                <div className="text-xs font-semibold text-slate-300">
+                  {value}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* COMMERCE OS MODULES */}
+      <section>
+        <div className="mb-3">
+          <h2 className="text-sm font-semibold text-white">
+            Commerce OS
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Las áreas que forman el sistema operativo de tu comercio.
+          </p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            ["Tienda", "Productos, inventario, pedidos y clientes.", Boxes, "products"],
+            ["Diseño", "Temas, constructor y personalización.", Package, "themes"],
+            ["Crecimiento", "Marketing, campañas y recuperación.", Megaphone, "marketing"],
+            ["Finanzas", "Ventas, pagos e indicadores financieros.", CircleDollarSign, "payments"],
+            ["Gestión", "Configuración y administración.", Activity, "settings"],
+            ["Analytics", "Datos y rendimiento del negocio.", BarChart3, "analytics"],
+          ].map(([title, description, Icon, section]) => {
+            const ModuleIcon = Icon as typeof Boxes;
+
+            return (
+              <button
+                key={String(title)}
+                type="button"
+                onClick={() => navigate(String(section))}
+                className="group rounded-xl border border-white/10 bg-[#070b14] p-4 text-left transition hover:border-cyan-400/25"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="rounded-lg border border-white/5 bg-black/20 p-2 text-cyan-300">
+                    <ModuleIcon size={17} />
+                  </div>
+                  <ChevronRight
+                    size={15}
+                    className="text-slate-600 group-hover:text-cyan-300"
+                  />
+                </div>
+
+                <div className="mt-4 text-sm font-semibold text-white">
+                  {String(title)}
+                </div>
+
+                <div className="mt-1 text-xs leading-5 text-slate-500">
+                  {String(description)}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+    </div>
+  );
+}
+'''
+
+OVERVIEW.write_text(overview_code, encoding="utf-8")
+print("✓ CommerceOSOverview.tsx creado")
+
+# ============================================================
+# 2. Backup del Workspace
+# ============================================================
+
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+backup = WORKSPACE.with_name(
+    f"StoreBuilderWorkspace.tsx.before_overview_{timestamp}.bak"
+)
+shutil.copy2(WORKSPACE, backup)
+
+print(f"✓ Backup creado: {backup.name}")
+
+text = WORKSPACE.read_text(encoding="utf-8")
+
+# ============================================================
+# 3. Agregar import de forma segura
+# ============================================================
+
+import_line = 'import CommerceOSOverview from "./CommerceOSOverview";'
+
+if import_line not in text:
+    lines = text.splitlines()
+    last_import = -1
+
+    for i, line in enumerate(lines):
+        if line.startswith("import "):
+            last_import = i
+
+    if last_import == -1:
+        shutil.copy2(backup, WORKSPACE)
+        OVERVIEW.unlink(missing_ok=True)
+        raise SystemExit("❌ No se encontró zona de imports.")
+
+    lines.insert(last_import + 1, import_line)
+    text = "\n".join(lines) + ("\n" if text.endswith("\n") else "")
+
+    WORKSPACE.write_text(text, encoding="utf-8")
+
+print("✓ Import de CommerceOSOverview agregado")
+
+# ============================================================
+# 4. Buscar el dashboard existente
+# ============================================================
+
+text = WORKSPACE.read_text(encoding="utf-8")
+
+patterns = [
+    r'\{section\s*===\s*["\']dashboard["\']\s*&&\s*\(',
+    r'\{section\s*===\s*["\']dashboard["\']\s*&&',
+]
+
+match = None
+
+for pattern in patterns:
+    match = re.search(pattern, text)
+    if match:
+        break
+
+if not match:
+    print()
+    print("⚠️ No encontré el bloque exacto del dashboard.")
+    print("No voy a modificar el render existente automáticamente.")
+    print()
+    print("✓ CommerceOSOverview.tsx queda creado.")
+    print(f"✓ Backup disponible: {backup.name}")
+    print()
+    print("BUILD DE VERIFICACIÓN")
+
+    result = subprocess.run(["npm", "run", "build"], cwd=ROOT)
+
+    if result.returncode != 0:
+        print("❌ BUILD FALLÓ")
+        shutil.copy2(backup, WORKSPACE)
+        OVERVIEW.unlink(missing_ok=True)
+        sys.exit(1)
+
+    print("✅ BUILD CORRECTO")
+    print()
+    print("El componente quedó preparado para la conexión manual.")
+    sys.exit(0)
+
+# ============================================================
+# 5. Encontrar el inicio y final del bloque JSX
+# ============================================================
+
+start = match.start()
+
+# Desde el `{` inicial del condicional.
+brace_start = text.find("{", start)
+
+depth = 0
+end = None
+
+for pos in range(brace_start, len(text)):
+    char = text[pos]
+
+    if char == "{":
+        depth += 1
+    elif char == "}":
+        depth -= 1
+
+        if depth == 0:
+            end = pos + 1
+            break
+
+if end is None:
+    shutil.copy2(backup, WORKSPACE)
+    raise SystemExit(
+        "❌ No pude determinar el final del dashboard existente."
+    )
+
+old_block = text[brace_start:end]
+
+# ============================================================
+# 6. Seguridad
+# ============================================================
+
+if "section" not in old_block:
+    shutil.copy2(backup, WORKSPACE)
+    raise SystemExit(
+        "❌ Seguridad: el bloque encontrado no parece ser el dashboard."
+    )
+
+new_block = """{section === "dashboard" && (
+        <CommerceOSOverview
+          onNavigate={(nextSection) => {
+            setSection(nextSection as StoreSection);
+          }}
+        />
+      )}"""
+
+new_text = text[:brace_start] + new_block + text[end:]
+
+# ============================================================
+# 7. Verificaciones
+# ============================================================
+
+if "CommerceOSOverview" not in new_text:
+    shutil.copy2(backup, WORKSPACE)
+    raise SystemExit("❌ CommerceOSOverview no quedó conectado.")
+
+if 'section === "dashboard"' not in new_text:
+    shutil.copy2(backup, WORKSPACE)
+    raise SystemExit("❌ Se perdió la condición dashboard.")
+
+if "const [openGroups, setOpenGroups]" not in new_text:
+    shutil.copy2(backup, WORKSPACE)
+    raise SystemExit("❌ openGroups desapareció. Archivo restaurado.")
+
+if "const [section, setSection]" not in new_text:
+    shutil.copy2(backup, WORKSPACE)
+    raise SystemExit("❌ section desapareció. Archivo restaurado.")
+
+# ============================================================
+# 8. Escribir
+# ============================================================
+
+WORKSPACE.write_text(new_text, encoding="utf-8")
+
+print("✓ Dashboard anterior reemplazado por Commerce OS Overview")
+print("✓ Navegación del Overview conectada a section")
+print()
+
+# ============================================================
+# 9. BUILD
+# ============================================================
+
+print("=" * 64)
+print("BUILD DE SEGURIDAD")
+print("=" * 64)
+print()
+
+build = subprocess.run(
+    ["npm", "run", "build"],
+    cwd=ROOT
+)
+
+if build.returncode != 0:
+    print()
+    print("❌ BUILD FALLÓ")
+    print("Restaurando StoreBuilderWorkspace...")
+    shutil.copy2(backup, WORKSPACE)
+    print("✓ Archivo restaurado.")
+    print("✓ CommerceOSOverview queda disponible como componente aislado.")
+    sys.exit(1)
+
+# ============================================================
+# 10. Verificación final
+# ============================================================
+
+final_text = WORKSPACE.read_text(encoding="utf-8")
+
+checks = [
+    "CommerceOSOverview",
+    'section === "dashboard"',
+    "const [openGroups, setOpenGroups]",
+    "const [section, setSection]",
+]
+
+for check in checks:
+    if check not in final_text:
+        shutil.copy2(backup, WORKSPACE)
+        print(f"❌ Verificación fallida: {check}")
+        print("✓ Archivo restaurado.")
+        sys.exit(1)
+
+print()
+print("=" * 64)
+print("✅ COMMERCE OS OVERVIEW IMPLEMENTADO")
+print("=" * 64)
+print()
+print("Incluye:")
+print("  ✓ Centro de control")
+print("  ✓ Métricas comerciales")
+print("  ✓ Acciones rápidas")
+print("  ✓ Rendimiento")
+print("  ✓ Commerce AI")
+print("  ✓ Actividad reciente")
+print("  ✓ Módulos de Commerce OS")
+print("  ✓ Navegación conectada")
+print()
+print("Protegido:")
+print("  ✓ Splash")
+print("  ✓ DigitalBoostMainPage")
+print("  ✓ CommerceOSBoot")
+print("  ✓ Orden de hooks del Store Builder")
+print()
+print(f"Backup: {backup.name}")
+print()
+print("✅ BUILD CORRECTO")
+print()
+print("👉 Reiniciá el servidor y entrá a Commerce OS.")
+print()

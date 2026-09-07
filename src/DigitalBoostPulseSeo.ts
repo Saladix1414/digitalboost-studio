@@ -11,19 +11,44 @@ export function seoSpeak() {
   const t = f.top;
   return { title: 'PULSE', body: explainScore(f.issues) + ' El golpe es «' + t.title + '» en ' + t.url + '. ' + t.why + ' Optimizar es L1.', action: 'seo', label: 'Abrir SEO' };
 }
-export function seoFixTop() {
+export function seoFixProposal() {
   const f = seoFacts();
   const t = f.top;
-  if (!t) return seoSpeak();
-  const p = f.pages.find(function (x) { return x.id === t.pageId; });
-  if (!p) return seoSpeak();
-  const ov = Object.assign({}, f.s.overrides || {});
-  const cur = Object.assign({}, ov[p.id] || {});
-  if (t.fixKind === 'title') cur.title = pulseTitle(p);
-  if (t.fixKind === 'desc') cur.description = pulseDesc(p);
-  if (t.fixKind === 'alt') cur.alt = pulseAlt(p);
-  if (t.fixKind === 'noindex') cur.indexable = false;
-  ov[p.id] = cur;
-  saveSeo(Object.assign({}, f.s, { overrides: ov, resolved: (f.s.resolved || []).concat([t.id]), lastScan: Date.now() }));
-  return { title: 'PULSE', body: 'Hecho. ' + t.fixKind + ' en ' + p.url + '. Mira el score en SEO Center. No toque el canvas.', action: 'seo', label: 'Ver SEO' };
+
+  if (!t) {
+    return {
+      title: "PULSE",
+      body: "SEO limpio. No hay correccion pendiente.",
+      action: "seo",
+      label: "Ver SEO",
+      proposal: null,
+    };
+  }
+
+  const p = f.pages.find(function (page: any) {
+    return page.id === t.pageId || page.url === t.url;
+  }) || {};
+
+  return {
+    title: "PULSE",
+    body:
+      "Propuesta SEO: " +
+      t.fixKind +
+      " en " +
+      (p.url || t.url || "pagina") +
+      ". Requiere Governance antes de aplicar.",
+    action: "seo-fix",
+    label: "Revisar y aplicar",
+    proposal: {
+      type: "seo-fix",
+      fixKind: t.fixKind,
+      pageId: p.id || t.pageId,
+      url: p.url || t.url,
+      issueId: t.id,
+      reason: "PULSE propone corregir el problema SEO prioritario.",
+    },
+    confirm: true,
+  };
 }
+
+

@@ -1,0 +1,1009 @@
+from pathlib import Path
+from datetime import datetime
+import shutil
+import subprocess
+import re
+import sys
+
+ROOT = Path.home() / "digitalboost-studio"
+WORKSPACE = ROOT / "src" / "StoreBuilderWorkspace.tsx"
+COMPONENT = ROOT / "src" / "WebsiteBuilderV2.tsx"
+
+print("=" * 70)
+print("DIGITALBOOST — WEBSITE BUILDER V2")
+print("CANVAS INTERACTIVO + INSPECTOR REAL")
+print("=" * 70)
+
+if not WORKSPACE.exists():
+    print("❌ No existe StoreBuilderWorkspace.tsx")
+    sys.exit(1)
+
+backup = WORKSPACE.with_name(
+    f"StoreBuilderWorkspace.tsx.before_website_builder_v2_{datetime.now().strftime('%Y%m%d_%H%M%S')}.bak"
+)
+
+original = WORKSPACE.read_text(encoding="utf-8")
+shutil.copy2(WORKSPACE, backup)
+
+print(f"✓ Backup creado: {backup.name}")
+
+component_source = r'''import React, { useEffect, useMemo, useState } from "react";
+import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Eye,
+  GripVertical,
+  Layout,
+  Monitor,
+  Move,
+  Palette,
+  Plus,
+  Redo2,
+  Save,
+  Smartphone,
+  Tablet,
+  Trash2,
+  Type,
+  Undo2,
+  X,
+} from "lucide-react";
+
+type DeviceMode = "desktop" | "tablet" | "mobile";
+
+type BlockType =
+  | "hero"
+  | "text"
+  | "image"
+  | "button"
+  | "products"
+  | "features"
+  | "banner"
+  | "footer";
+
+type BuilderBlock = {
+  id: string;
+  type: BlockType;
+  label: string;
+  text: string;
+  background: string;
+  color: string;
+  fontSize: number;
+  padding: number;
+  align: "left" | "center" | "right";
+  width: number;
+};
+
+type Props = {
+  onBack?: () => void;
+};
+
+const initialBlocks: BuilderBlock[] = [
+  {
+    id: "hero-1",
+    type: "hero",
+    label: "Hero principal",
+    text: "Tu tienda. Tu marca. Tu negocio.",
+    background: "#071326",
+    color: "#ffffff",
+    fontSize: 42,
+    padding: 72,
+    align: "center",
+    width: 100,
+  },
+  {
+    id: "text-1",
+    type: "text",
+    label: "Texto",
+    text: "Presentá tus productos y conectá con tus clientes desde una experiencia moderna.",
+    background: "#030914",
+    color: "#cbd5e1",
+    fontSize: 18,
+    padding: 40,
+    align: "center",
+    width: 100,
+  },
+  {
+    id: "products-1",
+    type: "products",
+    label: "Productos",
+    text: "Productos destacados",
+    background: "#070b14",
+    color: "#ffffff",
+    fontSize: 24,
+    padding: 40,
+    align: "left",
+    width: 100,
+  },
+];
+
+const blockLibrary: Array<{
+  type: BlockType;
+  label: string;
+  description: string;
+  icon: React.ElementType;
+}> = [
+  {
+    type: "hero",
+    label: "Hero",
+    description: "Encabezado principal",
+    icon: Layout,
+  },
+  {
+    type: "text",
+    label: "Texto",
+    description: "Bloque de contenido",
+    icon: Type,
+  },
+  {
+    type: "image",
+    label: "Imagen",
+    description: "Imagen destacada",
+    icon: Eye,
+  },
+  {
+    type: "button",
+    label: "Botón",
+    description: "Llamada a la acción",
+    icon: Move,
+  },
+  {
+    type: "products",
+    label: "Productos",
+    description: "Productos del Commerce OS",
+    icon: Layout,
+  },
+  {
+    type: "features",
+    label: "Características",
+    description: "Beneficios o servicios",
+    icon: Palette,
+  },
+  {
+    type: "banner",
+    label: "Banner",
+    description: "Promoción destacada",
+    icon: Layout,
+  },
+  {
+    type: "footer",
+    label: "Footer",
+    description: "Pie de página",
+    icon: Layout,
+  },
+];
+
+function createBlock(type: BlockType, index: number): BuilderBlock {
+  const defaults: Record<BlockType, Partial<BuilderBlock>> = {
+    hero: {
+      label: "Hero",
+      text: "Una experiencia digital creada con DigitalBoost.",
+      fontSize: 38,
+      padding: 64,
+      align: "center",
+      background: "#071326",
+      color: "#ffffff",
+    },
+    text: {
+      label: "Texto",
+      text: "Escribí contenido para tu sitio.",
+      fontSize: 18,
+      padding: 32,
+      align: "left",
+      background: "#030914",
+      color: "#cbd5e1",
+    },
+    image: {
+      label: "Imagen",
+      text: "Imagen destacada",
+      fontSize: 18,
+      padding: 48,
+      align: "center",
+      background: "#0b1220",
+      color: "#ffffff",
+    },
+    button: {
+      label: "Botón",
+      text: "Comprar ahora",
+      fontSize: 16,
+      padding: 24,
+      align: "center",
+      background: "#0b1630",
+      color: "#ffffff",
+    },
+    products: {
+      label: "Productos",
+      text: "Productos destacados",
+      fontSize: 24,
+      padding: 40,
+      align: "left",
+      background: "#070b14",
+      color: "#ffffff",
+    },
+    features: {
+      label: "Características",
+      text: "Todo lo que tu negocio necesita.",
+      fontSize: 24,
+      padding: 40,
+      align: "center",
+      background: "#07101e",
+      color: "#ffffff",
+    },
+    banner: {
+      label: "Banner",
+      text: "Oferta especial",
+      fontSize: 28,
+      padding: 36,
+      align: "center",
+      background: "#10182b",
+      color: "#ffffff",
+    },
+    footer: {
+      label: "Footer",
+      text: "© Tu marca",
+      fontSize: 14,
+      padding: 36,
+      align: "center",
+      background: "#02050a",
+      color: "#94a3b8",
+    },
+  };
+
+  return {
+    id: `${type}-${Date.now()}-${index}`,
+    type,
+    label: defaults[type].label || type,
+    text: defaults[type].text || "",
+    background: defaults[type].background || "#070b14",
+    color: defaults[type].color || "#ffffff",
+    fontSize: defaults[type].fontSize || 18,
+    padding: defaults[type].padding || 32,
+    align: defaults[type].align || "left",
+    width: 100,
+  };
+}
+
+export default function WebsiteBuilderV2({ onBack }: Props) {
+  const [blocks, setBlocks] = useState<BuilderBlock[]>(() => {
+    try {
+      const saved = localStorage.getItem("digitalboost_website_builder_v2");
+      return saved ? JSON.parse(saved) : initialBlocks;
+    } catch {
+      return initialBlocks;
+    }
+  });
+
+  const [selectedId, setSelectedId] = useState<string | null>(
+    initialBlocks[0]?.id || null
+  );
+
+  const [device, setDevice] = useState<DeviceMode>("desktop");
+  const [preview, setPreview] = useState(false);
+  const [history, setHistory] = useState<BuilderBlock[][]>([]);
+  const [future, setFuture] = useState<BuilderBlock[][]>([]);
+
+  const selectedBlock = useMemo(
+    () => blocks.find((block) => block.id === selectedId) || null,
+    [blocks, selectedId]
+  );
+
+  useEffect(() => {
+    localStorage.setItem(
+      "digitalboost_website_builder_v2",
+      JSON.stringify(blocks)
+    );
+  }, [blocks]);
+
+  const commit = (next: BuilderBlock[]) => {
+    setHistory((current) => [...current.slice(-29), blocks]);
+    setFuture([]);
+    setBlocks(next);
+  };
+
+  const updateSelected = (patch: Partial<BuilderBlock>) => {
+    if (!selectedId) return;
+
+    commit(
+      blocks.map((block) =>
+        block.id === selectedId ? { ...block, ...patch } : block
+      )
+    );
+  };
+
+  const addBlock = (type: BlockType) => {
+    const block = createBlock(type, blocks.length);
+    commit([...blocks, block]);
+    setSelectedId(block.id);
+  };
+
+  const duplicateSelected = () => {
+    if (!selectedBlock) return;
+
+    const clone = {
+      ...selectedBlock,
+      id: `${selectedBlock.type}-${Date.now()}`,
+      label: `${selectedBlock.label} copia`,
+    };
+
+    const index = blocks.findIndex((b) => b.id === selectedBlock.id);
+    const next = [...blocks];
+    next.splice(index + 1, 0, clone);
+
+    commit(next);
+    setSelectedId(clone.id);
+  };
+
+  const removeSelected = () => {
+    if (!selectedId) return;
+
+    const index = blocks.findIndex((b) => b.id === selectedId);
+    const next = blocks.filter((b) => b.id !== selectedId);
+
+    commit(next);
+
+    const fallback = next[Math.max(0, index - 1)];
+    setSelectedId(fallback?.id || null);
+  };
+
+  const moveSelected = (direction: -1 | 1) => {
+    if (!selectedId) return;
+
+    const index = blocks.findIndex((b) => b.id === selectedId);
+    const target = index + direction;
+
+    if (target < 0 || target >= blocks.length) return;
+
+    const next = [...blocks];
+    [next[index], next[target]] = [next[target], next[index]];
+
+    commit(next);
+  };
+
+  const undo = () => {
+    const previous = history[history.length - 1];
+    if (!previous) return;
+
+    setFuture((current) => [...current, blocks]);
+    setBlocks(previous);
+    setHistory((current) => current.slice(0, -1));
+
+    if (!previous.some((b) => b.id === selectedId)) {
+      setSelectedId(previous[0]?.id || null);
+    }
+  };
+
+  const redo = () => {
+    const next = future[future.length - 1];
+    if (!next) return;
+
+    setHistory((current) => [...current, blocks]);
+    setBlocks(next);
+    setFuture((current) => current.slice(0, -1));
+  };
+
+  const canvasWidth =
+    device === "desktop"
+      ? "w-full"
+      : device === "tablet"
+      ? "w-[768px] max-w-full"
+      : "w-[390px] max-w-full";
+
+  if (preview) {
+    return (
+      <div className="min-h-screen bg-[#02050a] text-white">
+        <div className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 bg-[#050913]/95 px-4 py-3 backdrop-blur">
+          <div className="text-sm font-semibold">Preview del sitio</div>
+
+          <button
+            type="button"
+            onClick={() => setPreview(false)}
+            className="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs text-slate-300 hover:bg-white/5"
+          >
+            <X size={14} />
+            Volver al editor
+          </button>
+        </div>
+
+        <div className="mx-auto max-w-6xl">
+          {blocks.map((block) => (
+            <div
+              key={block.id}
+              style={{
+                background: block.background,
+                color: block.color,
+                padding: `${block.padding}px`,
+                textAlign: block.align,
+                fontSize: `${block.fontSize}px`,
+                width: `${block.width}%`,
+              }}
+            >
+              {block.type === "image" ? (
+                <div className="mx-auto flex min-h-[220px] items-center justify-center rounded-xl border border-dashed border-white/15 bg-white/[.03] text-sm text-slate-500">
+                  {block.text}
+                </div>
+              ) : block.type === "button" ? (
+                <button className="rounded-xl bg-violet-500 px-6 py-3 text-sm font-semibold text-white">
+                  {block.text}
+                </button>
+              ) : (
+                block.text
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-h-[calc(100vh-120px)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#02050a] text-white shadow-2xl">
+      {/* TOP BAR */}
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-[#050913] px-4 py-3">
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="rounded-lg border border-white/10 px-3 py-2 text-xs text-slate-400 hover:bg-white/5"
+            >
+              ← Store Builder
+            </button>
+          )}
+
+          <div>
+            <div className="text-sm font-semibold">Website Builder V2</div>
+            <div className="text-[10px] uppercase tracking-[.18em] text-cyan-300">
+              Visual commerce studio
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-black/20 p-1">
+          <button
+            type="button"
+            title="Deshacer"
+            onClick={undo}
+            disabled={!history.length}
+            className="rounded-lg p-2 text-slate-400 hover:bg-white/5 disabled:opacity-30"
+          >
+            <Undo2 size={16} />
+          </button>
+
+          <button
+            type="button"
+            title="Rehacer"
+            onClick={redo}
+            disabled={!future.length}
+            className="rounded-lg p-2 text-slate-400 hover:bg-white/5 disabled:opacity-30"
+          >
+            <Redo2 size={16} />
+          </button>
+
+          <div className="mx-1 h-5 w-px bg-white/10" />
+
+          {(
+            [
+              ["desktop", Monitor],
+              ["tablet", Tablet],
+              ["mobile", Smartphone],
+            ] as const
+          ).map(([mode, Icon]) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => setDevice(mode)}
+              className={`rounded-lg p-2 ${
+                device === mode
+                  ? "bg-violet-500/15 text-violet-300"
+                  : "text-slate-500 hover:bg-white/5"
+              }`}
+            >
+              <Icon size={16} />
+            </button>
+          ))}
+
+          <div className="mx-1 h-5 w-px bg-white/10" />
+
+          <button
+            type="button"
+            onClick={() => setPreview(true)}
+            className="flex items-center gap-2 rounded-lg bg-violet-500 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-400"
+          >
+            <Eye size={14} />
+            Preview
+          </button>
+        </div>
+      </header>
+
+      {/* MAIN EDITOR */}
+      <div className="grid min-h-0 flex-1 lg:grid-cols-[230px_minmax(0,1fr)_280px]">
+        {/* BLOCK LIBRARY */}
+        <aside className="border-b border-white/10 bg-[#050913] p-3 lg:border-b-0 lg:border-r">
+          <div className="mb-3 px-1">
+            <div className="text-xs font-semibold">Bloques</div>
+            <div className="mt-1 text-[10px] text-slate-500">
+              Agregá elementos al sitio
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
+            {blockLibrary.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <button
+                  key={item.type}
+                  type="button"
+                  onClick={() => addBlock(item.type)}
+                  className="group flex items-center gap-3 rounded-xl border border-white/10 bg-white/[.02] p-3 text-left transition hover:border-cyan-400/20 hover:bg-cyan-400/[.03]"
+                >
+                  <span className="rounded-lg bg-violet-500/10 p-2 text-violet-300">
+                    <Icon size={15} />
+                  </span>
+
+                  <span className="min-w-0">
+                    <span className="block text-xs font-semibold">
+                      {item.label}
+                    </span>
+                    <span className="block truncate text-[9px] text-slate-500">
+                      {item.description}
+                    </span>
+                  </span>
+
+                  <Plus
+                    size={14}
+                    className="ml-auto text-slate-600 group-hover:text-cyan-300"
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </aside>
+
+        {/* CANVAS */}
+        <main className="relative min-h-[600px] overflow-auto bg-[#0a0e16] p-5">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,.05),transparent_40%)]" />
+
+          <div className="relative mx-auto flex min-h-[700px] justify-center">
+            <div
+              className={`${canvasWidth} min-h-[700px] overflow-hidden rounded-xl border border-white/10 bg-[#030914] shadow-2xl transition-all`}
+            >
+              {blocks.map((block, index) => {
+                const selected = selectedId === block.id;
+
+                return (
+                  <div
+                    key={block.id}
+                    onClick={() => setSelectedId(block.id)}
+                    style={{
+                      background: block.background,
+                      color: block.color,
+                      padding: `${block.padding}px`,
+                      textAlign: block.align,
+                      fontSize: `${block.fontSize}px`,
+                      width: `${block.width}%`,
+                    }}
+                    className={`group relative cursor-pointer border transition ${
+                      selected
+                        ? "border-violet-400 ring-1 ring-violet-400/40"
+                        : "border-transparent hover:border-cyan-400/30"
+                    }`}
+                  >
+                    {selected && (
+                      <div className="absolute left-2 top-2 z-10 flex items-center gap-1 rounded-lg border border-violet-400/20 bg-[#050913]/90 px-2 py-1 text-[9px] text-violet-300 backdrop-blur">
+                        <Move size={10} />
+                        {block.label}
+                      </div>
+                    )}
+
+                    <div className="mx-auto max-w-4xl">
+                      {block.type === "image" ? (
+                        <div className="flex min-h-[180px] items-center justify-center rounded-xl border border-dashed border-white/15 bg-white/[.03] text-xs text-slate-500">
+                          {block.text}
+                        </div>
+                      ) : block.type === "button" ? (
+                        <button
+                          type="button"
+                          className="rounded-xl bg-violet-500 px-6 py-3 text-sm font-semibold"
+                        >
+                          {block.text}
+                        </button>
+                      ) : (
+                        <div
+                          className={
+                            block.type === "hero"
+                              ? "font-bold tracking-tight"
+                              : ""
+                          }
+                        >
+                          {block.text}
+                        </div>
+                      )}
+                    </div>
+
+                    {selected && (
+                      <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-lg border border-white/10 bg-[#050913]/95 p-1">
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            moveSelected(-1);
+                          }}
+                          className="rounded p-1 text-slate-400 hover:bg-white/10"
+                        >
+                          <ChevronUp size={13} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            moveSelected(1);
+                          }}
+                          className="rounded p-1 text-slate-400 hover:bg-white/10"
+                        >
+                          <ChevronDown size={13} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            duplicateSelected();
+                          }}
+                          className="rounded p-1 text-slate-400 hover:bg-white/10"
+                        >
+                          <Copy size={13} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            removeSelected();
+                          }}
+                          className="rounded p-1 text-red-400 hover:bg-red-400/10"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="pointer-events-none absolute left-1/2 top-1 -translate-x-1/2 opacity-0 transition group-hover:opacity-100">
+                      <GripVertical size={14} className="text-cyan-300" />
+                    </div>
+
+                    {index === 0 && (
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-cyan-400/20" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </main>
+
+        {/* INSPECTOR */}
+        <aside className="overflow-y-auto border-t border-white/10 bg-[#050913] p-4 lg:border-l lg:border-t-0">
+          <div className="mb-5">
+            <div className="text-xs font-semibold">Inspector</div>
+            <div className="mt-1 text-[10px] text-slate-500">
+              Propiedades del elemento seleccionado
+            </div>
+          </div>
+
+          {!selectedBlock ? (
+            <div className="rounded-xl border border-dashed border-white/10 p-5 text-center text-xs text-slate-500">
+              Seleccioná un bloque del canvas.
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <div className="rounded-xl border border-violet-400/15 bg-violet-400/[.04] p-3">
+                <div className="text-[10px] uppercase tracking-wider text-violet-300">
+                  Elemento
+                </div>
+                <div className="mt-1 text-sm font-semibold">
+                  {selectedBlock.label}
+                </div>
+              </div>
+
+              <label className="block">
+                <span className="mb-2 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  Texto
+                </span>
+                <textarea
+                  value={selectedBlock.text}
+                  onChange={(event) =>
+                    updateSelected({ text: event.target.value })
+                  }
+                  rows={4}
+                  className="w-full resize-none rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/40"
+                />
+              </label>
+
+              <label className="block">
+                <div className="mb-2 flex justify-between">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                    Tamaño
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {selectedBlock.fontSize}px
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min="10"
+                  max="72"
+                  value={selectedBlock.fontSize}
+                  onChange={(event) =>
+                    updateSelected({
+                      fontSize: Number(event.target.value),
+                    })
+                  }
+                  className="w-full"
+                />
+              </label>
+
+              <label className="block">
+                <div className="mb-2 flex justify-between">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                    Espaciado
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {selectedBlock.padding}px
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min="8"
+                  max="120"
+                  value={selectedBlock.padding}
+                  onChange={(event) =>
+                    updateSelected({
+                      padding: Number(event.target.value),
+                    })
+                  }
+                  className="w-full"
+                />
+              </label>
+
+              <div>
+                <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  Alineación
+                </div>
+
+                <div className="grid grid-cols-3 gap-1 rounded-xl border border-white/10 bg-black/20 p-1">
+                  {(
+                    [
+                      ["left", AlignLeft],
+                      ["center", AlignCenter],
+                      ["right", AlignRight],
+                    ] as const
+                  ).map(([align, Icon]) => (
+                    <button
+                      key={align}
+                      type="button"
+                      onClick={() => updateSelected({ align })}
+                      className={`flex justify-center rounded-lg p-2 ${
+                        selectedBlock.align === align
+                          ? "bg-violet-500/15 text-violet-300"
+                          : "text-slate-500 hover:bg-white/5"
+                      }`}
+                    >
+                      <Icon size={15} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <label className="block">
+                <div className="mb-2 flex justify-between">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                    Ancho
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {selectedBlock.width}%
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min="40"
+                  max="100"
+                  value={selectedBlock.width}
+                  onChange={(event) =>
+                    updateSelected({
+                      width: Number(event.target.value),
+                    })
+                  }
+                  className="w-full"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  Fondo
+                </span>
+                <input
+                  type="text"
+                  value={selectedBlock.background}
+                  onChange={(event) =>
+                    updateSelected({
+                      background: event.target.value,
+                    })
+                  }
+                  className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/40"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  Color
+                </span>
+                <input
+                  type="text"
+                  value={selectedBlock.color}
+                  onChange={(event) =>
+                    updateSelected({
+                      color: event.target.value,
+                    })
+                  }
+                  className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/40"
+                />
+              </label>
+
+              <button
+                type="button"
+                onClick={() =>
+                  localStorage.setItem(
+                    "digitalboost_website_builder_v2",
+                    JSON.stringify(blocks)
+                  )
+                }
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-400/5 px-4 py-3 text-xs font-semibold text-emerald-300 hover:bg-emerald-400/10"
+              >
+                <Save size={14} />
+                Guardar sitio
+              </button>
+            </div>
+          )}
+        </aside>
+      </div>
+    </div>
+  );
+}
+'''
+
+COMPONENT.write_text(component_source, encoding="utf-8")
+print("✓ WebsiteBuilderV2.tsx creado")
+
+source = original
+
+# ------------------------------------------------------------
+# IMPORT
+# ------------------------------------------------------------
+
+if "WebsiteBuilderV2" not in source:
+    imports = list(
+        re.finditer(
+            r'^import\s+.*?from\s+["\'].*?["\'];?\s*$',
+            source,
+            flags=re.MULTILINE,
+        )
+    )
+
+    if imports:
+        pos = imports[-1].end()
+        source = (
+            source[:pos]
+            + '\nimport WebsiteBuilderV2 from "./WebsiteBuilderV2";'
+            + source[pos:]
+        )
+        print("✓ Import de WebsiteBuilderV2 agregado")
+    else:
+        print("❌ No pude localizar imports")
+        shutil.copy2(backup, WORKSPACE)
+        sys.exit(1)
+else:
+    print("✓ WebsiteBuilderV2 ya estaba importado")
+
+# ------------------------------------------------------------
+# RENDER
+# ------------------------------------------------------------
+
+if 'case "website-builder":' in source:
+    source = re.sub(
+        r'case\s+"website-builder":\s*return\s*\(\s*<WebsiteBuilderV1[\s\S]*?\)\s*;',
+        'case "website-builder":\n        return <WebsiteBuilderV2 onBack={() => setSection("dashboard")} />;',
+        source,
+        count=1,
+    )
+    print("✓ Ruta website-builder actualizada a V2")
+elif "WebsiteBuilderV1" in source:
+    source = source.replace(
+        "<WebsiteBuilderV1",
+        "<WebsiteBuilderV2",
+        1,
+    )
+    print("✓ Referencia WebsiteBuilderV1 actualizada")
+else:
+    print("⚠️ No encontré la ruta existente de Website Builder.")
+    print("Se conservará el workspace y se dejará V2 preparado.")
+
+# ------------------------------------------------------------
+# WRITE
+# ------------------------------------------------------------
+
+WORKSPACE.write_text(source, encoding="utf-8")
+print("✓ StoreBuilderWorkspace.tsx actualizado")
+
+# ------------------------------------------------------------
+# BUILD
+# ------------------------------------------------------------
+
+print()
+print("=" * 70)
+print("BUILD DE VERIFICACIÓN")
+print("=" * 70)
+
+try:
+    result = subprocess.run(
+        ["npm", "run", "build"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        timeout=180,
+    )
+
+    print(result.stdout)
+
+    if result.returncode != 0:
+        print(result.stderr)
+        print()
+        print("❌ BUILD FALLÓ")
+        print("Restaurando backup...")
+        shutil.copy2(backup, WORKSPACE)
+        print("✓ Workspace restaurado")
+        sys.exit(result.returncode)
+
+    print("✅ BUILD CORRECTO")
+    print()
+    print("=" * 70)
+    print("WEBSITE BUILDER V2 INSTALADO")
+    print("=" * 70)
+    print("✓ Canvas interactivo")
+    print("✓ Bloques seleccionables")
+    print("✓ Agregar bloques")
+    print("✓ Duplicar bloques")
+    print("✓ Eliminar bloques")
+    print("✓ Reordenar bloques")
+    print("✓ Inspector conectado")
+    print("✓ Edición de texto")
+    print("✓ Tamaño y espaciado")
+    print("✓ Alineación")
+    print("✓ Fondo y color")
+    print("✓ Desktop / Tablet / Mobile")
+    print("✓ Preview")
+    print("✓ Undo / Redo")
+    print("✓ Guardado local")
+    print("✓ Arquitectura preparada para Commerce OS")
+    print()
+    print(f"Backup: {backup.name}")
+
+except subprocess.TimeoutExpired:
+    print("❌ npm run build excedió el tiempo límite.")
+    print("Restaurando backup...")
+    shutil.copy2(backup, WORKSPACE)
+    print("✓ Workspace restaurado")
+    sys.exit(1)
+
+except FileNotFoundError:
+    print("❌ npm no está disponible en PATH.")
+    print("No se pudo ejecutar el build.")
+    print("El backup permanece disponible.")
+    sys.exit(1)

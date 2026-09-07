@@ -1,0 +1,25 @@
+/* DIGITALBOOST Commerce OS — núcleo visual */
+
+[data-commerce-os="true"] {
+  color-scheme: dark;
+  --db-bg: #0a1020;
+  --db-deep: #070d18;
+  --db-surface: #101b32;
+  --db-cyan: #22d3ee;
+  --db-violet: #8b5cf6;
+  --db-magenta: #ec4899;
+  background:
+    radial-gradient(900px 420px at 0% -10%, rgba(34, 211, 238, 0.16), transparent 55%),
+    radial-gradient(720px 480px at 100% 0%, rgba(139, 92, 246, 0.18), transparent 50%),
+    radial-gradient(640px 360px at 70% 110%, rgba(236, 72, 153, 0.08), transparent 45%),
+    var(--db-bg) !important;
+  color: #f7faff;
+}
+
+.db-grid-field {
+  background-image:
+    linear-gradient(rgba(103, 232, 249, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(103, 232, 249, 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+}

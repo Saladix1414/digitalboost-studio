@@ -2,6 +2,7 @@ import { routeTools } from "./DigitalBoostPulseRouter";
 import { toolInspect, toolScoreLine } from "./DigitalBoostPulseTools";
 
 import { runCycle } from "./DigitalBoostPulseCycle";
+import type { PulseDecisionEnvelope, PulseApproval } from "./DigitalBoostPulseGovernance";
 import { countExamples, dumpJSONL, pushExample } from "./DigitalBoostPulseLog";
 import { skillAlerta, skillBriefing, skillHero, skillPlan } from "./DigitalBoostPulseSkills";
 
@@ -22,10 +23,13 @@ export type PulseDecision = {
   actionLabel: string;
   confirm: boolean;
   draft?: { kind: string; title: string; body: string; cta: string };
+  proposal?: Record<string, unknown> | null;
   risk?: string;
   agent?: string;
   intent?: string;
   card?: unknown;
+  envelope?: PulseDecisionEnvelope;
+  approval?: PulseApproval | null;
 };
 
 let lastAction = "dashboard";
@@ -69,7 +73,17 @@ function score(q: string, keys: string[]) {
 }
 type Pack = { title: string; body: string; action: string; label: string; confirm?: boolean; score: number };
 
-function finish(input: PulseInput, pick: { title: string; body: string; action: string; label: string; confirm?: boolean }): PulseDecision {
+function finish(
+  input: PulseInput,
+  pick: {
+    title: string;
+    body: string;
+    action: string;
+    label: string;
+    confirm?: boolean;
+    proposal?: Record<string, unknown> | null;
+  },
+): PulseDecision {
   const meta = runCycle({
     q: input.q || "",
     section: input.section,
@@ -103,7 +117,10 @@ function finish(input: PulseInput, pick: { title: string; body: string; action: 
     agent: meta.agent,
     intent: meta.intent,
     card: meta.card,
-    draft: (pick as any).draft
+    envelope: meta.envelope,
+    approval: meta.approval,
+    draft: (pick as any).draft,
+    proposal: (pick as any).proposal || null
   };
 }
 

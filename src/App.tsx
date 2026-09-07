@@ -1,7 +1,7 @@
-import StoreBuilderWorkspace from "./StoreBuilderWorkspace";
 import DigitalBoostMainPage from './DigitalBoostMainPage';
+import StoreBuilderWorkspace from './StoreBuilderWorkspace';
 import { useState, useEffect } from 'react';
-import {
+import { 
 
   Menu, X, ArrowRight, Check, ChevronDown, Moon,
   Users, ShoppingCart, 
@@ -14,10 +14,8 @@ import {
   Download, Copy, CheckCircle2, Bot,
   ExternalLink, Layers
 } from 'lucide-react';
-import CommerceOSBoot from "./CommerceOSBoot";
 
 
-import "./commerce-os-vibrant-global.css";
 // Nombres de assets locales y de respaldo
 const ASSETS = {
   splashBg: "/splash-bg.webp",
@@ -211,7 +209,7 @@ const TEMPLATES: Record<string, { name: string; category: string; description: s
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NIMBUS - Agencia de Crecimiento y Marketing Digital</title>
+  <title>AURA - Agencia de Crecimiento y Marketing Digital</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -225,7 +223,7 @@ const TEMPLATES: Record<string, { name: string; category: string; description: s
     <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-2">
         <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-400 to-indigo-500 flex items-center justify-center font-bold text-black text-lg">A</div>
-        <span class="font-extrabold text-xl tracking-tight text-white">NIMBUS<span class="text-sky-400">.AGENCY</span></span>
+        <span class="font-extrabold text-xl tracking-tight text-white">AURA<span class="text-sky-400">.AGENCY</span></span>
       </div>
       <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
         <a href="#servicios" class="hover:text-white transition">Servicios</a>
@@ -318,7 +316,7 @@ const TEMPLATES: Record<string, { name: string; category: string; description: s
 
   <!-- Footer -->
   <footer class="py-8 border-t border-slate-800/80 text-center text-xs text-slate-500">
-    © 2025 NIMBUS Growth Agency. Potenciado con DigitalBoost AI.
+    © 2025 AURA Growth Agency. Potenciado con DigitalBoost AI.
   </footer>
 </body>
 </html>`
@@ -408,8 +406,8 @@ const TEMPLATES: Record<string, { name: string; category: string; description: s
 </html>`
   },
 
-  restnimbusnt: {
-    name: "Restnimbusnte Gourmet & Reservas",
+  restaurant: {
+    name: "Restaurante Gourmet & Reservas",
     category: "Gastronomía",
     description: "Carta digital moderna, ambientación estética y reservas en línea.",
     html: `<!DOCTYPE html>
@@ -781,7 +779,9 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
 
           <div className="lg:col-span-6 flex justify-center relative min-h-[390px] sm:min-h-[520px] items-center">
             <div className="absolute w-[360px] sm:w-[540px] h-[360px] sm:h-[540px] bg-[#1d4ed8]/20 blur-[100px] rounded-full" />
-            <HeroDragonCircle className="relative z-10 w-[320px] sm:w-[500px]" />
+            {!heroImgError ? (
+              <img src={ASSETS.heroDragon} alt="DigitalBoost dragon" className="relative z-10 w-[320px] sm:w-[480px] xl:w-[540px] object-contain drop-shadow-[0_0_70px_rgba(56,189,248,0.38)]" onError={() => setHeroImgError(true)} />
+            ) : <HeroDragonCircle className="relative z-10 w-[320px] sm:w-[500px]" />}
           </div>
         </div>
       </section>
@@ -899,10 +899,6 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
 
 // =========================================================================
 const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onBack: () => void }) => {
-  if (initialMode === "store") {
-    return <StoreBuilderWorkspace onBack={onBack} />;
-  }
-
   const [activeTab, setActiveTab] = useState<ToolMode>(initialMode);
   const [userPrompt, setUserPrompt] = useState('');
   const [activeRole, setActiveRole] = useState<CopilotRole>('designer');
@@ -913,7 +909,7 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
   
   // HTML Inicial basado en la categoría
   const [htmlCode, setHtmlCode] = useState<string>(() => {
-    if (initialMode === 'store') return TEMPLATES.ecommerce.html;
+    if (initialMode === 'store') return '';
     if (initialMode === 'landing') return TEMPLATES.landing.html;
     return TEMPLATES.agency.html;
   });
@@ -1048,6 +1044,8 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
     document.body.removeChild(element);
   };
 
+  if (activeTab === 'store') { return (<div className="min-h-screen bg-[#030308]"><StoreBuilderWorkspace /></div>); }
+
   return (
     <div className="min-h-screen bg-[#030308] text-white flex flex-col">
       
@@ -1131,10 +1129,10 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
           🎯 Landing Finanzas
         </button>
         <button 
-          onClick={() => handleSelectTemplate('restnimbusnt')}
+          onClick={() => handleSelectTemplate('restaurant')}
           className="bg-slate-900 hover:bg-slate-800 text-slate-300 px-3 py-1 rounded-md border border-slate-800 shrink-0 transition"
         >
-          🍕 Restnimbusnte Gourmet
+          🍕 Restaurante Gourmet
         </button>
         <button 
           onClick={() => handleSelectTemplate('ecommerce')}
@@ -1359,35 +1357,12 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
 // COMPONENTE PRINCIPAL
 // =========================================================================
 export default function App() {
-  type AppScreen = 'boot' | 'splash' | 'intro' | 'main' | 'workspace' | 'commerceBoot';
-
-  const [currentScreen, setCurrentScreen] = useState<AppScreen>('main');
-
-  useEffect(() => {
-    localStorage.setItem(
-      "digitalboost_current_screen",
-      currentScreen
-    );
-  }, [currentScreen]);
-  const [selectedTool, setSelectedTool] = useState<ToolMode>(() => {
-    try {
-      const saved = localStorage.getItem("digitalboost_selected_tool");
-      return saved ? (saved as ToolMode) : "web";
-    } catch {
-      return "web";
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem(
-      "digitalboost_selected_tool",
-      selectedTool
-    );
-  }, [selectedTool]);
+  const [currentScreen, setCurrentScreen] = useState<'boot' | 'splash' | 'intro' | 'main' | 'workspace'>('boot');
+  const [selectedTool, setSelectedTool] = useState<ToolMode>('web');
 
   const handleSelectTool = (mode: ToolMode) => {
     setSelectedTool(mode);
-    setCurrentScreen('commerceBoot');
+    setCurrentScreen('workspace');
   };
 
   return (
@@ -1416,12 +1391,6 @@ export default function App() {
             setSelectedTool(mode as ToolMode);
             setCurrentScreen('workspace');
           }}
-        />
-      )}
-
-      {currentScreen === 'commerceBoot' && (
-        <CommerceOSBoot
-          onComplete={() => setCurrentScreen('workspace')}
         />
       )}
 

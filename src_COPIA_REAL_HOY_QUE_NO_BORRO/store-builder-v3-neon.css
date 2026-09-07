@@ -1,0 +1,206 @@
+/*
+ * DIGITALBOOST — STORE BUILDER V3
+ * Identidad visual clara + azul neon.
+ *
+ * ESTE CSS SOLO SE CARGA EN STORE BUILDER.
+ */
+
+:root {
+  --sb-bg: #F6F9FC;
+  --sb-surface: #FFFFFF;
+  --sb-surface-soft: #F0F5FA;
+  --sb-surface-blue: #E8F5FF;
+  --sb-border: #D6E2EE;
+
+  --sb-text: #142033;
+  --sb-text-secondary: #475569;
+  --sb-text-muted: #64748B;
+
+  --sb-primary: #2563EB;
+  --sb-neon-blue: #00B7FF;
+  --sb-cyan: #06B6D4;
+  --sb-violet: #7C3AED;
+
+  --sb-radius: 14px;
+}
+
+/* ============================================================
+   ROOT
+   ============================================================ */
+
+.store-builder,
+.store-builder-root,
+[data-store-builder="true"] {
+  background: var(--sb-bg);
+  color: var(--sb-text);
+}
+
+/* ============================================================
+   SUPERFICIES
+   ============================================================ */
+
+[data-store-builder="true"] [class*="bg-white"],
+[data-store-builder="true"] .bg-white {
+  background-color: var(--sb-surface);
+}
+
+[data-store-builder="true"] {
+  background-color: var(--sb-bg);
+}
+
+/* ============================================================
+   BORDERS
+   ============================================================ */
+
+[data-store-builder="true"] [class*="border-white"],
+[data-store-builder="true"] [class*="border-slate"],
+[data-store-builder="true"] [class*="border-cyan"],
+[data-store-builder="true"] [class*="border-violet"] {
+  border-color: var(--sb-border);
+}
+
+/* ============================================================
+   TEXT
+   ============================================================ */
+
+[data-store-builder="true"] [class*="text-white"] {
+  color: var(--sb-text);
+}
+
+[data-store-builder="true"] [class*="text-slate-300"] {
+  color: var(--sb-text-secondary);
+}
+
+[data-store-builder="true"] [class*="text-slate-400"] {
+  color: var(--sb-text-muted);
+}
+
+/* ============================================================
+   NEON BLUE ACCENTS
+   ============================================================ */
+
+[data-store-builder="true"] [class*="border-cyan"] {
+  border-color: rgba(0, 183, 255, .30);
+}
+
+[data-store-builder="true"] [class*="text-cyan"] {
+  color: var(--sb-cyan);
+}
+
+[data-store-builder="true"] [class*="text-blue"] {
+  color: var(--sb-primary);
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+[data-store-builder="true"] button {
+  transition:
+    transform .16s ease,
+    box-shadow .16s ease,
+    background-color .16s ease,
+    border-color .16s ease;
+}
+
+[data-store-builder="true"] button:hover {
+  border-color: rgba(0, 183, 255, .35);
+}
+
+[data-store-builder="true"] button:focus-visible,
+[data-store-builder="true"] input:focus-visible,
+[data-store-builder="true"] textarea:focus-visible,
+[data-store-builder="true"] select:focus-visible {
+  outline: 2px solid rgba(0, 183, 255, .45);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+
+[data-store-builder="true"] input,
+[data-store-builder="true"] textarea,
+[data-store-builder="true"] select {
+  background-color: #F8FAFC;
+  color: var(--sb-text);
+  border-color: var(--sb-border);
+}
+
+[data-store-builder="true"] input::placeholder,
+[data-store-builder="true"] textarea::placeholder {
+  color: #94A3B8;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+
+[data-store-builder="true"] .rounded-xl,
+[data-store-builder="true"] .rounded-2xl {
+  border-color: var(--sb-border);
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+
+[data-store-builder="true"] aside {
+  background: #FFFFFF;
+  border-color: var(--sb-border);
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+[data-store-builder="true"] header {
+  background: rgba(255,255,255,.96);
+  border-color: var(--sb-border);
+}
+
+/* ============================================================
+   SCROLLBARS
+   ============================================================ */
+
+[data-store-builder="true"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-store-builder="true"] ::-webkit-scrollbar-track {
+  background: #F0F5FA;
+}
+
+[data-store-builder="true"] ::-webkit-scrollbar-thumb {
+  background: #C7D6E5;
+  border-radius: 999px;
+}
+
+[data-store-builder="true"] ::-webkit-scrollbar-thumb:hover {
+  background: #00B7FF;
+}
+
+/* ============================================================
+   NEON DETAILS
+   ============================================================ */
+
+.store-builder-neon {
+  box-shadow:
+    0 0 0 1px rgba(0,183,255,.12),
+    0 8px 30px rgba(37,99,235,.08);
+}
+
+.store-builder-neon-accent {
+  color: #00B7FF;
+}
+
+.store-builder-primary {
+  background: #2563EB;
+  color: white;
+}
+
+.store-builder-primary:hover {
+  background: #1D4ED8;
+  box-shadow: 0 8px 24px rgba(37,99,235,.20);
+}

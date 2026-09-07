@@ -1,12 +1,12 @@
 import type { PulseInput, PulseDecision } from "./DigitalBoostPulseKB";
 import { toolDiff, toolInspect, toolMap, toolNba, toolOrders, toolRange, toolScoreLine, toolStock, toolTheme } from "./DigitalBoostPulseTools";
-import { seoFixTop, seoSpeak } from "./DigitalBoostPulseSeo";
+import { seoFixProposal, seoSpeak } from "./DigitalBoostPulseSeo";
 import { pulseOptimizeOnce } from "./DigitalBoostPulseOptimize";
 function hit(q: string, keys: string[]) { for (let i = 0; i < keys.length; i++) if (q.indexOf(keys[i]) !== -1) return true; return false; }
 export function routeTools(input: PulseInput, q: string, finish: (i: PulseInput, p: any) => PulseDecision): PulseDecision | null {
   const f = toolInspect(input);
   if (hit(q, ['seo', 'meta', 'sitemap', 'robots', 'canonical', 'indexa', 'keyword', 'auditar'])) {
-    if (hit(q, ['optimiz', 'fix', 'aplicar', 'correg', 'alt'])) return finish(input, seoFixTop());
+    if (hit(q, ['optimiz', 'fix', 'aplicar', 'correg', 'alt'])) return finish(input, seoFixProposal());
     return finish(input, seoSpeak());
   }
   if (hit(q, ['inspecc', 'auditar', 'score', 'puntaje'])) return finish(input, { title: 'PULSE', body: toolScoreLine(f) + '. ' + f.store + ' · ' + f.page + ' · ' + f.blocks + ' bloques. Hero: «' + (f.heroTitle || '-') + '». ' + (f.notes.join('. ') || 'Sin notas.'), action: input.section === 'website-builder' ? 'website-builder' : 'dashboard', label: 'Seguir' });

@@ -1,7 +1,12 @@
 
 import { useEffect, useRef, useState } from "react";
-import { analyze, explain, isBuilder, type PulseDecision } from "./DigitalBoostPulseBrain";
-import { applyPulseDraft } from "./DigitalBoostPulseApply";
+import { explain, analyzeSmart, isBuilder, type PulseDecision } from "./DigitalBoostPulseBrain";
+import {
+  approvePulseAction,
+  rejectPulseAction,
+} from "./DigitalBoostPulseGovernance";
+import { executePulseAction } from "./DigitalBoostPulseExecutor";
+
 
 function readCanvas() {
   let page = "Inicio", n = 0, hero = "";
@@ -76,39 +81,61 @@ export default function DigitalBoostOperator(props: {
     else all = [["golpe", "Siguiente golpe"], ["inspeccionar", "Inspeccioná"], ["plan", "El orden"]];
     return all.filter(function (p) { return p[0] !== used; });
   }
-  function think(word: string) {
+  async function think(word: string) {
     const raw = (word || q || "hola").trim();
     const line = SAY[raw.toLowerCase()] || raw;
     const c = ctx();
     const cv = readCanvas();
     const payload = { q: raw, section: section, store: c.store, range: c.range, live: c.live, page: cv.page, blockCount: cv.n, heroTitle: cv.hero };
-    const r = raw === "debug" ? explain(payload) : analyze(payload);
+    const r = raw === "debug" ? explain(payload) : await analyzeSmart(payload);
+    const result = "decision" in r ? r.decision : r;
     setLastKey(raw.toLowerCase());
     setApplied(false);
-    setOut(r);
+    setOut(result);
     setQ("");
     setMsgs(function (m) {
       const last = m[m.length - 1];
-      if (last && last.role === "pulse" && last.text === r.body) return m;
+      if (last && last.role === "pulse" && last.text === result.body) return m;
       const prev = m[m.length - 2];
-      if (prev && prev.role === "user" && prev.text === line && last && last.text === r.body) return m;
-      return m.concat([{ role: "user", text: line }, { role: "pulse", text: r.body }]).slice(-12);
+      if (prev && prev.role === "user" && prev.text === line && last && last.text === result.body) return m;
+      return m.concat([{ role: "user", text: line }, { role: "pulse", text: result.body }]).slice(-12);
     });
   }
   function applyDraft() {
-    if (!out || !out.draft) return;
-    let ok = false;
-    try {
-      localStorage.setItem("db-pulse-skill", out.draft.kind);
-      localStorage.setItem("db-pulse-apply-v1", JSON.stringify(out.draft));
-      ok = applyPulseDraft(out.draft);
-      window.dispatchEvent(new CustomEvent("db-pulse-apply", { detail: out.draft }));
-    } catch {}
-    setApplied(true);
+    if (!out || !out.draft || !out.envelope) return;
+
+    let result = executePulseAction({
+      envelope: out.envelope,
+      approval: out.approval,
+      draft: out.draft,
+      proposal: out.proposal,
+      onNavigate: function (action) {
+        if (action === "__health" && props.onOpenHealth) props.onOpenHealth();
+        else if (action === "__search" && props.onOpenSearch) props.onOpenSearch();
+        else if (action === "__automations" && props.onOpenAutomations) props.onOpenAutomations();
+        else if (action === "__console" && props.onOpenConsole) props.onOpenConsole();
+        else if (action === "__integrations" && props.onOpenIntegrations) props.onOpenIntegrations();
+        else props.onNavigate(action);
+      }
+    });
+
+    const ok = result.state === "COMPLETED";
+
+    if (ok) {
+      try {
+        localStorage.setItem("db-pulse-skill", out.draft.kind);
+        localStorage.setItem("db-pulse-apply-v1", JSON.stringify(out.draft));
+        window.dispatchEvent(new CustomEvent("db-pulse-apply", { detail: out.draft }));
+      } catch {}
+      setApplied(true);
+    }
+
     setMsgs(function (m) {
       return m.concat([{ role: "pulse", text: ok
         ? "Listo: el canvas ya muestra el cambio. Cerrá PULSE un segundo y mirá el hero. History lo revierte si no te cierra."
-        : "Guardé la propuesta. Si el canvas no se movió, recargá la página del studio." }]).slice(-10);
+        : result.state === "AWAITING_APPROVAL"
+          ? "La propuesta requiere aprobación antes de aplicar el cambio."
+          : "No se aplicó el cambio. PULSE bloqueó la ejecución." }]).slice(-10);
     });
   }
   useEffect(function () {
@@ -128,14 +155,51 @@ export default function DigitalBoostOperator(props: {
       try { sessionStorage.setItem(THREAD, JSON.stringify(msgs)); } catch {}
   }, [msgs, out, applied]);
   function exec() {
-    if (!out) return;
-    props.onClose();
-    if (out.action === "__health" && props.onOpenHealth) props.onOpenHealth();
-    else if (out.action === "__search" && props.onOpenSearch) props.onOpenSearch();
-    else if (out.action === "__automations" && props.onOpenAutomations) props.onOpenAutomations();
-    else if (out.action === "__console" && props.onOpenConsole) props.onOpenConsole();
-    else if (out.action === "__integrations" && props.onOpenIntegrations) props.onOpenIntegrations();
-    else props.onNavigate(out.action);
+    if (!out || !out.envelope) return;
+
+    let approval = out.approval || null;
+
+    if (out.envelope.requires_approval) {
+      if (!approval) {
+        setMsgs(function (m) {
+          return m.concat([{ role: "pulse", text: "PULSE no puede ejecutar: falta una aprobación válida." }]).slice(-10);
+        });
+        return;
+      }
+
+      approval = approvePulseAction(approval);
+    }
+
+    const result = executePulseAction({
+      envelope: out.envelope,
+      approval: approval,
+      draft: out.draft,
+      proposal: out.proposal,
+      onNavigate: function (action) {
+        props.onClose();
+        if (action === "__health" && props.onOpenHealth) props.onOpenHealth();
+        else if (action === "__search" && props.onOpenSearch) props.onOpenSearch();
+        else if (action === "__automations" && props.onOpenAutomations) props.onOpenAutomations();
+        else if (action === "__console" && props.onOpenConsole) props.onOpenConsole();
+        else if (action === "__integrations" && props.onOpenIntegrations) props.onOpenIntegrations();
+        else props.onNavigate(action);
+      }
+    });
+
+    if (result.state !== "COMPLETED") {
+      setMsgs(function (m) {
+        return m.concat([{ role: "pulse", text:
+          result.state === "AWAITING_APPROVAL"
+            ? "La acción sigue esperando aprobación."
+            : result.state === "REJECTED"
+              ? "PULSE rechazó la acción según Governance."
+              : "La ejecución falló y quedó auditada."
+        }]).slice(-10);
+      });
+      return;
+    }
+
+    setApplied(Boolean(out.draft));
   }
   const showGo = out && !out.card && !builder && out.action !== "dashboard";
   const TRAY = builder
@@ -188,7 +252,12 @@ export default function DigitalBoostOperator(props: {
               <p className="mt-1 text-[#AFC0D5]">{out.body}</p>
               <div className="mt-3 flex gap-2">
                 <button type="button" onClick={exec} className="h-10 flex-1 rounded-lg bg-cyan-400 text-xs font-semibold text-[#070D18]">Confirmar</button>
-                <button type="button" onClick={function () { setOut(null); }} className="h-10 flex-1 rounded-lg border border-white/10 text-xs">Ahora no</button>
+                <button type="button" onClick={function () {
+                  if (out && out.approval) {
+                    rejectPulseAction(out.approval);
+                  }
+                  setOut(null);
+                }} className="h-10 flex-1 rounded-lg border border-white/10 text-xs">Ahora no</button>
               </div>
             </div>
           )}

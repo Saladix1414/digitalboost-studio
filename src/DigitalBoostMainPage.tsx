@@ -248,12 +248,6 @@ export default function DigitalBoostMainPage({
                 />
               </button>
 
-              <button
-                onClick={() => go("tools")}
-                className="rounded-lg border border-indigo-400/50 px-7 py-3 font-semibold"
-              >
-                Explorar herramientas
-              </button>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-5 text-xs text-slate-300">
