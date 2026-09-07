@@ -104,9 +104,20 @@ export default function DigitalBoostOperator(props: {
   function applyDraft() {
     if (!out || !out.draft || !out.envelope) return;
 
+    let approval = out.approval || null;
+    if (out.envelope.requires_approval) {
+      if (!approval) {
+        setMsgs(function (m) {
+          return m.concat([{ role: "pulse", text: "PULSE no puede aplicar: falta una aprobación válida." }]).slice(-10);
+        });
+        return;
+      }
+      approval = approvePulseAction(approval);
+    }
+
     let result = executePulseAction({
       envelope: out.envelope,
-      approval: out.approval,
+      approval: approval,
       draft: out.draft,
       proposal: out.proposal,
       onNavigate: function (action) {
