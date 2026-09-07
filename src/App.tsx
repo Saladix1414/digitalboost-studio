@@ -1356,9 +1356,40 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
 // =========================================================================
 // COMPONENTE PRINCIPAL
 // =========================================================================
+type AppScreen = 'boot' | 'splash' | 'intro' | 'main' | 'workspace';
+const APP_SCREEN_KEY = "digitalboost_app_screen";
+const APP_TOOL_KEY = "digitalboost_app_tool";
+
+function readAppScreen(): AppScreen {
+  try {
+    const saved = localStorage.getItem(APP_SCREEN_KEY);
+    if (saved === "main" || saved === "workspace") return saved;
+  } catch {}
+  return "boot";
+}
+
+function readAppTool(): ToolMode {
+  try {
+    const saved = localStorage.getItem(APP_TOOL_KEY);
+    if (saved === "web" || saved === "store" || saved === "landing" || saved === "nft" || saved === "pro") {
+      return saved;
+    }
+  } catch {}
+  return "web";
+}
+
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<'boot' | 'splash' | 'intro' | 'main' | 'workspace'>('boot');
-  const [selectedTool, setSelectedTool] = useState<ToolMode>('web');
+  const [currentScreen, setCurrentScreen] = useState<AppScreen>(readAppScreen);
+  const [selectedTool, setSelectedTool] = useState<ToolMode>(readAppTool);
+
+  useEffect(() => {
+    try {
+      if (currentScreen === "main" || currentScreen === "workspace") {
+        localStorage.setItem(APP_SCREEN_KEY, currentScreen);
+        localStorage.setItem(APP_TOOL_KEY, selectedTool);
+      }
+    } catch {}
+  }, [currentScreen, selectedTool]);
 
   const handleSelectTool = (mode: ToolMode) => {
     setSelectedTool(mode);
