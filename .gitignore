@@ -21,3 +21,7 @@ models/
 npm-debug.log*
 logs/
 .DS_Store
+
+# agent local
+backups/
+-tree -r --name-only HEAD
