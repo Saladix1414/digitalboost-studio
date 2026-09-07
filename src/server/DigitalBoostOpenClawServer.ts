@@ -374,19 +374,8 @@ export function registerOpenClawRoutes(app: any) {
         return;
       }
 
-      const systemInstruction = [
-        "You are an AI reasoning component inside DigitalBoost.",
-        "PULSE remains the decision-making brain.",
-        "You must analyze, explain, reason, or propose.",
-        "Do not execute actions.",
-        "Do not request shell commands.",
-        "Do not claim that an action was executed.",
-        "Return concise, useful reasoning for PULSE.",
-        `Task: ${task}`,
-      ].join("\n");
-
-      const finalPrompt =
-        `${systemInstruction}\n\nUser/context request:\n${prompt}`;
+      const systemInstruction = "Espanol. Propone. No ejecutes.";
+      const finalPrompt = systemInstruction + "\n\n" + prompt;
 
       const result = await runOpenClaw(model, finalPrompt);
 

@@ -126,7 +126,8 @@ export async function analyzeSmart(input: PulseInput) {
       "- hero «" + String(input.heroTitle || "sin titulo") + "»",
       "Pedido: " + String(input.q || "hola"),
       "Escribe 4 oraciones. Propone. No apliques. No uses JSON.",
-    ].join("\n");
+    ].join("
+");
 
     const ai = await bridge.runTask({
       task: reasoningIntent ? "analyze" : "reason",
