@@ -210,7 +210,20 @@ export default function DigitalBoostOperator(props: {
       return;
     }
 
-    setApplied(Boolean(out.draft));
+    if (out.draft) {
+      try {
+        localStorage.setItem("db-pulse-skill", out.draft.kind);
+        localStorage.setItem("db-pulse-apply-v1", JSON.stringify(out.draft));
+        window.dispatchEvent(new CustomEvent("db-pulse-apply", { detail: out.draft }));
+      } catch {}
+      setApplied(true);
+      setMsgs(function (m) {
+        return m.concat([{ role: "pulse", text: "Listo: el canvas ya muestra el cambio. Cerrá PULSE un segundo y mirá el hero. History lo revierte si no te cierra." }]).slice(-10);
+      });
+      return;
+    }
+
+    setApplied(false);
   }
   const showGo = out && !out.card && !builder && out.action !== "dashboard";
   const TRAY = builder
