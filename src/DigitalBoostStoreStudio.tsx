@@ -37,11 +37,11 @@ function CanvasView({ blocks, selected, hover, onSelect, onHover }: {
               <span className="absolute left-2 top-2 z-10 rounded bg-[#0A1020] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">{BLOCK_META[b.type].label}</span>
             )}
             {b.type === "hero" && (
-              <div className="bg-gradient-to-b from-violet-200 via-[#F4F1EA] to-cyan-100 px-6 py-10">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-600">Nueva coleccion</div>
+              <div className="px-6 py-10" style={{ background: "var(--store-surface)", color: "var(--store-text)" }}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--store-accent)" }}>Nueva coleccion</div>
                 <h2 className="mt-3 break-words text-3xl font-semibold leading-tight tracking-tight">{b.title}</h2>
-                <p className="mt-3 max-w-sm text-sm leading-6 text-black/70">{b.body}</p>
-                {b.cta ? <span className="mt-6 inline-flex rounded-full bg-[#101820] px-4 py-2 text-xs font-medium text-[#F4F1EA]">{b.cta}</span> : null}
+                <p className="mt-3 max-w-sm text-sm leading-6" style={{ color: "var(--store-muted)" }}>{b.body}</p>
+                {b.cta ? <span className="mt-6 inline-flex rounded-full px-4 py-2 text-xs font-medium" style={{ background: "var(--store-primary)", color: "var(--store-bg)" }}>{b.cta}</span> : null}
               </div>
             )}
             {b.type === "features" && (
