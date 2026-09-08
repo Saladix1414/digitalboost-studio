@@ -37,11 +37,13 @@ function CanvasView({ blocks, selected, hover, onSelect, onHover }: {
               <span className="absolute left-2 top-2 z-10 rounded bg-[#0A1020] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">{BLOCK_META[b.type].label}</span>
             )}
             {on && (
-              <span className="absolute right-2 top-2 z-20 flex gap-1 rounded-md bg-[#0A1020] p-1" onClick={function (e) { e.stopPropagation(); }}>
-                <button type="button" className="grid h-9 w-9 place-items-center text-slate-300" aria-label="Subir" onClick={function () { window.dispatchEvent(new CustomEvent("db-canvas-tool", { detail: { id: b.id, op: "up" } })); }}>↑</button>
-                <button type="button" className="grid h-9 w-9 place-items-center text-slate-300" aria-label="Bajar" onClick={function () { window.dispatchEvent(new CustomEvent("db-canvas-tool", { detail: { id: b.id, op: "down" } })); }}>↓</button>
-                <button type="button" className="grid h-9 w-9 place-items-center text-slate-300" aria-label="Duplicar" onClick={function () { window.dispatchEvent(new CustomEvent("db-canvas-tool", { detail: { id: b.id, op: "dup" } })); }}>+</button>
-                <button type="button" className="grid h-9 w-9 place-items-center text-pink-400" aria-label="Ocultar" onClick={function () { window.dispatchEvent(new CustomEvent("db-canvas-tool", { detail: { id: b.id, op: "hide" } })); }}>✕</button>
+              <span className="absolute inset-x-2 top-2 z-20 flex justify-end gap-1" onClick={function (e) { e.stopPropagation(); }}>
+                <span className="flex rounded-lg border border-cyan-400 bg-[#0A1020] p-1 shadow-lg">
+                  <button type="button" className="h-9 px-2 text-[10px] font-semibold text-cyan-300" onClick={function () { window.dispatchEvent(new CustomEvent("db-canvas-tool", { detail: { id: b.id, op: "up" } })); }}>Subir</button>
+                  <button type="button" className="h-9 px-2 text-[10px] font-semibold text-cyan-300" onClick={function () { window.dispatchEvent(new CustomEvent("db-canvas-tool", { detail: { id: b.id, op: "down" } })); }}>Bajar</button>
+                  <button type="button" className="h-9 px-2 text-[10px] font-semibold text-cyan-300" onClick={function () { window.dispatchEvent(new CustomEvent("db-canvas-tool", { detail: { id: b.id, op: "dup" } })); }}>Copiar</button>
+                  <button type="button" className="h-9 px-2 text-[10px] font-semibold text-pink-400" onClick={function () { window.dispatchEvent(new CustomEvent("db-canvas-tool", { detail: { id: b.id, op: "hide" } })); }}>Ocultar</button>
+                </span>
               </span>
             )}
             {b.type === "hero" && (
@@ -220,6 +222,39 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
     window.setTimeout(() => setSaved(false), 1600);
   }
 
+
+  useEffect(function () {
+    function onTool(ev: any) {
+      const d = ev && ev.detail; if (!d || !d.id) return;
+      setSelected(d.id);
+      const i = blocks.findIndex(function (b) { return b.id === d.id; });
+      if (i < 0) return;
+      if (d.op === "up" && i > 0) {
+        const copy = blocks.slice();
+        const item = copy.splice(i, 1)[0];
+        copy.splice(i - 1, 0, item);
+        commit(copy);
+      }
+      if (d.op === "down" && i < blocks.length - 1) {
+        const copy = blocks.slice();
+        const item = copy.splice(i, 1)[0];
+        copy.splice(i + 1, 0, item);
+        commit(copy);
+      }
+      if (d.op === "dup") {
+        const cur = blocks[i];
+        const copy = blocks.slice();
+        copy.splice(i + 1, 0, Object.assign({}, cur, { id: newId() }));
+        commit(copy);
+      }
+      if (d.op === "hide") {
+        commit(blocks.map(function (b) { return b.id === d.id ? Object.assign({}, b, { hidden: !b.hidden }) : b; }));
+      }
+    }
+    window.addEventListener("db-canvas-tool", onTool as any);
+    return function () { window.removeEventListener("db-canvas-tool", onTool as any); };
+  }, [blocks]);
+
   const paper = { ['--store-bg' as string]: theme.bg, ['--store-surface' as string]: theme.surface, ['--store-text' as string]: theme.text, ['--store-muted' as string]: theme.muted, ['--store-primary' as string]: theme.primary, ['--store-accent' as string]: theme.accent } as React.CSSProperties;
   return (
     <div className="flex h-full min-h-0 flex-col bg-[#070d18] text-[#F7FAFF]">
@@ -280,6 +315,7 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
             <button type="button" onClick={() => { commit(typeof seedPage === "function" ? seedPage(page) : seedHome()); setSelected(null); }} className="shrink-0 rounded-full border border-white/10 px-3 py-2 text-xs">Plantilla</button>
             <button type="button" onClick={() => setShowHistory(true)} className="shrink-0 rounded-full border border-emerald-400/40 px-3 py-2 text-xs text-emerald-300">History</button>
           </div>
+          {!preview ? <div className="mb-2 text-center text-[10px] uppercase tracking-[0.14em] text-cyan-400">Editando · toca un bloque · Subir Bajar Copiar Ocultar</div> : <div className="mb-2 text-center text-[10px] uppercase tracking-[0.14em] text-slate-500">Preview</div>}
           <div style={paper} className={cx("mx-auto overflow-hidden rounded-xl border border-white/10 shadow-2xl", device === "mobile" && "w-full max-w-sm", device === "tablet" && "w-full max-w-xl", device === "desktop" && "w-full max-w-3xl")}>
             <CanvasView blocks={blocks} selected={preview ? null : selected} hover={preview ? null : hover} onSelect={(id) => { if (!preview) setSelected(id); }} onHover={setHover} />
           </div>
