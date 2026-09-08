@@ -36,7 +36,7 @@ export function applyPulseDraft(draft: PulseDraft) {
     if (draft.kind === 'cta' && b && (isHero || b.cta)) { hit = true; return Object.assign({}, b, { cta: draft.cta || 'Comprar ahora' }); }
     return b;
   });
-  if (draft.kind === 'hero' && !hit && next[0]) next[0] = Object.assign({}, next[0], { title: draft.title, body: draft.body, cta: draft.cta || next[0].cta });
+  if (draft.kind === 'hero' && !hit) next.unshift({ id: 'hero', type: 'hero', title: draft.title, body: draft.body, cta: draft.cta });
   try { localStorage.setItem(bag.key, JSON.stringify(next)); localStorage.setItem('db-store-canvas-v1', JSON.stringify(next)); } catch {}
   live(next);
   window.dispatchEvent(new CustomEvent('db-canvas-reload', { detail: next }));

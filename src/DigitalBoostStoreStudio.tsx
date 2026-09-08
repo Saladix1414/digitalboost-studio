@@ -46,7 +46,7 @@ function CanvasView({ blocks, selected, hover, onSelect, onHover }: {
             )}
             {b.type === "features" && (
               <div className="grid grid-cols-3 gap-px bg-black/10 text-center text-[10px]">
-                {b.body.split("·").map((t) => <div key={t} className="bg-[color:var(--store-surface,#F4F1EA)] px-2 py-4 font-medium">{t.trim()}</div>)}
+                {(b.body.indexOf("·") >= 0 ? b.body.split("·") : ["Envios", "Checkout", "Soporte"]).map((t) => <div key={t} className="bg-[color:var(--store-surface,#F4F1EA)] px-2 py-4 font-medium">{t.trim()}</div>)}
               </div>
             )}
             {b.type === "products" && (
@@ -307,13 +307,7 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
                   <p className="mt-3 text-xs leading-5 text-slate-400">El canvas usa el theme Nimbus: paper #F4F1EA, tinta #101820, acento cyan. Tokens editables en la fase Theme System.</p>
                 )}
               </div>
-              <button type="button" className="h-11 w-full rounded-md bg-cyan-400 text-xs font-semibold text-[#070d18]" onClick={function () {
-                try {
-                  const q = "reescribi el texto del bloque " + current.type + " que hoy dice " + current.title;
-                  localStorage.setItem("db-pulse-seed", q);
-                  window.dispatchEvent(new Event("db-open-pulse"));
-                } catch {}
-              }}>PULSE · reescribir este bloque</button>
+              
               <div className="flex gap-1">
                 <button type="button" onClick={() => move(-1)} className="grid h-11 w-11 place-items-center rounded-md border border-white/10" aria-label="Subir"><ChevronUp size={16} /></button>
                 <button type="button" onClick={() => move(1)} className="grid h-11 w-11 place-items-center rounded-md border border-white/10" aria-label="Bajar"><ChevronDown size={16} /></button>
