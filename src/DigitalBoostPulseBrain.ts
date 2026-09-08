@@ -152,9 +152,18 @@ export async function analyzeSmart(input: PulseInput) {
     }
 
     const aiText =
-      typeof ai.result === "string"
-        ? ai.result.trim()
-        : JSON.stringify(ai.result);
+      (function () {
+        const a: any = ai;
+        const t = a && (a.text || a.output || a.result);
+        if (typeof t === "string" && t.trim()) return t.trim();
+        const outs = a && a.outputs;
+        if (Array.isArray(outs) && outs[0] && typeof outs[0].text === "string") return String(outs[0].text).trim();
+        if (t && typeof t === "object") {
+          if (typeof t.text === "string") return t.text.trim();
+          if (Array.isArray(t.outputs) && t.outputs[0] && t.outputs[0].text) return String(t.outputs[0].text).trim();
+        }
+        try { return JSON.stringify(t || a || ""); } catch { return ""; }
+      })();
 
     if (!aiText) {
       return {

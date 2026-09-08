@@ -98,12 +98,14 @@ export default function DigitalBoostOperator(props: {
     let result = raw === "debug" ? explain(payload) : analyze(payload);
     try {
       if (raw !== "debug") {
-        const timed = new Promise((_, reject) => setTimeout(function () { reject(new Error("pulse-ai-timeout")); }, 20000));
+        const timed = new Promise((_, reject) => setTimeout(function () { reject(new Error("pulse-ai-timeout")); }, 180000));
         const r = await Promise.race([analyzeSmart(payload), timed]);
-        if (r && typeof r === "object" && "decision" in r) result = r.decision;
-        else if (r && typeof r === "object" && "body" in r) result = r;
+        if (r && typeof r === "object" && "decision" in r) result = (r as any).decision;
+        else if (r && typeof r === "object" && "body" in r) result = r as any;
       }
-    } catch {}
+    } catch (err) {
+      result = Object.assign({}, result, { body: String(result.body || "") + "\n\nQwen sigue inferiendo. Mirá el log: CLOSE = llega al chat." });
+    }
     setLastKey(raw.toLowerCase());
     setApplied(false);
     setOut(result);
