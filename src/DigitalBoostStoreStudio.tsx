@@ -36,6 +36,14 @@ function CanvasView({ blocks, selected, hover, onSelect, onHover }: {
             {(on || hv) && (
               <span className="absolute left-2 top-2 z-10 rounded bg-[#0A1020] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">{BLOCK_META[b.type].label}</span>
             )}
+            {on && (
+              <span className="absolute right-2 top-2 z-20 flex gap-1 rounded-md bg-[#0A1020] p-1" onClick={function (e) { e.stopPropagation(); }}>
+                <button type="button" className="grid h-9 w-9 place-items-center text-slate-300" aria-label="Subir" onClick={function () { window.dispatchEvent(new CustomEvent("db-canvas-tool", { detail: { id: b.id, op: "up" } })); }}>↑</button>
+                <button type="button" className="grid h-9 w-9 place-items-center text-slate-300" aria-label="Bajar" onClick={function () { window.dispatchEvent(new CustomEvent("db-canvas-tool", { detail: { id: b.id, op: "down" } })); }}>↓</button>
+                <button type="button" className="grid h-9 w-9 place-items-center text-slate-300" aria-label="Duplicar" onClick={function () { window.dispatchEvent(new CustomEvent("db-canvas-tool", { detail: { id: b.id, op: "dup" } })); }}>+</button>
+                <button type="button" className="grid h-9 w-9 place-items-center text-pink-400" aria-label="Ocultar" onClick={function () { window.dispatchEvent(new CustomEvent("db-canvas-tool", { detail: { id: b.id, op: "hide" } })); }}>✕</button>
+              </span>
+            )}
             {b.type === "hero" && (
               <div className="px-6 py-10" style={{ background: "var(--store-surface)", color: "var(--store-text)" }}>
                 <div className="text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--store-accent)" }}>Nueva coleccion</div>
