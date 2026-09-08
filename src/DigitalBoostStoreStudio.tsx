@@ -11,15 +11,25 @@ import DigitalBoostThemePanel from "./DigitalBoostThemePanel";
 
 function cx(...p: Array<string | false | null | undefined>) { return p.filter(Boolean).join(" "); }
 
-function CanvasView({ blocks, selected, hover, onSelect, onHover }: {
+function CanvasView({ blocks, selected, hover, onSelect, onHover, page, pages, onPage }: {
   blocks: CanvasBlock[]; selected: string | null; hover: string | null;
   onSelect: (id: string) => void; onHover: (id: string | null) => void;
+  page: string; pages: string[]; onPage: (p: string) => void;
 }) {
   return (
     <div className="db-store-paper">
-      <div className="flex items-center justify-between px-5 py-4">
+      <div className="px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ background: "var(--store-primary)", color: "var(--store-bg)" }}>
+        Envio gratis desde $40.000 · Drop Studio 09
+      </div>
+      <div className="flex items-center justify-between gap-2 px-4 py-3" style={{ borderBottom: "1px solid color-mix(in srgb, var(--store-text) 12%, transparent)" }}>
         <span className="text-[11px] font-semibold tracking-[0.18em]">NIMBUS</span>
-        <span className="text-[10px] text-black/40">Inicio · Productos · Contacto</span>
+        <div className="flex min-w-0 flex-1 justify-end gap-1 overflow-x-auto">
+          {pages.map(function (name) {
+            return (
+              <button key={name} type="button" className="shrink-0 px-1.5 text-[10px]" style={{ color: page === name ? "var(--store-text)" : "var(--store-muted)", fontWeight: page === name ? 700 : 400 }} onClick={function (e) { e.stopPropagation(); onPage(name); }}>{name}</button>
+            );
+          })}
+        </div>
       </div>
       {blocks.length === 0 && (
             <div className="px-6 py-16 text-center">
@@ -98,6 +108,11 @@ function CanvasView({ blocks, selected, hover, onSelect, onHover }: {
           </button>
         );
       })}
+      <div className="mt-4 px-5 py-8 text-[10px]" style={{ borderTop: "1px solid color-mix(in srgb, var(--store-text) 12%, transparent)", color: "var(--store-muted)" }}>
+        <div className="text-[11px] font-semibold tracking-[0.16em]" style={{ color: "var(--store-text)" }}>NIMBUS</div>
+        <div className="mt-2">Envios · Cambios · Contacto · Instagram</div>
+        <div className="mt-3">© Nimbus. Hecho con DigitalBoost.</div>
+      </div>
     </div>
   );
 }
@@ -317,7 +332,7 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
           </div>
           {!preview ? <div className="mb-2 text-center text-[10px] uppercase tracking-[0.14em] text-cyan-400">Editando · toca un bloque · Subir Bajar Copiar Ocultar</div> : <div className="mb-2 text-center text-[10px] uppercase tracking-[0.14em] text-slate-500">Preview</div>}
           <div style={paper} className={cx("mx-auto overflow-hidden rounded-xl border border-white/10 shadow-2xl", device === "mobile" && "w-full max-w-sm", device === "tablet" && "w-full max-w-xl", device === "desktop" && "w-full max-w-3xl")}>
-            <CanvasView blocks={blocks} selected={preview ? null : selected} hover={preview ? null : hover} onSelect={(id) => { if (!preview) setSelected(id); }} onHover={setHover} />
+            <CanvasView blocks={blocks} selected={preview ? null : selected} hover={preview ? null : hover} onSelect={(id) => { if (!preview) setSelected(id); }} onHover={setHover} page={page} pages={pages} onPage={setPage} />
           </div>
         </div>
 
