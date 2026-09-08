@@ -181,7 +181,7 @@ export function decide(input: PulseInput): PulseDecision {
   add(["integr", "stripe"], "PULSE · Integrations", "L4 de gobernanza si se tocan credenciales. Solo abro el panel.", "__integrations", "Abrir Integrations");
   add(["campan", "promo", "descuento"], "PULSE · Campana", "L3. Preparo recuperacion de carritos 10%/48h. No publico hasta que confirmes la Pulse Card.", "campaigns", "Crear campana", true);
   add(["hero", "homepage", "redisen", "canvas", "titulo"], "PULSE Design", "El hero no cierra en tres segundos. Abajo te dejo otra línea. La aplicás vos.", "website-builder", "Aplicar hero");
-  add(["theme", "noir", "color", "preset"], "PULSE Design", "Nimbus es calma (luz, aire). Noir es filo (contraste, menos gris). Mezclar los dos hace que la tienda no tenga carácter. Yo iría Noir en este canvas y dejaría Nimbus para otra marca. El cambio es L1 y se revierte.", "website-builder", "Seguir en el canvas");
+  add(["theme", "noir", "preset", "cambiar theme"], "PULSE Design", "Nimbus es calma (luz, aire). Noir es filo (contraste, menos gris). Mezclar los dos hace que la tienda no tenga carácter. Yo iría Noir en este canvas y dejaría Nimbus para otra marca. El cambio es L1 y se revierte.", "website-builder", "Seguir en el canvas");
   add(["conver", "cta", "boton"], "PULSE Design", "Hay bloques que informan y no piden. El visitante no adivina el siguiente paso. Unificar a «Comprar ahora» / «Entrar» en hero, destacados y cierre. Es un cambio chico y se nota en mobile.", "website-builder", "Seguir en el canvas");
 
   packs.sort(function (a, b) { return b.score - a.score; });
