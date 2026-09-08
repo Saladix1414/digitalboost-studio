@@ -1,3 +1,4 @@
+import { aiUsable } from "./DigitalBoostPulseBoost";
 
 import { decide, explain, type PulseInput, type PulseDecision } from "./DigitalBoostPulseKB";
 import { buildPulseContext, type PulseContext } from "./DigitalBoostPulseContext";
@@ -185,7 +186,7 @@ export async function analyzeSmart(input: PulseInput) {
           " · " +
           String(decision.risk || "L0"),
       },
-      engine: "openclaw" as const,
+      engine: (aiUsable(String((ai as any)?.text || (ai as any)?.output || "")) ? "openclaw" : "rules") as const,
       model: selection.model.modelId,
     };
   } catch {

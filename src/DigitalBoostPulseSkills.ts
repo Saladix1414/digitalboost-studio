@@ -1,10 +1,10 @@
+import { boostHero } from "./DigitalBoostPulseBoost";
 import type { PulseInput } from "./DigitalBoostPulseKB";
 import { toolInspect, toolScoreLine } from "./DigitalBoostPulseTools";
 import { seoFixProposal, seoSpeak } from "./DigitalBoostPulseSeo";
 function studio(i: PulseInput) { return i.section === 'website-builder' || i.section === 'store-builder' || i.section === 'builder'; }
-function heroDraft(f: { heroTitle: string }) {
-  const alt = (f.heroTitle || '').indexOf('permiso') !== -1;
-  return { kind: 'hero', title: alt ? 'La pieza que se explica sola.' : 'La colección que no pide permiso.', body: 'Una promesa. Un botón.', cta: 'Entrar' };
+function heroDraft(f: any, q?: string) {
+  return Object.assign({ kind: "hero" }, boostHero(q || "", f && f.heroTitle || ""));
 }
 export function skillBriefing(i: PulseInput) {
   if (i.section === 'seo') return seoSpeak();
@@ -35,6 +35,6 @@ export function skillAlerta(i: PulseInput) {
 export function skillHero(i?: PulseInput) {
   const f = toolInspect(i);
   const now = f.heroTitle || 'todavía sin título';
-  return { title: 'PULSE', body: 'Hoy dice «' + now + '».\n' + (f.genericHero ? 'Es plantilla. Te dejo una línea con más carácter.' : 'Ya tiene voz. Si querés tensar, te dejo la otra.') + '\nAbajo está la propuesta. La aplicás vos; History la revierte.', action: 'website-builder', label: 'Aplicar hero', draft: heroDraft(f) };
+  return { title: 'PULSE', body: 'Hoy dice «' + now + '».\n' + (f.genericHero ? 'Es plantilla. Te dejo una línea con más carácter.' : 'Ya tiene voz. Si querés tensar, te dejo la otra.') + '\nAbajo está la propuesta. La aplicás vos; History la revierte.', action: 'website-builder', label: 'Aplicar hero', draft: heroDraft(f, i && i.q) };
 }
 export function skillSeoFix(_i?: PulseInput) { return seoFixProposal(); }
