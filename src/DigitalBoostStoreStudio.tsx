@@ -3,7 +3,7 @@ import "./digitalboost-os.css";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ChevronDown, ChevronUp, Copy, Eye, Monitor, Plus, Redo2, Smartphone, Tablet, Trash2, Undo2 } from "lucide-react";
-import { BLOCK_META, defaultBlock, loadCanvas, saveCanvas, loadCanvasPage, saveCanvasPage, seedPage, seedHome, newId, type BlockType, type CanvasBlock } from "./DigitalBoostStoreCanvas";
+import { BLOCK_META, defaultBlock, loadCanvas, saveCanvas, loadCanvasPage, saveCanvasPage, seedPage, seedHome, newId, organizeSections, type BlockType, type CanvasBlock } from "./DigitalBoostStoreCanvas";
 import { loadHistory, pushSnapshot, type Snapshot } from "./DigitalBoostHistory";
 import DigitalBoostHistoryPanel from "./DigitalBoostHistoryPanel";
 import { loadTheme, saveTheme, PRESETS, type StoreTheme } from "./DigitalBoostTheme";
@@ -327,6 +327,7 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
               <button key={type} type="button" onClick={() => add(type)} className="shrink-0 rounded-full border border-white/10 bg-[#101B32] px-3 py-2 text-xs">+ {BLOCK_META[type].label}</button>
             ))}
             <button type="button" onClick={() => setShowTheme(true)} className="shrink-0 rounded-full border border-cyan-400/40 px-3 py-2 text-xs text-cyan-300">Theme</button>
+            <button type="button" onClick={() => { commit(organizeSections(blocks)); setSelected(null); }} className="shrink-0 rounded-full border border-cyan-400/40 px-3 py-2 text-xs text-cyan-300">Organizar</button>
             <button type="button" onClick={() => { commit(typeof seedPage === "function" ? seedPage(page) : seedHome()); setSelected(null); }} className="shrink-0 rounded-full border border-white/10 px-3 py-2 text-xs">Plantilla</button>
             <button type="button" onClick={() => setShowHistory(true)} className="shrink-0 rounded-full border border-emerald-400/40 px-3 py-2 text-xs text-emerald-300">History</button>
           </div>

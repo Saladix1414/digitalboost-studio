@@ -21,6 +21,25 @@ export function defaultBlock(type: BlockType): CanvasBlock {
   };
   return { id: newId(), type, ...map[type] };
 }
+
+export function organizeSections(blocks: CanvasBlock[]): CanvasBlock[] {
+  const order = ["hero", "features", "products", "text", "cta", "media"];
+  const list = Array.isArray(blocks) ? blocks.slice() : [];
+  const seenHero = { v: false };
+  const cleaned = list.filter(function (b) {
+    if (!b) return false;
+    if (b.type === "hero" || (b as any).kind === "hero") {
+      if (seenHero.v) return false;
+      seenHero.v = true;
+    }
+    return true;
+  });
+  return cleaned.sort(function (a, b) {
+    const ia = order.indexOf(a.type); const ib = order.indexOf(b.type);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+}
+
 export function seedHome(): CanvasBlock[] {
   return [defaultBlock("hero"), defaultBlock("features"), defaultBlock("products"), defaultBlock("text")];
 }
