@@ -187,6 +187,7 @@ export function decide(input: PulseInput): PulseDecision {
   add(["buscar", "search"], "PULSE · Search", "Te abro Search del OS.", "__search", "Abrir Search");
   add(["automat", "flujo"], "PULSE · Flujos", "L1: preparar flujos. Activarlos puede pedir aprobacion.", "__automations", "Abrir Automations");
   add(["integr", "stripe"], "PULSE · Integrations", "L4 de gobernanza si se tocan credenciales. Solo abro el panel.", "__integrations", "Abrir Integrations");
+  add(["seo avanzado", "ceo avanzado", "competencia", "competidores", "serps"], "PULSE · SEO", "SEO avanzado aca es el centro que ya tenes: issues persistidos y seo-fix con Pulse Card. Competencia online: no hay fuente. No invento rankings ni trafico del rival. Si mas adelante hay Search Console o un crawl, ahi si.", "seo", "Abrir SEO");
   add(["tienda virtual", "crear tienda", "como creo", "pasos para"], "PULSE · Armar tienda", "Pasos reales de DigitalBoost, no un curso: 1) canvas Inicio 2) hero con voz 3) un theme 4) SEO de las paginas 5) campana solo con Pulse Card. No invento ventas.", "studio", "Ir al canvas");
   add(["campan", "promo", "descuento"], "PULSE · Campana", "L3. Preparo recuperacion de carritos 10%/48h. No publico hasta que confirmes la Pulse Card.", "campaigns", "Crear campana", true);
   add(["hero", "homepage", "redisen", "canvas", "titulo"], "PULSE Design", "El hero no cierra en tres segundos. Abajo te dejo otra línea. La aplicás vos.", "website-builder", "Aplicar hero");
