@@ -31,6 +31,14 @@ export function compilePulseGoal(input: { q?: string; action: string; section?: 
     successCriteria: ["policy-evaluated", "expected-outcome-declared"],
     riskFloor: action === "campaigns" ? "L3" : action === "seo-fix" || action === "hero" || action === "optimize" || action === "website-builder" ? "L1" : "L0",
   };
+  if (action === "studio") {
+    const s1 = step("website-builder", "Abrir canvas Inicio", { page: "Inicio" });
+    const s2 = step("hero", "Escribir hero con voz", { kind: "hero" }, { dependsOn: [s1.id], approvalLikely: true, checkpoint: true });
+    const s3 = step("website-builder", "Dejar un solo theme", { kind: "theme" }, { dependsOn: [s2.id], approvalLikely: true });
+    const s4 = step("seo", "Revisar SEO de paginas", { domain: "seo" }, { dependsOn: [s3.id] });
+    const s5 = step("campaigns", "Campana solo con Pulse Card", { risk: "L3" }, { dependsOn: [s4.id], approvalLikely: true, checkpoint: true });
+    return { id: nid("plan"), goal, steps: [s1, s2, s3, s4, s5], status: "READY", createdAt: new Date().toISOString() };
+  }
   const inspect = step("analyze", "Leer snapshot actual", { snapshot: "CURRENT" });
   const propose = step(action, "Proponer accion contratada", { action: action }, { dependsOn: [inspect.id], approvalLikely: goal.riskFloor !== "L0", checkpoint: goal.riskFloor !== "L0" });
   const verify = step("explain", "Declarar expected outcome", { verified: true }, { dependsOn: [propose.id], checkpoint: true });
