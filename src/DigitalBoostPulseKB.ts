@@ -107,9 +107,12 @@ function finish(
       confirm: meta.confirm
     });
   } catch {}
+  const planLines = meta.plan && meta.plan.steps
+    ? ["", "Plan:", ...meta.plan.steps.map(function (s, i) { return (i + 1) + ". " + s.title + " (" + s.action + ")"; })]
+    : [];
   return {
     title: pick.title,
-    body: pick.body,
+    body: [pick.body].concat(planLines).join("\n"),
     action: pick.action,
     actionLabel: meta.confirm ? "Revisar Pulse Card" : pick.label,
     confirm: meta.confirm,
@@ -179,6 +182,7 @@ export function decide(input: PulseInput): PulseDecision {
   add(["buscar", "search"], "PULSE · Search", "Te abro Search del OS.", "__search", "Abrir Search");
   add(["automat", "flujo"], "PULSE · Flujos", "L1: preparar flujos. Activarlos puede pedir aprobacion.", "__automations", "Abrir Automations");
   add(["integr", "stripe"], "PULSE · Integrations", "L4 de gobernanza si se tocan credenciales. Solo abro el panel.", "__integrations", "Abrir Integrations");
+  add(["tienda virtual", "crear tienda", "como creo", "pasos para"], "PULSE · Armar tienda", "Pasos reales de DigitalBoost, no un curso: 1) canvas Inicio 2) hero con voz 3) un theme 4) SEO de las paginas 5) campana solo con Pulse Card. No invento ventas.", "studio", "Ir al canvas");
   add(["campan", "promo", "descuento"], "PULSE · Campana", "L3. Preparo recuperacion de carritos 10%/48h. No publico hasta que confirmes la Pulse Card.", "campaigns", "Crear campana", true);
   add(["hero", "homepage", "redisen", "canvas", "titulo"], "PULSE Design", "El hero no cierra en tres segundos. Abajo te dejo otra línea. La aplicás vos.", "website-builder", "Aplicar hero");
   add(["noir", "preset", "cambiar theme"], "PULSE Design", "Nimbus es calma (luz, aire). Noir es filo (contraste, menos gris). Mezclar los dos hace que la tienda no tenga carácter. Yo iría Noir en este canvas y dejaría Nimbus para otra marca. El cambio es L1 y se revierte.", "website-builder", "Seguir en el canvas");
