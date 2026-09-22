@@ -1,4 +1,5 @@
 import { buildStateSnapshot, fact, type PulseFact, type PulseStateSnapshot } from "./DigitalBoostPulseSnapshot";
+import { loadSearchAdapter } from "./DigitalBoostPulseSearchAdapter";
 export type PulseContextSourceStatus = "available" | "partial" | "unavailable";
 export interface PulseContextDomain<T = unknown> {
   status: PulseContextSourceStatus; data: T; source: string;
@@ -13,6 +14,7 @@ export interface PulseSeoContext { score?: number; issues?: number; pages?: numb
 export interface PulseMarketingContext { campaigns?: number; channels?: number; }
 export interface PulseAnalyticsContext { available: boolean; metrics?: Record<string, unknown>; }
 export interface PulseAIContext { ollama: boolean; qwen2: boolean; llama3: boolean; openclaw: boolean; }
+export interface PulseSearchContext { rows?: number; topQuery?: string; source?: string; note?: string; }
 export interface PulseContext {
   version: "2.0"; generatedAt: string; snapshot: PulseStateSnapshot;
   commerce: PulseContextDomain<PulseCommerceContext>;
@@ -21,6 +23,7 @@ export interface PulseContext {
   marketing: PulseContextDomain<PulseMarketingContext>;
   analytics: PulseContextDomain<PulseAnalyticsContext>;
   ai: PulseContextDomain<PulseAIContext>;
+  search: PulseContextDomain<PulseSearchContext>;
   summary: { availableDomains: string[]; unavailableDomains: string[]; contextVersion: string; };
 }
 function safeRead(key: string): unknown {
@@ -81,6 +84,8 @@ export function buildPulseContext(input: { store?: string; range?: string; secti
   const commerce = domain<PulseCommerceContext>("unavailable", {}, "no-authoritative-commerce-store", generatedAt);
   const analytics = domain<PulseAnalyticsContext>("unavailable", { available: false }, "no-authoritative-analytics-store", generatedAt);
   const ai = domain<PulseAIContext>("unavailable", { ollama: false, qwen2: false, llama3: false, openclaw: false }, "runtime-status-not-sampled-here", generatedAt);
+  const searchSnap = loadSearchAdapter();
+  const search = domain<PulseSearchContext>(searchSnap.status, { rows: searchSnap.rows.length || undefined, topQuery: searchSnap.rows[0] && searchSnap.rows[0].query, source: searchSnap.source, note: searchSnap.note }, searchSnap.source, generatedAt);
   const facts: Record<string, PulseFact> = {
     store: fact(store, "db-active-store-v1", store !== "unknown", "store", generatedAt),
     section: fact(storeSection || null, "digitalboost_store_section", Boolean(storeSection), "store", generatedAt),
@@ -88,12 +93,13 @@ export function buildPulseContext(input: { store?: string; range?: string; secti
     canvasBlocks: fact(storeData.blockCount ?? null, "db-store-canvas-v1", Boolean(blocks), "store", generatedAt),
     seoIssues: fact(seoData.issues ?? null, "db-seo-center-v1", seoData.issues !== undefined, "seo", generatedAt),
     campaigns: fact(campaignCount ?? null, "digitalboost_campaigns", campaignCount !== undefined, "marketing", generatedAt),
+    searchQueries: fact(searchSnap.rows.length || null, searchSnap.source, searchSnap.status !== "unavailable", "search", generatedAt),
   };
   const snapshot = buildStateSnapshot({ store, tenant: "digitalboost", mode: "CURRENT", facts });
-  const domains = { commerce, storeBuilder, seo, marketing, analytics, ai };
+  const domains = { commerce, storeBuilder, seo, marketing, analytics, ai, search };
   const availableDomains = Object.entries(domains).filter(([, value]) => value.status === "available").map(([key]) => key);
   const unavailableDomains = Object.entries(domains).filter(([, value]) => value.status === "unavailable").map(([key]) => key);
-  return { version: "2.0", generatedAt, snapshot, commerce, storeBuilder, seo, marketing, analytics, ai, summary: { availableDomains, unavailableDomains, contextVersion: snapshot.version } };
+  return { version: "2.0", generatedAt, snapshot, commerce, storeBuilder, seo, marketing, analytics, ai, search, summary: { availableDomains, unavailableDomains, contextVersion: snapshot.version } };
 }
 export function buildPulseContextSummary(context: PulseContext): string {
   return ["Context version: " + context.version, "Snapshot: " + context.snapshot.version, "Available: " + (context.summary.availableDomains.join(", ") || "none"), "Unavailable: " + (context.summary.unavailableDomains.join(", ") || "none"), "Store section: " + (context.storeBuilder.data.activeSection || "unknown"), "SEO status: " + context.seo.status, "Commerce status: " + context.commerce.status].join("\n");
