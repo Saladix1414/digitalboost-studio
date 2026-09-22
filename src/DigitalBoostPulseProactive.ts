@@ -8,9 +8,9 @@ export type PulseSignal = {
 type BusHandler = (signal: PulseSignal) => void;
 const handlers: BusHandler[] = [];
 const KEY = "db-pulse-proactive-v1";
-function readState(): { last: Record<string, number> } {
-  if (typeof localStorage === "undefined") return { last: {} };
-  try { const raw = JSON.parse(localStorage.getItem(KEY) || "{}"); return { last: raw.last || {} }; } catch { return { last: {} }; }
+function readState(): { last: Record<string, number>; dismissed: Record<string, number> } {
+  if (typeof localStorage === "undefined") return { last: {}, dismissed: {} };
+  try { const raw = JSON.parse(localStorage.getItem(KEY) || "{}"); return { last: raw.last || {}, dismissed: raw.dismissed || {} }; } catch { return { last: {}, dismissed: {} }; }
 }
 function writeState(state: { last: Record<string, number> }) {
   if (typeof localStorage === "undefined") return;
@@ -22,6 +22,7 @@ export function emitPulseSignal(signal: PulseSignal) {
 }
 export function cooldownAllows(key: string, ms: number, now = Date.now()): boolean {
   const state = readState();
+  if (state.dismissed[key]) return false;
   const prev = state.last[key] || 0;
   if (now - prev < ms) return false;
   state.last[key] = now;
@@ -71,4 +72,10 @@ export function notifyPulseOpportunities(input: { store?: string; section?: stri
     out.push(signal);
   });
   return out;
+}
+
+export function dismissPulseSignal(id: string, now = Date.now()) {
+  const state = readState();
+  state.dismissed[id] = now;
+  writeState(state);
 }

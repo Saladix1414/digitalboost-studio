@@ -3,7 +3,7 @@ export type PulseFacts = {
   store: string; range: string; live: boolean; page: string; theme: string;
   blocks: number; heroTitle: string; heroBody: string; heroCta: string;
   missingCta: number; genericHero: boolean; sales: number; orders: number; ticket: number;
-  score: number; notes: string[]; map: string[];
+  score: number; notes: string[]; map: string[]; commerceDemo: boolean;
 };
 
 function mul(range: string) { return range === "90d" ? 12 : range === "30d" ? 4 : 1; }
@@ -44,7 +44,7 @@ export function toolInspect(input?: { store?: string; range?: string; live?: boo
   const sales = Math.round(474 * m);
   const orders = Math.max(1, Math.round(4 * m));
   const ticket = Math.round(118 * m);
-  const notes: string[] = [];
+  const notes: string[] = ["DEMO: sales/orders/ticket no son fuente autoritativa"];
   let score = 55;
   if (live) score += 8; else { score -= 10; notes.push("Live apagado"); }
   if (heroTitle && heroTitle.indexOf('permiso') !== -1) { score += 12; } else if (genericHero) { score -= 15; notes.push('Hero de plantilla'); } else score += 12;
@@ -54,7 +54,7 @@ export function toolInspect(input?: { store?: string; range?: string; live?: boo
   if (theme === "noir") score += 2;
   if (score < 0) score = 0;
   if (score > 100) score = 100;
-  return { store, range, live, page, theme, blocks: blocks.length, heroTitle, heroBody, heroCta, missingCta, genericHero, sales, orders, ticket, score, notes, map };
+  return { store, range, live, page, theme, blocks: blocks.length, heroTitle, heroBody, heroCta, missingCta, genericHero, sales, orders, ticket, score, notes, map, commerceDemo: true };
 }
 
 export function toolScoreLine(f: PulseFacts) {
@@ -88,9 +88,9 @@ export function toolNba(f: PulseFacts): { title: string; body: string; action: s
   }
   return {
     title: "PULSE · Siguiente golpe",
-    body: "El canvas no es el problema.\nEl 1047 está cobrado y no sale, y el cap está justo.\nCampaña de carritos la armo, no la publico sola.",
-    action: "orders",
-    label: "Ir a Pedidos"
+    body: "El canvas no es el problema inmediato.\nNo hay store autoritativo de pedidos. No invento el 1047 como hecho.",
+    action: "analyze",
+    label: "Quedarme en PULSE"
   };
 }
 
