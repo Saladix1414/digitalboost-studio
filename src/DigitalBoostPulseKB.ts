@@ -110,9 +110,14 @@ function finish(
   const planLines = meta.plan && meta.plan.steps
     ? ["", "Plan:", ...meta.plan.steps.map(function (s, i) { return (i + 1) + ". " + s.title + " (" + s.action + ")"; })]
     : [];
+  const govLines = [
+    "",
+    "Governance: " + String(meta.envelope && meta.envelope.policy) + " · risk " + String(meta.risk) + (meta.confirm ? " · Pulse Card" : ""),
+    meta.mission ? ("Mision: " + meta.mission.state + " · paso " + String(meta.mission.stepIndex + 1)) : "",
+  ].filter(Boolean);
   return {
     title: pick.title,
-    body: [pick.body].concat(planLines).join("\n"),
+    body: [pick.body].concat(planLines).concat(govLines).join("\n"),
     action: pick.action,
     actionLabel: meta.confirm ? "Revisar Pulse Card" : pick.label,
     confirm: meta.confirm,
