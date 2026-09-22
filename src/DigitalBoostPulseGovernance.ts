@@ -162,6 +162,7 @@ export function createPulseApproval(
   const timestamp = now();
 
   return {
+    binding: envelope.binding,
     approval_id: envelope.approval_id,
     request_id: envelope.request_id,
     action: envelope.action,
@@ -206,18 +207,59 @@ export function beginPulseExecution(
   if (envelope.policy === "REJECT") {
     return Object.assign({}, envelope, { state: "REJECTED", reason_code: envelope.reason_code || "POLICY_REJECT" });
   }
-  if (envelope.binding && approval && approval.binding) {
-    const mismatch = diffProposalBinding(envelope.binding, approval.binding);
-    if (mismatch !== "OK") {
-      return Object.assign({}, envelope, { policy: "REJECT", state: "REJECTED", reason_code: mismatch });
-    }
-  }
   if (envelope.requires_approval) {
     if (!approval || approval.approval_id !== envelope.approval_id) {
-      return Object.assign({}, envelope, { state: "AWAITING_APPROVAL", reason_code: "APPROVAL_MISSING" });
+      return Object.assign({}, envelope, {
+        state: "AWAITING_APPROVAL",
+        reason_code: "APPROVAL_MISSING",
+      });
     }
+
     if (approval.state !== "APPROVED") {
-      return Object.assign({}, envelope, { state: approval.state === "REJECTED" ? "REJECTED" : "AWAITING_APPROVAL", reason_code: approval.state === "REJECTED" ? "POLICY_REJECT" : "APPROVAL_MISSING" });
+      return Object.assign({}, envelope, {
+        state:
+          approval.state === "REJECTED"
+            ? "REJECTED"
+            : "AWAITING_APPROVAL",
+        reason_code:
+          approval.state === "REJECTED"
+            ? "POLICY_REJECT"
+            : "APPROVAL_MISSING",
+      });
+    }
+
+    if (!envelope.binding || !approval.binding) {
+      return Object.assign({}, envelope, {
+        policy: "REJECT",
+        state: "REJECTED",
+        reason_code: "BINDING_MISSING",
+      });
+    }
+
+    const mismatch = diffProposalBinding(
+      envelope.binding,
+      approval.binding,
+    );
+
+    if (mismatch !== "OK") {
+      return Object.assign({}, envelope, {
+        policy: "REJECT",
+        state: "REJECTED",
+        reason_code: mismatch,
+      });
+    }
+  } else if (envelope.binding && approval?.binding) {
+    const mismatch = diffProposalBinding(
+      envelope.binding,
+      approval.binding,
+    );
+
+    if (mismatch !== "OK") {
+      return Object.assign({}, envelope, {
+        policy: "REJECT",
+        state: "REJECTED",
+        reason_code: mismatch,
+      });
     }
   }
   return Object.assign({}, envelope, { state: "EXECUTING" });
