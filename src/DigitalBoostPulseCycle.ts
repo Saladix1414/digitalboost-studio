@@ -4,6 +4,7 @@ import { approvalCard, type PulseCard } from "./DigitalBoostPulseCard";
 import { pushAudit, requestId } from "./DigitalBoostPulseLog";
 import { rememberDecision } from "./DigitalBoostPulseMemory";
 import { compilePulseGoal, type PulsePlan } from "./DigitalBoostPulsePlan";
+import { startPulseMission, type PulseMission } from "./DigitalBoostPulseMission";
 import {
   evaluatePulsePolicy,
   createPulseApproval,
@@ -25,6 +26,7 @@ export type CycleMeta = {
   envelope: PulseDecisionEnvelope;
   approval?: PulseApproval | null;
   plan?: PulsePlan;
+  mission?: PulseMission;
 };
 
 export function runCycle(input: { q: string; section: string; store: string; action: string; title: string; body: string; alreadyConfirm: boolean }): CycleMeta {
@@ -125,6 +127,10 @@ export function runCycle(input: { q: string; section: string; store: string; act
     card: card,
     envelope: envelope,
     approval: approval,
-    plan: compilePulseGoal({ q: input.q, action: input.action, section: input.section, store: input.store }),
+    plan: (function () {
+      const plan = compilePulseGoal({ q: input.q, action: input.action, section: input.section, store: input.store });
+      return plan;
+    })(),
+    mission: undefined,
   };
 }
