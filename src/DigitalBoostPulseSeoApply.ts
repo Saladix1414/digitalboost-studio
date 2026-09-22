@@ -76,6 +76,65 @@ export function validateSeoFixProposal(
   return { ok: true };
 }
 
+export function inspectSeoFixProposal(
+  proposal: SeoFixProposal,
+) {
+  const validation = validateSeoFixProposal(proposal);
+
+  if (!validation.ok) {
+    throw new Error(validation.error);
+  }
+
+  const settings = loadSeo();
+  const pages = buildPages(settings);
+  const page = resolvePage(proposal, pages);
+
+  if (!page) {
+    throw new Error("SEO target page no longer exists.");
+  }
+
+  const overrides = settings.overrides || {};
+  const current = overrides[page.id] || {};
+
+  let expectedValue: unknown;
+  let actualValue: unknown;
+
+  if (proposal.fixKind === "title") {
+    expectedValue = pulseTitle(page);
+    actualValue = page.title;
+  }
+
+  if (proposal.fixKind === "desc") {
+    expectedValue = pulseDesc(page);
+    actualValue = page.description;
+  }
+
+  if (proposal.fixKind === "alt") {
+    expectedValue = pulseAlt(page);
+    actualValue = current.alt;
+  }
+
+  if (proposal.fixKind === "noindex") {
+    expectedValue = false;
+    actualValue = page.indexable;
+  }
+
+  const actualResolved =
+    !proposal.issueId ||
+    (Array.isArray(settings.resolved) &&
+      settings.resolved.indexOf(proposal.issueId) !== -1);
+
+  return {
+    pageId: page.id,
+    fixKind: proposal.fixKind,
+    issueId: proposal.issueId,
+    expectedValue,
+    actualValue,
+    expectedResolved: true,
+    actualResolved,
+  };
+}
+
 export function applySeoFixProposal(
   proposal: SeoFixProposal,
 ) {

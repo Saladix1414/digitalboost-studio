@@ -11,15 +11,19 @@ import {
 import { applyPulseDraft, type PulseDraft } from "./DigitalBoostPulseApply";
 import {
   applySeoFixProposal,
+  inspectSeoFixProposal,
   validateSeoFixProposal,
   type SeoFixProposal,
 } from "./DigitalBoostPulseSeoApply";
 import { pushAudit } from "./DigitalBoostPulseLog";
 import {
-  verifyPulseAction,
+  postcheckPulseExecution,
   precheckPulseExecution,
 } from "./DigitalBoostPulseVerify";
-import { peekCanvasHero, undoPulseApply } from "./DigitalBoostPulseApply";
+import {
+  peekCanvasHero,
+  undoPulseApply,
+} from "./DigitalBoostPulseApply";
 
 export type PulseExecutionContext = {
   envelope: PulseDecisionEnvelope;
@@ -69,6 +73,30 @@ function audit(
               ? "REJECTED"
               : "AWAITING_APPROVAL",
       result_summary: event,
+      policy_version: envelope.policy_version,
+      approval_id: envelope.approval_id,
+      proposal_hash: envelope.binding?.proposal_hash,
+      reason_code: envelope.reason_code,
+      verification_status:
+        typeof metadata?.verification_status === "string"
+          ? metadata.verification_status
+          : undefined,
+      verified:
+        typeof metadata?.verified === "boolean"
+          ? metadata.verified
+          : undefined,
+      rolled_back:
+        typeof metadata?.rolled_back === "boolean"
+          ? metadata.rolled_back
+          : undefined,
+      rollback_verified:
+        typeof metadata?.rollback_verified === "boolean"
+          ? metadata.rollback_verified
+          : undefined,
+      rollback_reason:
+        typeof metadata?.rollback_reason === "string"
+          ? metadata.rollback_reason
+          : undefined,
     });
   } catch {}
 
@@ -144,6 +172,225 @@ export function executePulseAction(
     };
   }
 
+  const canvasBeforeRaw = (() => {
+    try {
+      const page = localStorage.getItem("db-store-page-v1") || "Inicio";
+      return {
+        page,
+        raw:
+          localStorage.getItem("db-store-canvas-v1:" + page) ??
+          localStorage.getItem("db-store-canvas-v1") ??
+          "[]",
+      };
+    } catch {
+      return { page: "Inicio", raw: "[]" };
+    }
+  })();
+
+  const canvasBeforeHero = peekCanvasHero();
+
+  const themeBefore = (() => {
+    try {
+      return localStorage.getItem("db-os-theme-v1");
+    } catch {
+      return null;
+    }
+  })();
+
+  const seoBeforeRaw = (() => {
+    try {
+      return localStorage.getItem("db-seo-center-v1");
+    } catch {
+      return null;
+    }
+  })();
+
+  let canvasMutationStarted = false;
+  let seoMutationStarted = false;
+  let themeMutationStarted = false;
+
+  const expected: Record<string, unknown> = {};
+
+  if (draft?.kind === "hero") {
+    expected.canvas = {
+      title: draft.title,
+      body: draft.body,
+      cta: draft.cta,
+    };
+  }
+
+  if (draft?.kind === "cta") {
+    expected.canvas = {
+      cta: draft.cta,
+    };
+  }
+
+  if (draft?.kind === "theme") {
+    expected.theme =
+      /noir/i.test(draft.title + " " + draft.body)
+        ? "noir"
+        : "nimbus";
+  }
+
+  if (proposal?.type === "seo-fix") {
+    const inspection = inspectSeoFixProposal(
+      proposal as SeoFixProposal,
+    );
+
+    expected.seo = [
+      {
+        pageId: inspection.pageId,
+        fixKind: inspection.fixKind,
+        issueId: inspection.issueId,
+        value: inspection.expectedValue,
+        resolved: inspection.expectedResolved,
+      },
+    ];
+  }
+
+  if (proposal?.type === "optimize") {
+    const seoExpected: Array<Record<string, unknown>> = [];
+    const heroItems: Array<Record<string, unknown>> = [];
+
+    const items = proposal.items as Array<Record<string, unknown>>;
+
+    for (const item of items) {
+      if (item.type === "hero") {
+        heroItems.push({
+          title: String(item.title),
+          body: String(item.body),
+          cta: String(item.cta),
+        });
+      }
+
+      if (item.type === "seo-fix") {
+        const inspection = inspectSeoFixProposal(
+          item as SeoFixProposal,
+        );
+
+        seoExpected.push({
+          pageId: inspection.pageId,
+          fixKind: inspection.fixKind,
+          issueId: inspection.issueId,
+          value: inspection.expectedValue,
+          resolved: inspection.expectedResolved,
+        });
+      }
+    }
+
+    if (heroItems.length > 0) {
+      expected.canvas = heroItems[heroItems.length - 1];
+    }
+
+    if (seoExpected.length > 0) {
+      expected.seo = seoExpected;
+    }
+  }
+
+  function readCanvasRaw(): string {
+    try {
+      const page =
+        localStorage.getItem("db-store-page-v1") || "Inicio";
+
+      return (
+        localStorage.getItem("db-store-canvas-v1:" + page) ??
+        localStorage.getItem("db-store-canvas-v1") ??
+        "[]"
+      );
+    } catch {
+      return "[]";
+    }
+  }
+
+  function restoreKey(
+    key: string,
+    value: string | null,
+  ): boolean {
+    try {
+      if (value === null) {
+        localStorage.removeItem(key);
+      } else {
+        localStorage.setItem(key, value);
+      }
+
+      return localStorage.getItem(key) === value;
+    } catch {
+      return false;
+    }
+  }
+
+  function rollbackCanvas(): boolean {
+    if (!canvasMutationStarted) return true;
+
+    const undone = undoPulseApply();
+
+    if (!undone) return false;
+
+    try {
+      const restored =
+        readCanvasRaw() === canvasBeforeRaw.raw &&
+        JSON.stringify(peekCanvasHero()) ===
+          JSON.stringify(canvasBeforeHero);
+
+      return restored;
+    } catch {
+      return false;
+    }
+  }
+
+  function rollbackSeo(): boolean {
+    if (!seoMutationStarted) return true;
+
+    return restoreKey(
+      "db-seo-center-v1",
+      seoBeforeRaw,
+    );
+  }
+
+  function rollbackTheme(): boolean {
+    if (!themeMutationStarted) return true;
+
+    const restored = restoreKey(
+      "db-os-theme-v1",
+      themeBefore,
+    );
+
+    try {
+      window.dispatchEvent(new Event("db-theme-reload"));
+    } catch {}
+
+    return restored;
+  }
+
+  function rollbackAll() {
+    const canvasOk = rollbackCanvas();
+    const seoOk = rollbackSeo();
+    const themeOk = rollbackTheme();
+
+    const touched =
+      canvasMutationStarted ||
+      seoMutationStarted ||
+      themeMutationStarted;
+
+    if (!touched) {
+      return {
+        rolledBack: false,
+        rollbackVerified: false,
+        rollbackReason: "NO_MUTATION_STARTED",
+      };
+    }
+
+    const ok = canvasOk && seoOk && themeOk;
+
+    return {
+      rolledBack: ok,
+      rollbackVerified: ok,
+      rollbackReason: ok
+        ? "ROLLBACK_VERIFIED"
+        : "ROLLBACK_VERIFICATION_FAILED",
+    };
+  }
+
   try {
     let result: unknown;
 
@@ -206,7 +453,10 @@ export function executePulseAction(
       validateProposal(proposal);
 
       if (proposal.type === "seo-fix") {
-        result = applySeoFixProposal(proposal as SeoFixProposal);
+        seoMutationStarted = true;
+        result = applySeoFixProposal(
+          proposal as SeoFixProposal,
+        );
       }
 
       if (proposal.type === "optimize") {
@@ -215,6 +465,8 @@ export function executePulseAction(
 
         for (const item of items) {
           if (item.type === "hero") {
+            canvasMutationStarted = true;
+
             applied.push(
               applyPulseDraft({
                 kind: "hero",
@@ -235,6 +487,17 @@ export function executePulseAction(
     }
 
     if (!proposal && draft) {
+      if (
+        draft.kind === "hero" ||
+        draft.kind === "cta"
+      ) {
+        canvasMutationStarted = true;
+      }
+
+      if (draft.kind === "theme") {
+        themeMutationStarted = true;
+      }
+
       result = applyPulseDraft(draft);
     }
 
@@ -242,30 +505,120 @@ export function executePulseAction(
       onNavigate(envelope.action);
     }
 
-    const actualHero = peekCanvasHero();
-    const expected: Record<string, unknown> = {};
-    if (draft && draft.kind === "hero") {
-      expected.title = draft.title;
+    const actual: Record<string, unknown> = {};
+
+    if (expected.canvas) {
+      const hero = peekCanvasHero();
+      const canvasExpected =
+        expected.canvas as Record<string, unknown>;
+
+      const canvasActual: Record<string, unknown> = {};
+
+      if ("title" in canvasExpected) {
+        canvasActual.title = hero.title;
+      }
+
+      if ("body" in canvasExpected) {
+        canvasActual.body = hero.body;
+      }
+
+      if ("cta" in canvasExpected) {
+        canvasActual.cta = hero.cta;
+      }
+
+      actual.canvas = canvasActual;
     }
-    if (proposal && proposal.type === "seo-fix") {
-      expected.applied = true;
+
+    if (expected.theme) {
+      try {
+        actual.theme =
+          localStorage.getItem("db-os-theme-v1");
+      } catch {
+        actual.theme = null;
+      }
     }
-    const post = verifyPulseAction({
-      phase: "POSTCHECK",
+
+    if (expected.seo) {
+      if (proposal?.type === "seo-fix") {
+        const inspection = inspectSeoFixProposal(
+          proposal as SeoFixProposal,
+        );
+
+        actual.seo = [
+          {
+            pageId: inspection.pageId,
+            fixKind: inspection.fixKind,
+            issueId: inspection.issueId,
+            value: inspection.actualValue,
+            resolved: inspection.actualResolved,
+          },
+        ];
+      }
+
+      if (proposal?.type === "optimize") {
+        const seoActual: Array<Record<string, unknown>> = [];
+
+        const items =
+          proposal.items as Array<Record<string, unknown>>;
+
+        for (const item of items) {
+          if (item.type !== "seo-fix") continue;
+
+          const inspection =
+            inspectSeoFixProposal(
+              item as SeoFixProposal,
+            );
+
+          seoActual.push({
+            pageId: inspection.pageId,
+            fixKind: inspection.fixKind,
+            issueId: inspection.issueId,
+            value: inspection.actualValue,
+            resolved: inspection.actualResolved,
+          });
+        }
+
+        actual.seo = seoActual;
+      }
+    }
+
+    const post = postcheckPulseExecution({
       action: envelope.action,
-      expected: Object.keys(expected).length ? expected : { applied: result !== undefined },
-      actual: draft && draft.kind === "hero" ? { title: actualHero.title, applied: result !== undefined } : { applied: result !== undefined },
+      expected,
+      actual,
     });
+
     if (post.status === "FAIL") {
-      undoPulseApply();
-      const failed = failPulseExecution(executionEnvelope, new Error("POSTCHECK failed"));
+      const rollback = rollbackAll();
+
+      const failed = failPulseExecution(
+        executionEnvelope,
+        new Error("POSTCHECK failed"),
+      );
+
       return {
         allowed: false,
         state: "FAILED",
         error: "POSTCHECK failed",
         verified: false,
-        rolledBack: true,
-        audit: audit({ ...executionEnvelope, state: failed.state }, "PULSE_ACTION_VERIFY_FAILED", "FAILED", { diffs: post.diffs }),
+        rolledBack: rollback.rolledBack,
+        audit: audit(
+          { ...executionEnvelope, state: failed.state },
+          "PULSE_ACTION_VERIFY_FAILED",
+          "FAILED",
+          {
+            diffs: post.diffs,
+            failedChecks: post.failedChecks,
+            reasonCodes: post.reasonCodes,
+            verification_status: post.status,
+            verified: false,
+            rolled_back: rollback.rolledBack,
+            rollback_verified:
+              rollback.rollbackVerified,
+            rollback_reason:
+              rollback.rollbackReason,
+          },
+        ),
       };
     }
 
@@ -283,14 +636,27 @@ export function executePulseAction(
       allowed: true,
       state: "COMPLETED",
       result: completed.result,
+      verified: post.verified,
+      rolledBack: false,
       audit: audit(
         completedEnvelope,
         "PULSE_ACTION_COMPLETED",
         "COMPLETED",
+        {
+          verification_status: post.status,
+          verified: post.verified,
+          rolled_back: false,
+          rollback_verified: false,
+        },
       ),
     };
   } catch (error) {
-    const failed = failPulseExecution(executionEnvelope, error);
+    const rollback = rollbackAll();
+
+    const failed = failPulseExecution(
+      executionEnvelope,
+      error,
+    );
 
     const failedEnvelope = {
       ...executionEnvelope,
@@ -301,11 +667,22 @@ export function executePulseAction(
       allowed: false,
       state: "FAILED",
       error: failed.error,
+      verified: false,
+      rolledBack: rollback.rolledBack,
       audit: audit(
         failedEnvelope,
         "PULSE_ACTION_FAILED",
         "FAILED",
-        { error: failed.error },
+        {
+          error: failed.error,
+          verification_status: "EXECUTION_ERROR",
+          verified: false,
+          rolled_back: rollback.rolledBack,
+          rollback_verified:
+            rollback.rollbackVerified,
+          rollback_reason:
+            rollback.rollbackReason,
+        },
       ),
     };
   }

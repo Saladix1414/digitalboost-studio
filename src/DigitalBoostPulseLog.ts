@@ -34,6 +34,9 @@ export type PulseAudit = {
   reason_code?: string;
   verification_status?: string;
   verified?: boolean;
+  rolled_back?: boolean;
+  rollback_verified?: boolean;
+  rollback_reason?: string;
 };
 
 function readArr(k: string) {

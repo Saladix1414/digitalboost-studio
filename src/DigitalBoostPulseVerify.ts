@@ -28,6 +28,14 @@ export type PulsePrecheckInput = {
   proposal?: Record<string, unknown> | null;
 };
 
+export type PulsePostcheckInput = {
+  action: string;
+  expected?: Record<string, unknown> | null;
+  actual?: Record<string, unknown> | null;
+  checks?: PulseCheck[];
+};
+
+
 const PRECHECK_PAYLOAD_ACTIONS = new Set([
   "hero",
   "seo-fix",
@@ -185,6 +193,42 @@ export function precheckPulseExecution(
     failedChecks: [],
     reasonCodes: ["OK"],
   };
+}
+
+export function postcheckPulseExecution(
+  input: PulsePostcheckInput,
+): PulseVerificationResult {
+  const contract = getActionContract(input.action);
+
+  const hasExpected =
+    Boolean(input.expected && Object.keys(input.expected).length > 0);
+
+  const hasActual =
+    Boolean(input.actual && Object.keys(input.actual).length > 0);
+
+  if (contract?.class === "mutate" && (!hasExpected || !hasActual)) {
+    return {
+      phase: "POSTCHECK",
+      action: input.action,
+      status: "FAIL",
+      verified: false,
+      diffs: [],
+      failedChecks: [
+        !hasExpected
+          ? "persisted-expected-state"
+          : "persisted-actual-state",
+      ],
+      reasonCodes: ["VERIFICATION_FAILED"],
+    };
+  }
+
+  return verifyPulseAction({
+    phase: "POSTCHECK",
+    action: input.action,
+    expected: input.expected,
+    actual: input.actual,
+    checks: input.checks,
+  });
 }
 
 function diffRecords(expected?: Record<string, unknown> | null, actual?: Record<string, unknown> | null) {
