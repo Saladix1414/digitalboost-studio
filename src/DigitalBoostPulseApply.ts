@@ -119,3 +119,9 @@ export function toggleHidden(index: number) {
   commit(blocks);
   return index;
 }
+
+export function peekCanvasHero(): { title?: string; body?: string; cta?: string; blockCount: number } {
+  const bag = readBlocks();
+  const hero = bag.blocks.find(function (b: any) { return b && (b.type === "hero" || b.kind === "hero"); }) || bag.blocks[0] || {};
+  return { title: hero.title, body: hero.body, cta: hero.cta, blockCount: bag.blocks.length };
+}
