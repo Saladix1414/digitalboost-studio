@@ -8,6 +8,7 @@ import {
   type PulseDecisionEnvelope,
   type PulseApproval,
 } from "./DigitalBoostPulseGovernance";
+import { currentContextVersion } from "./DigitalBoostPulseContext";
 
 export type CycleMeta = {
   request_id: string;
@@ -41,7 +42,7 @@ export function runCycle(input: { q: string; section: string; store: string; act
       target: input.store + ":" + input.section + ":" + input.action,
       actor: "merchant",
       tenant: input.store,
-      context_version: input.store + ":" + input.section,
+      context_version: currentContextVersion({ store: input.store, section: input.section }),
       proposal: { action: input.action, title: input.title, body: input.body },
     },
   );
