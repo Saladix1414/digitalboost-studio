@@ -1,3 +1,4 @@
+import { getActionContract, isKnownPulseAction } from "./DigitalBoostPulseContracts";
 export type PulseVerifyPhase = "PRECHECK" | "POSTCHECK";
 export type PulseVerifyStatus = "PASS" | "FAIL" | "SKIPPED";
 export type PulseVerifyDiff = { path: string; expected: unknown; actual: unknown };
@@ -19,6 +20,172 @@ export type PulseVerificationResult = {
   failedChecks: string[];
   reasonCodes: string[];
 };
+
+export type PulsePrecheckInput = {
+  action: string;
+  executionState: string;
+  draft?: Record<string, unknown> | null;
+  proposal?: Record<string, unknown> | null;
+};
+
+const PRECHECK_PAYLOAD_ACTIONS = new Set([
+  "hero",
+  "seo-fix",
+  "optimize",
+]);
+
+const PRECHECK_UNSUPPORTED_MUTATIONS = new Set([
+  "campaigns",
+]);
+
+function precheckFailure(
+  action: string,
+  failedChecks: PulseCheck[],
+): PulseVerificationResult {
+  return {
+    phase: "PRECHECK",
+    action,
+    status: "FAIL",
+    verified: false,
+    diffs: [],
+    failedChecks: failedChecks.map((check) => check.name),
+    reasonCodes: ["PRECONDITION_FAILED"],
+  };
+}
+
+export function precheckPulseExecution(
+  input: PulsePrecheckInput,
+): PulseVerificationResult {
+  const contract = getActionContract(input.action);
+
+  const failedChecks: PulseCheck[] = [];
+
+  if (!isKnownPulseAction(input.action) || !contract) {
+    failedChecks.push({
+      name: "known-action",
+      ok: false,
+      detail: "Action contract is missing.",
+    });
+
+    return precheckFailure(input.action, failedChecks);
+  }
+
+  if (input.executionState !== "EXECUTING") {
+    failedChecks.push({
+      name: "execution-state",
+      ok: false,
+      detail: "Executor reached precheck without EXECUTING governance state.",
+    });
+  }
+
+  if (PRECHECK_UNSUPPORTED_MUTATIONS.has(input.action)) {
+    failedChecks.push({
+      name: "executor-capability",
+      ok: false,
+      detail: "No real mutation executor is registered for this action.",
+    });
+  }
+
+  const hasDraft = Boolean(input.draft);
+  const hasProposal = Boolean(input.proposal);
+
+  if (PRECHECK_PAYLOAD_ACTIONS.has(input.action) && !hasDraft && !hasProposal) {
+    failedChecks.push({
+      name: "mutation-payload",
+      ok: false,
+      detail: "Mutating action requires a draft or proposal.",
+    });
+  }
+
+  if (hasDraft) {
+    const draft = input.draft as Record<string, unknown>;
+
+    const validDraft =
+      typeof draft.kind === "string" &&
+      typeof draft.title === "string" &&
+      typeof draft.body === "string" &&
+      typeof draft.cta === "string";
+
+    if (!validDraft) {
+      failedChecks.push({
+        name: "draft-shape",
+        ok: false,
+        detail: "Draft shape is incomplete.",
+      });
+    }
+
+    if (
+      input.action === "hero" &&
+      draft.kind !== "hero"
+    ) {
+      failedChecks.push({
+        name: "hero-draft-kind",
+        ok: false,
+        detail: "hero action requires a hero draft.",
+      });
+    }
+  }
+
+  if (hasProposal) {
+    const proposal = input.proposal as Record<string, unknown>;
+
+    if (typeof proposal.type !== "string") {
+      failedChecks.push({
+        name: "proposal-type",
+        ok: false,
+        detail: "Proposal type is missing.",
+      });
+    }
+
+    if (
+      input.action === "seo-fix" &&
+      proposal.type !== "seo-fix"
+    ) {
+      failedChecks.push({
+        name: "seo-proposal-type",
+        ok: false,
+        detail: "seo-fix action requires a seo-fix proposal.",
+      });
+    }
+
+    if (
+      input.action === "optimize" &&
+      proposal.type !== "optimize"
+    ) {
+      failedChecks.push({
+        name: "optimize-proposal-type",
+        ok: false,
+        detail: "optimize action requires an optimize proposal.",
+      });
+    }
+
+    if (
+      input.action === "hero" &&
+      proposal.type !== "optimize" &&
+      !hasDraft
+    ) {
+      failedChecks.push({
+        name: "hero-proposal-type",
+        ok: false,
+        detail: "hero action requires a hero draft or optimize proposal.",
+      });
+    }
+  }
+
+  if (failedChecks.length > 0) {
+    return precheckFailure(input.action, failedChecks);
+  }
+
+  return {
+    phase: "PRECHECK",
+    action: input.action,
+    status: "PASS",
+    verified: true,
+    diffs: [],
+    failedChecks: [],
+    reasonCodes: ["OK"],
+  };
+}
 
 function diffRecords(expected?: Record<string, unknown> | null, actual?: Record<string, unknown> | null) {
   if (!expected) return [];

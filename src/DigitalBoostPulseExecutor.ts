@@ -15,7 +15,10 @@ import {
   type SeoFixProposal,
 } from "./DigitalBoostPulseSeoApply";
 import { pushAudit } from "./DigitalBoostPulseLog";
-import { verifyPulseAction } from "./DigitalBoostPulseVerify";
+import {
+  verifyPulseAction,
+  precheckPulseExecution,
+} from "./DigitalBoostPulseVerify";
 import { peekCanvasHero, undoPulseApply } from "./DigitalBoostPulseApply";
 
 export type PulseExecutionContext = {
@@ -99,6 +102,44 @@ export function executePulseAction(
         executionEnvelope,
         "PULSE_ACTION_AWAITING_APPROVAL",
         "AWAITING_APPROVAL",
+      ),
+    };
+  }
+
+  const precheck = precheckPulseExecution({
+    action: envelope.action,
+    executionState: executionEnvelope.state,
+    draft: draft
+      ? {
+          kind: draft.kind,
+          title: draft.title,
+          body: draft.body,
+          cta: draft.cta,
+        }
+      : null,
+    proposal: proposal ?? null,
+  });
+
+  if (precheck.status === "FAIL") {
+    const failed = failPulseExecution(
+      executionEnvelope,
+      new Error("PRECHECK failed"),
+    );
+
+    return {
+      allowed: false,
+      state: "FAILED",
+      error: "PRECHECK failed",
+      verified: false,
+      rolledBack: false,
+      audit: audit(
+        { ...executionEnvelope, state: failed.state },
+        "PULSE_ACTION_PRECHECK_FAILED",
+        "FAILED",
+        {
+          failedChecks: precheck.failedChecks,
+          reasonCodes: precheck.reasonCodes,
+        },
       ),
     };
   }
