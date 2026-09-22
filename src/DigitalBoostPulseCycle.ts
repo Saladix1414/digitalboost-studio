@@ -3,6 +3,7 @@ import { classifyIntent, classifyRisk, pickAgent, isWriteIntent, type PulseInten
 import { approvalCard, type PulseCard } from "./DigitalBoostPulseCard";
 import { pushAudit, requestId } from "./DigitalBoostPulseLog";
 import { rememberDecision } from "./DigitalBoostPulseMemory";
+import { compilePulseGoal, type PulsePlan } from "./DigitalBoostPulsePlan";
 import {
   evaluatePulsePolicy,
   createPulseApproval,
@@ -23,6 +24,7 @@ export type CycleMeta = {
   card?: PulseCard;
   envelope: PulseDecisionEnvelope;
   approval?: PulseApproval | null;
+  plan?: PulsePlan;
 };
 
 export function runCycle(input: { q: string; section: string; store: string; action: string; title: string; body: string; alreadyConfirm: boolean }): CycleMeta {
@@ -123,5 +125,6 @@ export function runCycle(input: { q: string; section: string; store: string; act
     card: card,
     envelope: envelope,
     approval: approval,
+    plan: compilePulseGoal({ q: input.q, action: input.action, section: input.section, store: input.store }),
   };
 }
