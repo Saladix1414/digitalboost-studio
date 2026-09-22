@@ -2,6 +2,7 @@
 import { classifyIntent, classifyRisk, pickAgent, isWriteIntent, type PulseIntent, type PulseRisk, type PulseAgent } from "./DigitalBoostPulseConst";
 import { approvalCard, type PulseCard } from "./DigitalBoostPulseCard";
 import { pushAudit, requestId } from "./DigitalBoostPulseLog";
+import { rememberDecision } from "./DigitalBoostPulseMemory";
 import {
   evaluatePulsePolicy,
   createPulseApproval,
@@ -93,6 +94,15 @@ export function runCycle(input: { q: string; section: string; store: string; act
             ? "AWAITING_APPROVAL"
             : "PENDING",
       result_summary: input.title,
+    });
+  } catch {}
+  try {
+    rememberDecision({
+      scope: input.store,
+      action: input.action,
+      policy: String(envelope.policy),
+      requestId: envelope.request_id,
+      reason: String(envelope.reason_code || envelope.policy),
     });
   } catch {}
 
