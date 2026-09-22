@@ -14,7 +14,8 @@
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build",
-    "start": "NODE_ENV=production tsx server.ts"
+    "start": "NODE_ENV=production tsx server.ts",
+    "test:pulse": "node --experimental-strip-types --import ./tests/pulse/ts-resolve-register.mjs --test tests/pulse/*.test.ts"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

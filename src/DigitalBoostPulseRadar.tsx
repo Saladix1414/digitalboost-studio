@@ -1,11 +1,9 @@
 
 import { useMemo } from "react";
+import { detectPulseOpportunities } from "./DigitalBoostPulseProactive";
 export default function DigitalBoostPulseRadar() {
   const n = useMemo(function () {
-    let c = 0;
-    try { if (localStorage.getItem("db-os-live-v1") === "0") c++; } catch {}
-    c += 2;
-    return c;
+    try { return detectPulseOpportunities().filter(function (s) { return s.significance >= 0.6; }).length; } catch { return 0; }
   }, []);
   function openBrief() {
     try { localStorage.setItem("db-pulse-seed", "briefing"); } catch {}

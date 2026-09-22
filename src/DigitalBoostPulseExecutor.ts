@@ -15,6 +15,8 @@ import {
   type SeoFixProposal,
 } from "./DigitalBoostPulseSeoApply";
 import { pushAudit } from "./DigitalBoostPulseLog";
+import { verifyPulseAction } from "./DigitalBoostPulseVerify";
+import { peekCanvasHero, undoPulseApply } from "./DigitalBoostPulseApply";
 
 export type PulseExecutionContext = {
   envelope: PulseDecisionEnvelope;
@@ -29,6 +31,8 @@ export type PulseExecutionOutcome = {
   state: "COMPLETED" | "FAILED" | "AWAITING_APPROVAL" | "REJECTED";
   result?: unknown;
   error?: string;
+  verified?: boolean;
+  rolledBack?: boolean;
   audit: PulseAuditEvent;
 };
 
@@ -195,6 +199,33 @@ export function executePulseAction(
 
     if (onNavigate) {
       onNavigate(envelope.action);
+    }
+
+    const actualHero = peekCanvasHero();
+    const expected: Record<string, unknown> = {};
+    if (draft && draft.kind === "hero") {
+      expected.title = draft.title;
+    }
+    if (proposal && proposal.type === "seo-fix") {
+      expected.applied = true;
+    }
+    const post = verifyPulseAction({
+      phase: "POSTCHECK",
+      action: envelope.action,
+      expected: Object.keys(expected).length ? expected : { applied: result !== undefined },
+      actual: draft && draft.kind === "hero" ? { title: actualHero.title, applied: result !== undefined } : { applied: result !== undefined },
+    });
+    if (post.status === "FAIL") {
+      undoPulseApply();
+      const failed = failPulseExecution(executionEnvelope, new Error("POSTCHECK failed"));
+      return {
+        allowed: false,
+        state: "FAILED",
+        error: "POSTCHECK failed",
+        verified: false,
+        rolledBack: true,
+        audit: audit({ ...executionEnvelope, state: failed.state }, "PULSE_ACTION_VERIFY_FAILED", "FAILED", { diffs: post.diffs }),
+      };
     }
 
     const completed: PulseExecutionResult = completePulseExecution(

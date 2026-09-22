@@ -28,6 +28,12 @@ export type PulseAudit = {
   approval_required: boolean;
   status: string;
   result_summary: string;
+  policy_version?: string;
+  approval_id?: string;
+  proposal_hash?: string;
+  reason_code?: string;
+  verification_status?: string;
+  verified?: boolean;
 };
 
 function readArr(k: string) {

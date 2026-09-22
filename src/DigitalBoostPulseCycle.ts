@@ -2,12 +2,16 @@
 import { classifyIntent, classifyRisk, pickAgent, isWriteIntent, type PulseIntent, type PulseRisk, type PulseAgent } from "./DigitalBoostPulseConst";
 import { approvalCard, type PulseCard } from "./DigitalBoostPulseCard";
 import { pushAudit, requestId } from "./DigitalBoostPulseLog";
+import { rememberDecision } from "./DigitalBoostPulseMemory";
+import { compilePulseGoal, type PulsePlan } from "./DigitalBoostPulsePlan";
+import { startPulseMission, type PulseMission } from "./DigitalBoostPulseMission";
 import {
   evaluatePulsePolicy,
   createPulseApproval,
   type PulseDecisionEnvelope,
   type PulseApproval,
 } from "./DigitalBoostPulseGovernance";
+import { currentContextVersion } from "./DigitalBoostPulseContext";
 
 export type CycleMeta = {
   request_id: string;
@@ -21,6 +25,8 @@ export type CycleMeta = {
   card?: PulseCard;
   envelope: PulseDecisionEnvelope;
   approval?: PulseApproval | null;
+  plan?: PulsePlan;
+  mission?: PulseMission;
 };
 
 export function runCycle(input: { q: string; section: string; store: string; action: string; title: string; body: string; alreadyConfirm: boolean }): CycleMeta {
@@ -37,6 +43,13 @@ export function runCycle(input: { q: string; section: string; store: string; act
     risk,
     confirm,
     rid,
+    {
+      target: input.store + ":" + input.section + ":" + input.action,
+      actor: "merchant",
+      tenant: input.store,
+      context_version: currentContextVersion({ store: input.store, section: input.section }),
+      proposal: { action: input.action, title: input.title, body: input.body },
+    },
   );
 
   const approval =
@@ -87,6 +100,15 @@ export function runCycle(input: { q: string; section: string; store: string; act
       result_summary: input.title,
     });
   } catch {}
+  try {
+    rememberDecision({
+      scope: input.store,
+      action: input.action,
+      policy: String(envelope.policy),
+      requestId: envelope.request_id,
+      reason: String(envelope.reason_code || envelope.policy),
+    });
+  } catch {}
 
   return {
     request_id: envelope.request_id,
@@ -105,5 +127,10 @@ export function runCycle(input: { q: string; section: string; store: string; act
     card: card,
     envelope: envelope,
     approval: approval,
+    plan: (function () {
+      const plan = compilePulseGoal({ q: input.q, action: input.action, section: input.section, store: input.store });
+      return plan;
+    })(),
+    mission: undefined,
   };
 }
