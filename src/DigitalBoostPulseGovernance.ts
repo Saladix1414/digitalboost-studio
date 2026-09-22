@@ -1,3 +1,16 @@
+import {
+  PULSE_POLICY_VERSION,
+  parsePulseRisk,
+  getActionContract,
+  isKnownPulseAction,
+  riskAtLeast,
+  buildProposalBinding,
+  diffProposalBinding,
+  type PulseBindingInput,
+  type PulseProposalBinding,
+  type PulseReasonCode,
+} from "./DigitalBoostPulseContracts";
+
 export type PulseRiskLevel = "L0" | "L1" | "L2" | "L3" | "L4";
 
 export type PulseGovernanceState =
@@ -15,6 +28,9 @@ export type PulsePolicyDecision =
   | "REJECT";
 
 export interface PulseDecisionEnvelope {
+  binding?: PulseProposalBinding;
+  reason_code?: PulseReasonCode;
+  policy_version?: string;
   request_id: string;
   action: string;
   intent?: string;
@@ -29,6 +45,7 @@ export interface PulseDecisionEnvelope {
 }
 
 export interface PulseApproval {
+  binding?: PulseProposalBinding;
   approval_id: string;
   request_id: string;
   action: string;
@@ -101,10 +118,9 @@ function makeApprovalId(requestId: string): string {
 }
 
 function normalizeRisk(risk?: string): PulseRiskLevel {
-  if (risk === "L4" || risk === "L3" || risk === "L2" || risk === "L1") {
-    return risk;
-  }
-  return "L0";
+  const parsed = parsePulseRisk(risk);
+  if (!parsed.ok) return "L4";
+  return parsed.risk;
 }
 
 export function evaluatePulsePolicy(
@@ -112,50 +128,24 @@ export function evaluatePulsePolicy(
   risk?: string,
   requiresApproval?: boolean,
   requestIdOverride?: string,
+  bindingInput?: PulseBindingInput,
 ): PulseDecisionEnvelope {
-  const requestId = requestIdOverride ?? `pulse_${Date.now()}_${Math.random()
-    .toString(36)
-    .slice(2, 10)}`;
-
-  const normalizedRisk = normalizeRisk(risk);
-
-  if (!KNOWN_ACTIONS.has(action)) {
-    return {
-      request_id: requestId,
-      action,
-      risk: normalizedRisk,
-      requires_approval: false,
-      policy: "REJECT",
-      state: "REJECTED",
-    };
+  const requestId = requestIdOverride ?? ("pulse_" + Date.now() + "_" + Math.random().toString(36).slice(2, 10));
+  const parsedRisk = parsePulseRisk(risk);
+  if (!parsedRisk.ok) {
+    return { request_id: requestId, action, risk: "L4", requires_approval: false, policy: "REJECT", state: "REJECTED", reason_code: "INVALID_RISK" };
   }
-
-  const approvalRequired =
-    requiresApproval === true ||
-    normalizedRisk === "L2" ||
-    normalizedRisk === "L3" ||
-    normalizedRisk === "L4";
-
+  if (!isKnownPulseAction(action) && !KNOWN_ACTIONS.has(action)) {
+    return { request_id: requestId, action, risk: parsedRisk.risk, requires_approval: false, policy: "REJECT", state: "REJECTED", reason_code: "UNKNOWN_ACTION" };
+  }
+  const contract = getActionContract(action);
+  const normalizedRisk = contract ? riskAtLeast(parsedRisk.risk, contract.minRisk) : parsedRisk.risk;
+  const binding = buildProposalBinding(Object.assign({}, bindingInput || { action: action }, { request_id: requestId, action: action }), normalizedRisk);
+  const approvalRequired = requiresApproval === true || normalizedRisk === "L2" || normalizedRisk === "L3" || normalizedRisk === "L4";
   if (approvalRequired) {
-    return {
-      request_id: requestId,
-      action,
-      risk: normalizedRisk,
-      requires_approval: true,
-      approval_id: makeApprovalId(requestId),
-      policy: "REQUIRE_APPROVAL",
-      state: "AWAITING_APPROVAL",
-    };
+    return { request_id: requestId, action, risk: normalizedRisk, requires_approval: true, approval_id: makeApprovalId(requestId), policy: "REQUIRE_APPROVAL", state: "AWAITING_APPROVAL", binding: binding, policy_version: PULSE_POLICY_VERSION };
   }
-
-  return {
-    request_id: requestId,
-    action,
-    risk: normalizedRisk,
-    requires_approval: false,
-    policy: "ALLOW",
-    state: "PROPOSED",
-  };
+  return { request_id: requestId, action, risk: normalizedRisk, requires_approval: false, policy: "ALLOW", state: "PROPOSED", binding: binding, policy_version: PULSE_POLICY_VERSION };
 }
 
 export function createPulseApproval(
@@ -214,35 +204,23 @@ export function beginPulseExecution(
   approval?: PulseApproval | null,
 ): PulseDecisionEnvelope {
   if (envelope.policy === "REJECT") {
-    return {
-      ...envelope,
-      state: "REJECTED",
-    };
+    return Object.assign({}, envelope, { state: "REJECTED", reason_code: envelope.reason_code || "POLICY_REJECT" });
   }
-
+  if (envelope.binding && approval && approval.binding) {
+    const mismatch = diffProposalBinding(envelope.binding, approval.binding);
+    if (mismatch !== "OK") {
+      return Object.assign({}, envelope, { policy: "REJECT", state: "REJECTED", reason_code: mismatch });
+    }
+  }
   if (envelope.requires_approval) {
     if (!approval || approval.approval_id !== envelope.approval_id) {
-      return {
-        ...envelope,
-        state: "AWAITING_APPROVAL",
-      };
+      return Object.assign({}, envelope, { state: "AWAITING_APPROVAL", reason_code: "APPROVAL_MISSING" });
     }
-
     if (approval.state !== "APPROVED") {
-      return {
-        ...envelope,
-        state:
-          approval.state === "REJECTED"
-            ? "REJECTED"
-            : "AWAITING_APPROVAL",
-      };
+      return Object.assign({}, envelope, { state: approval.state === "REJECTED" ? "REJECTED" : "AWAITING_APPROVAL", reason_code: approval.state === "REJECTED" ? "POLICY_REJECT" : "APPROVAL_MISSING" });
     }
   }
-
-  return {
-    ...envelope,
-    state: "EXECUTING",
-  };
+  return Object.assign({}, envelope, { state: "EXECUTING" });
 }
 
 export function completePulseExecution(

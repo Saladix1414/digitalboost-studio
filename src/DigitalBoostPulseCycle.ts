@@ -37,6 +37,13 @@ export function runCycle(input: { q: string; section: string; store: string; act
     risk,
     confirm,
     rid,
+    {
+      target: input.store + ":" + input.section + ":" + input.action,
+      actor: "merchant",
+      tenant: input.store,
+      context_version: input.store + ":" + input.section,
+      proposal: { action: input.action, title: input.title, body: input.body },
+    },
   );
 
   const approval =
