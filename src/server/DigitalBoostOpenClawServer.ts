@@ -4,6 +4,7 @@ type OpenClawTaskRequest = {
   task?: string;
   prompt?: string;
   model?: string;
+  context?: Record<string, unknown>;
 };
 
 type OpenClawTaskResult = {
@@ -25,6 +26,14 @@ const ALLOWED_TASKS = new Set([
   "plan",
   "propose",
 ]);
+
+// OpenClaw se instala en ~/.openclaw mediante install-cli.sh.
+// El servidor puede arrancar con un PATH heredado de Termux que
+// no incluya este directorio, por lo que resolvemos el binario
+// explícitamente y permitimos override mediante OPENCLAW_BIN.
+const OPENCLAW_BIN =
+  process.env.OPENCLAW_BIN?.trim() ||
+  "/root/.openclaw/bin/openclaw";
 
 function cleanText(value: unknown, maxLength: number): string {
   if (typeof value !== "string") return "";
@@ -65,7 +74,7 @@ function runOpenClaw(
     ];
 
     console.error("[DB_OPENCLAW_DIAGNOSTIC_START]", {
-      command: "openclaw",
+      command: OPENCLAW_BIN,
       args,
       cwd: process.cwd(),
       path: process.env.PATH,
@@ -76,7 +85,7 @@ function runOpenClaw(
       startedAt: new Date().toISOString(),
     });
 
-    const child = spawn("openclaw", args, {
+    const child = spawn(OPENCLAW_BIN, args, {
       shell: false,
       env: {
         ...process.env,
@@ -374,8 +383,36 @@ export function registerOpenClawRoutes(app: any) {
         return;
       }
 
-      const systemInstruction = "Espanol. Propone. No ejecutes.";
-      const finalPrompt = systemInstruction + "\n\n" + prompt;
+      const context =
+        body.context && typeof body.context === "object"
+          ? body.context
+          : {};
+
+      let contextText = "{}";
+
+      try {
+        contextText = JSON.stringify(context, null, 2).slice(0, 6000);
+      } catch {
+        contextText = "{}";
+      }
+
+      const finalPrompt = [
+        "Rol: PULSE IA de DigitalBoost.",
+        "Idioma: español rioplatense.",
+        "No ejecutes acciones.",
+        "No cambies action, risk, intent, confirm ni approval.",
+        "Usá solamente hechos presentes en el contexto.",
+        "Si un dato no está disponible, no lo inventes.",
+        "Respondé de forma natural y útil.",
+        "No uses JSON.",
+        "Máximo 5 oraciones.",
+        "",
+        "CONTEXTO CANÓNICO PULSE:",
+        contextText,
+        "",
+        "PEDIDO DEL USUARIO:",
+        prompt,
+      ].join("\n");
 
       const result = await runOpenClaw(model, finalPrompt);
 

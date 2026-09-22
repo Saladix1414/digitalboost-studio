@@ -75,6 +75,21 @@ export async function analyzeSmart(input: PulseInput) {
       };
     }
 
+    const discoveredNames = status.models.map((model) =>
+      String(model).replace(/^ollama\//i, "").trim()
+    );
+
+    context.ai = {
+      status: "available",
+      data: {
+        ollama: discoveredNames.length > 0,
+        qwen2: discoveredNames.some((name) => /qwen2/i.test(name)),
+        llama3: discoveredNames.some((name) => /llama3/i.test(name)),
+        openclaw: true,
+      },
+      source: "OpenClaw/Ollama runtime",
+    };
+
     const registry = new DigitalBoostModelRegistry();
 
     for (const modelName of status.models) {
@@ -134,7 +149,19 @@ export async function analyzeSmart(input: PulseInput) {
       prompt,
       model:
         `${selection.model.provider}/${selection.model.modelId}`,
-      context: context as unknown as Record<string, unknown>,
+      context: {
+        ...(context as unknown as Record<string, unknown>),
+        pulseDecision: {
+          title: decision.title,
+          body: decision.body,
+          action: decision.action,
+          actionLabel: decision.actionLabel,
+          confirm: decision.confirm,
+          risk: decision.risk,
+          intent: decision.intent,
+          agent: decision.agent,
+        },
+      },
       risk:
         decision.risk === "L3" || decision.risk === "L4"
           ? "high"
@@ -195,7 +222,7 @@ export async function analyzeSmart(input: PulseInput) {
           " · " +
           String(decision.risk || "L0"),
       },
-      engine: (aiUsable(String((ai as any)?.text || (ai as any)?.output || "")) ? "openclaw" : "rules") as const,
+      engine: (aiUsable(aiText) ? "openclaw" : "rules") as const,
       model: selection.model.modelId,
     };
   } catch {

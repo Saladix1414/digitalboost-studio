@@ -118,6 +118,13 @@ function inferCapabilities(
     );
   }
 
+  if (id.includes("qwen3")) {
+    capabilities.push(
+      "conversation",
+      "reasoning"
+    );
+  }
+
   if (id.includes('llama')) {
     capabilities.push(
       'conversation',
