@@ -5,6 +5,9 @@ import {
   createPulseOutcomeProof,
   createPulseGoalEvidenceBinding,
   verifyPulseGoalEvidenceBinding,
+  reconcilePulseGoalEvidenceBinding,
+  fingerprintPulseGoal,
+  fingerprintPulsePlan,
   derivePulseOutcomeAssurance,
   type PulseOutcomeContract,
   type PulseOutcomeProof,
@@ -139,11 +142,24 @@ function closeMissionOutcome(
     recordedAt,
   });
 
+  const goalEvidenceReconciliation =
+    mission.goalEvidenceBinding
+      ? reconcilePulseGoalEvidenceBinding({
+          binding: mission.goalEvidenceBinding,
+          goal: mission.plan.goal,
+          missionId: mission.id,
+          planId: mission.planId,
+          requestId: mission.requestId,
+          steps: mission.plan.steps,
+        })
+      : null;
+
   const goalEvidenceVerified =
     !!mission.goalEvidenceBinding &&
     verifyPulseGoalEvidenceBinding(
       mission.goalEvidenceBinding,
-    );
+    ) &&
+    goalEvidenceReconciliation?.status === "MATCH";
 
   const assuranceStatus = derivePulseOutcomeAssurance({
     outcome: input.status,
@@ -275,6 +291,10 @@ export function startPulseMission(input: {
       missionId,
       planId: input.plan.id,
       requestId: missionRequestId,
+      goalFingerprint:
+        fingerprintPulseGoal(input.plan.goal),
+      planFingerprint:
+        fingerprintPulsePlan(input.plan.steps),
       successCriteria:
         input.plan.goal.successCriteria,
       policy: input.goalEvidence?.policy || "UNKNOWN",
@@ -472,6 +492,10 @@ export function repairPulseMission(id: string): PulseMission | null {
       missionId: newMissionId,
       planId: repairedPlan.id,
       requestId: newRequestId,
+      goalFingerprint:
+        fingerprintPulseGoal(repairedPlan.goal),
+      planFingerprint:
+        fingerprintPulsePlan(repairedPlan.steps),
       successCriteria:
         repairedPlan.goal.successCriteria,
       policy:

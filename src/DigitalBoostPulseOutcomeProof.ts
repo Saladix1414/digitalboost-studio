@@ -22,6 +22,8 @@ export type PulseGoalEvidenceBinding = {
   mission_id: string;
   plan_id: string;
   request_id: string;
+  goal_fingerprint: string;
+  plan_fingerprint: string;
   success_criteria: string[];
   policy: string;
   policy_version?: string;
@@ -36,11 +38,56 @@ export type PulseGoalEvidenceBinding = {
   binding_hash: string;
 };
 
+export function fingerprintPulseGoal(input: {
+  id: string;
+  statement: string;
+  constraints: string[];
+  successCriteria: string[];
+  riskFloor: string;
+}): string {
+  return hashProposal({
+    id: input.id,
+    statement: input.statement,
+    constraints: [...input.constraints],
+    successCriteria: [...input.successCriteria],
+    riskFloor: input.riskFloor,
+  });
+}
+
+export function fingerprintPulsePlan(
+  steps: Array<{
+    id: string;
+    action: string;
+    title: string;
+    dependsOn: string[];
+    expected: Record<string, unknown>;
+    checkpoint: boolean;
+    approvalLikely: boolean;
+  }>,
+): string {
+  return hashProposal({
+    steps: steps.map(function (step, step_index) {
+      return {
+        step_index,
+        id: step.id,
+        action: step.action,
+        title: step.title,
+        dependsOn: [...step.dependsOn],
+        expected: step.expected,
+        checkpoint: step.checkpoint,
+        approvalLikely: step.approvalLikely,
+      };
+    }),
+  });
+}
+
 export function createPulseGoalEvidenceBinding(input: {
   goalId: string;
   missionId: string;
   planId: string;
   requestId: string;
+  goalFingerprint: string;
+  planFingerprint: string;
   successCriteria: string[];
   policy: string;
   policyVersion?: string;
@@ -54,6 +101,8 @@ export function createPulseGoalEvidenceBinding(input: {
     mission_id: input.missionId,
     plan_id: input.planId,
     request_id: input.requestId,
+    goal_fingerprint: input.goalFingerprint,
+    plan_fingerprint: input.planFingerprint,
     success_criteria: [...input.successCriteria],
     policy: input.policy,
     expected_steps: input.expectedSteps,
@@ -85,6 +134,101 @@ export function verifyPulseGoalEvidenceBinding(
       "expected-outcome-declared",
     )
   );
+}
+
+export type PulseGoalEvidenceReconciliationStatus =
+  "MATCH" | "MISMATCH";
+
+export type PulseGoalEvidenceReconciliationResult = {
+  status: PulseGoalEvidenceReconciliationStatus;
+  mismatches: string[];
+};
+
+export function reconcilePulseGoalEvidenceBinding(input: {
+  binding: PulseGoalEvidenceBinding;
+  goal: {
+    id: string;
+    statement: string;
+    constraints: string[];
+    successCriteria: string[];
+    riskFloor: string;
+  };
+  missionId: string;
+  planId: string;
+  requestId: string;
+  steps: Array<{
+    id: string;
+    action: string;
+    title: string;
+    dependsOn: string[];
+    expected: Record<string, unknown>;
+    checkpoint: boolean;
+    approvalLikely: boolean;
+  }>;
+}): PulseGoalEvidenceReconciliationResult {
+  const mismatches: string[] = [];
+
+  if (!verifyPulseGoalEvidenceBinding(input.binding))
+    mismatches.push("BINDING_INTEGRITY");
+
+  if (input.binding.goal_id !== input.goal.id)
+    mismatches.push("GOAL_ID");
+
+  if (input.binding.mission_id !== input.missionId)
+    mismatches.push("MISSION_ID");
+
+  if (input.binding.plan_id !== input.planId)
+    mismatches.push("PLAN_ID");
+
+  if (input.binding.request_id !== input.requestId)
+    mismatches.push("REQUEST_ID");
+
+  if (
+    input.binding.goal_fingerprint !==
+    fingerprintPulseGoal(input.goal)
+  ) {
+    mismatches.push("GOAL_FINGERPRINT");
+  }
+
+  if (
+    input.binding.plan_fingerprint !==
+    fingerprintPulsePlan(input.steps)
+  ) {
+    mismatches.push("PLAN_FINGERPRINT");
+  }
+
+  const expectedSteps = input.steps.map(
+    function (step, step_index) {
+      return {
+        step_id: step.id,
+        step_index,
+        action: step.action,
+        expected: step.expected,
+      };
+    },
+  );
+
+  if (
+    stableSerialize(input.binding.expected_steps) !==
+    stableSerialize(expectedSteps)
+  ) {
+    mismatches.push("EXPECTED_STEPS");
+  }
+
+  if (
+    stableSerialize(input.binding.success_criteria) !==
+    stableSerialize(input.goal.successCriteria)
+  ) {
+    mismatches.push("SUCCESS_CRITERIA");
+  }
+
+  return {
+    status:
+      mismatches.length > 0
+        ? "MISMATCH"
+        : "MATCH",
+    mismatches,
+  };
 }
 
 export function derivePulseOutcomeAssurance(input: {

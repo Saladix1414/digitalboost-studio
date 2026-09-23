@@ -435,3 +435,97 @@ test(
     );
   },
 );
+
+test("P0.4.11 Goal alterado impide ASSURED", () => {
+  const plan = compilePulseGoal({
+    action: "analyze",
+    store: "ReconcileOutcome",
+  });
+
+  const started = startPulseMission({
+    store: "ReconcileOutcome",
+    plan,
+    requestId: "req_reconcile_outcome",
+  });
+
+  const rows = JSON.parse(
+    storage.get("db-pulse-missions-v1") || "[]",
+  );
+
+  assert.equal(rows.length, 1);
+
+  rows[0].plan.goal.statement =
+    rows[0].plan.goal.statement + " TAMPERED";
+
+  storage.set(
+    "db-pulse-missions-v1",
+    JSON.stringify(rows),
+  );
+
+  advancePulseMission(started.id, { ok: true });
+  advancePulseMission(started.id, { ok: true });
+
+  const completed = advancePulseMission(
+    started.id,
+    {
+      ok: true,
+      verificationStatus: "PASS",
+      verified: true,
+    },
+  );
+
+  assert.equal(completed?.state, "COMPLETED");
+  assert.equal(completed?.outcome?.proofStatus, "PROVEN");
+  assert.equal(completed?.outcome?.verified, true);
+  assert.equal(
+    completed?.outcome?.assuranceStatus,
+    "UNASSURED",
+  );
+});
+
+test("P0.4.11 Plan alterado impide ASSURED", () => {
+  const plan = compilePulseGoal({
+    action: "analyze",
+    store: "ReconcilePlan",
+  });
+
+  const started = startPulseMission({
+    store: "ReconcilePlan",
+    plan,
+    requestId: "req_reconcile_plan",
+  });
+
+  const rows = JSON.parse(
+    storage.get("db-pulse-missions-v1") || "[]",
+  );
+
+  rows[0].plan.steps[1].expected = {
+    ...rows[0].plan.steps[1].expected,
+    tampered: true,
+  };
+
+  storage.set(
+    "db-pulse-missions-v1",
+    JSON.stringify(rows),
+  );
+
+  advancePulseMission(started.id, { ok: true });
+  advancePulseMission(started.id, { ok: true });
+
+  const completed = advancePulseMission(
+    started.id,
+    {
+      ok: true,
+      verificationStatus: "PASS",
+      verified: true,
+    },
+  );
+
+  assert.equal(completed?.state, "COMPLETED");
+  assert.equal(completed?.outcome?.proofStatus, "PROVEN");
+  assert.equal(completed?.outcome?.verified, true);
+  assert.equal(
+    completed?.outcome?.assuranceStatus,
+    "UNASSURED",
+  );
+});

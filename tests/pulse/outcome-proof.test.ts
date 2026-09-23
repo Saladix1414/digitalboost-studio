@@ -13,6 +13,7 @@ import {
   createPulseOutcomeContract,
   verifyPulseOutcomeProof,
   derivePulseOutcomeAssurance,
+  reconcilePulseGoalEvidenceBinding,
 } from "../../src/DigitalBoostPulseOutcomeProof";
 import { currentContextVersion } from "../../src/DigitalBoostPulseContext";
 
@@ -297,4 +298,59 @@ test("P0.4.6 FAILED marca el proof del step mutante", () => {
     verifyPulseOutcomeProof(contract, proof),
     true,
   );
+});
+
+test("P0.4.11 reconciliación detecta cambios de Goal y Plan", () => {
+  const result = cycle("ReconcileBinding");
+  assert.ok(result.mission);
+
+  const mission = result.mission!;
+  const binding = mission.goalEvidenceBinding;
+  assert.ok(binding);
+
+  const match = reconcilePulseGoalEvidenceBinding({
+    binding: binding!,
+    goal: mission.plan.goal,
+    missionId: mission.id,
+    planId: mission.planId,
+    requestId: mission.requestId,
+    steps: mission.plan.steps,
+  });
+
+  assert.equal(match.status, "MATCH");
+
+  const goal = {
+    ...mission.plan.goal,
+    statement: mission.plan.goal.statement + " TAMPERED",
+  };
+
+  const goalDrift = reconcilePulseGoalEvidenceBinding({
+    binding: binding!,
+    goal,
+    missionId: mission.id,
+    planId: mission.planId,
+    requestId: mission.requestId,
+    steps: mission.plan.steps,
+  });
+
+  assert.equal(goalDrift.status, "MISMATCH");
+  assert.ok(goalDrift.mismatches.includes("GOAL_FINGERPRINT"));
+
+  const steps = mission.plan.steps.map((step, index) =>
+    index === 1
+      ? { ...step, expected: { ...step.expected, tampered: true } }
+      : step,
+  );
+
+  const planDrift = reconcilePulseGoalEvidenceBinding({
+    binding: binding!,
+    goal: mission.plan.goal,
+    missionId: mission.id,
+    planId: mission.planId,
+    requestId: mission.requestId,
+    steps,
+  });
+
+  assert.equal(planDrift.status, "MISMATCH");
+  assert.ok(planDrift.mismatches.includes("PLAN_FINGERPRINT"));
 });
