@@ -89,6 +89,71 @@ export function rememberDecision(input: { scope: string; action: string; policy:
     content: { action: input.action, policy: input.policy, reason: input.reason || "" },
   });
 }
+
+export type PulseMissionOutcomeMemoryInput = {
+  scope: string;
+  missionId: string;
+  planId: string;
+  requestId: string;
+  outcome: "COMPLETED" | "FAILED" | "CANCELLED";
+  planStatus: string;
+  terminalStepIndex: number;
+  lastError?: string;
+  verificationStatus?: string;
+  verified?: boolean;
+  source?: "merchant" | "executor" | "verification";
+};
+
+export function rememberMissionOutcome(
+  input: PulseMissionOutcomeMemoryInput,
+): PulseMemoryItem | null {
+  const existing = queryPulseMemory({
+    kind: "mission",
+    scope: input.scope,
+    status: "ACTIVE",
+  }).find(function (row) {
+    if (!row.content || typeof row.content !== "object") return false;
+
+    const content = row.content as Record<string, unknown>;
+
+    return (
+      content.type === "mission-outcome" &&
+      content.missionId === input.missionId &&
+      content.outcome === input.outcome
+    );
+  });
+
+  if (existing) {
+    return existing;
+  }
+
+  return rememberPulse({
+    kind: "mission",
+    scope: input.scope,
+    source:
+      input.source ||
+      (input.outcome === "CANCELLED" ? "merchant" : "executor"),
+    evidenceRefs: [
+      input.requestId,
+      input.missionId,
+      input.planId,
+    ],
+    confidence: 1,
+    verifiedAt: new Date().toISOString(),
+    content: {
+      type: "mission-outcome",
+      missionId: input.missionId,
+      planId: input.planId,
+      requestId: input.requestId,
+      outcome: input.outcome,
+      planStatus: input.planStatus,
+      terminalStepIndex: input.terminalStepIndex,
+      lastError: input.lastError || "",
+      verificationStatus: input.verificationStatus || "",
+      verified: input.verified,
+    },
+  });
+}
 export function rememberPreference(input: { scope: string; key: string; value: unknown }): PulseMemoryItem | null {
   const prev = queryPulseMemory({ kind: "preference", scope: input.scope, status: "ACTIVE" }).filter(function (row) {
     return row.content && typeof row.content === "object" && (row.content as any).key === input.key;

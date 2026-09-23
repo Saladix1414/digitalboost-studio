@@ -76,6 +76,8 @@ export function executePulseMissionStep(
         (execution.state === "REJECTED"
           ? "governance-rejected"
           : undefined),
+      verificationStatus: execution.audit.metadata?.verification_status,
+      verified: execution.verified,
     });
 
   return {

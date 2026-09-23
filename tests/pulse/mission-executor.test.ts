@@ -192,6 +192,174 @@ test("Mission → Executor avanza paso completado y respeta approval", () => {
   assert.equal(persisted.step_index, 1);
 });
 
+
+test("P0.4.5 terminal Outcome conserva SKIPPED como no verificado", () => {
+  const blocks = [{
+    id: "hero",
+    type: "hero",
+    title: "Original",
+    body: "Original body",
+    cta: "Original CTA",
+  }];
+
+  localStorage.setItem("db-store-page-v1", "Inicio");
+  localStorage.setItem(
+    "db-store-canvas-v1:Inicio",
+    JSON.stringify(blocks),
+  );
+  localStorage.setItem(
+    "db-store-canvas-v1",
+    JSON.stringify(blocks),
+  );
+
+  const cycle = runCycle({
+    q: "mejora el hero",
+    section: "website-builder",
+    store: "IntegrationOutcome",
+    action: "hero",
+    title: "Hero terminal",
+    body: "Body terminal",
+    alreadyConfirm: false,
+  });
+
+  assert.ok(cycle.mission);
+
+  const analyzeEnvelope = evaluatePulsePolicy(
+    "analyze",
+    "L0",
+    false,
+    "req_p045_integration_analyze",
+    {
+      action: "analyze",
+      target: "IntegrationOutcome:website-builder:analyze",
+      actor: "merchant",
+      tenant: "IntegrationOutcome",
+      context_version: "ctx:test",
+      proposal: {
+        action: "analyze",
+      },
+    },
+  );
+
+  const first = executePulseMissionStep(
+    cycle.mission.id,
+    {
+      envelope: analyzeEnvelope,
+    },
+  );
+
+  assert.equal(first.execution.state, "COMPLETED");
+  assert.equal(first.mission?.stepIndex, 1);
+
+  const draft = {
+    kind: "hero",
+    title: "Hero terminal",
+    body: "Body terminal",
+    cta: "Entrar",
+  };
+
+  const heroEnvelope = evaluatePulsePolicy(
+    "hero",
+    "L1",
+    true,
+    "req_p045_integration_hero",
+    {
+      action: "hero",
+      target: "IntegrationOutcome:website-builder:hero",
+      actor: "merchant",
+      tenant: "IntegrationOutcome",
+      context_version: "ctx:test",
+      proposal: draft,
+    },
+  );
+
+  const created = createPulseApproval(heroEnvelope);
+  assert.ok(created);
+
+  const approved = approvePulseAction(created);
+
+  const second = executePulseMissionStep(
+    cycle.mission.id,
+    {
+      envelope: heroEnvelope,
+      approval: approved,
+      draft,
+    },
+  );
+
+  assert.equal(second.execution.state, "COMPLETED");
+  assert.equal(second.execution.verified, true);
+  assert.equal(
+    second.execution.audit.metadata?.verification_status,
+    "PASS",
+  );
+  assert.equal(second.mission?.stepIndex, 2);
+
+  const explainEnvelope = evaluatePulsePolicy(
+    "explain",
+    "L0",
+    false,
+    "req_p045_integration_explain",
+    {
+      action: "explain",
+      target: "IntegrationOutcome:website-builder:explain",
+      actor: "merchant",
+      tenant: "IntegrationOutcome",
+      context_version: "ctx:test",
+      proposal: {
+        action: "explain",
+      },
+    },
+  );
+
+  const third = executePulseMissionStep(
+    cycle.mission.id,
+    {
+      envelope: explainEnvelope,
+    },
+  );
+
+  assert.equal(third.execution.state, "COMPLETED");
+  assert.equal(third.execution.verified, false);
+  assert.equal(
+    third.execution.audit.metadata?.verification_status,
+    "SKIPPED",
+  );
+
+  assert.equal(third.mission?.state, "COMPLETED");
+  assert.equal(third.mission?.plan.status, "COMPLETED");
+  assert.equal(third.mission?.outcome?.status, "COMPLETED");
+  assert.equal(third.mission?.outcome?.verified, false);
+  assert.equal(
+    third.mission?.outcome?.verificationStatus,
+    "SKIPPED",
+  );
+
+  const audits = JSON.parse(
+    localStorage.getItem("db-pulse-audit-v1") || "[]",
+  ) as Array<Record<string, unknown>>;
+
+  const outcomeAudits = audits.filter(
+    (row) =>
+      row.mission_id === cycle.mission?.id &&
+      row.mission_outcome === "COMPLETED",
+  );
+
+  assert.equal(outcomeAudits.length, 1);
+  assert.equal(
+    outcomeAudits[0].mission_outcome,
+    "COMPLETED",
+  );
+  assert.equal(
+    outcomeAudits[0].verification_status,
+    "SKIPPED",
+  );
+  assert.equal(
+    outcomeAudits[0].verified,
+    false,
+  );
+});
+
 test("Mission no ejecuta si está pausada", () => {
   const cycle = runCycle({
     q: "mejora el hero",

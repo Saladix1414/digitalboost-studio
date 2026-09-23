@@ -1,4 +1,5 @@
 export type PulsePlanStatus = "DRAFT" | "READY" | "BLOCKED" | "COMPLETED" | "CANCELLED";
+export type PulseMissionTerminalOutcome = "COMPLETED" | "FAILED" | "CANCELLED";
 export type PulseGoal = {
   id: string; statement: string; constraints: string[];
   successCriteria: string[]; riskFloor: string;
@@ -46,4 +47,27 @@ export function compilePulseGoal(input: { q?: string; action: string; section?: 
 }
 export function planCheckpointActions(plan: PulsePlan): string[] {
   return plan.steps.filter(function (s) { return s.checkpoint; }).map(function (s) { return s.action; });
+}
+
+export function planStatusForMissionOutcome(
+  outcome: PulseMissionTerminalOutcome,
+): PulsePlanStatus {
+  if (outcome === "COMPLETED") return "COMPLETED";
+  if (outcome === "CANCELLED") return "CANCELLED";
+  return "BLOCKED";
+}
+
+export function closePulsePlan(
+  plan: PulsePlan,
+  outcome: PulseMissionTerminalOutcome,
+): PulsePlan {
+  const nextStatus = planStatusForMissionOutcome(outcome);
+
+  if (plan.status === nextStatus) {
+    return plan;
+  }
+
+  return Object.assign({}, plan, {
+    status: nextStatus,
+  });
 }

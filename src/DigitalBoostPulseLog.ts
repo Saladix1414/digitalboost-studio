@@ -42,6 +42,9 @@ export type PulseAudit = {
   rolled_back?: boolean;
   rollback_verified?: boolean;
   rollback_reason?: string;
+  mission_outcome?: "COMPLETED" | "FAILED" | "CANCELLED";
+  plan_status?: string;
+  outcome_id?: string;
 };
 
 function readArr(k: string) {
@@ -71,6 +74,15 @@ export function pushAudit(row: PulseAudit) {
   const rows = readArr(AUDIT) as PulseAudit[];
   rows.push(row);
   writeArr(AUDIT, rows);
+}
+
+export function hasPulseMissionOutcomeAudit(
+  missionId: string,
+  outcomeId: string,
+): boolean {
+  return (readArr(AUDIT) as PulseAudit[]).some(function (row) {
+    return row.mission_id === missionId && row.outcome_id === outcomeId;
+  });
 }
 export function requestId() {
   return "req_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 6);

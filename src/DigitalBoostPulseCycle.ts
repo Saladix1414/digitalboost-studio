@@ -144,6 +144,7 @@ export function runCycle(input: {
       : startPulseMission({
           store: input.store,
           plan,
+          requestId: envelope.request_id,
         });
 
   return {
