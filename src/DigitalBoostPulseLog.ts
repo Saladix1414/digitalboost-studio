@@ -32,6 +32,10 @@ export type PulseAudit = {
   approval_id?: string;
   proposal_hash?: string;
   executed_proposal_hash?: string;
+  mission_id?: string;
+  plan_id?: string;
+  step_id?: string;
+  step_index?: number;
   reason_code?: string;
   verification_status?: string;
   verified?: boolean;

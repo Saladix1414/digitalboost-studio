@@ -159,6 +159,37 @@ test("Mission → Executor avanza paso completado y respeta approval", () => {
   assert.equal(second.execution.verified, true);
   assert.equal(second.mission?.stepIndex, 2);
   assert.equal(second.mission?.state, "RUNNING");
+
+  assert.equal(
+    second.execution.audit.metadata?.mission_id,
+    cycle.mission.id,
+  );
+  assert.equal(
+    second.execution.audit.metadata?.plan_id,
+    cycle.plan?.id,
+  );
+  assert.equal(
+    second.execution.audit.metadata?.step_id,
+    cycle.mission.plan.steps[1].id,
+  );
+  assert.equal(
+    second.execution.audit.metadata?.step_index,
+    1,
+  );
+
+  const audits = JSON.parse(
+    localStorage.getItem("db-pulse-audit-v1") || "[]",
+  ) as Array<Record<string, unknown>>;
+
+  const persisted = audits[audits.length - 1];
+
+  assert.equal(persisted.mission_id, cycle.mission.id);
+  assert.equal(persisted.plan_id, cycle.plan?.id);
+  assert.equal(
+    persisted.step_id,
+    cycle.mission.plan.steps[1].id,
+  );
+  assert.equal(persisted.step_index, 1);
 });
 
 test("Mission no ejecuta si está pausada", () => {

@@ -49,7 +49,15 @@ export function executePulseMissionStep(
     );
   }
 
-  const execution = executePulseAction(context);
+  const execution = executePulseAction({
+    ...context,
+    trace: {
+      mission_id: mission.id,
+      plan_id: mission.planId,
+      step_id: step.id,
+      step_index: mission.stepIndex,
+    },
+  });
 
   if (execution.state === "AWAITING_APPROVAL") {
     return {

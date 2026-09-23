@@ -26,12 +26,20 @@ import {
 } from "./DigitalBoostPulseApply";
 import { hashPulseExecutionPayload } from "./DigitalBoostPulseContracts";
 
+export type PulseExecutionTrace = {
+  mission_id: string;
+  plan_id: string;
+  step_id: string;
+  step_index: number;
+};
+
 export type PulseExecutionContext = {
   envelope: PulseDecisionEnvelope;
   approval?: PulseApproval | null;
   draft?: PulseDraft;
   proposal?: Record<string, unknown> | null;
   onNavigate?: (action: string) => void;
+  trace?: PulseExecutionTrace;
 };
 
 export type PulseExecutionOutcome = {
@@ -53,6 +61,18 @@ function audit(
   const next = { ...envelope, state };
   const auditMetadata = {
     ...(metadata || {}),
+    ...(typeof next.metadata?.mission_id === "string"
+      ? { mission_id: next.metadata.mission_id }
+      : {}),
+    ...(typeof next.metadata?.plan_id === "string"
+      ? { plan_id: next.metadata.plan_id }
+      : {}),
+    ...(typeof next.metadata?.step_id === "string"
+      ? { step_id: next.metadata.step_id }
+      : {}),
+    ...(typeof next.metadata?.step_index === "number"
+      ? { step_index: next.metadata.step_index }
+      : {}),
     ...(next.reason_code
       ? { reason_code: next.reason_code }
       : {}),
@@ -93,7 +113,26 @@ function audit(
         typeof metadata?.executed_proposal_hash === "string"
           ? metadata.executed_proposal_hash
           : undefined,
-      reason_code: envelope.reason_code,
+      mission_id:
+        typeof auditMetadata.mission_id === "string"
+          ? auditMetadata.mission_id
+          : undefined,
+      plan_id:
+        typeof auditMetadata.plan_id === "string"
+          ? auditMetadata.plan_id
+          : undefined,
+      step_id:
+        typeof auditMetadata.step_id === "string"
+          ? auditMetadata.step_id
+          : undefined,
+      step_index:
+        typeof auditMetadata.step_index === "number"
+          ? auditMetadata.step_index
+          : undefined,
+      reason_code:
+        typeof auditMetadata.reason_code === "string"
+          ? auditMetadata.reason_code
+          : envelope.reason_code,
       verification_status:
         typeof metadata?.verification_status === "string"
           ? metadata.verification_status
@@ -123,9 +162,32 @@ function audit(
 export function executePulseAction(
   context: PulseExecutionContext,
 ): PulseExecutionOutcome {
-  const { envelope, approval, draft, proposal, onNavigate } = context;
+  const {
+    envelope,
+    approval,
+    draft,
+    proposal,
+    onNavigate,
+    trace,
+  } = context;
 
-  const executionEnvelope = beginPulseExecution(envelope, approval);
+  const executionEnvelopeBase = beginPulseExecution(
+    envelope,
+    approval,
+  );
+
+  const executionEnvelope = trace
+    ? {
+        ...executionEnvelopeBase,
+        metadata: {
+          ...(executionEnvelopeBase.metadata || {}),
+          mission_id: trace.mission_id,
+          plan_id: trace.plan_id,
+          step_id: trace.step_id,
+          step_index: trace.step_index,
+        },
+      }
+    : executionEnvelopeBase;
 
   if (executionEnvelope.state === "REJECTED") {
     return {
