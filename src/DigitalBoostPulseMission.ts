@@ -9,6 +9,7 @@ import {
 } from "./DigitalBoostPulseOutcomeProof";
 import { rememberMissionOutcome } from "./DigitalBoostPulseMemory";
 import { hasPulseMissionOutcomeAudit, pushAudit, requestId } from "./DigitalBoostPulseLog";
+import { currentContextVersion } from "./DigitalBoostPulseContext";
 export type PulseMissionState = "RUNNING" | "PAUSED" | "AWAITING_APPROVAL" | "COMPLETED" | "FAILED" | "CANCELLED";
 export type PulseMissionOutcome = {
   id: string; status: PulseMissionTerminalOutcome; missionId: string; planId: string;
@@ -22,6 +23,11 @@ export type PulseMissionOutcome = {
 export type PulseMission = {
   id: string; store: string; planId: string; state: PulseMissionState;
   requestId: string;
+  section?: string;
+  repairedFromMissionId?: string;
+  repairReason?: string;
+  repairContextVersion?: string;
+  repairGeneration?: number;
   stepIndex: number; retries: number; maxRetries: number;
   createdAt: string; updatedAt: string; lastError?: string; plan: PulsePlan;
   outcomeContract?: PulseOutcomeContract;
@@ -205,6 +211,7 @@ export function startPulseMission(input: {
   store: string;
   plan: PulsePlan;
   requestId?: string;
+  section?: string;
 }): PulseMission {
   const first = input.plan.steps[0];
   const awaiting = Boolean(first && first.approvalLikely);
@@ -228,6 +235,7 @@ export function startPulseMission(input: {
     store: input.store,
     planId: input.plan.id,
     requestId: missionRequestId,
+    section: input.section,
     state: awaiting
       ? "AWAITING_APPROVAL"
       : "RUNNING",
@@ -264,6 +272,161 @@ export function retryPulseMission(id: string): PulseMission | null {
   if (m.retries >= m.maxRetries) return m;
   return save(Object.assign({}, m, { state: "RUNNING", retries: m.retries + 1, lastError: undefined }));
 }
+export function repairPulseMission(id: string): PulseMission | null {
+  const source = getPulseMission(id);
+
+  if (
+    !source ||
+    source.state !== "FAILED" ||
+    !source.outcome ||
+    source.lastError !== "CONTEXT_STALE"
+  ) {
+    return null;
+  }
+
+  const failedIndex = source.stepIndex;
+  const remaining = source.plan.steps.slice(failedIndex);
+
+  if (remaining.length === 0) {
+    return null;
+  }
+
+  const stepIdMap = new Map<string, string>();
+
+  const repairedSteps = remaining.map(function (oldStep, index) {
+    const nextId = "rstep_" +
+      Date.now().toString(36) +
+      "_" +
+      Math.random().toString(36).slice(2, 6) +
+      "_" +
+      index;
+
+    stepIdMap.set(oldStep.id, nextId);
+
+    return Object.assign({}, oldStep, {
+      id: nextId,
+      dependsOn: [],
+    });
+  });
+
+  for (let i = 0; i < remaining.length; i++) {
+    const oldStep = remaining[i];
+    const nextStep = repairedSteps[i];
+
+    nextStep.dependsOn = oldStep.dependsOn
+      .filter(function (dependency) {
+        return stepIdMap.has(dependency);
+      })
+      .map(function (dependency) {
+        return stepIdMap.get(dependency)!;
+      });
+  }
+
+  const repairedPlan: PulsePlan = {
+    id:
+      "rplan_" +
+      Date.now().toString(36) +
+      "_" +
+      Math.random().toString(36).slice(2, 6),
+    goal: {
+      id:
+        "rgoal_" +
+        Date.now().toString(36) +
+        "_" +
+        Math.random().toString(36).slice(2, 6),
+      statement: source.plan.goal.statement,
+      constraints: [...source.plan.goal.constraints],
+      successCriteria: [...source.plan.goal.successCriteria],
+      riskFloor: source.plan.goal.riskFloor,
+    },
+    steps: repairedSteps,
+    status: "READY",
+    createdAt: new Date().toISOString(),
+  };
+
+  const newMissionId =
+    "msn_repair_" +
+    Date.now().toString(36) +
+    "_" +
+    Math.random().toString(36).slice(2, 6);
+
+  const newRequestId = requestId();
+
+  let repairContextVersion: string | undefined;
+
+  try {
+    repairContextVersion = currentContextVersion({
+      store: source.store,
+      section: source.section,
+    });
+  } catch {}
+
+  const outcomeContract = createPulseOutcomeContract({
+    missionId: newMissionId,
+    planId: repairedPlan.id,
+    requestId: newRequestId,
+    steps: repairedPlan.steps.map(function (step) {
+      return {
+        id: step.id,
+        action: step.action,
+      };
+    }),
+  });
+
+  const first = repairedPlan.steps[0];
+  const repairedState =
+    first && first.approvalLikely
+      ? "AWAITING_APPROVAL"
+      : "RUNNING";
+
+  const repaired: PulseMission = {
+    id: newMissionId,
+    store: source.store,
+    planId: repairedPlan.id,
+    requestId: newRequestId,
+    section: source.section,
+    repairedFromMissionId: source.id,
+    repairReason: "CONTEXT_STALE",
+    repairContextVersion,
+    repairGeneration: (source.repairGeneration || 0) + 1,
+    state: repairedState,
+    stepIndex: 0,
+    retries: 0,
+    maxRetries: source.maxRetries,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    plan: repairedPlan,
+    outcomeContract,
+    proofChain: [],
+  };
+
+  try {
+    pushAudit({
+      timestamp: new Date().toISOString(),
+      tenant_id: "digitalboost",
+      store_id: source.store,
+      actor_type: "system",
+      request_id: newRequestId,
+      intent: "mission-repair",
+      agent: "pulse",
+      risk_level: source.plan.goal.riskFloor,
+      tool: "mission-repair",
+      approval_required: false,
+      status: "REPAIRED",
+      result_summary: "PULSE_MISSION_REPAIR:CONTEXT_STALE",
+      mission_id: newMissionId,
+      plan_id: repairedPlan.id,
+      reason_code: "CONTEXT_STALE",
+      repair_context_version: repairContextVersion,
+      repaired_from_mission_id: source.id,
+      repair_reason: "CONTEXT_STALE",
+      repair_generation: repaired.repairGeneration,
+    });
+  } catch {}
+
+  return save(repaired);
+}
+
 export function advancePulseMission(
   id: string,
   input: {
@@ -301,7 +464,8 @@ export function advancePulseMission(
 
   if (
     m.state === "AWAITING_APPROVAL" &&
-    !input.approved
+    !input.approved &&
+    !input.terminal
   ) return m;
 
   const withEvidence =

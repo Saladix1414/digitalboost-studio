@@ -51,6 +51,10 @@ export type PulseAudit = {
   context_version?: string;
   current_context_version?: string;
   context_drift_status?: string;
+  repaired_from_mission_id?: string;
+  repair_reason?: string;
+  repair_context_version?: string;
+  repair_generation?: number;
 };
 
 function readArr(k: string) {
