@@ -101,6 +101,9 @@ export type PulseMissionOutcomeMemoryInput = {
   lastError?: string;
   verificationStatus?: string;
   verified?: boolean;
+  outcomeContractId?: string;
+  proofStatus?: "PROVEN" | "UNPROVEN" | "FAILED";
+  proofHash?: string;
   source?: "merchant" | "executor" | "verification";
 };
 
@@ -137,6 +140,7 @@ export function rememberMissionOutcome(
       input.requestId,
       input.missionId,
       input.planId,
+      ...(input.proofHash ? [input.proofHash] : []),
     ],
     confidence: 1,
     verifiedAt: new Date().toISOString(),
@@ -151,6 +155,9 @@ export function rememberMissionOutcome(
       lastError: input.lastError || "",
       verificationStatus: input.verificationStatus || "",
       verified: input.verified,
+      outcomeContractId: input.outcomeContractId || "",
+      proofStatus: input.proofStatus || "",
+      proofHash: input.proofHash || "",
     },
   });
 }
