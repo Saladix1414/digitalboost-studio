@@ -29,7 +29,17 @@ export type CycleMeta = {
   mission?: PulseMission;
 };
 
-export function runCycle(input: { q: string; section: string; store: string; action: string; title: string; body: string; alreadyConfirm: boolean }): CycleMeta {
+export function runCycle(input: {
+  q: string;
+  section: string;
+  store: string;
+  action: string;
+  title: string;
+  body: string;
+  alreadyConfirm: boolean;
+  draft?: { kind: string; title: string; body: string; cta: string };
+  proposal?: Record<string, unknown> | null;
+}): CycleMeta {
   const intent = classifyIntent(input.q, input.section);
   const write = isWriteIntent(intent) || input.alreadyConfirm;
   const risk = classifyRisk(intent, input.action);
@@ -38,6 +48,17 @@ export function runCycle(input: { q: string; section: string; store: string; act
   const rid = requestId();
 
   // Governance es la fuente de verdad de policy/approval.
+  const executionProposal =
+    input.proposal !== undefined && input.proposal !== null
+      ? input.proposal
+      : input.draft !== undefined
+        ? input.draft
+        : {
+            action: input.action,
+            title: input.title,
+            body: input.body,
+          };
+
   const envelope = evaluatePulsePolicy(
     input.action,
     risk,
@@ -48,7 +69,7 @@ export function runCycle(input: { q: string; section: string; store: string; act
       actor: "merchant",
       tenant: input.store,
       context_version: currentContextVersion({ store: input.store, section: input.section }),
-      proposal: { action: input.action, title: input.title, body: input.body },
+      proposal: executionProposal,
     },
   );
 

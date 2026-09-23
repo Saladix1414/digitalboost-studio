@@ -225,3 +225,97 @@ test("P0.3 postcheck fallido hace rollback Canvas verificable", () => {
     true,
   );
 });
+
+
+test("P0.4.3 rechaza payload distinto al aprobado antes de mutar", () => {
+  setCanvas();
+
+  const approvedDraft = {
+    kind: "hero",
+    title: "Aprobado",
+    body: "Body aprobado",
+    cta: "Entrar",
+  };
+
+  const changedDraft = {
+    kind: "hero",
+    title: "Cambiante",
+    body: "Body cambiado",
+    cta: "Comprar",
+  };
+
+  const a = approval(
+    "hero",
+    "req_p043_payload_mismatch",
+    approvedDraft,
+    "Nimbus:builder:hero",
+  );
+
+  const before = localStorage.getItem(
+    "db-store-canvas-v1:Inicio",
+  );
+
+  const result = executePulseAction({
+    envelope: a.envelope,
+    approval: a.approval,
+    draft: changedDraft,
+  });
+
+  assert.equal(result.state, "REJECTED");
+  assert.equal(result.error, "STALE_PROPOSAL");
+  assert.equal(result.verified, false);
+  assert.equal(
+    localStorage.getItem("db-store-canvas-v1:Inicio"),
+    before,
+  );
+  assert.equal(
+    result.audit.metadata?.reason_code,
+    "STALE_PROPOSAL",
+  );
+  assert.equal(
+    result.audit.metadata?.executed_proposal_hash !== undefined,
+    true,
+  );
+});
+
+test("P0.4.3 permite payload exactamente igual al aprobado", () => {
+  setCanvas();
+
+  const draft = {
+    kind: "hero",
+    title: "Mismo payload",
+    body: "Mismo body",
+    cta: "Entrar",
+  };
+
+  const a = approval(
+    "hero",
+    "req_p043_payload_match",
+    draft,
+    "Nimbus:builder:hero",
+  );
+
+  const result = executePulseAction({
+    envelope: a.envelope,
+    approval: a.approval,
+    draft,
+  });
+
+  assert.equal(result.state, "COMPLETED");
+  assert.equal(result.verified, true);
+
+  const saved = JSON.parse(
+    localStorage.getItem(
+      "db-store-canvas-v1:Inicio",
+    ) || "[]",
+  );
+
+  assert.equal(saved[0].title, "Mismo payload");
+  assert.equal(saved[0].body, "Mismo body");
+  assert.equal(saved[0].cta, "Entrar");
+
+  assert.equal(
+    result.audit.metadata?.executed_proposal_hash,
+    a.envelope.binding?.proposal_hash,
+  );
+});

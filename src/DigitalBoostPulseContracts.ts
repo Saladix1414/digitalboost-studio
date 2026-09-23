@@ -52,6 +52,21 @@ export function hashProposal(value: unknown): string {
   for (let i = 0; i < input.length; i++) { hash ^= input.charCodeAt(i); hash = Math.imul(hash, 16777619); }
   return "fnv1a_" + (hash >>> 0).toString(16).padStart(8, "0");
 }
+
+export function hashPulseExecutionPayload(
+  input: { proposal?: unknown; draft?: unknown },
+): string | null {
+  const payload =
+    input.proposal !== undefined && input.proposal !== null
+      ? input.proposal
+      : input.draft;
+
+  if (payload === undefined || payload === null) {
+    return null;
+  }
+
+  return hashProposal(payload);
+}
 export function buildProposalBinding(input: PulseBindingInput, risk: PulseRiskLevel): PulseProposalBinding {
   const now = input.now ?? Date.now();
   const ttl = input.ttl_ms ?? PULSE_APPROVAL_TTL_MS;

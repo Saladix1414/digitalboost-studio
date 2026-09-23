@@ -24,6 +24,7 @@ import {
   peekCanvasHero,
   undoPulseApply,
 } from "./DigitalBoostPulseApply";
+import { hashPulseExecutionPayload } from "./DigitalBoostPulseContracts";
 
 export type PulseExecutionContext = {
   envelope: PulseDecisionEnvelope;
@@ -50,7 +51,19 @@ function audit(
   metadata?: Record<string, unknown>,
 ): PulseAuditEvent {
   const next = { ...envelope, state };
-  const eventRecord = createPulseAuditEvent(next, event, metadata);
+  const auditMetadata = {
+    ...(metadata || {}),
+    ...(next.reason_code
+      ? { reason_code: next.reason_code }
+      : {}),
+  };
+  const eventRecord = createPulseAuditEvent(
+    next,
+    event,
+    Object.keys(auditMetadata).length > 0
+      ? auditMetadata
+      : undefined,
+  );
 
   try {
     pushAudit({
@@ -76,6 +89,10 @@ function audit(
       policy_version: envelope.policy_version,
       approval_id: envelope.approval_id,
       proposal_hash: envelope.binding?.proposal_hash,
+      executed_proposal_hash:
+        typeof metadata?.executed_proposal_hash === "string"
+          ? metadata.executed_proposal_hash
+          : undefined,
       reason_code: envelope.reason_code,
       verification_status:
         typeof metadata?.verification_status === "string"
@@ -132,6 +149,68 @@ export function executePulseAction(
         "AWAITING_APPROVAL",
       ),
     };
+  }
+
+  const executedProposalHash = hashPulseExecutionPayload({
+    proposal,
+    draft,
+  });
+
+  if (executedProposalHash !== null) {
+    if (!executionEnvelope.binding) {
+      const rejectedEnvelope = {
+        ...executionEnvelope,
+        state: "REJECTED" as const,
+        reason_code: "BINDING_MISSING" as const,
+      };
+
+      return {
+        allowed: false,
+        state: "REJECTED",
+        error: "BINDING_MISSING",
+        verified: false,
+        rolledBack: false,
+        audit: audit(
+          rejectedEnvelope,
+          "PULSE_ACTION_REJECTED_PAYLOAD_BINDING",
+          "REJECTED",
+          {
+            verification_status: "SKIPPED",
+            verified: false,
+            executed_proposal_hash: executedProposalHash,
+          },
+        ),
+      };
+    }
+
+    if (
+      executedProposalHash !==
+      executionEnvelope.binding.proposal_hash
+    ) {
+      const rejectedEnvelope = {
+        ...executionEnvelope,
+        state: "REJECTED" as const,
+        reason_code: "STALE_PROPOSAL" as const,
+      };
+
+      return {
+        allowed: false,
+        state: "REJECTED",
+        error: "STALE_PROPOSAL",
+        verified: false,
+        rolledBack: false,
+        audit: audit(
+          rejectedEnvelope,
+          "PULSE_ACTION_REJECTED_PAYLOAD_BINDING",
+          "REJECTED",
+          {
+            verification_status: "SKIPPED",
+            verified: false,
+            executed_proposal_hash: executedProposalHash,
+          },
+        ),
+      };
+    }
   }
 
   const precheck = precheckPulseExecution({
@@ -617,6 +696,8 @@ export function executePulseAction(
               rollback.rollbackVerified,
             rollback_reason:
               rollback.rollbackReason,
+            executed_proposal_hash:
+              executedProposalHash ?? undefined,
           },
         ),
       };
@@ -647,6 +728,8 @@ export function executePulseAction(
           verified: post.verified,
           rolled_back: false,
           rollback_verified: false,
+          executed_proposal_hash:
+            executedProposalHash ?? undefined,
         },
       ),
     };
@@ -682,6 +765,8 @@ export function executePulseAction(
             rollback.rollbackVerified,
           rollback_reason:
             rollback.rollbackReason,
+          executed_proposal_hash:
+            executedProposalHash ?? undefined,
         },
       ),
     };

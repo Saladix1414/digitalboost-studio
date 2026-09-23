@@ -82,18 +82,28 @@ function finish(
     label: string;
     confirm?: boolean;
     proposal?: Record<string, unknown> | null;
+    draft?: { kind: string; title: string; body: string; cta: string };
   },
 ): PulseDecision {
+  const preparedPick = injectDraft(pick) as typeof pick & {
+    draft?: { kind: string; title: string; body: string; cta: string };
+    proposal?: Record<string, unknown> | null;
+  };
+
   const meta = runCycle({
     q: input.q || "",
     section: input.section,
     store: input.store,
-    action: pick.action,
-    title: pick.title,
-    body: pick.body,
-    alreadyConfirm: Boolean(pick.confirm)
+    action: preparedPick.action,
+    title: preparedPick.title,
+    body: preparedPick.body,
+    alreadyConfirm: Boolean(preparedPick.confirm),
+    draft: preparedPick.draft,
+    proposal: preparedPick.proposal || null,
   });
-  lastAction = pick.action;
+
+  lastAction = preparedPick.action;
+
   try {
     pushExample({
       q: input.q || "",
@@ -101,25 +111,46 @@ function finish(
       store: input.store,
       range: input.range,
       live: input.live,
-      title: pick.title,
-      body: pick.body,
-      action: pick.action,
+      title: preparedPick.title,
+      body: preparedPick.body,
+      action: preparedPick.action,
       confirm: meta.confirm
     });
   } catch {}
+
   const planLines = meta.plan && meta.plan.steps
-    ? ["", "Plan:", ...meta.plan.steps.map(function (s, i) { return (i + 1) + ". " + s.title + " (" + s.action + ")"; })]
+    ? [
+        "",
+        "Plan:",
+        ...meta.plan.steps.map(function (s, i) {
+          return (i + 1) + ". " + s.title + " (" + s.action + ")";
+        }),
+      ]
     : [];
+
   const govLines = [
     "",
-    "Governance: " + String(meta.envelope && meta.envelope.policy) + " · risk " + String(meta.risk) + (meta.confirm ? " · Pulse Card" : ""),
-    meta.mission ? ("Mision: " + meta.mission.state + " · paso " + String(meta.mission.stepIndex + 1)) : "",
+    "Governance: " +
+      String(meta.envelope && meta.envelope.policy) +
+      " · risk " +
+      String(meta.risk) +
+      (meta.confirm ? " · Pulse Card" : ""),
+    meta.mission
+      ? ("Mision: " +
+          meta.mission.state +
+          " · paso " +
+          String(meta.mission.stepIndex + 1))
+      : "",
   ].filter(Boolean);
+
   return {
-    title: pick.title,
-    body: [pick.body].concat(planLines).concat(govLines).join("\n"),
-    action: pick.action,
-    actionLabel: meta.confirm ? "Revisar Pulse Card" : pick.label,
+    title: preparedPick.title,
+    body: [preparedPick.body]
+      .concat(planLines)
+      .concat(govLines)
+      .join("\n"),
+    action: preparedPick.action,
+    actionLabel: meta.confirm ? "Revisar Pulse Card" : preparedPick.label,
     confirm: meta.confirm,
     risk: meta.risk,
     agent: meta.agent,
@@ -127,8 +158,8 @@ function finish(
     card: meta.card,
     envelope: meta.envelope,
     approval: meta.approval,
-    draft: (pick as any).draft,
-    proposal: (pick as any).proposal || null
+    draft: preparedPick.draft,
+    proposal: preparedPick.proposal || null
   };
 }
 

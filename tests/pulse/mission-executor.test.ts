@@ -53,6 +53,7 @@ function heroEnvelope(requestId: string) {
       tenant: "Nimbus",
       context_version: "ctx:test",
       proposal: {
+        kind: "hero",
         title: "Hero mission",
         body: "Body mission",
         cta: "Entrar",
