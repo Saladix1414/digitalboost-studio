@@ -61,15 +61,27 @@ export function retryPulseMission(id: string): PulseMission | null {
   if (m.retries >= m.maxRetries) return m;
   return save(Object.assign({}, m, { state: "RUNNING", retries: m.retries + 1, lastError: undefined }));
 }
-export function advancePulseMission(id: string, input: { approved?: boolean; ok?: boolean; error?: string } = {}): PulseMission | null {
+export function advancePulseMission(id: string, input: { approved?: boolean; ok?: boolean; error?: string; terminal?: boolean } = {}): PulseMission | null {
   const m = getPulseMission(id);
   if (!m || m.state === "CANCELLED" || m.state === "COMPLETED" || m.state === "PAUSED") return null;
   const step = m.plan.steps[m.stepIndex];
   if (!step) return save(Object.assign({}, m, { state: "COMPLETED" }));
   if (m.state === "AWAITING_APPROVAL" && !input.approved) return m;
   if (input.ok === false) {
+    if (input.terminal) {
+      return save(Object.assign({}, m, {
+        state: "FAILED",
+        lastError: input.error || "step-failed-terminal",
+      }));
+    }
+
     const failed = m.retries + 1 > m.maxRetries;
-    return save(Object.assign({}, m, { state: failed ? "FAILED" : "RUNNING", retries: m.retries + (failed ? 0 : 1), lastError: input.error || "step-failed" }));
+
+    return save(Object.assign({}, m, {
+      state: failed ? "FAILED" : "RUNNING",
+      retries: m.retries + (failed ? 0 : 1),
+      lastError: input.error || "step-failed",
+    }));
   }
   const nextIndex = m.stepIndex + 1;
   if (nextIndex >= m.plan.steps.length) return save(Object.assign({}, m, { stepIndex: nextIndex, state: "COMPLETED" }));

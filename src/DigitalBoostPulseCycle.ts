@@ -110,6 +110,21 @@ export function runCycle(input: { q: string; section: string; store: string; act
     });
   } catch {}
 
+  const plan = compilePulseGoal({
+    q: input.q,
+    action: input.action,
+    section: input.section,
+    store: input.store,
+  });
+
+  const mission =
+    envelope.policy === "REJECT"
+      ? undefined
+      : startPulseMission({
+          store: input.store,
+          plan,
+        });
+
   return {
     request_id: envelope.request_id,
     actor: "merchant",
@@ -127,10 +142,7 @@ export function runCycle(input: { q: string; section: string; store: string; act
     card: card,
     envelope: envelope,
     approval: approval,
-    plan: (function () {
-      const plan = compilePulseGoal({ q: input.q, action: input.action, section: input.section, store: input.store });
-      return plan;
-    })(),
-    mission: undefined,
+    plan: plan,
+    mission: mission,
   };
 }
