@@ -260,12 +260,139 @@ export type PulseOutcomeProofRequirement = {
   action: string;
 };
 
+export const PULSE_EXECUTION_ATTESTATION_VERSION =
+  "pulse-execution-attestation-v1";
+
+export type PulseExecutionAttestation = {
+  version: typeof PULSE_EXECUTION_ATTESTATION_VERSION;
+  source: "executor";
+  mission_id: string;
+  plan_id: string;
+  step_id: string;
+  step_index: number;
+  action: string;
+  execution_request_id: string;
+  approval_id?: string;
+  policy_version?: string;
+  proposal_hash?: string;
+  executed_proposal_hash?: string;
+  expected_context_version?: string;
+  current_context_version?: string;
+  verification_status?: string;
+  verified?: boolean;
+  state:
+    | "COMPLETED"
+    | "FAILED"
+    | "AWAITING_APPROVAL"
+    | "REJECTED";
+  recorded_at: string;
+  attestation_hash: string;
+};
+
+export function createPulseExecutionAttestation(input: {
+  missionId: string;
+  planId: string;
+  stepId: string;
+  stepIndex: number;
+  action: string;
+  executionRequestId: string;
+  approvalId?: string;
+  policyVersion?: string;
+  proposalHash?: string;
+  executedProposalHash?: string;
+  expectedContextVersion?: string;
+  currentContextVersion?: string;
+  verificationStatus?: string;
+  verified?: boolean;
+  state:
+    | "COMPLETED"
+    | "FAILED"
+    | "AWAITING_APPROVAL"
+    | "REJECTED";
+}): PulseExecutionAttestation {
+  const base = {
+    version:
+      PULSE_EXECUTION_ATTESTATION_VERSION as const,
+    source: "executor" as const,
+    mission_id: input.missionId,
+    plan_id: input.planId,
+    step_id: input.stepId,
+    step_index: input.stepIndex,
+    action: input.action,
+    execution_request_id:
+      input.executionRequestId,
+    state: input.state,
+    recorded_at: new Date().toISOString(),
+    ...(input.approvalId !== undefined
+      ? { approval_id: input.approvalId }
+      : {}),
+    ...(input.policyVersion !== undefined
+      ? { policy_version: input.policyVersion }
+      : {}),
+    ...(input.proposalHash !== undefined
+      ? { proposal_hash: input.proposalHash }
+      : {}),
+    ...(input.executedProposalHash !== undefined
+      ? {
+          executed_proposal_hash:
+            input.executedProposalHash,
+        }
+      : {}),
+    ...(input.expectedContextVersion !== undefined
+      ? {
+          expected_context_version:
+            input.expectedContextVersion,
+        }
+      : {}),
+    ...(input.currentContextVersion !== undefined
+      ? {
+          current_context_version:
+            input.currentContextVersion,
+        }
+      : {}),
+    ...(input.verificationStatus !== undefined
+      ? {
+          verification_status:
+            input.verificationStatus,
+        }
+      : {}),
+    ...(input.verified !== undefined
+      ? { verified: input.verified }
+      : {}),
+  };
+
+  return {
+    ...base,
+    attestation_hash: hashProposal(base),
+  };
+}
+
+export function verifyPulseExecutionAttestation(
+  attestation: PulseExecutionAttestation,
+): boolean {
+  const {
+    attestation_hash,
+    ...base
+  } = attestation;
+
+  return (
+    attestation.version ===
+      PULSE_EXECUTION_ATTESTATION_VERSION &&
+    attestation.source === "executor" &&
+    typeof attestation.execution_request_id ===
+      "string" &&
+    attestation.execution_request_id.length > 0 &&
+    hashProposal(base) === attestation_hash
+  );
+}
+
 export type PulseOutcomeProofEvidence = {
   step_id: string;
   step_index: number;
   action: string;
   verification_status?: string;
   verified?: boolean;
+  execution_attestation?: PulseExecutionAttestation;
   recorded_at: string;
 };
 
@@ -293,6 +420,7 @@ export type PulseOutcomeProof = {
   verified_steps: string[];
   missing_steps: string[];
   failed_steps: string[];
+  unattested_steps: string[];
   evidence: PulseOutcomeProofEvidence[];
   recorded_at: string;
   hash_algorithm: "fnv1a";
@@ -362,6 +490,7 @@ export function createPulseOutcomeProof(input: {
   const verified_steps: string[] = [];
   const missing_steps: string[] = [];
   const failed_steps: string[] = [];
+  const unattested_steps: string[] = [];
 
   for (const required of input.contract.required_proof_steps) {
     const row = [...evidence]
@@ -375,9 +504,48 @@ export function createPulseOutcomeProof(input: {
 
     if (!row) {
       missing_steps.push(required.step_id);
-    } else if (row.verification_status === "FAIL") {
+      continue;
+    }
+
+    if (row.verification_status === "FAIL") {
       failed_steps.push(required.step_id);
-    } else if (row.verified === true) {
+      continue;
+    }
+
+    const attestation =
+      row.execution_attestation;
+
+    const attested =
+      !!attestation &&
+      verifyPulseExecutionAttestation(
+        attestation,
+      ) &&
+      attestation.mission_id ===
+        input.contract.mission_id &&
+      attestation.plan_id ===
+        input.contract.plan_id &&
+      attestation.step_id ===
+        required.step_id &&
+      attestation.step_index ===
+        required.step_index &&
+      attestation.action ===
+        required.action &&
+      (!row.verification_status ||
+        attestation.verification_status ===
+          row.verification_status) &&
+      (!row.verified ||
+        (
+          attestation.state === "COMPLETED" &&
+          attestation.verified === true
+        ));
+
+    if (!attested) {
+      missing_steps.push(required.step_id);
+      unattested_steps.push(required.step_id);
+      continue;
+    }
+
+    if (row.verified === true) {
       verified_steps.push(required.step_id);
     } else {
       missing_steps.push(required.step_id);
@@ -408,6 +576,7 @@ export function createPulseOutcomeProof(input: {
     verified_steps,
     missing_steps,
     failed_steps,
+    unattested_steps,
     evidence,
     recorded_at:
       input.recordedAt || new Date().toISOString(),
@@ -461,6 +630,8 @@ export function verifyPulseOutcomeProof(
       stableSerialize(proof.missing_steps) &&
     stableSerialize(rebuilt.failed_steps) ===
       stableSerialize(proof.failed_steps) &&
+    stableSerialize(rebuilt.unattested_steps) ===
+      stableSerialize(proof.unattested_steps) &&
     rebuilt.proof_hash === proof.proof_hash
   );
 }

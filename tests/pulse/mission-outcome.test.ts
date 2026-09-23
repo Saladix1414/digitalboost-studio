@@ -529,3 +529,61 @@ test("P0.4.11 Plan alterado impide ASSURED", () => {
     "UNASSURED",
   );
 });
+
+
+test("P0.4.12 advance directo no prueba una mutacion sin execution attestation", () => {
+  const plan = compilePulseGoal({
+    action: "hero",
+    store: "AttestationGap",
+  });
+
+  const started = startPulseMission({
+    store: "AttestationGap",
+    plan,
+    requestId: "req_attestation_gap",
+  });
+
+  const first = advancePulseMission(
+    started.id,
+    { ok: true },
+  );
+
+  assert.equal(first?.stepIndex, 1);
+  assert.equal(first?.state, "AWAITING_APPROVAL");
+
+  const second = advancePulseMission(
+    started.id,
+    {
+      approved: true,
+      ok: true,
+      verificationStatus: "PASS",
+      verified: true,
+    },
+  );
+
+  assert.equal(second?.stepIndex, 2);
+
+  const completed = advancePulseMission(
+    started.id,
+    {
+      approved: true,
+      ok: true,
+      verificationStatus: "PASS",
+      verified: true,
+    },
+  );
+
+  assert.equal(completed?.state, "COMPLETED");
+  assert.equal(
+    completed?.outcome?.proofStatus,
+    "UNPROVEN",
+  );
+  assert.equal(
+    completed?.outcome?.assuranceStatus,
+    "UNASSURED",
+  );
+  assert.ok(
+    completed?.outcome?.proof?.unattested_steps
+      .includes(plan.steps[1].id),
+  );
+});

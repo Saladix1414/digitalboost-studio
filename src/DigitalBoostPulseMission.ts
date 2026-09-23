@@ -14,6 +14,7 @@ import {
   type PulseOutcomeProofEvidence,
   type PulseOutcomeAssuranceStatus,
   type PulseGoalEvidenceBinding,
+  type PulseExecutionAttestation,
 } from "./DigitalBoostPulseOutcomeProof";
 import { rememberMissionOutcome } from "./DigitalBoostPulseMemory";
 import { hasPulseMissionOutcomeAudit, pushAudit, requestId } from "./DigitalBoostPulseLog";
@@ -78,6 +79,7 @@ function recordProofEvidence(
   input: {
     verificationStatus?: string;
     verified?: boolean;
+    executionAttestation?: PulseExecutionAttestation;
   },
 ): PulseMission {
   const step = mission.plan.steps[mission.stepIndex];
@@ -89,6 +91,8 @@ function recordProofEvidence(
     action: step.action,
     verification_status: input.verificationStatus,
     verified: input.verified,
+    execution_attestation:
+      input.executionAttestation,
     recorded_at: new Date().toISOString(),
   };
 
@@ -580,6 +584,7 @@ export function advancePulseMission(
     terminal?: boolean;
     verificationStatus?: string;
     verified?: boolean;
+    executionAttestation?: PulseExecutionAttestation;
   } = {},
 ): PulseMission | null {
   const m = getPulseMission(id);
@@ -617,6 +622,8 @@ export function advancePulseMission(
       verificationStatus:
         input.verificationStatus,
       verified: input.verified,
+      executionAttestation:
+        input.executionAttestation,
     });
 
   if (input.ok === false) {

@@ -10,6 +10,10 @@ import {
   type PulseExecutionOutcome,
 } from "./DigitalBoostPulseExecutor";
 
+import {
+  createPulseExecutionAttestation,
+} from "./DigitalBoostPulseOutcomeProof";
+
 export type PulseMissionStepExecutionContext =
   PulseExecutionContext;
 
@@ -66,6 +70,43 @@ export function executePulseMissionStep(
     };
   }
 
+  const executionAttestation =
+    createPulseExecutionAttestation({
+      missionId: mission.id,
+      planId: mission.planId,
+      stepId: step.id,
+      stepIndex: mission.stepIndex,
+      action: step.action,
+      executionRequestId:
+        context.envelope.request_id,
+      approvalId:
+        context.envelope.approval_id ||
+        context.approval?.id,
+      policyVersion:
+        context.envelope.policy_version,
+      proposalHash:
+        context.envelope.binding?.proposal_hash,
+      executedProposalHash:
+        typeof execution.audit.metadata
+          ?.executed_proposal_hash === "string"
+          ? execution.audit.metadata
+              ?.executed_proposal_hash
+          : undefined,
+      expectedContextVersion:
+        context.envelope.binding?.context_version,
+      currentContextVersion:
+        typeof execution.audit.metadata
+          ?.current_context_version === "string"
+          ? execution.audit.metadata
+              ?.current_context_version
+          : undefined,
+      verificationStatus:
+        execution.audit.metadata
+          ?.verification_status,
+      verified: execution.verified,
+      state: execution.state,
+    });
+
   const missionAfterExecution =
     advancePulseMission(missionId, {
       approved: execution.state !== "REJECTED",
@@ -76,8 +117,10 @@ export function executePulseMissionStep(
         (execution.state === "REJECTED"
           ? "governance-rejected"
           : undefined),
-      verificationStatus: execution.audit.metadata?.verification_status,
+      verificationStatus:
+        execution.audit.metadata?.verification_status,
       verified: execution.verified,
+      executionAttestation,
     });
 
   return {
