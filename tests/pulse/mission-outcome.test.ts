@@ -15,6 +15,10 @@ import {
   queryPulseMemory,
 } from "../../src/DigitalBoostPulseMemory";
 
+import {
+  verifyPulseGoalEvidenceBinding,
+} from "../../src/DigitalBoostPulseOutcomeProof";
+
 const storage = new Map<string, string>();
 
 function browser() {
@@ -105,7 +109,25 @@ test(
       true,
     );
 
-    const memories =
+      assert.ok(completed?.goalEvidenceBinding);
+      assert.ok(completed?.goalEvidenceBinding?.id);
+      assert.ok(completed?.goalEvidenceBinding?.binding_hash);
+      assert.equal(
+        verifyPulseGoalEvidenceBinding(
+          completed!.goalEvidenceBinding!,
+        ),
+        true,
+      );
+      assert.equal(
+        completed?.outcome?.goalEvidenceBindingId,
+        completed?.goalEvidenceBinding?.id,
+      );
+      assert.equal(
+        completed?.outcome?.goalEvidenceBindingHash,
+        completed?.goalEvidenceBinding?.binding_hash,
+      );
+
+const memories =
       queryPulseMemory({
         kind: "mission",
         scope: "OutcomeComplete",
@@ -154,7 +176,15 @@ test(
       outcomeAudits[0].plan_status,
       "COMPLETED",
     );
-  },
+
+      assert.equal(
+        outcomeAudits[0].goal_evidence_binding_id,
+        completed?.goalEvidenceBinding?.id,
+      );
+      assert.equal(
+        outcomeAudits[0].goal_evidence_binding_hash,
+        completed?.goalEvidenceBinding?.binding_hash,
+      );},
 );
 
 test(

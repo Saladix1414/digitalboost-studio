@@ -3,11 +3,14 @@ import { closePulsePlan } from "./DigitalBoostPulsePlan";
 import {
   createPulseOutcomeContract,
   createPulseOutcomeProof,
+  createPulseGoalEvidenceBinding,
+  verifyPulseGoalEvidenceBinding,
   derivePulseOutcomeAssurance,
   type PulseOutcomeContract,
   type PulseOutcomeProof,
   type PulseOutcomeProofEvidence,
   type PulseOutcomeAssuranceStatus,
+  type PulseGoalEvidenceBinding,
 } from "./DigitalBoostPulseOutcomeProof";
 import { rememberMissionOutcome } from "./DigitalBoostPulseMemory";
 import { hasPulseMissionOutcomeAudit, pushAudit, requestId } from "./DigitalBoostPulseLog";
@@ -22,6 +25,8 @@ export type PulseMissionOutcome = {
   proofHash?: string;
   proof?: PulseOutcomeProof;
   assuranceStatus?: PulseOutcomeAssuranceStatus;
+  goalEvidenceBindingId?: string;
+  goalEvidenceBindingHash?: string;
 };
 export type PulseMission = {
   id: string; store: string; planId: string; state: PulseMissionState;
@@ -34,6 +39,7 @@ export type PulseMission = {
   stepIndex: number; retries: number; maxRetries: number;
   createdAt: string; updatedAt: string; lastError?: string; plan: PulsePlan;
   outcomeContract?: PulseOutcomeContract;
+  goalEvidenceBinding?: PulseGoalEvidenceBinding;
   proofChain?: PulseOutcomeProofEvidence[];
   outcome?: PulseMissionOutcome;
 };
@@ -133,10 +139,17 @@ function closeMissionOutcome(
     recordedAt,
   });
 
+  const goalEvidenceVerified =
+    !!mission.goalEvidenceBinding &&
+    verifyPulseGoalEvidenceBinding(
+      mission.goalEvidenceBinding,
+    );
+
   const assuranceStatus = derivePulseOutcomeAssurance({
     outcome: input.status,
     proofStatus: proof.status,
     verified: input.verified,
+    goalEvidenceVerified,
   });
 
   const outcome: PulseMissionOutcome = {
@@ -155,6 +168,10 @@ function closeMissionOutcome(
     proofStatus: proof.status,
     proofHash: proof.proof_hash,
     assuranceStatus,
+    goalEvidenceBindingId:
+      mission.goalEvidenceBinding?.id,
+    goalEvidenceBindingHash:
+      mission.goalEvidenceBinding?.binding_hash,
     proof,
   };
 
@@ -174,6 +191,8 @@ function closeMissionOutcome(
       proofStatus: proof.status,
       proofHash: proof.proof_hash,
       assuranceStatus,
+      goalEvidenceBindingId: mission.goalEvidenceBinding?.id,
+      goalEvidenceBindingHash: mission.goalEvidenceBinding?.binding_hash,
     });
   } catch {}
 
@@ -208,6 +227,8 @@ function closeMissionOutcome(
         proof_status: proof.status,
         proof_hash: proof.proof_hash,
         assurance_status: assuranceStatus,
+        goal_evidence_binding_id: mission.goalEvidenceBinding?.id,
+        goal_evidence_binding_hash: mission.goalEvidenceBinding?.binding_hash,
       });
     }
   } catch {}
@@ -225,6 +246,11 @@ export function startPulseMission(input: {
   plan: PulsePlan;
   requestId?: string;
   section?: string;
+  goalEvidence?: {
+    policy: string;
+    policyVersion?: string;
+    proposalHash?: string;
+  };
 }): PulseMission {
   const first = input.plan.steps[0];
   const awaiting = Boolean(first && first.approvalLikely);
@@ -243,6 +269,30 @@ export function startPulseMission(input: {
       }),
     });
 
+  const goalEvidenceBinding =
+    createPulseGoalEvidenceBinding({
+      goalId: input.plan.goal.id,
+      missionId,
+      planId: input.plan.id,
+      requestId: missionRequestId,
+      successCriteria:
+        input.plan.goal.successCriteria,
+      policy: input.goalEvidence?.policy || "UNKNOWN",
+      policyVersion:
+        input.goalEvidence?.policyVersion,
+      proposalHash:
+        input.goalEvidence?.proposalHash,
+      expectedSteps:
+        input.plan.steps.map(function (step, step_index) {
+          return {
+            step_id: step.id,
+            step_index,
+            action: step.action,
+            expected: step.expected,
+          };
+        }),
+    });
+
   return save({
     id: missionId,
     store: input.store,
@@ -259,6 +309,7 @@ export function startPulseMission(input: {
     updatedAt: new Date().toISOString(),
     plan: input.plan,
     outcomeContract,
+    goalEvidenceBinding,
     proofChain: [],
   });
 }
@@ -414,6 +465,33 @@ export function repairPulseMission(id: string): PulseMission | null {
     }),
   });
 
+
+  const goalEvidenceBinding =
+    createPulseGoalEvidenceBinding({
+      goalId: repairedPlan.goal.id,
+      missionId: newMissionId,
+      planId: repairedPlan.id,
+      requestId: newRequestId,
+      successCriteria:
+        repairedPlan.goal.successCriteria,
+      policy:
+        source.goalEvidenceBinding?.policy ||
+        "UNKNOWN",
+      policyVersion:
+        source.goalEvidenceBinding?.policy_version,
+      proposalHash:
+        source.goalEvidenceBinding?.proposal_hash,
+      expectedSteps:
+        repairedPlan.steps.map(function (step, step_index) {
+          return {
+            step_id: step.id,
+            step_index,
+            action: step.action,
+            expected: step.expected,
+          };
+        }),
+    });
+
   const first = repairedPlan.steps[0];
   const repairedState =
     first && first.approvalLikely
@@ -438,6 +516,7 @@ export function repairPulseMission(id: string): PulseMission | null {
     updatedAt: new Date().toISOString(),
     plan: repairedPlan,
     outcomeContract,
+    goalEvidenceBinding,
     proofChain: [],
   };
 

@@ -49,6 +49,8 @@ export type PulseAudit = {
   proof_status?: "PROVEN" | "UNPROVEN" | "FAILED";
   proof_hash?: string;
   assurance_status?: "ASSURED" | "PARTIAL" | "UNASSURED";
+  goal_evidence_binding_id?: string;
+  goal_evidence_binding_hash?: string;
   context_version?: string;
   current_context_version?: string;
   context_drift_status?: string;

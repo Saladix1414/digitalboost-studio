@@ -15,12 +15,89 @@ export type PulseOutcomeProofStatus =
 export type PulseOutcomeAssuranceStatus =
   "ASSURED" | "PARTIAL" | "UNASSURED";
 
+export type PulseGoalEvidenceBinding = {
+  id: string;
+  version: "pulse-goal-evidence-v1";
+  goal_id: string;
+  mission_id: string;
+  plan_id: string;
+  request_id: string;
+  success_criteria: string[];
+  policy: string;
+  policy_version?: string;
+  proposal_hash?: string;
+  expected_steps: Array<{
+    step_id: string;
+    step_index: number;
+    action: string;
+    expected: Record<string, unknown>;
+  }>;
+  issued_at: string;
+  binding_hash: string;
+};
+
+export function createPulseGoalEvidenceBinding(input: {
+  goalId: string;
+  missionId: string;
+  planId: string;
+  requestId: string;
+  successCriteria: string[];
+  policy: string;
+  policyVersion?: string;
+  proposalHash?: string;
+  expectedSteps: PulseGoalEvidenceBinding["expected_steps"];
+}): PulseGoalEvidenceBinding {
+  const base = {
+    id: "geb_" + input.missionId,
+    version: "pulse-goal-evidence-v1" as const,
+    goal_id: input.goalId,
+    mission_id: input.missionId,
+    plan_id: input.planId,
+    request_id: input.requestId,
+    success_criteria: [...input.successCriteria],
+    policy: input.policy,
+    expected_steps: input.expectedSteps,
+    issued_at: new Date().toISOString(),
+    ...(input.policyVersion !== undefined
+      ? { policy_version: input.policyVersion }
+      : {}),
+    ...(input.proposalHash !== undefined
+      ? { proposal_hash: input.proposalHash }
+      : {}),
+  };
+
+  return {
+    ...base,
+    binding_hash: hashProposal(base),
+  };
+}
+
+export function verifyPulseGoalEvidenceBinding(
+  binding: PulseGoalEvidenceBinding,
+): boolean {
+  const { binding_hash, ...base } = binding;
+
+  return (
+    binding.version === "pulse-goal-evidence-v1" &&
+    hashProposal(base) === binding_hash &&
+    binding.success_criteria.includes("policy-evaluated") &&
+    binding.success_criteria.includes(
+      "expected-outcome-declared",
+    )
+  );
+}
+
 export function derivePulseOutcomeAssurance(input: {
   outcome: PulseOutcomeStatus;
   proofStatus?: PulseOutcomeProofStatus;
   verified?: boolean;
+  goalEvidenceVerified: boolean;
 }): PulseOutcomeAssuranceStatus {
   if (input.outcome !== "COMPLETED") {
+    return "UNASSURED";
+  }
+
+  if (!input.goalEvidenceVerified) {
     return "UNASSURED";
   }
 

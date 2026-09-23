@@ -105,6 +105,8 @@ export type PulseMissionOutcomeMemoryInput = {
   proofStatus?: "PROVEN" | "UNPROVEN" | "FAILED";
   proofHash?: string;
   assuranceStatus?: "ASSURED" | "PARTIAL" | "UNASSURED";
+  goalEvidenceBindingId?: string;
+  goalEvidenceBindingHash?: string;
   source?: "merchant" | "executor" | "verification";
 };
 
@@ -160,6 +162,8 @@ export function rememberMissionOutcome(
       proofStatus: input.proofStatus || "",
       proofHash: input.proofHash || "",
       assuranceStatus: input.assuranceStatus || "",
+      goalEvidenceBindingId: input.goalEvidenceBindingId || "",
+      goalEvidenceBindingHash: input.goalEvidenceBindingHash || "",
     },
   });
 }

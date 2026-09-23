@@ -146,6 +146,12 @@ export function runCycle(input: {
           section: input.section,
           plan,
           requestId: envelope.request_id,
+          goalEvidence: {
+            policy: envelope.policy,
+            policyVersion: envelope.policy_version,
+            proposalHash:
+              envelope.binding?.proposal_hash,
+          },
         });
 
   return {

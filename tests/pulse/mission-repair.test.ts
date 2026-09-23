@@ -19,6 +19,10 @@ import {
   PULSE_MAX_REPAIR_GENERATIONS,
 } from "../../src/DigitalBoostPulseMission";
 
+import {
+  verifyPulseGoalEvidenceBinding,
+} from "../../src/DigitalBoostPulseOutcomeProof";
+
 const storage = new Map<string, string>();
 
 function browser() {
@@ -78,8 +82,7 @@ test("P0.4.8 repara una Mission fallida por CONTEXT_STALE", () => {
   });
 
   assert.ok(cycle.mission);
-
-  const analyze = evaluatePulsePolicy(
+const analyze = evaluatePulsePolicy(
     "analyze",
     "L0",
     false,
@@ -239,7 +242,6 @@ test("P0.4.8 repara una Mission fallida por CONTEXT_STALE", () => {
   );
 });
 
-
 test("P0.4.8 reparación exige nuevo approval y puede continuar", () => {
   seedCanvas();
 
@@ -254,6 +256,20 @@ test("P0.4.8 reparación exige nuevo approval y puede continuar", () => {
   });
 
   assert.ok(cycle.mission);
+
+  const originalBindingId =
+    cycle.mission?.goalEvidenceBinding?.id;
+  const originalBindingHash =
+    cycle.mission?.goalEvidenceBinding?.binding_hash;
+
+  assert.ok(originalBindingId);
+  assert.ok(originalBindingHash);
+  assert.equal(
+    verifyPulseGoalEvidenceBinding(
+      cycle.mission!.goalEvidenceBinding!,
+    ),
+    true,
+  );
 
   const analyze = evaluatePulsePolicy(
     "analyze",
@@ -348,7 +364,25 @@ test("P0.4.8 reparación exige nuevo approval y puede continuar", () => {
   assert.ok(repaired);
   assert.equal(repaired?.state, "AWAITING_APPROVAL");
 
-  // El approval original pertenece a la Mission vieja y no puede reutilizarse.
+  assert.ok(repaired?.goalEvidenceBinding);
+  assert.ok(repaired?.goalEvidenceBinding?.id);
+  assert.ok(repaired?.goalEvidenceBinding?.binding_hash);
+  assert.equal(
+    verifyPulseGoalEvidenceBinding(
+      repaired!.goalEvidenceBinding!,
+    ),
+    true,
+  );
+  assert.notEqual(
+    repaired?.goalEvidenceBinding?.id,
+    originalBindingId,
+  );
+  assert.notEqual(
+    repaired?.goalEvidenceBinding?.binding_hash,
+    originalBindingHash,
+  );
+
+// El approval original pertenece a la Mission vieja y no puede reutilizarse.
   assert.equal(
     repaired?.requestId === hero.request_id,
     false,
@@ -392,7 +426,6 @@ test("P0.4.8 reparación exige nuevo approval y puede continuar", () => {
   assert.equal(resumed.mission?.stepIndex, 1);
   assert.equal(resumed.mission?.state, "RUNNING");
 });
-
 
 test("P0.4.8 limita generaciones de repair y deja Audit", () => {
   seedCanvas();

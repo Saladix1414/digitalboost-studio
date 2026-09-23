@@ -205,6 +205,7 @@ test("P0.4.9 deriva ASSURED, PARTIAL y UNASSURED", () => {
       outcome: "COMPLETED",
       proofStatus: "PROVEN",
       verified: true,
+      goalEvidenceVerified: true,
     }),
     "ASSURED",
   );
@@ -214,6 +215,7 @@ test("P0.4.9 deriva ASSURED, PARTIAL y UNASSURED", () => {
       outcome: "COMPLETED",
       proofStatus: "PROVEN",
       verified: false,
+      goalEvidenceVerified: true,
     }),
     "PARTIAL",
   );
