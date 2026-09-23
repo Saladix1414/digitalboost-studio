@@ -14,6 +14,7 @@ import {
   createPulseApproval,
   approvePulseAction,
 } from "../../src/DigitalBoostPulseGovernance";
+import { currentContextVersion } from "../../src/DigitalBoostPulseContext";
 
 const storage = new Map<string, string>();
 
@@ -51,7 +52,10 @@ function heroEnvelope(requestId: string) {
       target: "Nimbus:website-builder:hero",
       actor: "merchant",
       tenant: "Nimbus",
-      context_version: "ctx:test",
+      context_version: currentContextVersion({
+        store: "Nimbus",
+        section: "website-builder",
+      }),
       proposal: {
         kind: "hero",
         title: "Hero mission",
@@ -114,7 +118,10 @@ test("Mission → Executor avanza paso completado y respeta approval", () => {
           target: "Nimbus:website-builder:analyze",
           actor: "merchant",
           tenant: "Nimbus",
-          context_version: "ctx:test",
+          context_version: currentContextVersion({
+        store: "Nimbus",
+        section: "website-builder",
+      }),
           proposal: {
             action: "analyze",
           },
@@ -234,7 +241,10 @@ test("P0.4.5 terminal Outcome conserva SKIPPED como no verificado", () => {
       target: "IntegrationOutcome:website-builder:analyze",
       actor: "merchant",
       tenant: "IntegrationOutcome",
-      context_version: "ctx:test",
+      context_version: currentContextVersion({
+        store: "IntegrationOutcome",
+        section: "website-builder",
+      }),
       proposal: {
         action: "analyze",
       },
@@ -268,7 +278,10 @@ test("P0.4.5 terminal Outcome conserva SKIPPED como no verificado", () => {
       target: "IntegrationOutcome:website-builder:hero",
       actor: "merchant",
       tenant: "IntegrationOutcome",
-      context_version: "ctx:test",
+      context_version: currentContextVersion({
+        store: "IntegrationOutcome",
+        section: "website-builder",
+      }),
       proposal: draft,
     },
   );
@@ -305,7 +318,10 @@ test("P0.4.5 terminal Outcome conserva SKIPPED como no verificado", () => {
       target: "IntegrationOutcome:website-builder:explain",
       actor: "merchant",
       tenant: "IntegrationOutcome",
-      context_version: "ctx:test",
+      context_version: currentContextVersion({
+        store: "IntegrationOutcome",
+        section: "website-builder",
+      }),
       proposal: {
         action: "explain",
       },

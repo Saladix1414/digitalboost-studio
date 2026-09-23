@@ -13,6 +13,7 @@ import {
   createPulseOutcomeContract,
   verifyPulseOutcomeProof,
 } from "../../src/DigitalBoostPulseOutcomeProof";
+import { currentContextVersion } from "../../src/DigitalBoostPulseContext";
 
 const storage = new Map<string, string>();
 
@@ -54,7 +55,10 @@ function analyzeEnvelope(store: string) {
       target: store + ":website-builder:analyze",
       actor: "merchant",
       tenant: store,
-      context_version: "ctx:test",
+      context_version: currentContextVersion({
+        store,
+        section: "website-builder",
+      }),
       proposal: { action: "analyze" },
     },
   );
@@ -103,7 +107,10 @@ test("P0.4.6 COMPLETED produce PROVEN y detecta tampering", () => {
       target: "Proven:website-builder:hero",
       actor: "merchant",
       tenant: "Proven",
-      context_version: "ctx:test",
+      context_version: currentContextVersion({
+        store: "Proven",
+        section: "website-builder",
+      }),
       proposal: draft,
     },
   );
@@ -129,7 +136,10 @@ test("P0.4.6 COMPLETED produce PROVEN y detecta tampering", () => {
       target: "Proven:website-builder:explain",
       actor: "merchant",
       tenant: "Proven",
-      context_version: "ctx:test",
+      context_version: currentContextVersion({
+        store: "Proven",
+        section: "website-builder",
+      }),
       proposal: { action: "explain" },
     },
   );

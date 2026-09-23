@@ -9,6 +9,7 @@ import {
 
 import { postcheckPulseExecution } from "../../src/DigitalBoostPulseVerify";
 import { executePulseAction } from "../../src/DigitalBoostPulseExecutor";
+import { currentContextVersion } from "../../src/DigitalBoostPulseContext";
 
 const store = new Map<string, string>();
 
@@ -57,12 +58,22 @@ function approval(
   proposal: unknown,
   target: string,
 ) {
+  const [store, section] = target.split(":");
+
   const envelope = evaluatePulsePolicy(
     action,
     "L1",
     true,
     requestId,
-    { action, target, proposal },
+    {
+      action,
+      target,
+      proposal,
+      context_version: currentContextVersion({
+        store,
+        section,
+      }),
+    },
   );
 
   const created = createPulseApproval(envelope);

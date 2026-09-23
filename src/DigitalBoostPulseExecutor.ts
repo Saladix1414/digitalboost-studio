@@ -25,6 +25,7 @@ import {
   undoPulseApply,
 } from "./DigitalBoostPulseApply";
 import { hashPulseExecutionPayload } from "./DigitalBoostPulseContracts";
+import { checkPulseContextDrift } from "./DigitalBoostPulseContextDrift";
 
 export type PulseExecutionTrace = {
   mission_id: string;
@@ -153,6 +154,18 @@ function audit(
         typeof metadata?.rollback_reason === "string"
           ? metadata.rollback_reason
           : undefined,
+      context_version:
+        typeof metadata?.expected_context_version === "string"
+          ? metadata.expected_context_version
+          : undefined,
+      current_context_version:
+        typeof metadata?.current_context_version === "string"
+          ? metadata.current_context_version
+          : undefined,
+      context_drift_status:
+        typeof metadata?.context_drift_status === "string"
+          ? metadata.context_drift_status
+          : undefined,
     });
   } catch {}
 
@@ -209,6 +222,45 @@ export function executePulseAction(
         executionEnvelope,
         "PULSE_ACTION_AWAITING_APPROVAL",
         "AWAITING_APPROVAL",
+      ),
+    };
+  }
+
+  const contextDrift = checkPulseContextDrift(
+    executionEnvelope.binding,
+    envelope.action,
+  );
+
+  if (
+    contextDrift.relevant &&
+    contextDrift.status !== "MATCH"
+  ) {
+    const rejectedEnvelope = {
+      ...executionEnvelope,
+      state: "REJECTED" as const,
+      reason_code: "CONTEXT_STALE" as const,
+    };
+
+    return {
+      allowed: false,
+      state: "REJECTED",
+      error: "CONTEXT_STALE",
+      verified: false,
+      rolledBack: false,
+      audit: audit(
+        rejectedEnvelope,
+        "PULSE_ACTION_REJECTED_CONTEXT_DRIFT",
+        "REJECTED",
+        {
+          expected_context_version:
+            contextDrift.expectedContextVersion,
+          current_context_version:
+            contextDrift.currentContextVersion,
+          context_drift_status:
+            contextDrift.status,
+          verification_status: "SKIPPED",
+          verified: false,
+        },
       ),
     };
   }

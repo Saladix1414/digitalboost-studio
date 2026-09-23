@@ -48,6 +48,9 @@ export type PulseAudit = {
   outcome_contract_id?: string;
   proof_status?: "PROVEN" | "UNPROVEN" | "FAILED";
   proof_hash?: string;
+  context_version?: string;
+  current_context_version?: string;
+  context_drift_status?: string;
 };
 
 function readArr(k: string) {

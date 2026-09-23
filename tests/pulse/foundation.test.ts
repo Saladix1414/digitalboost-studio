@@ -7,6 +7,7 @@ import {
   precheckPulseExecution,
 } from "../../src/DigitalBoostPulseVerify";
 import { executePulseAction } from "../../src/DigitalBoostPulseExecutor";
+import { currentContextVersion } from "../../src/DigitalBoostPulseContext";
 test("invalid risk does not become L0", () => {
   const parsed = parsePulseRisk("L9");
   assert.equal(parsed.ok, false);
@@ -33,6 +34,10 @@ test("approval copies proposal binding", () => {
     {
       action: "hero",
       target: "Nimbus:builder:hero",
+      context_version: currentContextVersion({
+        store: "Nimbus",
+        section: "builder",
+      }),
       proposal: { title: "A" },
     },
   );
@@ -53,6 +58,10 @@ test("approval binding rejects stale proposal hash in normal flow", () => {
     {
       action: "hero",
       target: "Nimbus:builder:hero",
+      context_version: currentContextVersion({
+        store: "Nimbus",
+        section: "builder",
+      }),
       proposal: { title: "A" },
     },
   );
@@ -87,6 +96,10 @@ test("approval execution rejects missing binding", () => {
     {
       action: "hero",
       target: "Nimbus:builder:hero",
+      context_version: currentContextVersion({
+        store: "Nimbus",
+        section: "builder",
+      }),
       proposal: { title: "A" },
     },
   );
@@ -115,6 +128,10 @@ test("valid approval binding reaches execution", () => {
     {
       action: "hero",
       target: "Nimbus:builder:hero",
+      context_version: currentContextVersion({
+        store: "Nimbus",
+        section: "builder",
+      }),
       proposal: { title: "A" },
     },
   );
@@ -206,6 +223,10 @@ test("executor blocks hero mutation before apply when payload is missing", () =>
     {
       action: "hero",
       target: "Nimbus:builder:hero",
+      context_version: currentContextVersion({
+        store: "Nimbus",
+        section: "builder",
+      }),
       proposal: {
         title: "A",
       },
