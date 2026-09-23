@@ -35,6 +35,7 @@ export type PulseMission = {
   outcome?: PulseMissionOutcome;
 };
 const KEY = "db-pulse-missions-v1";
+export const PULSE_MAX_REPAIR_GENERATIONS = 3;
 function readAll(): PulseMission[] {
   if (typeof localStorage === "undefined") return [];
   try { const rows = JSON.parse(localStorage.getItem(KEY) || "[]"); return Array.isArray(rows) ? rows : []; } catch { return []; }
@@ -281,6 +282,34 @@ export function repairPulseMission(id: string): PulseMission | null {
     !source.outcome ||
     source.lastError !== "CONTEXT_STALE"
   ) {
+    return null;
+  }
+
+  const generation = source.repairGeneration || 0;
+
+  if (generation >= PULSE_MAX_REPAIR_GENERATIONS) {
+    try {
+      pushAudit({
+        timestamp: new Date().toISOString(),
+        tenant_id: "digitalboost",
+        store_id: source.store,
+        actor_type: "system",
+        request_id: source.requestId,
+        intent: "mission-repair",
+        agent: "pulse",
+        risk_level: source.plan.goal.riskFloor,
+        tool: "mission-repair",
+        approval_required: false,
+        status: "REJECTED",
+        result_summary: "PULSE_MISSION_REPAIR_LIMIT",
+        mission_id: source.id,
+        plan_id: source.planId,
+        reason_code: "REPAIR_LIMIT",
+        repair_reason: "CONTEXT_STALE",
+        repair_generation: generation,
+      });
+    } catch {}
+
     return null;
   }
 

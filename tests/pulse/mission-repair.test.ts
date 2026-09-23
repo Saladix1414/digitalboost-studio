@@ -16,6 +16,7 @@ import {
 import {
   repairPulseMission,
   getPulseMission,
+  PULSE_MAX_REPAIR_GENERATIONS,
 } from "../../src/DigitalBoostPulseMission";
 
 const storage = new Map<string, string>();
@@ -390,6 +391,82 @@ test("P0.4.8 reparación exige nuevo approval y puede continuar", () => {
   assert.equal(resumed.execution.verified, true);
   assert.equal(resumed.mission?.stepIndex, 1);
   assert.equal(resumed.mission?.state, "RUNNING");
+});
+
+
+test("P0.4.8 limita generaciones de repair y deja Audit", () => {
+  seedCanvas();
+
+  const limitedMission = {
+    id: "mission_repair_limit",
+    store: "RepairLimit",
+    planId: "plan_repair_limit",
+    requestId: "req_repair_limit",
+    state: "FAILED",
+    section: "website-builder",
+    stepIndex: 0,
+    retries: 0,
+    maxRetries: 2,
+    repairGeneration: PULSE_MAX_REPAIR_GENERATIONS,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    lastError: "CONTEXT_STALE",
+    plan: {
+      id: "plan_repair_limit",
+      goal: {
+        id: "goal_repair_limit",
+        statement: "repair limit",
+        constraints: [],
+        successCriteria: [],
+        riskFloor: "L1",
+      },
+      steps: [{
+        id: "step_repair_limit",
+        action: "hero",
+        title: "Hero",
+        dependsOn: [],
+        expected: {},
+        checkpoint: true,
+        approvalLikely: true,
+      }],
+      status: "BLOCKED",
+      createdAt: new Date().toISOString(),
+    },
+    outcome: {
+      id: "out_repair_limit",
+      status: "FAILED",
+    },
+  };
+
+  localStorage.setItem(
+    "db-pulse-missions-v1",
+    JSON.stringify([limitedMission]),
+  );
+
+  const repaired = repairPulseMission(
+    "mission_repair_limit",
+  );
+
+  assert.equal(repaired, null);
+
+  const audits = JSON.parse(
+    localStorage.getItem("db-pulse-audit-v1") || "[]",
+  ) as Array<Record<string, unknown>>;
+
+  const audit = audits.at(-1);
+
+  assert.equal(
+    audit?.reason_code,
+    "REPAIR_LIMIT",
+  );
+  assert.equal(
+    audit?.result_summary,
+    "PULSE_MISSION_REPAIR_LIMIT",
+  );
+  assert.equal(
+    audit?.repair_generation,
+    PULSE_MAX_REPAIR_GENERATIONS,
+  );
 });
 
 test("P0.4.8 no repara una Mission no elegible", () => {
