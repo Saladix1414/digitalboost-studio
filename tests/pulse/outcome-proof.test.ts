@@ -12,6 +12,7 @@ import {
 import {
   createPulseOutcomeContract,
   verifyPulseOutcomeProof,
+  derivePulseOutcomeAssurance,
 } from "../../src/DigitalBoostPulseOutcomeProof";
 import { currentContextVersion } from "../../src/DigitalBoostPulseContext";
 
@@ -153,6 +154,41 @@ test("P0.4.6 COMPLETED produce PROVEN y detecta tampering", () => {
 
   assert.equal(third.mission!.outcome!.proofStatus, "PROVEN");
   assert.equal(third.mission!.outcome!.verified, false);
+  assert.equal(
+    third.mission!.outcome!.assuranceStatus,
+    "PARTIAL",
+  );
+
+  const memories = JSON.parse(
+    storage.get("db-pulse-memory-v1") || "[]",
+  );
+
+  const memory = memories.find(
+    (row: any) =>
+      row.content &&
+      row.content.missionId === third.mission!.id,
+  );
+
+  assert.equal(
+    memory?.content?.assuranceStatus,
+    "PARTIAL",
+  );
+
+  const audits = JSON.parse(
+    storage.get("db-pulse-audit-v1") || "[]",
+  );
+
+  const outcomeAudit = audits.find(
+    (row: any) =>
+      row.mission_id === third.mission!.id &&
+      row.outcome_id === third.mission!.outcome!.id,
+  );
+
+  assert.equal(
+    outcomeAudit?.assurance_status,
+    "PARTIAL",
+  );
+
   assert.equal(proof.evidence.at(-1)?.verification_status, "SKIPPED");
   assert.equal(verifyPulseOutcomeProof(contract, proof), true);
 
@@ -162,6 +198,63 @@ test("P0.4.6 COMPLETED produce PROVEN y detecta tampering", () => {
     false,
   );
 });
+
+test("P0.4.9 deriva ASSURED, PARTIAL y UNASSURED", () => {
+  assert.equal(
+    derivePulseOutcomeAssurance({
+      outcome: "COMPLETED",
+      proofStatus: "PROVEN",
+      verified: true,
+    }),
+    "ASSURED",
+  );
+
+  assert.equal(
+    derivePulseOutcomeAssurance({
+      outcome: "COMPLETED",
+      proofStatus: "PROVEN",
+      verified: false,
+    }),
+    "PARTIAL",
+  );
+
+  assert.equal(
+    derivePulseOutcomeAssurance({
+      outcome: "COMPLETED",
+      proofStatus: "UNPROVEN",
+      verified: true,
+    }),
+    "UNASSURED",
+  );
+
+  assert.equal(
+    derivePulseOutcomeAssurance({
+      outcome: "COMPLETED",
+      proofStatus: "FAILED",
+      verified: true,
+    }),
+    "UNASSURED",
+  );
+
+  assert.equal(
+    derivePulseOutcomeAssurance({
+      outcome: "FAILED",
+      proofStatus: "PROVEN",
+      verified: true,
+    }),
+    "UNASSURED",
+  );
+
+  assert.equal(
+    derivePulseOutcomeAssurance({
+      outcome: "CANCELLED",
+      proofStatus: "PROVEN",
+      verified: true,
+    }),
+    "UNASSURED",
+  );
+});
+
 
 test("P0.4.6 FAILED marca el proof del step mutante", () => {
   const c = cycle("Failed");
@@ -188,6 +281,7 @@ test("P0.4.6 FAILED marca el proof del step mutante", () => {
 
   assert.equal(failed?.state, "FAILED");
   assert.equal(failed?.outcome?.proofStatus, "FAILED");
+  assert.equal(failed?.outcome?.assuranceStatus, "UNASSURED");
 
   const proof = failed!.outcome!.proof!;
   const contract = failed!.outcomeContract!;

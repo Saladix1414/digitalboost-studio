@@ -104,6 +104,7 @@ export type PulseMissionOutcomeMemoryInput = {
   outcomeContractId?: string;
   proofStatus?: "PROVEN" | "UNPROVEN" | "FAILED";
   proofHash?: string;
+  assuranceStatus?: "ASSURED" | "PARTIAL" | "UNASSURED";
   source?: "merchant" | "executor" | "verification";
 };
 
@@ -158,6 +159,7 @@ export function rememberMissionOutcome(
       outcomeContractId: input.outcomeContractId || "",
       proofStatus: input.proofStatus || "",
       proofHash: input.proofHash || "",
+      assuranceStatus: input.assuranceStatus || "",
     },
   });
 }

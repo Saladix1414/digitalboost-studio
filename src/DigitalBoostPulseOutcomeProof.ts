@@ -12,6 +12,27 @@ export type PulseOutcomeStatus =
 export type PulseOutcomeProofStatus =
   "PROVEN" | "UNPROVEN" | "FAILED";
 
+export type PulseOutcomeAssuranceStatus =
+  "ASSURED" | "PARTIAL" | "UNASSURED";
+
+export function derivePulseOutcomeAssurance(input: {
+  outcome: PulseOutcomeStatus;
+  proofStatus?: PulseOutcomeProofStatus;
+  verified?: boolean;
+}): PulseOutcomeAssuranceStatus {
+  if (input.outcome !== "COMPLETED") {
+    return "UNASSURED";
+  }
+
+  if (input.proofStatus !== "PROVEN") {
+    return "UNASSURED";
+  }
+
+  return input.verified === true
+    ? "ASSURED"
+    : "PARTIAL";
+}
+
 export type PulseOutcomeProofRequirement = {
   step_id: string;
   step_index: number;

@@ -3,9 +3,11 @@ import { closePulsePlan } from "./DigitalBoostPulsePlan";
 import {
   createPulseOutcomeContract,
   createPulseOutcomeProof,
+  derivePulseOutcomeAssurance,
   type PulseOutcomeContract,
   type PulseOutcomeProof,
   type PulseOutcomeProofEvidence,
+  type PulseOutcomeAssuranceStatus,
 } from "./DigitalBoostPulseOutcomeProof";
 import { rememberMissionOutcome } from "./DigitalBoostPulseMemory";
 import { hasPulseMissionOutcomeAudit, pushAudit, requestId } from "./DigitalBoostPulseLog";
@@ -19,6 +21,7 @@ export type PulseMissionOutcome = {
   proofStatus?: "PROVEN" | "UNPROVEN" | "FAILED";
   proofHash?: string;
   proof?: PulseOutcomeProof;
+  assuranceStatus?: PulseOutcomeAssuranceStatus;
 };
 export type PulseMission = {
   id: string; store: string; planId: string; state: PulseMissionState;
@@ -130,6 +133,12 @@ function closeMissionOutcome(
     recordedAt,
   });
 
+  const assuranceStatus = derivePulseOutcomeAssurance({
+    outcome: input.status,
+    proofStatus: proof.status,
+    verified: input.verified,
+  });
+
   const outcome: PulseMissionOutcome = {
     id,
     status: input.status,
@@ -145,6 +154,7 @@ function closeMissionOutcome(
     outcomeContractId: contract.id,
     proofStatus: proof.status,
     proofHash: proof.proof_hash,
+    assuranceStatus,
     proof,
   };
 
@@ -163,6 +173,7 @@ function closeMissionOutcome(
       outcomeContractId: contract.id,
       proofStatus: proof.status,
       proofHash: proof.proof_hash,
+      assuranceStatus,
     });
   } catch {}
 
@@ -196,6 +207,7 @@ function closeMissionOutcome(
         outcome_contract_id: contract.id,
         proof_status: proof.status,
         proof_hash: proof.proof_hash,
+        assurance_status: assuranceStatus,
       });
     }
   } catch {}
