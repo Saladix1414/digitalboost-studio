@@ -1,5 +1,6 @@
 import { buildStateSnapshot, fact, type PulseFact, type PulseStateSnapshot } from "./DigitalBoostPulseSnapshot";
 import { loadSearchAdapter } from "./DigitalBoostPulseSearchAdapter";
+import { hashProposal } from "./DigitalBoostPulseContracts";
 export type PulseContextSourceStatus = "available" | "partial" | "unavailable";
 export interface PulseContextDomain<T = unknown> {
   status: PulseContextSourceStatus; data: T; source: string;
@@ -77,6 +78,9 @@ export function buildPulseContext(input: { store?: string; range?: string; secti
   const storeData: PulseStoreBuilderContext = { activeSection: storeSection, page, theme, live: liveRaw === undefined ? undefined : liveRaw !== "0", blockCount: blocks ? blocks.length : undefined, heroTitle: heroTitle || undefined, canvasPresent: Boolean(blocks) };
   const storePresent = Boolean(storeSection || page || blocks);
   const storeBuilder = domain<PulseStoreBuilderContext>(storePresent ? (blocks ? "available" : "partial") : "unavailable", storeData, blocks ? "db-store-canvas-v1" : storeSection ? "digitalboost_store_section" : "none", generatedAt);
+  const seoRaw = safeRead("db-seo-center-v1");
+  const campaignsRaw = safeRead("digitalboost_campaigns");
+
   const seoData = readSeo();
   const seo = domain<PulseSeoContext>(Object.keys(seoData).length > 0 ? "available" : "unavailable", seoData, "db-seo-center-v1", generatedAt);
   const campaignCount = readCampaigns();
@@ -91,8 +95,43 @@ export function buildPulseContext(input: { store?: string; range?: string; secti
     section: fact(storeSection || null, "digitalboost_store_section", Boolean(storeSection), "store", generatedAt),
     page: fact(page || null, "db-store-page-v1", Boolean(page), "store", generatedAt),
     canvasBlocks: fact(storeData.blockCount ?? null, "db-store-canvas-v1", Boolean(blocks), "store", generatedAt),
+    canvasFingerprint: fact(
+      blocks ? hashProposal(blocks) : null,
+      "db-store-canvas-v1",
+      Boolean(blocks),
+      "store",
+      generatedAt,
+    ),
+    theme: fact(
+      theme || null,
+      "db-os-theme-v1",
+      theme !== undefined,
+      "store",
+      generatedAt,
+    ),
+    live: fact(
+      liveRaw || null,
+      "db-os-live-v1",
+      liveRaw !== undefined,
+      "store",
+      generatedAt,
+    ),
     seoIssues: fact(seoData.issues ?? null, "db-seo-center-v1", seoData.issues !== undefined, "seo", generatedAt),
+    seoFingerprint: fact(
+      seoRaw !== undefined ? hashProposal(seoRaw) : null,
+      "db-seo-center-v1",
+      seoRaw !== undefined,
+      "seo",
+      generatedAt,
+    ),
     campaigns: fact(campaignCount ?? null, "digitalboost_campaigns", campaignCount !== undefined, "marketing", generatedAt),
+    campaignsFingerprint: fact(
+      campaignsRaw !== undefined ? hashProposal(campaignsRaw) : null,
+      "digitalboost_campaigns",
+      campaignsRaw !== undefined,
+      "marketing",
+      generatedAt,
+    ),
     searchQueries: fact(searchSnap.rows.length || null, searchSnap.source, searchSnap.status !== "unavailable", "search", generatedAt),
   };
   const snapshot = buildStateSnapshot({ store, tenant: "digitalboost", mode: "CURRENT", facts });
