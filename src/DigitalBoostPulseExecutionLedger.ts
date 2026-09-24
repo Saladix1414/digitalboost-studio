@@ -52,7 +52,7 @@ function writeClaims(rows: PulseExecutionClaim[]) {
 
   storage.setItem(
     KEY,
-    JSON.stringify(rows.slice(-400)),
+    JSON.stringify(rows),
   );
 }
 

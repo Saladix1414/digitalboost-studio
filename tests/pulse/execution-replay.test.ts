@@ -200,6 +200,47 @@ test(
 );
 
 test(
+  "P0.4.15 una approval consumida no desaparece tras superar 400 claims",
+  async () => {
+    const { claimPulseExecution } =
+      await import("../../src/DigitalBoostPulseExecutionLedger");
+
+    const first = claimPulseExecution({
+      approvalId: "approval_p0415_first",
+      requestId: "request_p0415_first",
+      action: "hero",
+    });
+
+    assert.equal(first.claimed, true);
+
+    for (let i = 0; i < 400; i += 1) {
+      const result = claimPulseExecution({
+        approvalId: `approval_p0415_fill_${i}`,
+        requestId: `request_p0415_fill_${i}`,
+        action: "hero",
+      });
+
+      assert.equal(result.claimed, true);
+    }
+
+    const replay = claimPulseExecution({
+      approvalId: "approval_p0415_first",
+      requestId: "request_p0415_first",
+      action: "hero",
+    });
+
+    assert.equal(replay.claimed, false);
+
+    if (!replay.claimed) {
+      assert.equal(
+        replay.reason,
+        "ALREADY_CLAIMED",
+      );
+    }
+  },
+);
+
+test(
   "P0.4.14 precheck fallido no consume approval",
   () => {
     setCanvas();
