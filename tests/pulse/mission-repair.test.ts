@@ -13,6 +13,7 @@ import {
 import {
   currentContextVersion,
 } from "../../src/DigitalBoostPulseContext";
+import { createAtomicClaimStore } from "./atomic-claim-store";
 import {
   repairPulseMission,
   getPulseMission,
@@ -24,6 +25,7 @@ import {
 } from "../../src/DigitalBoostPulseOutcomeProof";
 
 const storage = new Map<string, string>();
+const atomicClaims = createAtomicClaimStore();
 
 function browser() {
   storage.clear();
@@ -66,7 +68,10 @@ function seedCanvas() {
   );
 }
 
-beforeEach(browser);
+beforeEach(() => {
+  browser();
+  atomicClaims.reset();
+});
 
 test("P0.4.8 repara una Mission fallida por CONTEXT_STALE", () => {
   seedCanvas();
@@ -418,6 +423,7 @@ test("P0.4.8 reparación exige nuevo approval y puede continuar", () => {
       envelope: repairedHero,
       approval: freshApproval,
       draft,
+      claimStore: atomicClaims.store,
     },
   );
 

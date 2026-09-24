@@ -16,8 +16,10 @@ import {
   reconcilePulseGoalEvidenceBinding,
 } from "../../src/DigitalBoostPulseOutcomeProof";
 import { currentContextVersion } from "../../src/DigitalBoostPulseContext";
+import { createAtomicClaimStore } from "./atomic-claim-store";
 
 const storage = new Map<string, string>();
+const atomicClaims = createAtomicClaimStore();
 
 function browser() {
   storage.clear();
@@ -66,7 +68,10 @@ function analyzeEnvelope(store: string) {
   );
 }
 
-beforeEach(browser);
+beforeEach(() => {
+  browser();
+  atomicClaims.reset();
+});
 
 test("P0.4.6 crea contrato con proof steps mutantes", () => {
   const c = cycle("Contract");
@@ -123,6 +128,7 @@ test("P0.4.6 COMPLETED produce PROVEN y detecta tampering", () => {
     envelope,
     approval,
     draft,
+    claimStore: atomicClaims.store,
   });
 
   assert.equal(second.execution.state, "COMPLETED");

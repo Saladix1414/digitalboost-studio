@@ -10,8 +10,10 @@ import {
 import { postcheckPulseExecution } from "../../src/DigitalBoostPulseVerify";
 import { executePulseAction } from "../../src/DigitalBoostPulseExecutor";
 import { currentContextVersion } from "../../src/DigitalBoostPulseContext";
+import { createAtomicClaimStore } from "./atomic-claim-store";
 
 const store = new Map<string, string>();
+const atomicClaims = createAtomicClaimStore();
 
 function browser() {
   store.clear();
@@ -85,7 +87,10 @@ function approval(
   };
 }
 
-beforeEach(browser);
+beforeEach(() => {
+  browser();
+  atomicClaims.reset();
+});
 
 test("P0.3 postcheck rechaza mutación sin estado persistido", () => {
   const result = postcheckPulseExecution({
@@ -117,6 +122,7 @@ test("P0.3 hero verifica Canvas persistido", () => {
     envelope: a.envelope,
     approval: a.approval,
     draft,
+    claimStore: atomicClaims.store,
   });
 
   assert.equal(result.state, "COMPLETED");
@@ -159,6 +165,7 @@ test("P0.3 theme verifica db-os-theme-v1", () => {
     envelope: a.envelope,
     approval: a.approval,
     draft,
+    claimStore: atomicClaims.store,
   });
 
   assert.equal(result.state, "COMPLETED");
@@ -195,6 +202,7 @@ test("P0.3 postcheck fallido hace rollback Canvas verificable", () => {
     envelope: a.envelope,
     approval: a.approval,
     draft,
+    claimStore: atomicClaims.store,
     onNavigate() {
       const corrupted = [{
         id: "hero",
@@ -310,6 +318,7 @@ test("P0.4.3 permite payload exactamente igual al aprobado", () => {
     envelope: a.envelope,
     approval: a.approval,
     draft,
+    claimStore: atomicClaims.store,
   });
 
   assert.equal(result.state, "COMPLETED");

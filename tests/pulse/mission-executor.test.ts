@@ -15,8 +15,10 @@ import {
   approvePulseAction,
 } from "../../src/DigitalBoostPulseGovernance";
 import { currentContextVersion } from "../../src/DigitalBoostPulseContext";
+import { createAtomicClaimStore } from "./atomic-claim-store";
 
 const storage = new Map<string, string>();
+const atomicClaims = createAtomicClaimStore();
 
 function browser() {
   storage.clear();
@@ -66,7 +68,10 @@ function heroEnvelope(requestId: string) {
   );
 }
 
-beforeEach(browser);
+beforeEach(() => {
+  browser();
+  atomicClaims.reset();
+});
 
 test("runCycle conecta Goal → Plan → Mission", () => {
   const cycle = runCycle({
@@ -159,6 +164,7 @@ test("Mission → Executor avanza paso completado y respeta approval", () => {
         body: "Body mission",
         cta: "Entrar",
       },
+      claimStore: atomicClaims.store,
     },
   );
 
@@ -297,6 +303,7 @@ test("P0.4.5 terminal Outcome conserva SKIPPED como no verificado", () => {
       envelope: heroEnvelope,
       approval: approved,
       draft,
+      claimStore: atomicClaims.store,
     },
   );
 

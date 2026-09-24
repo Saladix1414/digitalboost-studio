@@ -18,12 +18,43 @@ import {
 import {
   claimPulseExecution,
   PULSE_EXECUTION_CLAIM_KEY_PREFIX,
+  type PulseExecutionClaim,
+  type PulseExecutionClaimStore,
 } from "../../src/DigitalBoostPulseExecutionLedger";
 
 const storage = new Map<string, string>();
 
+const atomicClaims = new Map<
+  string,
+  PulseExecutionClaim
+>();
+
+const atomicClaimStore: PulseExecutionClaimStore = {
+  atomic: true,
+
+  claim(claim) {
+    if (atomicClaims.has(claim.approval_id)) {
+      return {
+        claimed: false,
+        reason: "ALREADY_CLAIMED",
+      };
+    }
+
+    atomicClaims.set(
+      claim.approval_id,
+      claim,
+    );
+
+    return {
+      claimed: true,
+      claim,
+    };
+  },
+};
+
 function browser() {
   storage.clear();
+  atomicClaims.clear();
 
   (globalThis as any).localStorage = {
     getItem(key: string) {
@@ -140,6 +171,7 @@ test(
       envelope: prepared.envelope,
       approval: prepared.approval,
       draft,
+      claimStore: atomicClaimStore,
     });
 
     assert.equal(
@@ -161,6 +193,7 @@ test(
         ...prepared.approval,
       },
       draft,
+      claimStore: atomicClaimStore,
     });
 
     assert.equal(
@@ -186,23 +219,15 @@ test(
       afterFirst,
     );
 
-    const claimKey =
-      PULSE_EXECUTION_CLAIM_KEY_PREFIX +
-      encodeURIComponent(
+    const claim =
+      atomicClaims.get(
         prepared.approval.approval_id,
       );
 
-    const claimRaw =
-      localStorage.getItem(claimKey);
-
-    assert.ok(claimRaw);
-
-    const claim = JSON.parse(
-      claimRaw!,
-    );
+    assert.ok(claim);
 
     assert.equal(
-      claim.approval_id,
+      claim?.approval_id,
       prepared.approval.approval_id,
     );
   },
@@ -355,6 +380,147 @@ test(
 );
 
 test(
+  "P0.4.17 claim crítica falla cerrado con store local no atómico",
+  () => {
+    const result = claimPulseExecution(
+      {
+        approvalId: "approval_p0417_non_atomic",
+        requestId: "request_p0417_non_atomic",
+        action: "hero",
+      },
+      {
+        requireAtomic: true,
+      },
+    );
+
+    assert.equal(
+      result.claimed,
+      false,
+    );
+
+    if (!result.claimed) {
+      assert.equal(
+        result.reason,
+        "ATOMIC_CLAIM_UNAVAILABLE",
+      );
+    }
+
+    const expectedKey =
+      PULSE_EXECUTION_CLAIM_KEY_PREFIX +
+      encodeURIComponent(
+        "approval_p0417_non_atomic",
+      );
+
+    assert.equal(
+      localStorage.getItem(expectedKey),
+      null,
+    );
+  },
+);
+
+test(
+  "P0.4.17 store atómico consume una approval una sola vez",
+  () => {
+    const first = claimPulseExecution(
+      {
+        approvalId: "approval_p0417_atomic",
+        requestId: "request_p0417_atomic",
+        action: "hero",
+      },
+      {
+        store: atomicClaimStore,
+        requireAtomic: true,
+      },
+    );
+
+    assert.equal(
+      first.claimed,
+      true,
+    );
+
+    const second = claimPulseExecution(
+      {
+        approvalId: "approval_p0417_atomic",
+        requestId: "request_p0417_atomic",
+        action: "hero",
+      },
+      {
+        store: atomicClaimStore,
+        requireAtomic: true,
+      },
+    );
+
+    assert.equal(
+      second.claimed,
+      false,
+    );
+
+    if (!second.claimed) {
+      assert.equal(
+        second.reason,
+        "ALREADY_CLAIMED",
+      );
+    }
+  },
+);
+
+test(
+  "P0.4.17 executor falla cerrado sin claim store atómico",
+  () => {
+    setCanvas();
+
+    const draft = {
+      kind: "hero" as const,
+      title: "Atomic Gate",
+      body: "No mutation without atomic claim",
+      cta: "Entrar",
+    };
+
+    const prepared = createHeroApproval(
+      "req_p0417_executor",
+      draft,
+    );
+
+    const before = JSON.stringify(
+      JSON.parse(
+        localStorage.getItem(
+          "db-store-canvas-v1",
+        ) || "[]",
+      ),
+    );
+
+    const result = executePulseAction({
+      envelope: prepared.envelope,
+      approval: prepared.approval,
+      draft,
+    });
+
+    assert.equal(
+      result.state,
+      "REJECTED",
+    );
+
+    assert.equal(
+      result.error,
+      "EXECUTION_CLAIM_NOT_ATOMIC",
+    );
+
+    const after = JSON.stringify(
+      JSON.parse(
+        localStorage.getItem(
+          "db-store-canvas-v1",
+        ) || "[]",
+      ),
+    );
+
+    assert.equal(
+      after,
+      before,
+    );
+  },
+);
+
+test(
   "P0.4.14 precheck fallido no consume approval",
   () => {
     setCanvas();
@@ -381,15 +547,11 @@ test(
       "FAILED",
     );
 
-    const claimKey =
-      PULSE_EXECUTION_CLAIM_KEY_PREFIX +
-      encodeURIComponent(
-        prepared.approval.approval_id,
-      );
-
     assert.equal(
-      localStorage.getItem(claimKey),
-      null,
+      atomicClaims.has(
+        prepared.approval.approval_id,
+      ),
+      false,
     );
 
     const recovered = executePulseAction({
@@ -398,6 +560,7 @@ test(
         ...prepared.approval,
       },
       draft,
+      claimStore: atomicClaimStore,
     });
 
     assert.equal(
@@ -405,14 +568,11 @@ test(
       "COMPLETED",
     );
 
-    const successClaimKey =
-      PULSE_EXECUTION_CLAIM_KEY_PREFIX +
-      encodeURIComponent(
+    assert.equal(
+      atomicClaims.has(
         prepared.approval.approval_id,
-      );
-
-    assert.ok(
-      localStorage.getItem(successClaimKey),
+      ),
+      true,
     );
   },
 );

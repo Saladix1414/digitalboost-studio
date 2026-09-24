@@ -26,7 +26,10 @@ import {
 } from "./DigitalBoostPulseApply";
 import { hashPulseExecutionPayload } from "./DigitalBoostPulseContracts";
 import { checkPulseContextDrift } from "./DigitalBoostPulseContextDrift";
-import { claimPulseExecution } from "./DigitalBoostPulseExecutionLedger";
+import {
+  claimPulseExecution,
+  type PulseExecutionClaimStore,
+} from "./DigitalBoostPulseExecutionLedger";
 
 export type PulseExecutionTrace = {
   mission_id: string;
@@ -42,6 +45,14 @@ export type PulseExecutionContext = {
   proposal?: Record<string, unknown> | null;
   onNavigate?: (action: string) => void;
   trace?: PulseExecutionTrace;
+
+  /**
+   * Store de claims inyectable.
+   *
+   * Las mutaciones aprobadas críticas requieren
+   * un store con garantía de atomicidad.
+   */
+  claimStore?: PulseExecutionClaimStore;
 };
 
 export type PulseExecutionOutcome = {
@@ -660,34 +671,43 @@ export function executePulseAction(
         return null;
       }
 
-      const claim = claimPulseExecution({
-        approvalId:
-          executionEnvelope.approval_id!,
-        requestId:
-          executionEnvelope.request_id,
-        action:
-          executionEnvelope.action,
-        missionId:
-          typeof executionEnvelope.metadata?.mission_id === "string"
-            ? executionEnvelope.metadata.mission_id
-            : undefined,
-        planId:
-          typeof executionEnvelope.metadata?.plan_id === "string"
-            ? executionEnvelope.metadata.plan_id
-            : undefined,
-        stepId:
-          typeof executionEnvelope.metadata?.step_id === "string"
-            ? executionEnvelope.metadata.step_id
-            : undefined,
-        stepIndex:
-          typeof executionEnvelope.metadata?.step_index === "number"
-            ? executionEnvelope.metadata.step_index
-            : undefined,
-      });
+      const claim = claimPulseExecution(
+        {
+          approvalId:
+            executionEnvelope.approval_id!,
+          requestId:
+            executionEnvelope.request_id,
+          action:
+            executionEnvelope.action,
+          missionId:
+            typeof executionEnvelope.metadata?.mission_id === "string"
+              ? executionEnvelope.metadata.mission_id
+              : undefined,
+          planId:
+            typeof executionEnvelope.metadata?.plan_id === "string"
+              ? executionEnvelope.metadata.plan_id
+              : undefined,
+          stepId:
+            typeof executionEnvelope.metadata?.step_id === "string"
+              ? executionEnvelope.metadata.step_id
+              : undefined,
+          stepIndex:
+            typeof executionEnvelope.metadata?.step_index === "number"
+              ? executionEnvelope.metadata.step_index
+              : undefined,
+        },
+        {
+          store: context.claimStore,
+          requireAtomic: true,
+        },
+      );
 
       if (!claim.claimed) {
         const replay =
           claim.reason === "ALREADY_CLAIMED";
+
+        const nonAtomic =
+          claim.reason === "ATOMIC_CLAIM_UNAVAILABLE";
 
         const rejectedEnvelope = {
           ...executionEnvelope,
@@ -699,14 +719,18 @@ export function executePulseAction(
           state: "REJECTED",
           error: replay
             ? "EXECUTION_REPLAY"
-            : "EXECUTION_CLAIM_UNAVAILABLE",
+            : nonAtomic
+              ? "EXECUTION_CLAIM_NOT_ATOMIC"
+              : "EXECUTION_CLAIM_UNAVAILABLE",
           verified: false,
           rolledBack: false,
           audit: audit(
             rejectedEnvelope,
             replay
               ? "PULSE_ACTION_REJECTED_REPLAY"
-              : "PULSE_ACTION_REJECTED_EXECUTION_CLAIM",
+              : nonAtomic
+                ? "PULSE_ACTION_REJECTED_NON_ATOMIC_CLAIM"
+                : "PULSE_ACTION_REJECTED_EXECUTION_CLAIM",
             "REJECTED",
             {
               verification_status: "SKIPPED",

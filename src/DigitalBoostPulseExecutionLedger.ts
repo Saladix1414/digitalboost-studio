@@ -21,8 +21,31 @@ export type PulseExecutionClaimResult =
     }
   | {
       claimed: false;
-      reason: "ALREADY_CLAIMED" | "STORAGE_UNAVAILABLE";
+      reason:
+        | "ALREADY_CLAIMED"
+        | "STORAGE_UNAVAILABLE"
+        | "ATOMIC_CLAIM_UNAVAILABLE";
     };
+
+export type PulseExecutionClaimStore = {
+  /**
+   * true  = el store puede garantizar single-use atómico.
+   * false = el store sólo ofrece semántica best-effort.
+   *
+   * Las mutaciones aprobadas deben exigir atomic=true.
+   */
+  readonly atomic: boolean;
+
+  /**
+   * Debe intentar registrar la claim.
+   *
+   * Un store atómico debe implementar esta operación con una
+   * primitiva de compare-and-set / unique constraint / transaction.
+   */
+  claim(
+    claim: PulseExecutionClaim,
+  ): PulseExecutionClaimResult;
+};
 
 function getStorage() {
   const storage = (globalThis as any).localStorage;
@@ -100,26 +123,84 @@ function readLegacyClaim(
     : null;
 }
 
-function writeV2Claim(
-  claim: PulseExecutionClaim,
-) {
-  const storage = getStorage();
+/**
+ * Adapter actual de navegador.
+ *
+ * IMPORTANTE:
+ * localStorage NO posee compare-and-set atómico.
+ * Por eso este adapter se declara explícitamente como
+ * best-effort y NO puede satisfacer una mutación crítica
+ * que exija atomic=true.
+ *
+ * Se conserva para:
+ * - compatibilidad con claims v1/v2 existentes;
+ * - tests del ledger;
+ * - lectura/replay detection fuera del camino crítico.
+ */
+const LOCAL_STORAGE_CLAIM_STORE: PulseExecutionClaimStore = {
+  atomic: false,
 
-  storage.setItem(
-    keyForApproval(claim.approval_id),
-    JSON.stringify(claim),
-  );
+  claim(claim: PulseExecutionClaim): PulseExecutionClaimResult {
+    try {
+      const existingV2 =
+        readV2Claim(claim.approval_id);
+
+      if (existingV2) {
+        return {
+          claimed: false,
+          reason: "ALREADY_CLAIMED",
+        };
+      }
+
+      const existingLegacy =
+        readLegacyClaim(claim.approval_id);
+
+      if (existingLegacy) {
+        return {
+          claimed: false,
+          reason: "ALREADY_CLAIMED",
+        };
+      }
+
+      const storage = getStorage();
+
+      storage.setItem(
+        keyForApproval(claim.approval_id),
+        JSON.stringify(claim),
+      );
+
+      return {
+        claimed: true,
+        claim,
+      };
+    } catch {
+      return {
+        claimed: false,
+        reason: "STORAGE_UNAVAILABLE",
+      };
+    }
+  },
+};
+
+function defaultStore(): PulseExecutionClaimStore {
+  return LOCAL_STORAGE_CLAIM_STORE;
 }
 
-export function claimPulseExecution(input: {
-  approvalId: string;
-  requestId: string;
-  action: string;
-  missionId?: string;
-  planId?: string;
-  stepId?: string;
-  stepIndex?: number;
-}): PulseExecutionClaimResult {
+export function claimPulseExecution(
+  input: {
+    approvalId: string;
+    requestId: string;
+    action: string;
+    missionId?: string;
+    planId?: string;
+    stepId?: string;
+    stepIndex?: number;
+  },
+  options?: {
+    store?: PulseExecutionClaimStore;
+    requireAtomic?: boolean;
+  },
+): PulseExecutionClaimResult {
   if (
     !input.approvalId ||
     !input.requestId ||
@@ -131,49 +212,30 @@ export function claimPulseExecution(input: {
     };
   }
 
-  try {
-    const existingV2 = readV2Claim(
-      input.approvalId,
-    );
+  const store =
+    options?.store ??
+    defaultStore();
 
-    if (existingV2) {
-      return {
-        claimed: false,
-        reason: "ALREADY_CLAIMED",
-      };
-    }
-
-    const existingLegacy =
-      readLegacyClaim(input.approvalId);
-
-    if (existingLegacy) {
-      return {
-        claimed: false,
-        reason: "ALREADY_CLAIMED",
-      };
-    }
-
-    const claim: PulseExecutionClaim = {
-      approval_id: input.approvalId,
-      request_id: input.requestId,
-      action: input.action,
-      mission_id: input.missionId,
-      plan_id: input.planId,
-      step_id: input.stepId,
-      step_index: input.stepIndex,
-      claimed_at: new Date().toISOString(),
-    };
-
-    writeV2Claim(claim);
-
-    return {
-      claimed: true,
-      claim,
-    };
-  } catch {
+  if (
+    options?.requireAtomic === true &&
+    store.atomic !== true
+  ) {
     return {
       claimed: false,
-      reason: "STORAGE_UNAVAILABLE",
+      reason: "ATOMIC_CLAIM_UNAVAILABLE",
     };
   }
+
+  const claim: PulseExecutionClaim = {
+    approval_id: input.approvalId,
+    request_id: input.requestId,
+    action: input.action,
+    mission_id: input.missionId,
+    plan_id: input.planId,
+    step_id: input.stepId,
+    step_index: input.stepIndex,
+    claimed_at: new Date().toISOString(),
+  };
+
+  return store.claim(claim);
 }
