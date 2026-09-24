@@ -3,6 +3,10 @@ import {
   hashProposal,
   stableSerialize,
 } from "./DigitalBoostPulseContracts";
+
+import {
+  fingerprintPulseGoalEngineGoal,
+} from "./DigitalBoostPulseGoalEngine";
 import { findPulseExecutionAudit } from "./DigitalBoostPulseLog";
 
 export const PULSE_OUTCOME_CONTRACT_VERSION = "pulse-outcome-v1";
@@ -45,14 +49,35 @@ export function fingerprintPulseGoal(input: {
   constraints: string[];
   successCriteria: string[];
   riskFloor: string;
+  desiredOutcome?: string;
+  priority?: string;
+  intent?: string;
+  intentConfidence?: number;
+  tenantId?: string;
+  store?: string;
+  section?: string;
+  contextId?: string;
+  contextVersion?: string;
+  evidenceRequirements?: {
+    required: string[];
+    prohibited: string[];
+  };
+  provenance?: {
+    engine: string;
+    source: string;
+    tenantId?: string;
+    store?: string;
+    section?: string;
+    contextId?: string;
+    contextVersion?: string;
+    intent: string;
+    intentConfidence: number;
+    intentDecision: string;
+  };
 }): string {
-  return hashProposal({
-    id: input.id,
-    statement: input.statement,
-    constraints: [...input.constraints],
-    successCriteria: [...input.successCriteria],
-    riskFloor: input.riskFloor,
-  });
+  return fingerprintPulseGoalEngineGoal(
+    input,
+  );
 }
 
 export function fingerprintPulsePlan(

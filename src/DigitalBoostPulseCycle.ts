@@ -1,6 +1,7 @@
 
 import { classifyIntent, classifyRisk, pickAgent, isWriteIntent, type PulseIntent, type PulseRisk, type PulseAgent } from "./DigitalBoostPulseConst";
 import { classifyPulseIntent, type PulseIntentClassification } from "./DigitalBoostPulseIntentEngine";
+import { type PulseGoalDecision } from "./DigitalBoostPulseGoalEngine";
 import { approvalCard, type PulseCard } from "./DigitalBoostPulseCard";
 import { pushAudit, requestId } from "./DigitalBoostPulseLog";
 import { rememberDecision } from "./DigitalBoostPulseMemory";
@@ -29,6 +30,7 @@ export type CycleMeta = {
   plan?: PulsePlan;
   mission?: PulseMission;
   intentClassification?: PulseIntentClassification;
+  goalDecision?: PulseGoalDecision;
 };
 
 export function runCycle(input: {
@@ -68,6 +70,12 @@ export function runCycle(input: {
             body: input.body,
           };
 
+  const contextVersion =
+    currentContextVersion({
+      store: input.store,
+      section: input.section,
+    });
+
   const envelope = evaluatePulsePolicy(
     input.action,
     risk,
@@ -77,7 +85,8 @@ export function runCycle(input: {
       target: input.store + ":" + input.section + ":" + input.action,
       actor: "merchant",
       tenant: input.store,
-      context_version: currentContextVersion({ store: input.store, section: input.section }),
+      context_version:
+        contextVersion,
       proposal: executionProposal,
     },
   );
@@ -145,10 +154,15 @@ export function runCycle(input: {
     action: input.action,
     section: input.section,
     store: input.store,
+    tenantId: input.store,
+    contextVersion,
+    intentClassification,
   });
 
   const mission =
-    envelope.policy === "REJECT"
+    envelope.policy === "REJECT" ||
+    plan.goal.decision !==
+      "ALLOW_GOAL"
       ? undefined
       : startPulseMission({
           store: input.store,
@@ -169,6 +183,7 @@ export function runCycle(input: {
     tenant: input.store,
     intent: intent,
     intentClassification: intentClassification,
+    goalDecision: plan.goal.decision,
     agent: agent,
     risk: risk,
     write: write,
