@@ -21,16 +21,24 @@ import {
 export const PULSE_DISTRIBUTED_IDEMPOTENCY_VERSION =
   "pulse-distributed-idempotency-v1";
 
+export const PULSE_IDEMPOTENCY_DEFAULT_LEASE_MS =
+  30_000;
+
 export type PulseIdempotencyState =
   | "STARTED"
   | "COMPLETED"
-  | "FAILED";
+  | "FAILED"
+  | "RECOVERY_REQUIRED";
 
 export interface PulseIdempotencyRecord<TOutcome = unknown> {
   readonly tenant_id: string;
   readonly idempotency_key: string;
   readonly request_fingerprint: string;
   readonly state: PulseIdempotencyState;
+  readonly acquired_at?: string;
+  readonly lease_expires_at?: string;
+  readonly recovered_at?: string;
+  readonly recovery_reason?: string;
   readonly outcome?: TOutcome;
   readonly error?: {
     readonly code: string;
@@ -54,6 +62,10 @@ interface PersistedIdempotencyRecord<TOutcome = unknown> {
   readonly idempotency_key: string;
   readonly request_fingerprint: string;
   readonly state: PulseIdempotencyState;
+  readonly acquired_at?: string;
+  readonly lease_expires_at?: string;
+  readonly recovered_at?: string;
+  readonly recovery_reason?: string;
   readonly outcome?: TOutcome;
   readonly error?: {
     readonly code: string;
@@ -76,6 +88,9 @@ export class PulseIdempotencyError extends Error {
     | "IDEMPOTENCY_NOT_FOUND"
     | "IDEMPOTENCY_TAMPERED"
     | "IDEMPOTENCY_LOCKED"
+    | "IDEMPOTENCY_LEASE_ACTIVE"
+    | "IDEMPOTENCY_RECOVERY_REQUIRED"
+    | "RECOVERY_UNAVAILABLE"
     | "INVALID_STATE"
     | "IDEMPOTENCY_STORAGE_ERROR";
 
@@ -306,10 +321,12 @@ export class FilesystemPulseDistributedIdempotencyStore {
   readonly tenantId: string;
   readonly rootDir: string;
   readonly tenantDir: string;
+  readonly leaseDurationMs: number;
 
   constructor(options: {
     tenantId: string;
     rootDir?: string;
+    leaseDurationMs?: number;
   }) {
     this.tenantId =
       normalizeTenant(
@@ -329,6 +346,22 @@ export class FilesystemPulseDistributedIdempotencyStore {
           this.tenantId,
         ),
       );
+
+    this.leaseDurationMs =
+      options.leaseDurationMs ??
+      PULSE_IDEMPOTENCY_DEFAULT_LEASE_MS;
+
+    if (
+      !Number.isFinite(
+        this.leaseDurationMs,
+      ) ||
+      this.leaseDurationMs <= 0
+    ) {
+      throw new PulseIdempotencyError(
+        "INVALID_STATE",
+        "leaseDurationMs must be a positive finite number.",
+      );
+    }
 
     mkdirSync(
       this.tenantDir,
@@ -407,6 +440,14 @@ export class FilesystemPulseDistributedIdempotencyStore {
           parsed.request_fingerprint,
         state:
           parsed.state,
+        acquired_at:
+          parsed.acquired_at,
+        lease_expires_at:
+          parsed.lease_expires_at,
+        recovered_at:
+          parsed.recovered_at,
+        recovery_reason:
+          parsed.recovery_reason,
         outcome:
           parsed.outcome,
         error:
@@ -442,6 +483,30 @@ export class FilesystemPulseDistributedIdempotencyStore {
         parsed.request_fingerprint,
       state:
         parsed.state,
+      ...(parsed.acquired_at !== undefined
+        ? {
+            acquired_at:
+              parsed.acquired_at,
+          }
+        : {}),
+      ...(parsed.lease_expires_at !== undefined
+        ? {
+            lease_expires_at:
+              parsed.lease_expires_at,
+          }
+        : {}),
+      ...(parsed.recovered_at !== undefined
+        ? {
+            recovered_at:
+              parsed.recovered_at,
+          }
+        : {}),
+      ...(parsed.recovery_reason !== undefined
+        ? {
+            recovery_reason:
+              parsed.recovery_reason,
+          }
+        : {}),
       ...(parsed.outcome !== undefined
         ? {
             outcome:
@@ -517,6 +582,30 @@ export class FilesystemPulseDistributedIdempotencyStore {
         record.request_fingerprint,
       state:
         record.state,
+      ...(record.acquired_at !== undefined
+        ? {
+            acquired_at:
+              record.acquired_at,
+          }
+        : {}),
+      ...(record.lease_expires_at !== undefined
+        ? {
+            lease_expires_at:
+              record.lease_expires_at,
+          }
+        : {}),
+      ...(record.recovered_at !== undefined
+        ? {
+            recovered_at:
+              record.recovered_at,
+          }
+        : {}),
+      ...(record.recovery_reason !== undefined
+        ? {
+            recovery_reason:
+              record.recovery_reason,
+          }
+        : {}),
       ...(record.outcome !== undefined
         ? {
             outcome:
@@ -610,6 +699,15 @@ export class FilesystemPulseDistributedIdempotencyStore {
       };
     }
 
+    const acquiredAt =
+      new Date();
+
+    const leaseExpiresAt =
+      new Date(
+        acquiredAt.getTime() +
+          this.leaseDurationMs,
+      );
+
     const record:
       PulseIdempotencyRecord = {
       tenant_id:
@@ -620,6 +718,10 @@ export class FilesystemPulseDistributedIdempotencyStore {
         fingerprint,
       state:
         "STARTED",
+      acquired_at:
+        acquiredAt.toISOString(),
+      lease_expires_at:
+        leaseExpiresAt.toISOString(),
     };
 
     const path =
@@ -638,6 +740,10 @@ export class FilesystemPulseDistributedIdempotencyStore {
         record.request_fingerprint,
       state:
         record.state,
+      acquired_at:
+        record.acquired_at,
+      lease_expires_at:
+        record.lease_expires_at,
       content_hash:
         contentHash({
           repository_version:
@@ -650,6 +756,10 @@ export class FilesystemPulseDistributedIdempotencyStore {
             record.request_fingerprint,
           state:
             record.state,
+          acquired_at:
+            record.acquired_at,
+          lease_expires_at:
+            record.lease_expires_at,
         }),
     };
 
@@ -803,11 +913,155 @@ export class FilesystemPulseDistributedIdempotencyStore {
           fingerprint,
         state:
           "COMPLETED" as const,
+        acquired_at:
+          current.acquired_at,
+        lease_expires_at:
+          current.lease_expires_at,
         outcome:
           input.outcome,
       };
 
       this.persist(next);
+      return next;
+    } finally {
+      this.releaseLock(lock);
+    }
+  }
+
+  recoverExpired<TOutcome = unknown>(
+    input: {
+      idempotency_key: string;
+      request_fingerprint: string;
+      now?: number;
+      reason?: string;
+    },
+  ): PulseIdempotencyRecord<TOutcome> {
+    const key =
+      normalizeKey(
+        input.idempotency_key,
+      );
+
+    const fingerprint =
+      normalizeFingerprint(
+        input.request_fingerprint,
+      );
+
+    const lock =
+      this.acquireLock(key);
+
+    try {
+      const current =
+        this.read<TOutcome>(key);
+
+      if (!current) {
+        throw new PulseIdempotencyError(
+          "IDEMPOTENCY_NOT_FOUND",
+          `Idempotency key "${key}" was not found.`,
+        );
+      }
+
+      if (
+        current.request_fingerprint !==
+        fingerprint
+      ) {
+        throw new PulseIdempotencyError(
+          "IDEMPOTENCY_CONFLICT",
+          "Request fingerprint mismatch.",
+        );
+      }
+
+      if (
+        current.state ===
+        "RECOVERY_REQUIRED"
+      ) {
+        return current;
+      }
+
+      if (
+        current.state ===
+        "COMPLETED" ||
+        current.state ===
+        "FAILED"
+      ) {
+        return current;
+      }
+
+      if (
+        current.state !==
+        "STARTED"
+      ) {
+        throw new PulseIdempotencyError(
+          "INVALID_STATE",
+          "Unsupported state for crash recovery.",
+        );
+      }
+
+      if (
+        !current.lease_expires_at
+      ) {
+        throw new PulseIdempotencyError(
+          "RECOVERY_UNAVAILABLE",
+          "Legacy STARTED record has no recovery lease.",
+        );
+      }
+
+      const expiresAt =
+        Date.parse(
+          current.lease_expires_at,
+        );
+
+      if (
+        !Number.isFinite(
+          expiresAt,
+        )
+      ) {
+        throw new PulseIdempotencyError(
+          "RECOVERY_UNAVAILABLE",
+          "STARTED record contains an invalid lease expiration.",
+        );
+      }
+
+      const now =
+        input.now ??
+        Date.now();
+
+      if (
+        now < expiresAt
+      ) {
+        throw new PulseIdempotencyError(
+          "IDEMPOTENCY_LEASE_ACTIVE",
+          `Idempotency key "${key}" still has an active recovery lease.`,
+        );
+      }
+
+      const recoveredAt =
+        new Date(
+          now,
+        ).toISOString();
+
+      const next:
+        PulseIdempotencyRecord<TOutcome> = {
+        tenant_id:
+          this.tenantId,
+        idempotency_key:
+          key,
+        request_fingerprint:
+          fingerprint,
+        state:
+          "RECOVERY_REQUIRED",
+        acquired_at:
+          current.acquired_at,
+        lease_expires_at:
+          current.lease_expires_at,
+        recovered_at:
+          recoveredAt,
+        recovery_reason:
+          input.reason ??
+          "LEASE_EXPIRED",
+      };
+
+      this.persist(next);
+
       return next;
     } finally {
       this.releaseLock(lock);
@@ -880,6 +1134,10 @@ export class FilesystemPulseDistributedIdempotencyStore {
           fingerprint,
         state:
           "FAILED" as const,
+        acquired_at:
+          current.acquired_at,
+        lease_expires_at:
+          current.lease_expires_at,
         error: {
           code:
             input.code,
@@ -939,6 +1197,16 @@ export async function executePulseIdempotently<TOutcome>(
         "INVALID_STATE",
         begin.record.error?.message ??
           "The operation previously failed.",
+      );
+    }
+
+    if (
+      begin.record.state ===
+      "RECOVERY_REQUIRED"
+    ) {
+      throw new PulseIdempotencyError(
+        "IDEMPOTENCY_RECOVERY_REQUIRED",
+        "The operation requires recovery and a new authorized execution.",
       );
     }
 
