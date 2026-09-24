@@ -1,4 +1,7 @@
-const KEY = "db-pulse-execution-claims-v1";
+const LEGACY_KEY = "db-pulse-execution-claims-v1";
+const KEY_PREFIX = "db-pulse-execution-claim-v2:";
+
+export const PULSE_EXECUTION_CLAIM_KEY_PREFIX = KEY_PREFIX;
 
 export type PulseExecutionClaim = {
   approval_id: string;
@@ -21,38 +24,90 @@ export type PulseExecutionClaimResult =
       reason: "ALREADY_CLAIMED" | "STORAGE_UNAVAILABLE";
     };
 
-function readClaims(): PulseExecutionClaim[] {
+function getStorage() {
   const storage = (globalThis as any).localStorage;
 
   if (!storage) {
     throw new Error("Execution claim storage unavailable.");
   }
 
-  const raw = storage.getItem(KEY);
+  return storage;
+}
+
+function keyForApproval(
+  approvalId: string,
+): string {
+  return (
+    KEY_PREFIX +
+    encodeURIComponent(approvalId)
+  );
+}
+
+function readV2Claim(
+  approvalId: string,
+): PulseExecutionClaim | null {
+  const storage = getStorage();
+  const raw = storage.getItem(
+    keyForApproval(approvalId),
+  );
 
   if (!raw) {
-    return [];
+    return null;
+  }
+
+  const parsed = JSON.parse(raw);
+
+  if (
+    !parsed ||
+    typeof parsed !== "object" ||
+    parsed.approval_id !== approvalId
+  ) {
+    throw new Error(
+      "Execution claim storage is invalid.",
+    );
+  }
+
+  return parsed as PulseExecutionClaim;
+}
+
+function readLegacyClaim(
+  approvalId: string,
+): PulseExecutionClaim | null {
+  const storage = getStorage();
+  const raw = storage.getItem(LEGACY_KEY);
+
+  if (!raw) {
+    return null;
   }
 
   const parsed = JSON.parse(raw);
 
   if (!Array.isArray(parsed)) {
-    throw new Error("Execution claim storage is invalid.");
+    throw new Error(
+      "Legacy execution claim storage is invalid.",
+    );
   }
 
-  return parsed as PulseExecutionClaim[];
+  const found = parsed.find(
+    (row) =>
+      row &&
+      typeof row === "object" &&
+      row.approval_id === approvalId,
+  );
+
+  return found
+    ? (found as PulseExecutionClaim)
+    : null;
 }
 
-function writeClaims(rows: PulseExecutionClaim[]) {
-  const storage = (globalThis as any).localStorage;
-
-  if (!storage) {
-    throw new Error("Execution claim storage unavailable.");
-  }
+function writeV2Claim(
+  claim: PulseExecutionClaim,
+) {
+  const storage = getStorage();
 
   storage.setItem(
-    KEY,
-    JSON.stringify(rows),
+    keyForApproval(claim.approval_id),
+    JSON.stringify(claim),
   );
 }
 
@@ -77,14 +132,21 @@ export function claimPulseExecution(input: {
   }
 
   try {
-    const rows = readClaims();
-
-    const existing = rows.find(
-      (row) =>
-        row.approval_id === input.approvalId,
+    const existingV2 = readV2Claim(
+      input.approvalId,
     );
 
-    if (existing) {
+    if (existingV2) {
+      return {
+        claimed: false,
+        reason: "ALREADY_CLAIMED",
+      };
+    }
+
+    const existingLegacy =
+      readLegacyClaim(input.approvalId);
+
+    if (existingLegacy) {
       return {
         claimed: false,
         reason: "ALREADY_CLAIMED",
@@ -102,10 +164,7 @@ export function claimPulseExecution(input: {
       claimed_at: new Date().toISOString(),
     };
 
-    writeClaims([
-      ...rows,
-      claim,
-    ]);
+    writeV2Claim(claim);
 
     return {
       claimed: true,

@@ -15,6 +15,11 @@ import {
   currentContextVersion,
 } from "../../src/DigitalBoostPulseContext";
 
+import {
+  claimPulseExecution,
+  PULSE_EXECUTION_CLAIM_KEY_PREFIX,
+} from "../../src/DigitalBoostPulseExecutionLedger";
+
 const storage = new Map<string, string>();
 
 function browser() {
@@ -181,19 +186,23 @@ test(
       afterFirst,
     );
 
-    const claims = JSON.parse(
-      localStorage.getItem(
-        "db-pulse-execution-claims-v1",
-      ) || "[]",
+    const claimKey =
+      PULSE_EXECUTION_CLAIM_KEY_PREFIX +
+      encodeURIComponent(
+        prepared.approval.approval_id,
+      );
+
+    const claimRaw =
+      localStorage.getItem(claimKey);
+
+    assert.ok(claimRaw);
+
+    const claim = JSON.parse(
+      claimRaw!,
     );
 
     assert.equal(
-      claims.length,
-      1,
-    );
-
-    assert.equal(
-      claims[0].approval_id,
+      claim.approval_id,
       prepared.approval.approval_id,
     );
   },
@@ -241,6 +250,111 @@ test(
 );
 
 test(
+  "P0.4.16 ledger v2 separa las claims por approval_id",
+  () => {
+    const first = claimPulseExecution({
+      approvalId: "approval_p0416_first",
+      requestId: "request_p0416_first",
+      action: "hero",
+    });
+
+    assert.equal(first.claimed, true);
+
+    for (let i = 0; i < 1000; i += 1) {
+      const result = claimPulseExecution({
+        approvalId: `approval_p0416_${i}`,
+        requestId: `request_p0416_${i}`,
+        action: "hero",
+      });
+
+      assert.equal(result.claimed, true);
+    }
+
+    assert.equal(
+      storage.has("db-pulse-execution-claims-v1"),
+      false,
+    );
+
+    const v2Keys = Array.from(
+      storage.keys(),
+    ).filter((key) =>
+      key.startsWith(
+        PULSE_EXECUTION_CLAIM_KEY_PREFIX,
+      ),
+    );
+
+    assert.equal(
+      v2Keys.length,
+      1001,
+    );
+
+    const replay = claimPulseExecution({
+      approvalId: "approval_p0416_first",
+      requestId: "request_p0416_first",
+      action: "hero",
+    });
+
+    assert.equal(
+      replay.claimed,
+      false,
+    );
+
+    if (!replay.claimed) {
+      assert.equal(
+        replay.reason,
+        "ALREADY_CLAIMED",
+      );
+    }
+  },
+);
+
+test(
+  "P0.4.16 legacy v1 sigue bloqueando replay",
+  () => {
+    const legacyClaim = {
+      approval_id: "approval_p0416_legacy",
+      request_id: "request_p0416_legacy",
+      action: "hero",
+      claimed_at: "2026-09-24T00:00:00.000Z",
+    };
+
+    localStorage.setItem(
+      "db-pulse-execution-claims-v1",
+      JSON.stringify([legacyClaim]),
+    );
+
+    const result = claimPulseExecution({
+      approvalId: "approval_p0416_legacy",
+      requestId: "request_p0416_legacy",
+      action: "hero",
+    });
+
+    assert.equal(
+      result.claimed,
+      false,
+    );
+
+    if (!result.claimed) {
+      assert.equal(
+        result.reason,
+        "ALREADY_CLAIMED",
+      );
+    }
+
+    const expectedV2Key =
+      PULSE_EXECUTION_CLAIM_KEY_PREFIX +
+      encodeURIComponent(
+        "approval_p0416_legacy",
+      );
+
+    assert.equal(
+      storage.has(expectedV2Key),
+      false,
+    );
+  },
+);
+
+test(
   "P0.4.14 precheck fallido no consume approval",
   () => {
     setCanvas();
@@ -267,15 +381,15 @@ test(
       "FAILED",
     );
 
-    const claimsAfterFailure = JSON.parse(
-      localStorage.getItem(
-        "db-pulse-execution-claims-v1",
-      ) || "[]",
-    );
+    const claimKey =
+      PULSE_EXECUTION_CLAIM_KEY_PREFIX +
+      encodeURIComponent(
+        prepared.approval.approval_id,
+      );
 
     assert.equal(
-      claimsAfterFailure.length,
-      0,
+      localStorage.getItem(claimKey),
+      null,
     );
 
     const recovered = executePulseAction({
@@ -291,15 +405,14 @@ test(
       "COMPLETED",
     );
 
-    const claimsAfterSuccess = JSON.parse(
-      localStorage.getItem(
-        "db-pulse-execution-claims-v1",
-      ) || "[]",
-    );
+    const successClaimKey =
+      PULSE_EXECUTION_CLAIM_KEY_PREFIX +
+      encodeURIComponent(
+        prepared.approval.approval_id,
+      );
 
-    assert.equal(
-      claimsAfterSuccess.length,
-      1,
+    assert.ok(
+      localStorage.getItem(successClaimKey),
     );
   },
 );
