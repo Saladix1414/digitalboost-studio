@@ -32,6 +32,9 @@ export type PulseServerExecutionStatus =
 
 export type PulseServerExecutorCode =
   | "INVALID_REQUEST"
+  | "AUTHENTICATION_REQUIRED"
+  | "TENANT_ACCESS_DENIED"
+  | "ACTION_NOT_AUTHORIZED"
   | "CLAIM_STORE_UNAVAILABLE"
   | "CLAIM_REJECTED"
   | "EXECUTION_FAILED"

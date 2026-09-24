@@ -223,3 +223,217 @@ test("P0.4.20 claim store no puede saltarse el executor", async () => {
   assert.equal(result.status, "EXECUTED");
   assert.equal(executed, true);
 });
+
+import {
+  executeAuthorizedPulseServerRequest,
+} from "../../src/server/DigitalBoostPulseServerExecutionRuntime";
+
+import type {
+  PulsePrincipal,
+} from "../../src/server/DigitalBoostPulseAuthorizationBoundary";
+
+function authPrincipal(
+  overrides: Partial<PulsePrincipal> = {},
+): PulsePrincipal {
+  return {
+    authenticated: true,
+    subject_id: "runtime-user",
+    active_tenant_id: "tenant-runtime-alpha",
+    tenant_ids: ["tenant-runtime-alpha"],
+    ...overrides,
+  };
+}
+
+function authorizedRuntimeRequest() {
+  return {
+    boundary_version: "pulse-execution-boundary-v1",
+    request_id: "req-p0421-runtime",
+    tenant_id: "tenant-runtime-alpha",
+    approval_id: "approval-runtime-p0421",
+    action: "inventory",
+    proposal_hash: "proposal-runtime-p0421",
+    policy_version: "policy-v1",
+    expected_context_version: "ctx-v1",
+    mission_id: "mission-runtime-p0421",
+    plan_id: "plan-runtime-p0421",
+    step_id: "step-runtime-p0421",
+    step_index: 0,
+    issued_at: "2026-09-24T00:00:00.000Z",
+  };
+}
+
+test("P0.4.21 runtime rechaza ejecución sin autenticación", async () => {
+  let claims = 0;
+  let executions = 0;
+
+  const result =
+    await executeAuthorizedPulseServerRequest(
+      authorizedRuntimeRequest(),
+      authPrincipal({
+        authenticated: false,
+      }),
+      {
+        authorizeAction: async () => true,
+
+        createClaimStore() {
+          return {
+            async claim() {
+              claims += 1;
+              return {
+                claimed: true,
+              };
+            },
+          };
+        },
+
+        async executeAction() {
+          executions += 1;
+
+          return {
+            completed: true,
+            verified: true,
+          };
+        },
+      },
+    );
+
+  assert.equal(result.status, "REJECTED");
+  assert.equal(result.code, "AUTHENTICATION_REQUIRED");
+  assert.equal(claims, 0);
+  assert.equal(executions, 0);
+});
+
+test("P0.4.21 runtime rechaza tenant distinto antes del claim", async () => {
+  let claims = 0;
+
+  const result =
+    await executeAuthorizedPulseServerRequest(
+      {
+        ...authorizedRuntimeRequest(),
+        tenant_id: "tenant-attacker",
+      },
+      authPrincipal(),
+      {
+        authorizeAction: async () => true,
+
+        createClaimStore() {
+          return {
+            async claim() {
+              claims += 1;
+              return {
+                claimed: true,
+              };
+            },
+          };
+        },
+
+        async executeAction() {
+          return {
+            completed: true,
+            verified: true,
+          };
+        },
+      },
+    );
+
+  assert.equal(result.status, "REJECTED");
+  assert.equal(result.code, "TENANT_ACCESS_DENIED");
+  assert.equal(claims, 0);
+});
+
+test("P0.4.21 runtime rechaza acción no autorizada antes del claim", async () => {
+  let claims = 0;
+
+  const result =
+    await executeAuthorizedPulseServerRequest(
+      authorizedRuntimeRequest(),
+      authPrincipal(),
+      {
+        authorizeAction: async () => false,
+
+        createClaimStore() {
+          return {
+            async claim() {
+              claims += 1;
+              return {
+                claimed: true,
+              };
+            },
+          };
+        },
+
+        async executeAction() {
+          return {
+            completed: true,
+            verified: true,
+          };
+        },
+      },
+    );
+
+  assert.equal(result.status, "REJECTED");
+  assert.equal(result.code, "ACTION_NOT_AUTHORIZED");
+  assert.equal(claims, 0);
+});
+
+test("P0.4.21 runtime autorizado llega al executor", async () => {
+  let selectedTenant = "";
+  let executions = 0;
+
+  const result =
+    await executeAuthorizedPulseServerRequest(
+      authorizedRuntimeRequest(),
+      authPrincipal(),
+      {
+        authorizeAction: async (
+          principal,
+          request,
+        ) => {
+          return (
+            principal.subject_id === "runtime-user" &&
+            principal.active_tenant_id === "tenant-runtime-alpha" &&
+            request.action === "inventory"
+          );
+        },
+
+        createClaimStore(tenantId) {
+          selectedTenant = tenantId;
+
+          return {
+            async claim(input) {
+              assert.equal(
+                input.tenant_id,
+                "tenant-runtime-alpha",
+              );
+
+              return {
+                claimed: true,
+              };
+            },
+          };
+        },
+
+        async executeAction(request) {
+          executions += 1;
+
+          assert.equal(
+            request.tenant_id,
+            "tenant-runtime-alpha",
+          );
+
+          return {
+            completed: true,
+            verified: true,
+            evidence_id: "p0421-evidence",
+          };
+        },
+      },
+    );
+
+  assert.equal(result.status, "EXECUTED");
+  assert.equal(
+    selectedTenant,
+    "tenant-runtime-alpha",
+  );
+  assert.equal(executions, 1);
+});

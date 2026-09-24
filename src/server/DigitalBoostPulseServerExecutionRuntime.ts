@@ -107,3 +107,82 @@ export async function executePulseServerRequestWithServerClaimStore(
     },
   );
 }
+
+import {
+  authorizePulseServerExecution,
+  type PulseActionAuthorizer,
+  type PulsePrincipal,
+} from "./DigitalBoostPulseAuthorizationBoundary";
+
+/**
+ * P0.4.21
+ *
+ * Server-authorized execution entrypoint.
+ *
+ * La identidad y el tenant provienen de `principal`, no del request.
+ * El request tenant solo puede coincidir con ese contexto confiable.
+ *
+ * Esta función sigue sin ser un endpoint HTTP:
+ * el mecanismo de autenticación HTTP debe resolver primero el principal.
+ */
+export async function executeAuthorizedPulseServerRequest(
+  input: unknown,
+  principal: PulsePrincipal,
+  options: PulseServerExecutionRuntimeOptions & {
+    readonly authorizeAction: PulseActionAuthorizer;
+  },
+): Promise<PulseServerExecutionResult> {
+  const validation = validatePulseServerExecutionRequest(input);
+
+  if (!validation.ok) {
+    return executePulseServerRequest(input, {
+      claimStore: {
+        claim() {
+          throw new Error("invalid request must not claim");
+        },
+      },
+      executeAction: options.executeAction,
+    });
+  }
+
+  const authorization = await authorizePulseServerExecution(
+    principal,
+    validation.request,
+    options.authorizeAction,
+  );
+
+  if (!authorization.ok) {
+    return {
+      version: "pulse-server-executor-v1",
+      status: "REJECTED",
+      request_id: validation.request.request_id,
+      tenant_id: validation.request.tenant_id,
+      approval_id: validation.request.approval_id,
+      mission_id: validation.request.mission_id,
+      plan_id: validation.request.plan_id,
+      step_id: validation.request.step_id,
+      code:
+        authorization.code === "AUTHENTICATION_REQUIRED"
+          ? "AUTHENTICATION_REQUIRED"
+          : authorization.code === "TENANT_ACCESS_DENIED"
+            ? "TENANT_ACCESS_DENIED"
+            : authorization.code === "ACTION_NOT_AUTHORIZED"
+              ? "ACTION_NOT_AUTHORIZED"
+              : "INVALID_REQUEST",
+    };
+  }
+
+  /*
+   * Rebind tenant from trusted principal context.
+   * This removes any ambiguity before claim-store selection.
+   */
+  const trustedRequest: PulseServerExecutionRequest = {
+    ...validation.request,
+    tenant_id: authorization.tenant_id,
+  };
+
+  return executePulseServerRequestWithServerClaimStore(
+    trustedRequest,
+    options,
+  );
+}
