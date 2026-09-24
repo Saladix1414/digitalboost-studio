@@ -16,8 +16,14 @@ import {
 } from "../../src/DigitalBoostPulseMemory";
 
 import {
+  createPulseExecutionAttestation,
   verifyPulseGoalEvidenceBinding,
+  verifyPulseExecutionAttestation,
 } from "../../src/DigitalBoostPulseOutcomeProof";
+
+import {
+  pushAudit,
+} from "../../src/DigitalBoostPulseLog";
 
 const storage = new Map<string, string>();
 
@@ -585,5 +591,87 @@ test("P0.4.12 advance directo no prueba una mutacion sin execution attestation",
   assert.ok(
     completed?.outcome?.proof?.unattested_steps
       .includes(plan.steps[1].id),
+  );
+});
+
+
+test("P0.4.13 pushAudit genérico no puede satisfacer execution provenance", () => {
+  const requestId = "req_p0413_forged";
+  const missionId = "msn_p0413_forged";
+  const planId = "plan_p0413_forged";
+  const stepId = "stp_p0413_forged";
+  const stepIndex = 0;
+  const action = "hero";
+  const event = "PULSE_ACTION_COMPLETED";
+  const executionAuditId = "pexaud_p0413_forged";
+  const timestamp = "2026-09-24T00:00:00.000Z";
+
+  const attestation = createPulseExecutionAttestation({
+    missionId,
+    planId,
+    stepId,
+    stepIndex,
+    action,
+    executionRequestId: requestId,
+    state: "COMPLETED",
+    executionAudit: {
+      request_id: requestId,
+      event,
+      state: "COMPLETED",
+      action,
+      timestamp,
+      execution_audit_id: executionAuditId,
+    },
+  });
+
+  pushAudit({
+    timestamp,
+    tenant_id: "digitalboost",
+    store_id: "digitalboost",
+    actor_type: "merchant",
+    request_id: requestId,
+    intent: "",
+    agent: "",
+    risk_level: "L1",
+    tool: action,
+    approval_required: true,
+    status: "COMPLETED",
+    result_summary: event,
+    mission_id: missionId,
+    plan_id: planId,
+    step_id: stepId,
+    step_index: stepIndex,
+
+    // Intento deliberado de falsificar la autoridad de ejecución.
+    execution_issuer: "executor",
+    execution_audit_id: executionAuditId,
+  });
+
+  const rows = JSON.parse(
+    storage.get("db-pulse-audit-v1") || "[]",
+  );
+
+  const forgedRow = rows.find(
+    (row: any) =>
+      row.request_id === requestId,
+  );
+
+  assert.ok(forgedRow);
+
+  // pushAudit() debe neutralizar los campos reservados.
+  assert.equal(
+    forgedRow.execution_issuer,
+    undefined,
+  );
+
+  assert.equal(
+    forgedRow.execution_audit_id,
+    undefined,
+  );
+
+  // Sin Execution Audit auténtico, la attestation no puede verificarse.
+  assert.equal(
+    verifyPulseExecutionAttestation(attestation),
+    false,
   );
 });

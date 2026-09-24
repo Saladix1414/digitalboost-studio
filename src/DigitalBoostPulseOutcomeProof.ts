@@ -3,6 +3,7 @@ import {
   hashProposal,
   stableSerialize,
 } from "./DigitalBoostPulseContracts";
+import { findPulseExecutionAudit } from "./DigitalBoostPulseLog";
 
 export const PULSE_OUTCOME_CONTRACT_VERSION = "pulse-outcome-v1";
 
@@ -280,6 +281,9 @@ export type PulseExecutionAttestation = {
   current_context_version?: string;
   verification_status?: string;
   verified?: boolean;
+  execution_audit_timestamp: string;
+  execution_audit_event: string;
+  execution_audit_id: string;
   state:
     | "COMPLETED"
     | "FAILED"
@@ -304,6 +308,14 @@ export function createPulseExecutionAttestation(input: {
   currentContextVersion?: string;
   verificationStatus?: string;
   verified?: boolean;
+  executionAudit: {
+    request_id: string;
+    event: string;
+    state: string;
+    action: string;
+    timestamp: string;
+    execution_audit_id: string;
+  };
   state:
     | "COMPLETED"
     | "FAILED"
@@ -321,6 +333,12 @@ export function createPulseExecutionAttestation(input: {
     action: input.action,
     execution_request_id:
       input.executionRequestId,
+    execution_audit_timestamp:
+      input.executionAudit.timestamp,
+    execution_audit_event:
+      input.executionAudit.event,
+    execution_audit_id:
+      input.executionAudit.execution_audit_id,
     state: input.state,
     recorded_at: new Date().toISOString(),
     ...(input.approvalId !== undefined
@@ -375,14 +393,84 @@ export function verifyPulseExecutionAttestation(
     ...base
   } = attestation;
 
+  if (
+    attestation.version !==
+      PULSE_EXECUTION_ATTESTATION_VERSION ||
+    attestation.source !== "executor" ||
+    typeof attestation.execution_request_id !==
+      "string" ||
+    attestation.execution_request_id.length === 0 ||
+    typeof attestation.execution_audit_id !==
+      "string" ||
+    attestation.execution_audit_id.length === 0 ||
+    typeof attestation.execution_audit_timestamp !==
+      "string" ||
+    typeof attestation.execution_audit_event !==
+      "string" ||
+    hashProposal(base) !== attestation_hash
+  ) {
+    return false;
+  }
+
+  const audit = findPulseExecutionAudit({
+    requestId: attestation.execution_request_id,
+    missionId: attestation.mission_id,
+    planId: attestation.plan_id,
+    stepId: attestation.step_id,
+    stepIndex: attestation.step_index,
+    timestamp: attestation.execution_audit_timestamp,
+    event: attestation.execution_audit_event,
+    executionAuditId: attestation.execution_audit_id,
+  });
+
+  if (!audit) return false;
+
+  const expectedStatus =
+    attestation.state === "COMPLETED"
+      ? "COMPLETED"
+      : attestation.state === "FAILED"
+        ? "FAILED"
+        : attestation.state === "REJECTED"
+          ? "REJECTED"
+          : "AWAITING_APPROVAL";
+
+  const same = (a: unknown, b: unknown) =>
+    (a ?? null) === (b ?? null);
+
   return (
-    attestation.version ===
-      PULSE_EXECUTION_ATTESTATION_VERSION &&
-    attestation.source === "executor" &&
-    typeof attestation.execution_request_id ===
-      "string" &&
-    attestation.execution_request_id.length > 0 &&
-    hashProposal(base) === attestation_hash
+    audit.execution_issuer === "executor" &&
+    audit.execution_audit_id ===
+      attestation.execution_audit_id &&
+    audit.request_id ===
+      attestation.execution_request_id &&
+    audit.mission_id === attestation.mission_id &&
+    audit.plan_id === attestation.plan_id &&
+    audit.step_id === attestation.step_id &&
+    audit.step_index === attestation.step_index &&
+    audit.tool === attestation.action &&
+    audit.status === expectedStatus &&
+    audit.result_summary ===
+      attestation.execution_audit_event &&
+    same(audit.approval_id, attestation.approval_id) &&
+    same(audit.policy_version, attestation.policy_version) &&
+    same(audit.proposal_hash, attestation.proposal_hash) &&
+    same(
+      audit.executed_proposal_hash,
+      attestation.executed_proposal_hash,
+    ) &&
+    same(
+      audit.verification_status,
+      attestation.verification_status,
+    ) &&
+    same(audit.verified, attestation.verified) &&
+    same(
+      audit.context_version,
+      attestation.expected_context_version,
+    ) &&
+    same(
+      audit.current_context_version,
+      attestation.current_context_version,
+    )
   );
 }
 

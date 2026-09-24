@@ -71,41 +71,61 @@ export function executePulseMissionStep(
   }
 
   const executionAttestation =
-    createPulseExecutionAttestation({
-      missionId: mission.id,
-      planId: mission.planId,
-      stepId: step.id,
-      stepIndex: mission.stepIndex,
-      action: step.action,
-      executionRequestId:
-        context.envelope.request_id,
-      approvalId:
-        context.envelope.approval_id ||
-        context.approval?.id,
-      policyVersion:
-        context.envelope.policy_version,
-      proposalHash:
-        context.envelope.binding?.proposal_hash,
-      executedProposalHash:
-        typeof execution.audit.metadata
-          ?.executed_proposal_hash === "string"
-          ? execution.audit.metadata
-              ?.executed_proposal_hash
-          : undefined,
-      expectedContextVersion:
-        context.envelope.binding?.context_version,
-      currentContextVersion:
-        typeof execution.audit.metadata
-          ?.current_context_version === "string"
-          ? execution.audit.metadata
-              ?.current_context_version
-          : undefined,
-      verificationStatus:
-        execution.audit.metadata
-          ?.verification_status,
-      verified: execution.verified,
-      state: execution.state,
-    });
+      createPulseExecutionAttestation({
+        missionId: mission.id,
+        planId: mission.planId,
+        stepId: step.id,
+        stepIndex: mission.stepIndex,
+        action: step.action,
+        executionRequestId:
+          context.envelope.request_id,
+        approvalId:
+          context.envelope.approval_id ||
+          context.approval?.id,
+        policyVersion:
+          context.envelope.policy_version,
+        proposalHash:
+          context.envelope.binding?.proposal_hash,
+        executedProposalHash:
+          typeof execution.audit.metadata
+            ?.executed_proposal_hash === "string"
+            ? execution.audit.metadata
+                ?.executed_proposal_hash
+            : undefined,
+        expectedContextVersion:
+          context.envelope.binding?.context_version,
+        currentContextVersion:
+          typeof execution.audit.metadata
+            ?.current_context_version === "string"
+            ? execution.audit.metadata
+                ?.current_context_version
+            : undefined,
+        verificationStatus:
+          execution.audit.metadata
+            ?.verification_status,
+        verified: execution.verified,
+        state: execution.state,
+        executionAudit: {
+          request_id:
+            execution.audit.request_id,
+          event:
+            execution.audit.metadata
+              ?.execution_audit_event ??
+            "",
+          state:
+            execution.audit.state,
+          action:
+            execution.audit.action,
+          timestamp:
+            execution.audit.timestamp,
+          execution_audit_id:
+            typeof execution.audit.metadata
+              ?.execution_audit_id === "string"
+              ? execution.audit.metadata
+                  .execution_audit_id
+              : "",
+        },
+      });
 
   const missionAfterExecution =
     advancePulseMission(missionId, {

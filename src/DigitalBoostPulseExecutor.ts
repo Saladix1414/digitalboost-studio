@@ -15,7 +15,7 @@ import {
   validateSeoFixProposal,
   type SeoFixProposal,
 } from "./DigitalBoostPulseSeoApply";
-import { pushAudit } from "./DigitalBoostPulseLog";
+import { pushExecutionAudit } from "./DigitalBoostPulseLog";
 import {
   postcheckPulseExecution,
   precheckPulseExecution,
@@ -60,6 +60,7 @@ function audit(
   metadata?: Record<string, unknown>,
 ): PulseAuditEvent {
   const next = { ...envelope, state };
+  const executionAuditId = "pexaud_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
   const auditMetadata = {
     ...(metadata || {}),
     ...(typeof next.metadata?.mission_id === "string"
@@ -77,6 +78,8 @@ function audit(
     ...(next.reason_code
       ? { reason_code: next.reason_code }
       : {}),
+    execution_audit_id: executionAuditId,
+    execution_audit_event: event,
   };
   const eventRecord = createPulseAuditEvent(
     next,
@@ -87,7 +90,7 @@ function audit(
   );
 
   try {
-    pushAudit({
+    pushExecutionAudit({
       timestamp: eventRecord.timestamp,
       tenant_id: "digitalboost",
       store_id: String(envelope.metadata?.store_id ?? "digitalboost"),
@@ -166,7 +169,8 @@ function audit(
         typeof metadata?.context_drift_status === "string"
           ? metadata.context_drift_status
           : undefined,
-    });
+      execution_audit_id: executionAuditId,
+    }, executionAuditId);
   } catch {}
 
   return eventRecord;
@@ -844,6 +848,12 @@ export function executePulseAction(
           rollback_verified: false,
           executed_proposal_hash:
             executedProposalHash ?? undefined,
+          expected_context_version:
+            contextDrift.expectedContextVersion,
+          current_context_version:
+            contextDrift.currentContextVersion,
+          context_drift_status:
+            contextDrift.status,
         },
       ),
     };

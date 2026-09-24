@@ -58,6 +58,8 @@ export type PulseAudit = {
   repair_reason?: string;
   repair_context_version?: string;
   repair_generation?: number;
+  execution_issuer?: "executor";
+  execution_audit_id?: string;
 };
 
 function readArr(k: string) {
@@ -83,10 +85,23 @@ export function dumpJSONL() {
     });
   }).join("\n");
 }
-export function pushAudit(row: PulseAudit) {
+function writeAuditRow(row: PulseAudit) {
   const rows = readArr(AUDIT) as PulseAudit[];
   rows.push(row);
   writeArr(AUDIT, rows);
+}
+
+export function pushAudit(row: PulseAudit) {
+  const safe = { ...row };
+  delete safe.execution_issuer;
+  delete safe.execution_audit_id;
+  writeAuditRow(safe);
+}
+
+export function pushExecutionAudit(row: Omit<PulseAudit, "execution_issuer" | "execution_audit_id">, suppliedId?: string): string {
+  const id = suppliedId || ("pexaud_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8));
+  writeAuditRow({ ...row, execution_issuer: "executor", execution_audit_id: id });
+  return id;
 }
 
 export function hasPulseMissionOutcomeAudit(
@@ -97,6 +112,11 @@ export function hasPulseMissionOutcomeAudit(
     return row.mission_id === missionId && row.outcome_id === outcomeId;
   });
 }
+export function findPulseExecutionAudit(input: { requestId: string; missionId: string; planId: string; stepId: string; stepIndex: number; timestamp: string; event: string; executionAuditId: string; }): PulseAudit | null {
+  const rows = readArr(AUDIT) as PulseAudit[];
+  return [...rows].reverse().find((row) => row.execution_issuer === "executor" && row.execution_audit_id === input.executionAuditId && row.request_id === input.requestId && row.mission_id === input.missionId && row.plan_id === input.planId && row.step_id === input.stepId && row.step_index === input.stepIndex && row.timestamp === input.timestamp && row.result_summary === input.event) || null;
+}
+
 export function requestId() {
   return "req_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 6);
 }
