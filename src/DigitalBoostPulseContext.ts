@@ -1,5 +1,6 @@
 import { buildStateSnapshot, fact, type PulseFact, type PulseStateSnapshot } from "./DigitalBoostPulseSnapshot";
 import { loadSearchAdapter } from "./DigitalBoostPulseSearchAdapter";
+import { assemblePulseContext, contextItem, type PulseContextItem } from "./DigitalBoostPulseContextEngine";
 import { hashProposal } from "./DigitalBoostPulseContracts";
 export type PulseContextSourceStatus = "available" | "partial" | "unavailable";
 export interface PulseContextDomain<T = unknown> {
@@ -17,7 +18,24 @@ export interface PulseAnalyticsContext { available: boolean; metrics?: Record<st
 export interface PulseAIContext { ollama: boolean; qwen2: boolean; llama3: boolean; openclaw: boolean; }
 export interface PulseSearchContext { rows?: number; topQuery?: string; source?: string; note?: string; }
 export interface PulseContext {
-  version: "2.0"; generatedAt: string; snapshot: PulseStateSnapshot;
+  version: "2.0";
+  generatedAt: string;
+  snapshot: PulseStateSnapshot;
+
+  contextId: string;
+  tenantId: string;
+  contractVersion: string;
+
+  contextItems: PulseContextItem[];
+
+  conflicts: ReturnType<
+    typeof assemblePulseContext
+  >["conflicts"];
+
+  compression: ReturnType<
+    typeof assemblePulseContext
+  >["compression"];
+
   commerce: PulseContextDomain<PulseCommerceContext>;
   storeBuilder: PulseContextDomain<PulseStoreBuilderContext>;
   seo: PulseContextDomain<PulseSeoContext>;
@@ -25,7 +43,13 @@ export interface PulseContext {
   analytics: PulseContextDomain<PulseAnalyticsContext>;
   ai: PulseContextDomain<PulseAIContext>;
   search: PulseContextDomain<PulseSearchContext>;
-  summary: { availableDomains: string[]; unavailableDomains: string[]; contextVersion: string; };
+
+  summary: {
+    availableDomains: string[];
+    unavailableDomains: string[];
+    contextVersion: string;
+    assemblyVersion: string;
+  };
 }
 function safeRead(key: string): unknown {
   if (typeof window === "undefined") return undefined;
@@ -65,9 +89,10 @@ function readCampaigns(): number | undefined {
   if (raw && typeof raw === "object" && Array.isArray((raw as { items?: unknown }).items)) return (raw as { items: unknown[] }).items.length;
   return undefined;
 }
-export function buildPulseContext(input: { store?: string; range?: string; section?: string; page?: string; } = {}): PulseContext {
+export function buildPulseContext(input: { store?: string; tenant?: string; range?: string; section?: string; page?: string; } = {}): PulseContext {
   const generatedAt = new Date().toISOString();
   const store = input.store || safeText("db-active-store-v1") || "unknown";
+  const tenantId = input.tenant || safeText("db-active-tenant-v1") || safeText("db-tenant-v1") || "digitalboost";
   const storeSection = input.section || safeText("digitalboost_store_section") || safeText("db-os-section-v1");
   const page = input.page || safeText("db-store-page-v1");
   const theme = safeText("db-os-theme-v1");
@@ -134,11 +159,146 @@ export function buildPulseContext(input: { store?: string; range?: string; secti
     ),
     searchQueries: fact(searchSnap.rows.length || null, searchSnap.source, searchSnap.status !== "unavailable", "search", generatedAt),
   };
-  const snapshot = buildStateSnapshot({ store, tenant: "digitalboost", mode: "CURRENT", facts });
-  const domains = { commerce, storeBuilder, seo, marketing, analytics, ai, search };
-  const availableDomains = Object.entries(domains).filter(([, value]) => value.status === "available").map(([key]) => key);
-  const unavailableDomains = Object.entries(domains).filter(([, value]) => value.status === "unavailable").map(([key]) => key);
-  return { version: "2.0", generatedAt, snapshot, commerce, storeBuilder, seo, marketing, analytics, ai, search, summary: { availableDomains, unavailableDomains, contextVersion: snapshot.version } };
+  const snapshot = buildStateSnapshot({ store, tenant: tenantId, mode: "CURRENT", facts });
+  const domains = {
+    commerce,
+    storeBuilder,
+    seo,
+    marketing,
+    analytics,
+    ai,
+    search,
+  };
+
+  const availableDomains =
+    Object.entries(domains)
+      .filter(
+        ([, value]) =>
+          value.status === "available",
+      )
+      .map(([key]) => key);
+
+  const unavailableDomains =
+    Object.entries(domains)
+      .filter(
+        ([, value]) =>
+          value.status === "unavailable",
+      )
+      .map(([key]) => key);
+
+  const contextItems:
+    PulseContextItem[] =
+    Object.entries(
+      snapshot.facts,
+    ).map(
+      ([key, currentFact]) =>
+        contextItem({
+          id: `fact:${key}`,
+          key,
+          tenantId,
+          value:
+            currentFact.value,
+          source:
+            currentFact.source,
+          provenance:
+            currentFact.provenance,
+          timestamp:
+            currentFact.timestamp,
+
+          trust:
+            key ===
+              "searchQueries"
+              ? "untrusted"
+              : key ===
+                    "seoIssues" ||
+                key ===
+                    "campaigns"
+                ? "derived"
+                : "raw",
+
+          evidenceRefs:
+            currentFact.present
+              ? [
+                  currentFact.source,
+                ]
+              : [],
+
+          constraints:
+            currentFact.present
+              ? [
+                  `scope:${currentFact.scope}`,
+                ]
+              : [],
+
+          relevance:
+            currentFact.present
+              ? 0.8
+              : 0.1,
+
+          mandatory:
+            key === "store" ||
+            key === "section",
+
+          ttlMs:
+            10 * 60 * 1000,
+        }),
+    );
+
+  const assembly =
+    assemblePulseContext({
+      tenantId,
+      snapshot,
+      policyVersion:
+        "pulse-gov-v1",
+      items:
+        contextItems,
+      now:
+        Date.parse(
+          generatedAt,
+        ),
+      maxBytes:
+        24000,
+    });
+
+  return {
+    version: "2.0",
+    generatedAt,
+    snapshot,
+
+    contextId:
+      assembly.contextId,
+
+    tenantId,
+
+    contractVersion:
+      assembly.contractVersion,
+
+    contextItems:
+      assembly.items,
+
+    conflicts:
+      assembly.conflicts,
+
+    compression:
+      assembly.compression,
+
+    commerce,
+    storeBuilder,
+    seo,
+    marketing,
+    analytics,
+    ai,
+    search,
+
+    summary: {
+      availableDomains,
+      unavailableDomains,
+      contextVersion:
+          snapshot.version,
+
+        assemblyVersion:
+          assembly.version,},
+  };
 }
 export function buildPulseContextSummary(context: PulseContext): string {
   return ["Context version: " + context.version, "Snapshot: " + context.snapshot.version, "Available: " + (context.summary.availableDomains.join(", ") || "none"), "Unavailable: " + (context.summary.unavailableDomains.join(", ") || "none"), "Store section: " + (context.storeBuilder.data.activeSection || "unknown"), "SEO status: " + context.seo.status, "Commerce status: " + context.commerce.status].join("\n");
