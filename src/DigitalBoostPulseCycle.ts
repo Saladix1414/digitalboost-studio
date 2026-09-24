@@ -1,5 +1,6 @@
 
 import { classifyIntent, classifyRisk, pickAgent, isWriteIntent, type PulseIntent, type PulseRisk, type PulseAgent } from "./DigitalBoostPulseConst";
+import { classifyPulseIntent, type PulseIntentClassification } from "./DigitalBoostPulseIntentEngine";
 import { approvalCard, type PulseCard } from "./DigitalBoostPulseCard";
 import { pushAudit, requestId } from "./DigitalBoostPulseLog";
 import { rememberDecision } from "./DigitalBoostPulseMemory";
@@ -27,6 +28,7 @@ export type CycleMeta = {
   approval?: PulseApproval | null;
   plan?: PulsePlan;
   mission?: PulseMission;
+  intentClassification?: PulseIntentClassification;
 };
 
 export function runCycle(input: {
@@ -40,7 +42,14 @@ export function runCycle(input: {
   draft?: { kind: string; title: string; body: string; cta: string };
   proposal?: Record<string, unknown> | null;
 }): CycleMeta {
-  const intent = classifyIntent(input.q, input.section);
+  const legacyIntent = classifyIntent(input.q, input.section);
+  const intentClassification = classifyPulseIntent({
+    q: input.q,
+    section: input.section,
+    store: input.store,
+    tenantId: input.store,
+  });
+  const intent = intentClassification.legacyIntent || legacyIntent;
   const write = isWriteIntent(intent) || input.alreadyConfirm;
   const risk = classifyRisk(intent, input.action);
   const agent = pickAgent(intent, input.section);
@@ -159,6 +168,7 @@ export function runCycle(input: {
     actor: "merchant",
     tenant: input.store,
     intent: intent,
+    intentClassification: intentClassification,
     agent: agent,
     risk: risk,
     write: write,
