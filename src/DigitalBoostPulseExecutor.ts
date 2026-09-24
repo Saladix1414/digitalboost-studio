@@ -26,6 +26,7 @@ import {
 } from "./DigitalBoostPulseApply";
 import { hashPulseExecutionPayload } from "./DigitalBoostPulseContracts";
 import { checkPulseContextDrift } from "./DigitalBoostPulseContextDrift";
+import { claimPulseExecution } from "./DigitalBoostPulseExecutionLedger";
 
 export type PulseExecutionTrace = {
   mission_id: string;
@@ -646,8 +647,88 @@ export function executePulseAction(
       throw new Error("Unsupported proposal type.");
     }
 
+    let executionClaimed = false;
+
+    function claimApprovedExecution(): PulseExecutionOutcome | null {
+      const shouldClaim =
+        executionEnvelope.requires_approval &&
+        typeof executionEnvelope.approval_id === "string" &&
+        Boolean(approval) &&
+        Boolean(proposal || draft);
+
+      if (!shouldClaim || executionClaimed) {
+        return null;
+      }
+
+      const claim = claimPulseExecution({
+        approvalId:
+          executionEnvelope.approval_id!,
+        requestId:
+          executionEnvelope.request_id,
+        action:
+          executionEnvelope.action,
+        missionId:
+          typeof executionEnvelope.metadata?.mission_id === "string"
+            ? executionEnvelope.metadata.mission_id
+            : undefined,
+        planId:
+          typeof executionEnvelope.metadata?.plan_id === "string"
+            ? executionEnvelope.metadata.plan_id
+            : undefined,
+        stepId:
+          typeof executionEnvelope.metadata?.step_id === "string"
+            ? executionEnvelope.metadata.step_id
+            : undefined,
+        stepIndex:
+          typeof executionEnvelope.metadata?.step_index === "number"
+            ? executionEnvelope.metadata.step_index
+            : undefined,
+      });
+
+      if (!claim.claimed) {
+        const replay =
+          claim.reason === "ALREADY_CLAIMED";
+
+        const rejectedEnvelope = {
+          ...executionEnvelope,
+          state: "REJECTED" as const,
+        };
+
+        return {
+          allowed: false,
+          state: "REJECTED",
+          error: replay
+            ? "EXECUTION_REPLAY"
+            : "EXECUTION_CLAIM_UNAVAILABLE",
+          verified: false,
+          rolledBack: false,
+          audit: audit(
+            rejectedEnvelope,
+            replay
+              ? "PULSE_ACTION_REJECTED_REPLAY"
+              : "PULSE_ACTION_REJECTED_EXECUTION_CLAIM",
+            "REJECTED",
+            {
+              verification_status: "SKIPPED",
+              verified: false,
+            },
+          ),
+        };
+      }
+
+      executionClaimed = true;
+      return null;
+    }
+
     if (proposal) {
       validateProposal(proposal);
+
+      const claimFailure =
+        claimApprovedExecution();
+
+      if (claimFailure) {
+        return claimFailure;
+      }
 
       if (proposal.type === "seo-fix") {
         seoMutationStarted = true;
@@ -684,6 +765,13 @@ export function executePulseAction(
     }
 
     if (!proposal && draft) {
+      const claimFailure =
+        claimApprovedExecution();
+
+      if (claimFailure) {
+        return claimFailure;
+      }
+
       if (
         draft.kind === "hero" ||
         draft.kind === "cta"
