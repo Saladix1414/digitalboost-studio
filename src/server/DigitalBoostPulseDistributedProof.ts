@@ -970,15 +970,68 @@ export class FilesystemPulseDistributedProofRepository {
 
     return readdirSafe(
       this.tenantDir,
-    ).map(
-      (name) =>
-        this.get(
-          name.slice(
-            0,
-            -5,
-          ),
-        )!,
-    );
+    )
+      .filter(
+        (name) =>
+          name.endsWith(".json"),
+      )
+      .map(
+        (name) => {
+          const path =
+            join(
+              this.tenantDir,
+              name,
+            );
+
+          const proof =
+            JSON.parse(
+              readFileSync(
+                path,
+                "utf8",
+              ),
+            ) as PulseDistributedProofRecord;
+
+          if (
+            proof.tenant_id !==
+            this.tenantId
+          ) {
+            throw new PulseDistributedProofError(
+              "PROOF_TAMPERED",
+              "stored proof belongs to another tenant",
+            );
+          }
+
+          const expectedPath =
+            proofPath(
+              this.rootDir,
+              this.tenantId,
+              proof.proof_id,
+            );
+
+          if (
+            expectedPath !==
+            path
+          ) {
+            throw new PulseDistributedProofError(
+              "PROOF_TAMPERED",
+              "stored proof path does not match proof identity",
+            );
+          }
+
+          if (
+            !verifyPulseDistributedProof(
+              proof,
+            )
+          ) {
+            throw new PulseDistributedProofError(
+              "PROOF_TAMPERED",
+              "stored proof failed integrity verification",
+            );
+          }
+
+          return proof;
+        },
+      );
   }
 
   verifyIntegrity(): void {

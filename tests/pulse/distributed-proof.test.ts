@@ -1,7 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { mkdtempSync } from "node:fs";
+import {
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -197,6 +202,98 @@ test("P0.4.28 crea y verifica proof distribuido", () => {
   assert.equal(
     verifyPulseDistributedProof(proof),
     true,
+  );
+
+  const repositoryA =
+    new FilesystemPulseDistributedProofRepository({
+      tenantId,
+      rootDir: join(storage, "proof"),
+    });
+
+  const saved =
+    repositoryA.save(proof);
+
+  assert.deepEqual(
+    saved,
+    proof,
+  );
+
+  const repositoryB =
+    new FilesystemPulseDistributedProofRepository({
+      tenantId,
+      rootDir: join(storage, "proof"),
+    });
+
+  const restored =
+    repositoryB.get(
+      proof.proof_id,
+    );
+
+  assert.deepEqual(
+    restored,
+    proof,
+  );
+
+  assert.equal(
+    repositoryB.count(),
+    1,
+  );
+
+  repositoryB.verifyIntegrity();
+
+  const proofFile =
+    readdirSync(
+      repositoryB.tenantDir,
+    ).find(
+      (name) =>
+        name.endsWith(".json"),
+    );
+
+  assert.ok(
+    proofFile,
+  );
+
+  const persistedPath =
+    join(
+      repositoryB.tenantDir,
+      proofFile!,
+    );
+
+  const tampered =
+    JSON.parse(
+      readFileSync(
+        persistedPath,
+        "utf8",
+      ),
+    ) as Record<
+      string,
+      unknown
+    >;
+
+  tampered.content_hash =
+    "tampered-proof-hash";
+
+  writeFileSync(
+    persistedPath,
+    JSON.stringify(
+      tampered,
+      null,
+      2,
+    ) + "\n",
+  );
+
+  assert.throws(
+    () =>
+      repositoryB.get(
+        proof.proof_id,
+      ),
+    /stored proof failed integrity verification/,
+  );
+
+  assert.throws(
+    () =>
+      repositoryB.verifyIntegrity(),
+    /stored proof failed integrity verification/,
   );
 });
 
