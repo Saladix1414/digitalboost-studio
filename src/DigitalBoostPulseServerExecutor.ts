@@ -20,6 +20,10 @@ import {
   validatePulseServerExecutionRequest,
 } from "./DigitalBoostPulseExecutionBoundary";
 
+import type {
+  PulseExecutionAttestation,
+} from "./DigitalBoostPulseOutcomeProof";
+
 export const PULSE_SERVER_EXECUTOR_VERSION =
   "pulse-server-executor-v1" as const;
 
@@ -75,6 +79,15 @@ export interface PulseServerExecutionEvidence {
   readonly completed: boolean;
   readonly verified: boolean;
   readonly evidence_id?: string;
+
+  /**
+   * Evidence-grade attestation produced by the trusted execution path.
+   *
+   * This does not change the semantics of EXECUTED.
+   * Distributed Proof remains a separate composition boundary.
+   */
+  readonly execution_attestation?:
+    PulseExecutionAttestation;
 }
 
 export interface PulseServerExecutionResult {
