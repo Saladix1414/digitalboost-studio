@@ -1,3 +1,4 @@
+import { assertPulseTenantIsolation } from "./DigitalBoostPulseTenantIsolation";
 /**
  * PULSE — Server Execution Runtime Composition
  * P0.4.20
@@ -176,7 +177,14 @@ export async function executeAuthorizedPulseServerRequest(
    * Rebind tenant from trusted principal context.
    * This removes any ambiguity before claim-store selection.
    */
-  const trustedRequest: PulseServerExecutionRequest = {
+
+    // P0.4.22 — authorization tenant must equal resource tenant.
+    assertPulseTenantIsolation(
+      authorization.tenant_id,
+      input.tenant_id,
+    );
+
+const trustedRequest: PulseServerExecutionRequest = {
     ...validation.request,
     tenant_id: authorization.tenant_id,
   };

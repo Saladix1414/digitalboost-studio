@@ -1,3 +1,4 @@
+import { assertPulseTenantIsolation } from "./DigitalBoostPulseTenantIsolation";
 import {
   createHash,
   randomUUID,
@@ -172,6 +173,32 @@ export class ServerExecutionClaimStore
   claim(
     claim: PulseExecutionClaim,
   ): PulseExecutionClaimResult {
+    // P0.4.22 — resource/claim tenant isolation.
+    /*
+     * P0.4.22:
+     *
+     * Server execution claims produced by the hardened execution path
+     * carry tenant_id and must match the store tenant exactly.
+     *
+     * Historical/local claim-store tests and persisted records from
+     * P0.4.18 may not carry tenant_id. Those records remain compatible;
+     * they are already physically isolated by this store's tenantDir.
+     *
+     * No tenant is ever inferred from an absent field.
+     */
+    const claimTenantId = (
+      claim as unknown as {
+        tenant_id?: unknown;
+      }
+    ).tenant_id;
+
+    if (claimTenantId !== undefined) {
+      assertPulseTenantIsolation(
+        this.tenantId,
+        claimTenantId,
+      );
+    }
+
     try {
       const approvalId =
         normalizeApprovalId(
