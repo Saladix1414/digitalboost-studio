@@ -175,6 +175,21 @@ test(
 );
 
 test(
+  "canonical MODEL_NOT_FOUND code is classified",
+  () => {
+    assert.equal(
+      classifyPulseInferenceBridgeFailure({
+        accepted: false,
+        status: "failed",
+        error:
+          "MODEL_NOT_FOUND",
+      }),
+      "MODEL_NOT_FOUND",
+    );
+  },
+);
+
+test(
   "waiting for approval is not treated as completed inference",
   () => {
     assert.equal(

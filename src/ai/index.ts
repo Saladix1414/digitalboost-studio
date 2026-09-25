@@ -9,3 +9,5 @@ export {
 export * from './DigitalBoostModelIntelligence';
 
 export * from './DigitalBoostPulseInference';
+
+export * from './DigitalBoostPulseInferenceRuntime';

@@ -213,7 +213,7 @@ export function classifyPulseInferenceBridgeFailure(
     }
 
     if (
-      /model.*not found|unknown model|no local ollama model/.test(
+      /model[_ -]*not[_ -]*found|unknown[_ -]*model|no local ollama model/.test(
         message,
       )
     ) {
@@ -289,50 +289,59 @@ export function normalizePulseInferenceResult(
     latencyMs?: number;
   },
 ): PulseInferenceResult {
-  const binding =
-    assertPulseInferenceModelBinding({
-      requestedModelRef:
-        input.request.modelRef,
+  const provenance = {
+    contract:
+      PULSE_INFERENCE_CONTRACT,
 
-      runtimeModelRef:
-        input.runtimeModelRef,
-    });
+    requestId:
+      input.request.requestId,
 
-  if (!binding.valid) {
-    return {
-      contract:
-        PULSE_INFERENCE_CONTRACT,
+    modelRef:
+      input.request.modelRef,
 
-      status: "FAILED",
+    selectionFingerprint:
+      input.request.selectionFingerprint,
 
-      requestId:
-        input.request.requestId,
+    provider:
+      input.provider,
 
-      modelRef:
-        input.request.modelRef,
+    startedAt:
+      input.startedAt,
 
-      provider:
-        input.provider,
+    completedAt:
+      input.completedAt,
 
-      selectionFingerprint:
-        input.request
-          .selectionFingerprint,
+    latencyMs:
+      input.latencyMs,
+  };
 
-      outputMode:
-        input.request.outputMode,
+  /*
+   * Runtime model binding is verified only when the runtime
+   * claims that inference completed.
+   *
+   * A failed request may have no runtime model. In that case
+   * the original failure class must remain observable.
+   */
+  if (
+    input.bridgeResult.status ===
+    "completed"
+  ) {
+    const binding =
+      assertPulseInferenceModelBinding({
+        requestedModelRef:
+          input.request.modelRef,
 
-      failure:
-        "MODEL_BINDING_MISMATCH",
+        runtimeModelRef:
+          input.runtimeModelRef,
+      });
 
-      error:
-        "Runtime model does not match selected model.",
-
-      latencyMs:
-        input.latencyMs,
-
-      provenance: {
+    if (!binding.valid) {
+      return {
         contract:
           PULSE_INFERENCE_CONTRACT,
+
+        status:
+          "FAILED",
 
         requestId:
           input.request.requestId,
@@ -340,23 +349,27 @@ export function normalizePulseInferenceResult(
         modelRef:
           input.request.modelRef,
 
-        selectionFingerprint:
-          input.request
-            .selectionFingerprint,
-
         provider:
           input.provider,
 
-        startedAt:
-          input.startedAt,
+        selectionFingerprint:
+          input.request.selectionFingerprint,
 
-        completedAt:
-          input.completedAt,
+        outputMode:
+          input.request.outputMode,
+
+        failure:
+          "MODEL_BINDING_MISMATCH",
+
+        error:
+          "Runtime model does not match selected model.",
 
         latencyMs:
           input.latencyMs,
-      },
-    };
+
+        provenance,
+      };
+    }
   }
 
   const output =
@@ -373,7 +386,8 @@ export function normalizePulseInferenceResult(
       contract:
         PULSE_INFERENCE_CONTRACT,
 
-      status: "FAILED",
+      status:
+        "FAILED",
 
       requestId:
         input.request.requestId,
@@ -385,8 +399,7 @@ export function normalizePulseInferenceResult(
         input.provider,
 
       selectionFingerprint:
-        input.request
-          .selectionFingerprint,
+        input.request.selectionFingerprint,
 
       outputMode:
         input.request.outputMode,
@@ -400,32 +413,7 @@ export function normalizePulseInferenceResult(
       latencyMs:
         input.latencyMs,
 
-      provenance: {
-        contract:
-          PULSE_INFERENCE_CONTRACT,
-
-        requestId:
-          input.request.requestId,
-
-        modelRef:
-          input.request.modelRef,
-
-        selectionFingerprint:
-          input.request
-            .selectionFingerprint,
-
-        provider:
-          input.provider,
-
-        startedAt:
-          input.startedAt,
-
-        completedAt:
-          input.completedAt,
-
-        latencyMs:
-          input.latencyMs,
-      },
+      provenance,
     };
   }
 
@@ -437,7 +425,8 @@ export function normalizePulseInferenceResult(
       contract:
         PULSE_INFERENCE_CONTRACT,
 
-      status: "FAILED",
+      status:
+        "FAILED",
 
       requestId:
         input.request.requestId,
@@ -449,8 +438,7 @@ export function normalizePulseInferenceResult(
         input.provider,
 
       selectionFingerprint:
-        input.request
-          .selectionFingerprint,
+        input.request.selectionFingerprint,
 
       outputMode:
         input.request.outputMode,
@@ -466,32 +454,7 @@ export function normalizePulseInferenceResult(
       latencyMs:
         input.latencyMs,
 
-      provenance: {
-        contract:
-          PULSE_INFERENCE_CONTRACT,
-
-        requestId:
-          input.request.requestId,
-
-        modelRef:
-          input.request.modelRef,
-
-        selectionFingerprint:
-          input.request
-            .selectionFingerprint,
-
-        provider:
-          input.provider,
-
-        startedAt:
-          input.startedAt,
-
-        completedAt:
-          input.completedAt,
-
-        latencyMs:
-          input.latencyMs,
-      },
+      provenance,
     };
   }
 
@@ -499,7 +462,8 @@ export function normalizePulseInferenceResult(
     contract:
       PULSE_INFERENCE_CONTRACT,
 
-    status: "COMPLETED",
+    status:
+      "COMPLETED",
 
     requestId:
       input.request.requestId,
@@ -511,8 +475,7 @@ export function normalizePulseInferenceResult(
       input.provider,
 
     selectionFingerprint:
-      input.request
-        .selectionFingerprint,
+      input.request.selectionFingerprint,
 
     output,
 
@@ -522,31 +485,6 @@ export function normalizePulseInferenceResult(
     latencyMs:
       input.latencyMs,
 
-    provenance: {
-      contract:
-        PULSE_INFERENCE_CONTRACT,
-
-      requestId:
-        input.request.requestId,
-
-      modelRef:
-        input.request.modelRef,
-
-      selectionFingerprint:
-        input.request
-          .selectionFingerprint,
-
-      provider:
-        input.provider,
-
-      startedAt:
-        input.startedAt,
-
-      completedAt:
-        input.completedAt,
-
-      latencyMs:
-        input.latencyMs,
-    },
+    provenance,
   };
 }

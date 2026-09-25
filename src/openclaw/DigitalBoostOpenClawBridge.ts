@@ -32,6 +32,14 @@ export interface OpenClawTaskRequest {
 export interface OpenClawTaskResult {
   accepted: boolean;
   executionId?: string;
+
+  /*
+   * P0.7.2.2
+   * Identidad del modelo realmente reportado por backend/runtime.
+   *
+   * No se deriva del request para inferencia completada.
+   */
+  model?: string;
   status:
     | 'proposed'
     | 'awaiting_approval'
@@ -86,9 +94,33 @@ export class DigitalBoostOpenClawBridge {
       );
 
       if (!response.ok) {
-        return unavailable(
-          `OpenClaw status HTTP ${response.status}`
-        );
+        let errorMessage =
+          `OpenClaw task HTTP ${response.status}`;
+
+        try {
+          const errorData =
+            await response.json();
+
+          if (
+            errorData &&
+            typeof errorData.error === "string" &&
+            errorData.error.trim()
+          ) {
+            errorMessage =
+              errorData.error.trim();
+          }
+        } catch {
+          /*
+           * El backend puede responder sin JSON.
+           * Conservamos el error HTTP.
+           */
+        }
+
+        return {
+          accepted: false,
+          status: "failed",
+          error: errorMessage,
+        };
       }
 
       const data = await response.json();
@@ -193,9 +225,15 @@ export class DigitalBoostOpenClawBridge {
 
         return {
           accepted: true,
-          status: 'completed',
+          status: "completed",
+
+          model:
+            typeof data.model === "string"
+              ? data.model.trim() || undefined
+              : undefined,
+
           result:
-            typeof data.response === 'string'
+            typeof data.response === "string"
               ? data.response
               : data.output ?? data,
         };
