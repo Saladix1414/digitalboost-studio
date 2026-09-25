@@ -1,3 +1,5 @@
+import { preparePulsePlan } from "./DigitalBoostPulsePlanningEngine";
+
 import {
   buildPulseGoal,
   PULSE_GOAL_ENGINE_CONTRACT,
@@ -52,6 +54,7 @@ export type PulsePlanStep = {
   expected: Record<string, unknown>;
   checkpoint: boolean;
   approvalLikely: boolean;
+  planning?: import("./DigitalBoostPulsePlanningEngine").PulsePlanningStepPolicy;
 };
 
 export type PulsePlan = {
@@ -60,6 +63,12 @@ export type PulsePlan = {
   steps: PulsePlanStep[];
   status: PulsePlanStatus;
   createdAt: string;
+  planningContract?: string;
+  planningDecision?: import("./DigitalBoostPulsePlanningEngine").PulsePlanDecision;
+  planFingerprint?: string;
+  planningProvenance?: import("./DigitalBoostPulsePlanningEngine").PulsePlanProvenance;
+  planningValidation?: import("./DigitalBoostPulsePlanningEngine").PulsePlanValidation;
+  executionMode?: "SEQUENTIAL";
 };
 
 function nid(prefix: string) {
@@ -144,7 +153,7 @@ function goalQueryHint(
   }
 }
 
-export function compilePulseGoal(input: {
+function compilePulseGoalLegacy(input: {
   q?: string;
   action: string;
   section?: string;
@@ -382,4 +391,13 @@ export function closePulsePlan(
   return Object.assign({}, plan, {
     status: nextStatus,
   });
+}
+
+export function compilePulseGoal(
+  input: Parameters<typeof compilePulseGoalLegacy>[0],
+): PulsePlan {
+  const legacyPlan = compilePulseGoalLegacy(input);
+  return preparePulsePlan({
+    plan: legacyPlan,
+  }).plan;
 }

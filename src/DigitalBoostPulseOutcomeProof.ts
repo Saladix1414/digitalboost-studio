@@ -29,6 +29,8 @@ export type PulseGoalEvidenceBinding = {
   request_id: string;
   goal_fingerprint: string;
   plan_fingerprint: string;
+  planning_fingerprint?: string;
+  planning_contract?: string;
   success_criteria: string[];
   policy: string;
   policy_version?: string;
@@ -119,6 +121,8 @@ export function createPulseGoalEvidenceBinding(input: {
   policyVersion?: string;
   proposalHash?: string;
   expectedSteps: PulseGoalEvidenceBinding["expected_steps"];
+  planningFingerprint?: string;
+  planningContract?: string;
 }): PulseGoalEvidenceBinding {
   const base = {
     id: "geb_" + input.missionId,
@@ -129,6 +133,12 @@ export function createPulseGoalEvidenceBinding(input: {
     request_id: input.requestId,
     goal_fingerprint: input.goalFingerprint,
     plan_fingerprint: input.planFingerprint,
+    ...(input.planningFingerprint !== undefined
+      ? { planning_fingerprint: input.planningFingerprint }
+      : {}),
+    ...(input.planningContract !== undefined
+      ? { planning_contract: input.planningContract }
+      : {}),
     success_criteria: [...input.successCriteria],
     policy: input.policy,
     expected_steps: input.expectedSteps,
@@ -158,6 +168,14 @@ export function verifyPulseGoalEvidenceBinding(
     binding.success_criteria.includes("policy-evaluated") &&
     binding.success_criteria.includes(
       "expected-outcome-declared",
+    ) &&
+    (
+      binding.planning_fingerprint === undefined ||
+      binding.planning_fingerprint.length > 0
+    ) &&
+    (
+      binding.planning_contract === undefined ||
+      binding.planning_contract === "p0.5.3"
     )
   );
 }
@@ -182,6 +200,8 @@ export function reconcilePulseGoalEvidenceBinding(input: {
   missionId: string;
   planId: string;
   requestId: string;
+  planningFingerprint?: string;
+  planningContract?: string;
   steps: Array<{
     id: string;
     action: string;
@@ -221,6 +241,24 @@ export function reconcilePulseGoalEvidenceBinding(input: {
     fingerprintPulsePlan(input.steps)
   ) {
     mismatches.push("PLAN_FINGERPRINT");
+  }
+
+  if (
+    input.binding.planning_fingerprint !== undefined &&
+    input.planningFingerprint !== undefined &&
+    input.binding.planning_fingerprint !==
+      input.planningFingerprint
+  ) {
+    mismatches.push("PLANNING_FINGERPRINT");
+  }
+
+  if (
+    input.binding.planning_contract !== undefined &&
+    input.planningContract !== undefined &&
+    input.binding.planning_contract !==
+      input.planningContract
+  ) {
+    mismatches.push("PLANNING_CONTRACT");
   }
 
   const expectedSteps = input.steps.map(

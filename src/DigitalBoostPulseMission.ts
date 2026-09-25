@@ -1,3 +1,4 @@
+import { preparePulsePlan } from "./DigitalBoostPulsePlanningEngine";
 import type { PulsePlan, PulseMissionTerminalOutcome } from "./DigitalBoostPulsePlan";
 import { closePulsePlan } from "./DigitalBoostPulsePlan";
 import {
@@ -154,6 +155,10 @@ function closeMissionOutcome(
           missionId: mission.id,
           planId: mission.planId,
           requestId: mission.requestId,
+          planningFingerprint:
+            mission.plan.planFingerprint,
+          planningContract:
+            mission.plan.planningContract,
           steps: mission.plan.steps,
         })
       : null;
@@ -272,7 +277,22 @@ export function startPulseMission(input: {
     proposalHash?: string;
   };
 }): PulseMission {
-  const first = input.plan.steps[0];
+  const preparedMissionPlan =
+    preparePulsePlan({
+      plan: input.plan,
+    }).plan;
+
+  if (
+    preparedMissionPlan.planningDecision !==
+      "ALLOW_PLAN" ||
+    !preparedMissionPlan.planningValidation?.valid
+  ) {
+    throw new Error(
+      "PULSE_PLAN_NOT_EXECUTABLE",
+    );
+  }
+
+  const first = preparedMissionPlan.steps[0];
   const awaiting = Boolean(first && first.approvalLikely);
 
   const missionId = nid();
@@ -282,32 +302,36 @@ export function startPulseMission(input: {
   const outcomeContract =
     createPulseOutcomeContract({
       missionId,
-      planId: input.plan.id,
+      planId: preparedMissionPlan.id,
       requestId: missionRequestId,
-      steps: input.plan.steps.map(function (step) {
+      steps: preparedMissionPlan.steps.map(function (step) {
         return { id: step.id, action: step.action };
       }),
     });
 
   const goalEvidenceBinding =
     createPulseGoalEvidenceBinding({
-      goalId: input.plan.goal.id,
+      goalId: preparedMissionPlan.goal.id,
       missionId,
-      planId: input.plan.id,
+      planId: preparedMissionPlan.id,
       requestId: missionRequestId,
       goalFingerprint:
-        fingerprintPulseGoal(input.plan.goal),
+        fingerprintPulseGoal(preparedMissionPlan.goal),
       planFingerprint:
-        fingerprintPulsePlan(input.plan.steps),
+        fingerprintPulsePlan(preparedMissionPlan.steps),
+      planningFingerprint:
+        preparedMissionPlan.planFingerprint,
+      planningContract:
+        preparedMissionPlan.planningContract,
       successCriteria:
-        input.plan.goal.successCriteria,
+        preparedMissionPlan.goal.successCriteria,
       policy: input.goalEvidence?.policy || "UNKNOWN",
       policyVersion:
         input.goalEvidence?.policyVersion,
       proposalHash:
         input.goalEvidence?.proposalHash,
       expectedSteps:
-        input.plan.steps.map(function (step, step_index) {
+        preparedMissionPlan.steps.map(function (step, step_index) {
           return {
             step_id: step.id,
             step_index,
@@ -320,7 +344,7 @@ export function startPulseMission(input: {
   return save({
     id: missionId,
     store: input.store,
-    planId: input.plan.id,
+    planId: preparedMissionPlan.id,
     requestId: missionRequestId,
     section: input.section,
     state: awaiting
@@ -331,7 +355,7 @@ export function startPulseMission(input: {
     maxRetries: 2,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    plan: input.plan,
+    plan: preparedMissionPlan,
     outcomeContract,
     goalEvidenceBinding,
     proofChain: [],
@@ -438,7 +462,7 @@ export function repairPulseMission(id: string): PulseMission | null {
       });
   }
 
-  const repairedPlan: PulsePlan = {
+  let repairedPlan: PulsePlan = {
     id:
       "rplan_" +
       Date.now().toString(36) +
@@ -446,14 +470,46 @@ export function repairPulseMission(id: string): PulseMission | null {
       Math.random().toString(36).slice(2, 6),
     goal: {
       id:
-        "rgoal_" +
-        Date.now().toString(36) +
-        "_" +
-        Math.random().toString(36).slice(2, 6),
+        source.plan.goal.id,
+
       statement: source.plan.goal.statement,
+      desiredOutcome:
+        source.plan.goal.desiredOutcome,
       constraints: [...source.plan.goal.constraints],
       successCriteria: [...source.plan.goal.successCriteria],
       riskFloor: source.plan.goal.riskFloor,
+      priority:
+        source.plan.goal.priority,
+      intent:
+        source.plan.goal.intent,
+      intentConfidence:
+        source.plan.goal.intentConfidence,
+      tenantId:
+        source.plan.goal.tenantId,
+      store:
+        source.plan.goal.store ||
+        source.store,
+      section:
+        source.plan.goal.section ||
+        source.section,
+      contextId:
+        source.plan.goal.contextId,
+      contextVersion:
+        source.plan.goal.contextVersion,
+      evidenceRequirements:
+        source.plan.goal.evidenceRequirements,
+      provenance:
+        source.plan.goal.provenance,
+      fingerprint:
+        source.plan.goal.fingerprint,
+      decision:
+        source.plan.goal.decision,
+      clarificationRequired:
+        source.plan.goal.clarificationRequired,
+      authorizationRequired:
+        source.plan.goal.authorizationRequired,
+      goalEngineContract:
+        source.plan.goal.goalEngineContract,
     },
     steps: repairedSteps,
     status: "READY",
@@ -476,6 +532,41 @@ export function repairPulseMission(id: string): PulseMission | null {
       section: source.section,
     });
   } catch {}
+
+  repairedPlan.goal = {
+    ...repairedPlan.goal,
+    contextVersion:
+      repairContextVersion ||
+      repairedPlan.goal.contextVersion,
+    provenance:
+      repairedPlan.goal.provenance
+        ? {
+            ...repairedPlan.goal.provenance,
+            contextVersion:
+              repairContextVersion ||
+              repairedPlan.goal.provenance.contextVersion,
+          }
+        : repairedPlan.goal.provenance,
+  };
+
+  repairedPlan.goal = {
+    ...repairedPlan.goal,
+    fingerprint:
+      fingerprintPulseGoal(repairedPlan.goal),
+  };
+
+  repairedPlan =
+    preparePulsePlan({
+      plan: repairedPlan,
+    }).plan;
+
+  if (
+    repairedPlan.planningDecision !==
+      "ALLOW_PLAN" ||
+    !repairedPlan.planningValidation?.valid
+  ) {
+    return null;
+  }
 
   const outcomeContract = createPulseOutcomeContract({
     missionId: newMissionId,
@@ -500,6 +591,10 @@ export function repairPulseMission(id: string): PulseMission | null {
         fingerprintPulseGoal(repairedPlan.goal),
       planFingerprint:
         fingerprintPulsePlan(repairedPlan.steps),
+      planningFingerprint:
+        repairedPlan.planFingerprint,
+      planningContract:
+        repairedPlan.planningContract,
       successCriteria:
         repairedPlan.goal.successCriteria,
       policy:
