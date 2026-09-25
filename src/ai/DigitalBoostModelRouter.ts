@@ -1,125 +1,275 @@
 /**
  * DigitalBoostModelRouter
  *
- * Decide qué modelo usar sin depender de una etiqueta
- * concreta de Ollama.
+ * P0.7.1 — integración con Model Intelligence.
  *
- * Fallback:
- * modelo especializado
- * -> otro modelo compatible
- * -> Rules Engine
+ * Responsabilidades:
+ * - registrar la selección de modelos;
+ * - aplicar compatibilidad dura;
+ * - respetar preferencias sin convertirlas en autoridad;
+ * - conservar fallback explícito;
+ * - producir evidencia explicable mediante
+ *   PulseModelSelectionContract.
+ *
+ * NO ejecuta modelos.
+ * NO concede permisos.
+ * NO modifica Governance.
+ * NO ejecuta herramientas.
  */
 
 import type {
+  AIProvider,
   ModelCapability,
   ModelSelectionRequest,
   ModelSelectionResult,
-} from '../types/DigitalBoostAI';
+} from "../types/DigitalBoostAI";
 
-import DigitalBoostModelRegistry from './DigitalBoostModelRegistry';
+import DigitalBoostModelRegistry from "./DigitalBoostModelRegistry";
+
+import {
+  createPulseModelSelectionContract,
+  normalizePulseModelTaskProfile,
+  evaluatePulseModelCandidate,
+  type PulseModelSelectionContract,
+  type PulseModelTaskProfile,
+} from "./DigitalBoostModelIntelligence";
 
 export class DigitalBoostModelRouter {
+  private readonly registry: DigitalBoostModelRegistry;
+
   constructor(
-    private readonly registry: DigitalBoostModelRegistry
-  ) {}
+    registry: DigitalBoostModelRegistry,
+  ) {
+    this.registry = registry;
+  }
 
-  select(
-    request: ModelSelectionRequest
-  ): ModelSelectionResult {
-    const available =
-      this.registry.getAvailable();
+  /*
+   * Nueva ruta P0.7.1.
+   *
+   * La selección:
+   * 1. normaliza el perfil;
+   * 2. evalúa compatibilidad dura;
+   * 3. puntúa únicamente candidatos elegibles;
+   * 4. marca fallback cuando se debe abandonar
+   *    el proveedor preferido;
+   * 5. produce evidencia de selección.
+   */
+  selectIntelligent(
+    profile: PulseModelTaskProfile,
+  ): PulseModelSelectionContract {
+    const candidates =
+      this.registry
+        .getAvailable()
+        .slice()
+        .sort((a, b) => {
+          const aRef =
+            `${a.provider}/${a.modelId}`;
+          const bRef =
+            `${b.provider}/${b.modelId}`;
 
-    if (!available.length) {
-      return {
+          return aRef.localeCompare(bRef);
+        });
+
+    if (!candidates.length) {
+      const rawSelection: ModelSelectionResult = {
         model: null,
         reason:
-          'No hay modelos disponibles. Debe utilizarse Rules Engine.',
+          "No hay modelos disponibles. Debe utilizarse Rules Engine.",
         fallbackUsed: true,
       };
+
+      return createPulseModelSelectionContract({
+        profile,
+        rawSelection,
+        candidates,
+      });
     }
 
-    const requestedCapabilities =
-      request.capabilities || [];
+    const evaluations =
+      candidates.map(model => ({
+        model,
+        evaluation:
+          evaluatePulseModelCandidate(
+            profile,
+            model,
+          ),
+      }));
 
-    const ranked = available
-      .map(model => {
-        let score = 0;
+    const eligible =
+      evaluations.filter(
+        entry =>
+          entry.evaluation.eligible,
+      );
 
-        if (
-          request.preferredProvider &&
-          model.provider === request.preferredProvider
-        ) {
-          score += 100;
-        }
+    if (!eligible.length) {
+      const rawSelection: ModelSelectionResult = {
+        model: null,
+        reason:
+          "No existe un modelo compatible con los requisitos de Model Intelligence.",
+        fallbackUsed: true,
+      };
 
-        for (const capability of requestedCapabilities) {
-          if (
-            model.capabilities.includes(capability)
-          ) {
-            score += 50;
+      return createPulseModelSelectionContract({
+        profile,
+        rawSelection,
+        candidates,
+      });
+    }
+
+    const ranked =
+      eligible
+        .map(entry => ({
+          model: entry.model,
+          score:
+            this.scoreEligibleModel(
+              profile,
+              entry.model,
+            ),
+        }))
+        .sort((a, b) => {
+          if (b.score !== a.score) {
+            return b.score - a.score;
           }
-        }
 
-        if (
-          model.preferredTasks.some(task =>
-            request.task
-              .toLowerCase()
-              .includes(task.toLowerCase())
-          )
-        ) {
-          score += 40;
-        }
+          const aRef =
+            `${a.model.provider}/${a.model.modelId}`;
+          const bRef =
+            `${b.model.provider}/${b.model.modelId}`;
 
-        /*
-         * Menor fallbackPriority = mayor prioridad.
-         */
-        score += Math.max(
-          0,
-          30 - model.fallbackPriority
-        );
+          return aRef.localeCompare(bRef);
+        });
 
-        if (
-          request.requireTools &&
-          model.provider === 'ollama'
-        ) {
-          /*
-           * Ollama por sí solo no implica herramientas.
-           * OpenClaw debe encargarse de la orquestación.
-           */
-          score -= 10;
-        }
+    const selected =
+      ranked[0];
 
-        return { model, score };
-      })
-      .sort((a, b) => b.score - a.score);
+    const fallbackUsed =
+      Boolean(
+        profile.preferredProvider &&
+          selected.model.provider !==
+            profile.preferredProvider,
+      );
 
-    const selected = ranked[0];
+    const reason =
+      fallbackUsed
+        ? `Proveedor preferido no elegible; fallback seleccionado: ${selected.model.provider}/${selected.model.modelId}.`
+        : `Modelo seleccionado para tarea "${profile.task}".`;
 
-    if (!selected) {
-      return {
-        model: null,
-        reason:
-          'No se encontró un modelo compatible.',
-        fallbackUsed: true,
-      };
-    }
-
-    return {
+    const rawSelection: ModelSelectionResult = {
       model: selected.model,
-      reason:
-        `Modelo seleccionado para tarea "${request.task}".`,
-      fallbackUsed: false,
+      reason,
+      fallbackUsed,
     };
+
+    return createPulseModelSelectionContract({
+      profile,
+      rawSelection,
+      candidates,
+    });
+  }
+
+  /*
+   * Compatibilidad con la API existente.
+   *
+   * Los consumidores actuales siguen recibiendo
+   * ModelSelectionResult, pero la selección ahora
+   * pasa por Model Intelligence.
+   */
+  select(
+    request: ModelSelectionRequest,
+  ): ModelSelectionResult {
+    const profile =
+      normalizePulseModelTaskProfile({
+        task: request.task,
+        requiredCapabilities:
+          request.capabilities || [],
+        preferredProvider:
+          request.preferredProvider,
+        risk:
+          request.risk === "high"
+            ? "L3"
+            : request.risk === "medium"
+              ? "L2"
+              : "L1",
+        requireTools:
+          Boolean(request.requireTools),
+      });
+
+    return this.selectIntelligent(
+      profile,
+    ).rawSelection;
   }
 
   selectForTask(
     task: string,
-    capabilities: ModelCapability[] = []
+    capabilities: ModelCapability[] = [],
   ): ModelSelectionResult {
     return this.select({
       task,
       capabilities,
     });
+  }
+
+  /*
+   * Preserva el scoring original, pero únicamente
+   * después de que Model Intelligence confirme
+   * compatibilidad.
+   */
+  private scoreEligibleModel(
+    profile: PulseModelTaskProfile,
+    model: {
+      provider: AIProvider;
+      modelId: string;
+      preferredTasks: string[];
+      capabilities: ModelCapability[];
+      fallbackPriority: number;
+    },
+  ): number {
+    let score = 0;
+
+    if (
+      profile.preferredProvider &&
+      model.provider ===
+        profile.preferredProvider
+    ) {
+      score += 100;
+    }
+
+    for (
+      const capability
+      of profile.requiredCapabilities
+    ) {
+      if (
+        model.capabilities.includes(
+          capability,
+        )
+      ) {
+        score += 50;
+      }
+    }
+
+    if (
+      model.preferredTasks.some(
+        task =>
+          profile.task
+            .toLowerCase()
+            .includes(
+              task.toLowerCase(),
+            ),
+      )
+    ) {
+      score += 40;
+    }
+
+    /*
+     * Menor fallbackPriority =
+     * mayor prioridad de selección.
+     */
+    score += Math.max(
+      0,
+      30 - model.fallbackPriority,
+    );
+
+    return score;
   }
 }
 
