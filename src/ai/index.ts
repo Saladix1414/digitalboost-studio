@@ -7,3 +7,5 @@ export {
 } from './DigitalBoostModelRouter';
 
 export * from './DigitalBoostModelIntelligence';
+
+export * from './DigitalBoostPulseInference';
