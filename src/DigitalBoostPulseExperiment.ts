@@ -3,7 +3,7 @@ export type PulseExperimentStatus = "DRAFT" | "RUNNING" | "STOPPED" | "COMPLETED
 export type PulseVariant = { id: string; label: string; action: string; payload: Record<string, unknown> };
 export type PulseHypothesis = { statement: string; metric: string; direction: "up" | "down" };
 export type PulseExperiment = {
-  id: string; store: string; status: PulseExperimentStatus;
+  id: string; store: string; tenantId?: string; status: PulseExperimentStatus;
   hypothesis: PulseHypothesis; variants: PulseVariant[];
   guardrails: string[]; stopConditions: string[];
   createdAt: string; updatedAt: string; result?: string;
@@ -29,22 +29,54 @@ function save(row: PulseExperiment): PulseExperiment {
   writeAll(rows);
   return next;
 }
-export function createPulseExperiment(input: { store: string; hypothesis: PulseHypothesis; variants: PulseVariant[] }): PulseExperiment | null {
+export function createPulseExperiment(input: {
+  store: string;
+  tenantId?: string;
+  hypothesis: PulseHypothesis;
+  variants: PulseVariant[];
+}): PulseExperiment | null {
   if (!ALLOWED_METRICS.has(input.hypothesis.metric)) return null;
   if (!input.variants.length) return null;
+
   return save({
-    id: nid(), store: input.store, status: "DRAFT",
-    hypothesis: input.hypothesis, variants: input.variants,
-    guardrails: ["no-invented-metrics", "governance-before-mutate", "rollback-on-verify-fail"],
-    stopConditions: ["manual-stop", "verify-fail", "max-one-running-per-store"],
-    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+    id: nid(),
+    store: input.store,
+    tenantId: input.tenantId,
+    status: "DRAFT",
+    hypothesis: input.hypothesis,
+    variants: input.variants,
+    guardrails: [
+      "no-invented-metrics",
+      "governance-before-mutate",
+      "rollback-on-verify-fail",
+    ],
+    stopConditions: [
+      "manual-stop",
+      "verify-fail",
+      "max-one-running-per-store-and-tenant",
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   });
 }
 export function startPulseExperiment(id: string): PulseExperiment | null {
   const rows = readAll();
   const exp = rows.filter(function (e) { return e.id === id; })[0];
   if (!exp || exp.status !== "DRAFT") return null;
-  const running = rows.some(function (e) { return e.store === exp.store && e.status === "RUNNING"; });
+  const running = rows.some(function (e) {
+    if (e.store !== exp.store || e.status !== "RUNNING") return false;
+
+    /*
+     * Explicit tenant experiments are isolated from one another.
+     * Legacy experiments without tenantId retain the historical
+     * store-wide constraint.
+     */
+    if (exp.tenantId) {
+      return e.tenantId === exp.tenantId;
+    }
+
+    return !e.tenantId;
+  });
   if (running) return null;
   return save(Object.assign({}, exp, { status: "RUNNING" }));
 }
@@ -53,9 +85,18 @@ export function stopPulseExperiment(id: string, reason: string): PulseExperiment
   if (!exp || (exp.status !== "RUNNING" && exp.status !== "DRAFT")) return null;
   const stopped = save(Object.assign({}, exp, { status: "STOPPED", result: reason }));
   rememberPulse({
-    kind: "lesson", scope: stopped.store, source: "executor",
-    evidenceRefs: [stopped.id], confidence: 0.6,
-    content: { experimentId: stopped.id, hypothesis: stopped.hypothesis, result: reason },
+    kind: "lesson",
+    scope: stopped.store,
+    tenantId: stopped.tenantId,
+    store: stopped.store,
+    source: "executor",
+    evidenceRefs: [stopped.id],
+    confidence: 0.6,
+    content: {
+      experimentId: stopped.id,
+      hypothesis: stopped.hypothesis,
+      result: reason,
+    },
   });
   return stopped;
 }

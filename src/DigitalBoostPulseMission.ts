@@ -20,6 +20,7 @@ import {
 import { rememberMissionOutcome } from "./DigitalBoostPulseMemory";
 import { hasPulseMissionOutcomeAudit, pushAudit, requestId } from "./DigitalBoostPulseLog";
 import { currentContextVersion } from "./DigitalBoostPulseContext";
+import { resolvePulseTenantAttribution } from "./DigitalBoostPulseTenant";
 export type PulseMissionState = "RUNNING" | "PAUSED" | "AWAITING_APPROVAL" | "COMPLETED" | "FAILED" | "CANCELLED";
 export type PulseMissionOutcome = {
   id: string; status: PulseMissionTerminalOutcome; missionId: string; planId: string;
@@ -203,6 +204,7 @@ function closeMissionOutcome(
   try {
     rememberMissionOutcome({
       scope: mission.store,
+      tenantId: mission.plan.goal.tenantId || mission.store,
       missionId: mission.id,
       planId: mission.planId,
       requestId: mission.requestId,
@@ -221,11 +223,15 @@ function closeMissionOutcome(
     });
   } catch {}
 
+  const missionTenant = resolvePulseTenantAttribution({
+    goalTenantId: mission.plan.goal.tenantId,
+  });
+
   try {
     if (!hasPulseMissionOutcomeAudit(mission.id, id)) {
       pushAudit({
         timestamp: recordedAt,
-        tenant_id: "digitalboost",
+        tenant_id: missionTenant.tenantId,
         store_id: mission.store,
         actor_type:
           input.status === "CANCELLED"
@@ -268,6 +274,7 @@ function closeMissionOutcome(
 
 export function startPulseMission(input: {
   store: string;
+  tenantId?: string;
   plan: PulsePlan;
   requestId?: string;
   section?: string;
@@ -277,6 +284,33 @@ export function startPulseMission(input: {
     proposalHash?: string;
   };
 }): PulseMission {
+
+  const explicitTenantId =
+    typeof input.tenantId === "string"
+      ? input.tenantId.trim()
+      : "";
+
+  const planTenantId =
+    typeof input.plan.goal.tenantId === "string"
+      ? input.plan.goal.tenantId.trim()
+      : "";
+
+  if (explicitTenantId && !planTenantId) {
+    throw new Error(
+      "PULSE_TENANT_ID_MISSING_IN_PLAN",
+    );
+  }
+
+  if (
+    explicitTenantId &&
+    planTenantId &&
+    explicitTenantId !== planTenantId
+  ) {
+    throw new Error(
+      "PULSE_TENANT_MISMATCH",
+    );
+  }
+
   const preparedMissionPlan =
     preparePulsePlan({
       plan: input.plan,
@@ -398,11 +432,15 @@ export function repairPulseMission(id: string): PulseMission | null {
 
   const generation = source.repairGeneration || 0;
 
+  const sourceTenant = resolvePulseTenantAttribution({
+    goalTenantId: source.plan.goal.tenantId,
+  });
+
   if (generation >= PULSE_MAX_REPAIR_GENERATIONS) {
     try {
       pushAudit({
         timestamp: new Date().toISOString(),
-        tenant_id: "digitalboost",
+        tenant_id: sourceTenant.tenantId,
         store_id: source.store,
         actor_type: "system",
         request_id: source.requestId,
@@ -643,10 +681,14 @@ export function repairPulseMission(id: string): PulseMission | null {
     proofChain: [],
   };
 
+  const repairedMissionTenant = resolvePulseTenantAttribution({
+    goalTenantId: repairedPlan.goal.tenantId,
+  });
+
   try {
     pushAudit({
       timestamp: new Date().toISOString(),
-      tenant_id: "digitalboost",
+      tenant_id: repairedMissionTenant.tenantId,
       store_id: source.store,
       actor_type: "system",
       request_id: newRequestId,

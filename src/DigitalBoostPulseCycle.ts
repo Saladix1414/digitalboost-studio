@@ -14,6 +14,7 @@ import {
   type PulseApproval,
 } from "./DigitalBoostPulseGovernance";
 import { currentContextVersion } from "./DigitalBoostPulseContext";
+import { resolvePulseTenantAttribution } from "./DigitalBoostPulseTenant";
 
 export type CycleMeta = {
   request_id: string;
@@ -37,6 +38,7 @@ export function runCycle(input: {
   q: string;
   section: string;
   store: string;
+  tenantId?: string;
   action: string;
   title: string;
   body: string;
@@ -49,7 +51,7 @@ export function runCycle(input: {
     q: input.q,
     section: input.section,
     store: input.store,
-    tenantId: input.store,
+    tenantId: input.tenantId || input.store,
   });
   const intent = intentClassification.legacyIntent || legacyIntent;
   const write = isWriteIntent(intent) || input.alreadyConfirm;
@@ -118,10 +120,19 @@ export function runCycle(input: {
 
   // IMPORTANTE: Cycle propone / espera aprobación.
   // Nunca declara SUCCEEDED antes de que el Executor termine.
+  //
+  // Tenant attribution:
+  // - explicit tenantId wins;
+  // - legacy runtime falls back to digitalboost;
+  // - this is NOT a security authority.
+  const cycleTenant = resolvePulseTenantAttribution({
+    explicitTenantId: input.tenantId,
+  });
+
   try {
     pushAudit({
       timestamp: new Date().toISOString(),
-      tenant_id: "digitalboost",
+      tenant_id: cycleTenant.tenantId,
       store_id: input.store,
       actor_type: "merchant",
       request_id: envelope.request_id,
@@ -154,7 +165,7 @@ export function runCycle(input: {
     action: input.action,
     section: input.section,
     store: input.store,
-    tenantId: input.store,
+    tenantId: input.tenantId || input.store,
     contextVersion,
     intentClassification,
   });
@@ -166,6 +177,7 @@ export function runCycle(input: {
       ? undefined
       : startPulseMission({
           store: input.store,
+          tenantId: input.tenantId,
           section: input.section,
           plan,
           requestId: envelope.request_id,
