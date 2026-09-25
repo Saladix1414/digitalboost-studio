@@ -21,6 +21,12 @@ export interface OpenClawTaskRequest {
   context?: Record<string, unknown>;
   risk?: 'low' | 'medium' | 'high';
   requiresApproval?: boolean;
+
+  /*
+   * P0.7.2.1 strict runtime binding.
+   * When true, backend MUST use exactly the requested modelRef.
+   */
+  strictModelBinding?: boolean;
 }
 
 export interface OpenClawTaskResult {
@@ -151,6 +157,8 @@ export class DigitalBoostOpenClawBridge {
             risk: request.risk,
             requiresApproval:
               request.requiresApproval ?? true,
+            strictModelBinding:
+              request.strictModelBinding ?? false,
           }),
         }
       );

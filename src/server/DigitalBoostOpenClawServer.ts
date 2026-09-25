@@ -5,6 +5,11 @@ type OpenClawTaskRequest = {
   prompt?: string;
   model?: string;
   context?: Record<string, unknown>;
+  /*
+   * P0.7.2.1 strict runtime binding.
+   * When true, the backend MUST use exactly the requested model.
+   */
+  strictModelBinding?: boolean;
 };
 
 type OpenClawTaskResult = {
@@ -52,6 +57,92 @@ function allowedModel(value: unknown): string | undefined {
   }
 
   return model;
+}
+
+export interface OpenClawModelResolution {
+  ok: boolean;
+  model?: string;
+  error?: "MODEL_NOT_FOUND";
+}
+
+/**
+ * P0.7.2.1
+ *
+ * Strict mode:
+ *   - exige un model solicitado válido
+ *   - exige coincidencia exacta contra los modelos descubiertos
+ *   - jamás sustituye el modelo pedido por otro
+ *
+ * Legacy mode:
+ *   - conserva el comportamiento anterior
+ *   - usa el modelo solicitado si existe
+ *   - si no existe, prefiere Qwen
+ *   - si no existe Qwen, usa el primero disponible
+ */
+export function resolveOpenClawModel(
+  requestedModel: string | undefined,
+  discoveredModels: string[],
+  strictModelBinding = false,
+): OpenClawModelResolution {
+  const requested = requestedModel?.trim() || "";
+
+  const uniqueModels = Array.from(
+    new Set(
+      discoveredModels
+        .map((model) => String(model).trim())
+        .filter(Boolean),
+    ),
+  );
+
+  if (strictModelBinding) {
+    if (
+      requested &&
+      uniqueModels.includes(requested)
+    ) {
+      return {
+        ok: true,
+        model: requested,
+      };
+    }
+
+    return {
+      ok: false,
+      error: "MODEL_NOT_FOUND",
+    };
+  }
+
+  if (
+    requested &&
+    uniqueModels.includes(requested)
+  ) {
+    return {
+      ok: true,
+      model: requested,
+    };
+  }
+
+  const qwen = uniqueModels.find((model) =>
+    /qwen/i.test(model),
+  );
+
+  if (qwen) {
+    return {
+      ok: true,
+      model: qwen,
+    };
+  }
+
+  if (uniqueModels.length > 0) {
+    return {
+      ok: true,
+      model: uniqueModels[0],
+    };
+  }
+
+  return {
+    ok: false,
+    error: "MODEL_NOT_FOUND",
+  };
 }
 
 function runOpenClaw(
@@ -282,21 +373,6 @@ async function discoverModels(): Promise<string[]> {
   }
 }
 
-async function discoverDefaultModel(): Promise<string | undefined> {
-  const models = await discoverModels();
-
-  if (models.length === 0) {
-    return undefined;
-  }
-
-  // Preferencia estable: Qwen si está disponible.
-  const qwen = models.find((model) =>
-    /qwen/i.test(model),
-  );
-
-  return qwen || models[0];
-}
-
 let inferBusy = false;
 
 export function registerOpenClawRoutes(app: any) {
@@ -369,19 +445,28 @@ export function registerOpenClawRoutes(app: any) {
       const requestedModel = allowedModel(body.model);
       const discoveredModels = await discoverModels();
 
-      const model =
-        requestedModel &&
-        discoveredModels.includes(requestedModel)
-          ? requestedModel
-          : await discoverDefaultModel();
+      const resolution = resolveOpenClawModel(
+        requestedModel,
+        discoveredModels,
+        body.strictModelBinding === true,
+      );
 
-      if (!model) {
-        res.status(503).json({
+      if (!resolution.ok || !resolution.model) {
+        res.status(
+          body.strictModelBinding === true
+            ? 409
+            : 503,
+        ).json({
           ok: false,
-          error: "No local Ollama model available through OpenClaw",
+          error:
+            body.strictModelBinding === true
+              ? "MODEL_NOT_FOUND"
+              : "No local Ollama model available through OpenClaw",
         });
         return;
       }
+
+      const model = resolution.model;
 
       const context =
         body.context && typeof body.context === "object"
