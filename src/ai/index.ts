@@ -13,3 +13,5 @@ export * from './DigitalBoostPulseInference';
 export * from './DigitalBoostPulseInferenceRuntime';
 
 export * from './DigitalBoostModelRuntimeBinding';
+
+export * from './DigitalBoostPulseInferenceEvidence';

@@ -21,6 +21,11 @@ import type {
   OpenClawTaskResult,
 } from "../openclaw/DigitalBoostOpenClawBridge";
 
+import {
+  createPulseInferenceEvidence,
+  type PulseInferenceEvidenceReceipt,
+} from "./DigitalBoostPulseInferenceEvidence";
+
 export const PULSE_INFERENCE_CONTRACT =
   "p0.7.2.0" as const;
 
@@ -110,6 +115,10 @@ export interface PulseInferenceResult {
 
   modelRef: string;
 
+  expectedRuntimeModelRef?: string;
+
+  runtimeModelRef?: string;
+
   provider: string;
 
   selectionFingerprint: string;
@@ -125,6 +134,8 @@ export interface PulseInferenceResult {
   latencyMs?: number;
 
   provenance: PulseInferenceProvenance;
+
+  evidence?: PulseInferenceEvidenceReceipt;
 }
 
 export interface PulseInferenceBindingResult {
@@ -281,19 +292,33 @@ export function classifyPulseInferenceBridgeFailure(
 export function normalizePulseInferenceResult(
   input: {
     request: PulseInferenceRequest;
-    bridgeResult: OpenClawTaskResult;
-    provider: string;
-    runtimeModelRef: string;
-    startedAt?: string;
-    completedAt?: string;
-    latencyMs?: number;
+
+    bridgeResult:
+      OpenClawTaskResult;
+
+    provider:
+      string;
+
+    runtimeModelRef:
+      string;
+
+    startedAt?:
+      string;
+
+    completedAt?:
+      string;
+
+    latencyMs?:
+      number;
   },
 ): PulseInferenceResult {
   const expectedRuntimeModelRef =
-    input.request.expectedRuntimeModelRef?.trim() ||
+    input.request
+      .expectedRuntimeModelRef
+      ?.trim() ||
     input.request.modelRef.trim();
 
-  const provenance = {
+  const provenance: PulseInferenceProvenance = {
     contract:
       PULSE_INFERENCE_CONTRACT,
 
@@ -303,12 +328,9 @@ export function normalizePulseInferenceResult(
     modelRef:
       input.request.modelRef,
 
-    runtimeModelRef:
-      input.runtimeModelRef ||
-      undefined,
-
     selectionFingerprint:
-      input.request.selectionFingerprint,
+      input.request
+        .selectionFingerprint,
 
     provider:
       input.provider,
@@ -323,6 +345,94 @@ export function normalizePulseInferenceResult(
       input.latencyMs,
   };
 
+  function bindingStatus():
+    "MATCH" |
+    "MISMATCH" |
+    "UNAVAILABLE" {
+    const expected =
+      expectedRuntimeModelRef;
+
+    const runtime =
+      input.runtimeModelRef.trim();
+
+    if (!runtime) {
+      return "UNAVAILABLE";
+    }
+
+    return runtime === expected
+      ? "MATCH"
+      : "MISMATCH";
+  }
+
+  function finalize(
+    partial:
+      Omit<
+        PulseInferenceResult,
+        "evidence"
+      >,
+  ): PulseInferenceResult {
+    const receipt =
+      createPulseInferenceEvidence({
+        requestId:
+          input.request.requestId,
+
+        selectionFingerprint:
+          input.request
+            .selectionFingerprint,
+
+        selectionModelRef:
+          input.request.modelRef,
+
+        expectedRuntimeModelRef,
+
+        runtimeModelRef:
+          input.runtimeModelRef,
+
+        provider:
+          input.provider,
+
+        status:
+          partial.status,
+
+        bindingStatus:
+          bindingStatus(),
+
+        output:
+          partial.output,
+
+        failure:
+          partial.failure,
+
+        error:
+          partial.error,
+
+        startedAt:
+          input.startedAt,
+
+        completedAt:
+          input.completedAt,
+
+        latencyMs:
+          input.latencyMs,
+      });
+
+    return {
+      ...partial,
+
+      expectedRuntimeModelRef,
+
+      runtimeModelRef:
+        input.runtimeModelRef ||
+        undefined,
+
+      evidence:
+        receipt,
+    };
+  }
+
+  /*
+   * Completed inference must satisfy exact runtime binding.
+   */
   if (
     input.bridgeResult.status ===
     "completed"
@@ -337,7 +447,7 @@ export function normalizePulseInferenceResult(
       });
 
     if (!binding.valid) {
-      return {
+      return finalize({
         contract:
           PULSE_INFERENCE_CONTRACT,
 
@@ -349,10 +459,6 @@ export function normalizePulseInferenceResult(
 
         modelRef:
           input.request.modelRef,
-
-        runtimeModelRef:
-          input.runtimeModelRef ||
-          undefined,
 
         provider:
           input.provider,
@@ -374,7 +480,7 @@ export function normalizePulseInferenceResult(
           input.latencyMs,
 
         provenance,
-      };
+      });
     }
   }
 
@@ -388,7 +494,7 @@ export function normalizePulseInferenceResult(
       "completed" &&
     output === undefined
   ) {
-    return {
+    return finalize({
       contract:
         PULSE_INFERENCE_CONTRACT,
 
@@ -400,10 +506,6 @@ export function normalizePulseInferenceResult(
 
       modelRef:
         input.request.modelRef,
-
-      runtimeModelRef:
-        input.runtimeModelRef ||
-        undefined,
 
       provider:
         input.provider,
@@ -425,14 +527,14 @@ export function normalizePulseInferenceResult(
         input.latencyMs,
 
       provenance,
-    };
+    });
   }
 
   if (
     input.bridgeResult.status !==
     "completed"
   ) {
-    return {
+    return finalize({
       contract:
         PULSE_INFERENCE_CONTRACT,
 
@@ -444,10 +546,6 @@ export function normalizePulseInferenceResult(
 
       modelRef:
         input.request.modelRef,
-
-      runtimeModelRef:
-        input.runtimeModelRef ||
-        undefined,
 
       provider:
         input.provider,
@@ -471,10 +569,10 @@ export function normalizePulseInferenceResult(
         input.latencyMs,
 
       provenance,
-    };
+    });
   }
 
-  return {
+  return finalize({
     contract:
       PULSE_INFERENCE_CONTRACT,
 
@@ -486,10 +584,6 @@ export function normalizePulseInferenceResult(
 
     modelRef:
       input.request.modelRef,
-
-    runtimeModelRef:
-      input.runtimeModelRef ||
-      undefined,
 
     provider:
       input.provider,
@@ -507,5 +601,5 @@ export function normalizePulseInferenceResult(
       input.latencyMs,
 
     provenance,
-  };
+  });
 }
