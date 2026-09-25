@@ -5,3 +5,5 @@ export {
 export {
   default as DigitalBoostModelRouter,
 } from './DigitalBoostModelRouter';
+
+export * from './DigitalBoostModelIntelligence';
