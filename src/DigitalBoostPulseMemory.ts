@@ -1,9 +1,13 @@
 export {
   PULSE_MEMORY_ENGINE_CONTRACT,
   fingerprintMemorySemantic,
+  fingerprintMemoryClaim,
   listPulseMemory,
   queryPulseMemory,
   queryTrustedPulseMemory,
+  findPulseMemoryActiveConflicts,
+  getPulseMemoryLineage,
+  reconcilePulseMemory,
   rememberPulse,
   rememberDecision,
   rememberMissionOutcome,
@@ -24,6 +28,9 @@ export type {
   PulseMemoryItem,
   PulseMemoryQuery,
   RememberPulseInput,
+  PulseMemoryReplacementInput,
+  PulseMemoryReconciliationAction,
+  PulseMemoryReconciliationResult,
   PulseMemoryVerificationEvidence,
   PulseMissionOutcomeMemoryInput,
 } from "./DigitalBoostPulseMemoryEngine";

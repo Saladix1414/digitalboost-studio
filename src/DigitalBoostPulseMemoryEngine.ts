@@ -46,6 +46,38 @@ export type PulseMemoryIdentityMode =
   | "EXPLICIT_TENANT"
   | "LEGACY_SCOPE";
 
+export type PulseMemoryReconciliationAction =
+  | "REAFFIRM"
+  | "REPLACE"
+  | "EXPIRE"
+  | "REJECT";
+
+export type PulseMemoryReconciliationResult = {
+  ok: boolean;
+  action: PulseMemoryReconciliationAction;
+  memory?: PulseMemoryItem;
+  replacement?: PulseMemoryItem;
+  conflictIds?: string[];
+  reason?: string;
+};
+
+export type PulseMemoryReplacementInput = {
+  scope?: string;
+  store?: string;
+  kind?: PulseMemoryKind;
+  content?: unknown;
+  source?: string;
+  evidenceRefs?: string[];
+  confidence?: number;
+  validUntil?: string;
+  contextId?: string;
+  contextVersion?: string;
+  goalId?: string;
+  missionId?: string;
+  outcomeId?: string;
+  proofHash?: string;
+};
+
 export type PulseMemoryItem = {
   id: string;
 
@@ -92,6 +124,21 @@ export type PulseMemoryItem = {
   proofHash?: string;
 
   supersedes?: string;
+  supersededBy?: string;
+
+  /*
+   * Claim-level identity used for lifecycle reconciliation.
+   *
+   * This is NOT a cryptographic authority.
+   */
+  reconciliationFingerprint: string;
+
+  /*
+   * Lifecycle provenance.
+   */
+  lifecycleReason?: string;
+  lifecycleAt?: string;
+  lifecycleVersion?: number;
 
   status: PulseMemoryStatus;
   trust: PulseMemoryTrust;
@@ -400,6 +447,17 @@ function normalizeLegacyRow(raw: unknown): PulseMemoryItem | null {
       normalizeText(row.proofHash) || undefined,
     supersedes:
       normalizeText(row.supersedes) || undefined,
+    supersededBy:
+      normalizeText(row.supersededBy) || undefined,
+    reconciliationFingerprint:
+      normalizeText(row.reconciliationFingerprint) ||
+      fingerprintMemoryClaim({
+        ...row,
+        scope,
+        tenantId,
+        store:
+          normalizeText(row.store) || scope,
+      }),
   };
 
   const semanticFingerprint =
@@ -466,6 +524,25 @@ function normalizeLegacyRow(raw: unknown): PulseMemoryItem | null {
     supersedes:
       canonical.supersedes,
 
+    supersededBy:
+      canonical.supersededBy,
+
+    reconciliationFingerprint:
+      canonical.reconciliationFingerprint,
+
+    lifecycleReason:
+      normalizeText(row.lifecycleReason) ||
+      undefined,
+
+    lifecycleAt:
+      normalizeText(row.lifecycleAt) ||
+      undefined,
+
+    lifecycleVersion:
+      typeof row.lifecycleVersion === "number"
+        ? row.lifecycleVersion
+        : undefined,
+
     status:
       (normalizeText(row.status) ||
         "ACTIVE") as PulseMemoryStatus,
@@ -511,6 +588,31 @@ function writeAll(rows: PulseMemoryItem[]): void {
      * Preserve existing fail-safe storage semantics.
      */
   }
+}
+
+export function fingerprintMemoryClaim(
+  input: Partial<PulseMemoryItem>,
+): string {
+  const canonical = {
+    scope: normalizeText(input.scope),
+    tenantId: normalizeText(input.tenantId),
+    store: normalizeText(input.store),
+    kind: input.kind || "",
+    content: input.content,
+    contextId:
+      normalizeText(input.contextId) || undefined,
+    contextVersion:
+      normalizeText(input.contextVersion) || undefined,
+    goalId:
+      normalizeText(input.goalId) || undefined,
+    missionId:
+      normalizeText(input.missionId) || undefined,
+    outcomeId:
+      normalizeText(input.outcomeId) || undefined,
+  };
+
+  return "p0.6-claim-fnv1a32:" +
+    fnv1a32(stableStringify(canonical));
 }
 
 export function fingerprintMemorySemantic(
@@ -705,6 +807,32 @@ export function rememberPulse(
     supersedes:
       normalizeText(input.supersedes) ||
       undefined,
+
+    reconciliationFingerprint:
+      fingerprintMemoryClaim({
+        scope,
+        tenantId,
+        store:
+          normalizeText(input.store) ||
+          scope,
+        kind: input.kind,
+        content: input.content,
+        contextId:
+          normalizeText(input.contextId) ||
+          undefined,
+        contextVersion:
+          normalizeText(input.contextVersion) ||
+          undefined,
+        goalId:
+          normalizeText(input.goalId) ||
+          undefined,
+        missionId:
+          normalizeText(input.missionId) ||
+          undefined,
+        outcomeId:
+          normalizeText(input.outcomeId) ||
+          undefined,
+      }),
   };
 
   const semanticFingerprint =
@@ -741,6 +869,8 @@ export function rememberPulse(
 
     trust: "OBSERVED",
 
+    lifecycleVersion: 1,
+
     memoryVersion: 2,
 
     identityMode:
@@ -774,9 +904,17 @@ export function rememberPulse(
       }
 
       if (previous.status === "ACTIVE") {
+        const lifecycleAt =
+          new Date().toISOString();
+
         rows[previousIndex] = {
           ...previous,
           status: "SUPERSEDED",
+          supersededBy: item.id,
+          lifecycleReason: "REPLACED",
+          lifecycleAt,
+          lifecycleVersion:
+            (previous.lifecycleVersion || 0) + 1,
         };
       }
     }
@@ -787,6 +925,533 @@ export function rememberPulse(
   writeAll(rows);
 
   return item;
+}
+
+
+export function findPulseMemoryActiveConflicts(input: {
+  tenantId: string;
+  reconciliationFingerprint: string;
+  excludeId?: string;
+}): PulseMemoryItem[] {
+  try {
+    assertTenantId(input.tenantId);
+  } catch {
+    return [];
+  }
+
+  return readAll().filter(function (row) {
+    return (
+      row.tenantId === input.tenantId &&
+      row.status === "ACTIVE" &&
+      row.reconciliationFingerprint ===
+        input.reconciliationFingerprint &&
+      row.id !== input.excludeId
+    );
+  });
+}
+
+export function getPulseMemoryLineage(input: {
+  id: string;
+  tenantId: string;
+  maxDepth?: number;
+}): PulseMemoryItem[] {
+  try {
+    assertTenantId(input.tenantId);
+  } catch {
+    return [];
+  }
+
+  const rows = readAll().filter(
+    (row) => row.tenantId === input.tenantId,
+  );
+
+  const current = rows.find(
+    (row) => row.id === input.id,
+  );
+
+  if (!current) return [];
+
+  const maxDepth = Math.max(
+    1,
+    Math.min(
+      input.maxDepth || 50,
+      100,
+    ),
+  );
+
+  const byId = new Map(
+    rows.map((row) => [row.id, row]),
+  );
+
+  /*
+   * Phase 1:
+   * walk backward through supersedes until the oldest
+   * reachable ancestor is found.
+   */
+  const backward: PulseMemoryItem[] = [];
+  const backwardSeen = new Set<string>();
+
+  let cursor: PulseMemoryItem | undefined =
+    current;
+
+  while (
+    cursor &&
+    !backwardSeen.has(cursor.id) &&
+    backward.length < maxDepth
+  ) {
+    backwardSeen.add(cursor.id);
+    backward.push(cursor);
+
+    cursor = cursor.supersedes
+      ? byId.get(cursor.supersedes)
+      : undefined;
+  }
+
+  /*
+   * Phase 2:
+   * start at the oldest ancestor and walk forward
+   * exclusively through supersededBy.
+   *
+   * This makes the lineage order deterministic:
+   * oldest -> newest.
+   */
+  const lineage =
+    [...backward].reverse();
+
+  const forwardSeen =
+    new Set(
+      lineage.map(
+        (row) => row.id,
+      ),
+    );
+
+  cursor =
+    lineage[lineage.length - 1];
+
+  while (
+    cursor &&
+    lineage.length < maxDepth
+  ) {
+    const successorId =
+      cursor.supersededBy;
+
+    if (!successorId) {
+      break;
+    }
+
+    if (forwardSeen.has(successorId)) {
+      break;
+    }
+
+    const successor =
+      byId.get(successorId);
+
+    if (!successor) {
+      break;
+    }
+
+    forwardSeen.add(
+      successor.id,
+    );
+
+    lineage.push(
+      successor,
+    );
+
+    cursor = successor;
+  }
+
+  return lineage;
+}
+
+export function reconcilePulseMemory(input: {
+  id: string;
+  tenantId: string;
+  action: PulseMemoryReconciliationAction;
+  reason: string;
+  now?: number;
+  replacement?: PulseMemoryReplacementInput;
+}): PulseMemoryReconciliationResult {
+  try {
+    assertTenantId(input.tenantId);
+  } catch {
+    return {
+      ok: false,
+      action: input.action,
+      reason: "INVALID_TENANT",
+    };
+  }
+
+  const rows = readAll();
+
+  const index = rows.findIndex(
+    (row) =>
+      row.id === input.id &&
+      row.tenantId === input.tenantId,
+  );
+
+  if (index < 0) {
+    return {
+      ok: false,
+      action: input.action,
+      reason: "MEMORY_NOT_FOUND",
+    };
+  }
+
+  const current = rows[index];
+  const now =
+    input.now ?? Date.now();
+  const lifecycleAt =
+    new Date(now).toISOString();
+
+  if (
+    input.action === "REAFFIRM"
+  ) {
+    if (current.status !== "ACTIVE") {
+      return {
+        ok: false,
+        action: input.action,
+        reason: "MEMORY_NOT_ACTIVE",
+      };
+    }
+
+    if (
+      memoryExpiryState(
+        current,
+        now,
+      ) !== "VALID"
+    ) {
+      return {
+        ok: false,
+        action: input.action,
+        reason: "MEMORY_EXPIRED",
+      };
+    }
+
+    const next = {
+      ...current,
+      lifecycleReason: input.reason,
+      lifecycleAt,
+      lifecycleVersion:
+        (current.lifecycleVersion || 0) + 1,
+    };
+
+    rows[index] = next;
+    writeAll(rows);
+
+    return {
+      ok: true,
+      action: input.action,
+      memory: next,
+    };
+  }
+
+  if (
+    input.action === "EXPIRE"
+  ) {
+    if (current.status !== "ACTIVE") {
+      return {
+        ok: false,
+        action: input.action,
+        reason: "MEMORY_NOT_ACTIVE",
+      };
+    }
+
+    const next = {
+      ...current,
+      status: "STALE" as const,
+      lifecycleReason: input.reason,
+      lifecycleAt,
+      lifecycleVersion:
+        (current.lifecycleVersion || 0) + 1,
+    };
+
+    rows[index] = next;
+    writeAll(rows);
+
+    return {
+      ok: true,
+      action: input.action,
+      memory: next,
+    };
+  }
+
+  if (
+    input.action === "REJECT"
+  ) {
+    if (
+      current.status ===
+      "SUPERSEDED"
+    ) {
+      return {
+        ok: false,
+        action: input.action,
+        reason: "MEMORY_SUPERSEDED",
+      };
+    }
+
+    const next = {
+      ...current,
+      status: "REJECTED" as const,
+      lifecycleReason: input.reason,
+      lifecycleAt,
+      lifecycleVersion:
+        (current.lifecycleVersion || 0) + 1,
+    };
+
+    rows[index] = next;
+    writeAll(rows);
+
+    return {
+      ok: true,
+      action: input.action,
+      memory: next,
+    };
+  }
+
+  if (
+    input.action === "REPLACE"
+  ) {
+    if (current.status !== "ACTIVE") {
+      return {
+        ok: false,
+        action: input.action,
+        reason: "MEMORY_NOT_ACTIVE",
+      };
+    }
+
+    const replacement =
+      input.replacement || {};
+
+    const source =
+      normalizeText(
+        replacement.source,
+      ) || current.source;
+
+    if (!ALLOWED_SOURCES.has(source)) {
+      return {
+        ok: false,
+        action: input.action,
+        reason: "INVALID_SOURCE",
+      };
+    }
+
+    const kind =
+      replacement.kind ||
+      current.kind;
+
+    if (
+      kind === "working" ||
+      kind === "session"
+    ) {
+      return {
+        ok: false,
+        action: input.action,
+        reason: "INVALID_MEMORY_KIND",
+      };
+    }
+
+    const scope =
+      normalizeText(
+        replacement.scope,
+      ) || current.scope;
+
+    const store =
+      normalizeText(
+        replacement.store,
+      ) ||
+      current.store ||
+      scope;
+
+    const content =
+      "content" in replacement
+        ? replacement.content
+        : current.content;
+
+    const evidenceRefs =
+      uniqueStrings(
+        "evidenceRefs" in replacement
+          ? replacement.evidenceRefs
+          : current.evidenceRefs,
+      );
+
+    const confidence =
+      clampConfidence(
+        "confidence" in replacement
+          ? replacement.confidence
+          : current.confidence,
+      );
+
+    const validUntil =
+      normalizeText(
+        replacement.validUntil,
+      ) ||
+      current.validUntil ||
+      undefined;
+
+    const contextId =
+      normalizeText(
+        replacement.contextId,
+      ) ||
+      current.contextId ||
+      undefined;
+
+    const contextVersion =
+      normalizeText(
+        replacement.contextVersion,
+      ) ||
+      current.contextVersion ||
+      undefined;
+
+    const goalId =
+      normalizeText(
+        replacement.goalId,
+      ) ||
+      current.goalId ||
+      undefined;
+
+    const missionId =
+      normalizeText(
+        replacement.missionId,
+      ) ||
+      current.missionId ||
+      undefined;
+
+    const outcomeId =
+      normalizeText(
+        replacement.outcomeId,
+      ) ||
+      current.outcomeId ||
+      undefined;
+
+    const proofHash =
+      normalizeText(
+        replacement.proofHash,
+      ) ||
+      current.proofHash ||
+      undefined;
+
+    const reconciliationFingerprint =
+      fingerprintMemoryClaim({
+        scope,
+        tenantId:
+          current.tenantId,
+        store,
+        kind,
+        content,
+        contextId,
+        contextVersion,
+        goalId,
+        missionId,
+        outcomeId,
+      });
+
+    const conflicts =
+      findPulseMemoryActiveConflicts({
+        tenantId:
+          current.tenantId,
+        reconciliationFingerprint,
+        excludeId:
+          current.id,
+      });
+
+    if (conflicts.length > 0) {
+      return {
+        ok: false,
+        action: input.action,
+        conflictIds:
+          conflicts.map(
+            (row) => row.id,
+          ),
+        reason:
+          "ACTIVE_RECONCILIATION_CONFLICT",
+      };
+    }
+
+    const itemBase = {
+      scope,
+      tenantId:
+        current.tenantId,
+      store,
+      kind,
+      content,
+      source,
+      sourceType:
+        deriveSourceType(source),
+      evidenceRefs,
+      confidence,
+      validFrom:
+        lifecycleAt,
+      validUntil,
+      createdAt:
+        lifecycleAt,
+      contextId,
+      contextVersion,
+      goalId,
+      missionId,
+      outcomeId,
+      proofHash,
+      supersedes:
+        current.id,
+      reconciliationFingerprint,
+    };
+
+    const replacementItem: PulseMemoryItem = {
+      ...itemBase,
+      id: newId(),
+      status: "ACTIVE",
+      trust: "OBSERVED",
+      memoryVersion: 2,
+      identityMode:
+        current.identityMode,
+      lifecycleVersion: 1,
+      semanticFingerprint:
+        fingerprintMemorySemantic(
+          itemBase,
+        ),
+    };
+
+    const supersededCurrent: PulseMemoryItem = {
+      ...current,
+      status:
+        "SUPERSEDED",
+      supersededBy:
+        replacementItem.id,
+      lifecycleReason:
+        input.reason,
+      lifecycleAt,
+      lifecycleVersion:
+        (current.lifecycleVersion || 0) + 1,
+    };
+
+    /*
+     * Single write:
+     * old memory + replacement are committed together.
+     */
+    rows[index] =
+      supersededCurrent;
+
+    rows.push(
+      replacementItem,
+    );
+
+    writeAll(rows);
+
+    return {
+      ok: true,
+      action: input.action,
+      memory:
+        supersededCurrent,
+      replacement:
+        replacementItem,
+    };
+  }
+
+  return {
+    ok: false,
+    action: input.action,
+    reason: "UNSUPPORTED_ACTION",
+  };
 }
 
 export function verifyPulseMemory(input: {
@@ -1041,72 +1706,24 @@ export function markPulseMemoryStale(input: {
   id: string;
   tenantId: string;
 }): boolean {
-  try {
-    assertTenantId(input.tenantId);
-  } catch {
-    return false;
-  }
-
-  const rows = readAll();
-
-  const index = rows.findIndex(
-    function (row) {
-      return (
-        row.id === input.id &&
-        row.tenantId === input.tenantId &&
-        row.status === "ACTIVE"
-      );
-    },
-  );
-
-  if (index < 0) {
-    return false;
-  }
-
-  rows[index] = {
-    ...rows[index],
-    status: "STALE",
-  };
-
-  writeAll(rows);
-
-  return true;
+  return reconcilePulseMemory({
+    id: input.id,
+    tenantId: input.tenantId,
+    action: "EXPIRE",
+    reason: "MANUAL_STALE",
+  }).ok;
 }
 
 export function rejectPulseMemory(input: {
   id: string;
   tenantId: string;
 }): boolean {
-  try {
-    assertTenantId(input.tenantId);
-  } catch {
-    return false;
-  }
-
-  const rows = readAll();
-
-  const index = rows.findIndex(
-    function (row) {
-      return (
-        row.id === input.id &&
-        row.tenantId === input.tenantId &&
-        row.status !== "SUPERSEDED"
-      );
-    },
-  );
-
-  if (index < 0) {
-    return false;
-  }
-
-  rows[index] = {
-    ...rows[index],
-    status: "REJECTED",
-  };
-
-  writeAll(rows);
-
-  return true;
+  return reconcilePulseMemory({
+    id: input.id,
+    tenantId: input.tenantId,
+    action: "REJECT",
+    reason: "MANUAL_REJECT",
+  }).ok;
 }
 
 export function expireStalePulseMemory(
@@ -1137,6 +1754,14 @@ export function expireStalePulseMemory(
       return {
         ...row,
         status: "STALE",
+        lifecycleReason:
+          !Number.isFinite(expiresAt)
+            ? "INVALID_VALID_UNTIL"
+            : "VALID_UNTIL_EXPIRED",
+        lifecycleAt:
+          new Date(now).toISOString(),
+        lifecycleVersion:
+          (row.lifecycleVersion || 0) + 1,
       };
     }
 
