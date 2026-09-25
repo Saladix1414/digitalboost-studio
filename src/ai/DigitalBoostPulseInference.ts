@@ -43,6 +43,7 @@ export type PulseInferenceFailure =
   | "EMPTY_RESPONSE"
   | "INVALID_OUTPUT"
   | "MODEL_BINDING_MISMATCH"
+  | "MODEL_RUNTIME_BINDING_UNAVAILABLE"
   | "BRIDGE_REJECTED"
   | "BRIDGE_PROTOCOL_ERROR"
   | "UNKNOWN";
@@ -53,6 +54,11 @@ export interface PulseInferenceRequest {
   requestId: string;
 
   modelRef: string;
+
+  /*
+   * Runtime identity expected after model selection.
+   */
+  expectedRuntimeModelRef?: string;
 
   selectionFingerprint: string;
 
@@ -275,20 +281,18 @@ export function classifyPulseInferenceBridgeFailure(
 export function normalizePulseInferenceResult(
   input: {
     request: PulseInferenceRequest;
-
     bridgeResult: OpenClawTaskResult;
-
     provider: string;
-
     runtimeModelRef: string;
-
     startedAt?: string;
-
     completedAt?: string;
-
     latencyMs?: number;
   },
 ): PulseInferenceResult {
+  const expectedRuntimeModelRef =
+    input.request.expectedRuntimeModelRef?.trim() ||
+    input.request.modelRef.trim();
+
   const provenance = {
     contract:
       PULSE_INFERENCE_CONTRACT,
@@ -298,6 +302,10 @@ export function normalizePulseInferenceResult(
 
     modelRef:
       input.request.modelRef,
+
+    runtimeModelRef:
+      input.runtimeModelRef ||
+      undefined,
 
     selectionFingerprint:
       input.request.selectionFingerprint,
@@ -315,13 +323,6 @@ export function normalizePulseInferenceResult(
       input.latencyMs,
   };
 
-  /*
-   * Runtime model binding is verified only when the runtime
-   * claims that inference completed.
-   *
-   * A failed request may have no runtime model. In that case
-   * the original failure class must remain observable.
-   */
   if (
     input.bridgeResult.status ===
     "completed"
@@ -329,7 +330,7 @@ export function normalizePulseInferenceResult(
     const binding =
       assertPulseInferenceModelBinding({
         requestedModelRef:
-          input.request.modelRef,
+          expectedRuntimeModelRef,
 
         runtimeModelRef:
           input.runtimeModelRef,
@@ -349,11 +350,16 @@ export function normalizePulseInferenceResult(
         modelRef:
           input.request.modelRef,
 
+        runtimeModelRef:
+          input.runtimeModelRef ||
+          undefined,
+
         provider:
           input.provider,
 
         selectionFingerprint:
-          input.request.selectionFingerprint,
+          input.request
+            .selectionFingerprint,
 
         outputMode:
           input.request.outputMode,
@@ -362,7 +368,7 @@ export function normalizePulseInferenceResult(
           "MODEL_BINDING_MISMATCH",
 
         error:
-          "Runtime model does not match selected model.",
+          "Runtime model does not match the verified runtime binding.",
 
         latencyMs:
           input.latencyMs,
@@ -395,11 +401,16 @@ export function normalizePulseInferenceResult(
       modelRef:
         input.request.modelRef,
 
+      runtimeModelRef:
+        input.runtimeModelRef ||
+        undefined,
+
       provider:
         input.provider,
 
       selectionFingerprint:
-        input.request.selectionFingerprint,
+        input.request
+          .selectionFingerprint,
 
       outputMode:
         input.request.outputMode,
@@ -434,11 +445,16 @@ export function normalizePulseInferenceResult(
       modelRef:
         input.request.modelRef,
 
+      runtimeModelRef:
+        input.runtimeModelRef ||
+        undefined,
+
       provider:
         input.provider,
 
       selectionFingerprint:
-        input.request.selectionFingerprint,
+        input.request
+          .selectionFingerprint,
 
       outputMode:
         input.request.outputMode,
@@ -471,11 +487,16 @@ export function normalizePulseInferenceResult(
     modelRef:
       input.request.modelRef,
 
+    runtimeModelRef:
+      input.runtimeModelRef ||
+      undefined,
+
     provider:
       input.provider,
 
     selectionFingerprint:
-      input.request.selectionFingerprint,
+      input.request
+        .selectionFingerprint,
 
     output,
 

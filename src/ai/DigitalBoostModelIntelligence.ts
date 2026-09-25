@@ -25,6 +25,12 @@ import type {
   ModelSelectionResult,
 } from "../types/DigitalBoostAI";
 
+import {
+  buildPulseModelRuntimeBinding,
+  type PulseModelRuntimeBinding,
+  type PulseModelRuntimeBindingInput,
+} from "./DigitalBoostModelRuntimeBinding";
+
 export const PULSE_MODEL_INTELLIGENCE_CONTRACT =
   "p0.7.0" as const;
 
@@ -119,6 +125,13 @@ export interface PulseModelSelectionContract {
   taskProfile: PulseModelTaskProfile;
   rawSelection: ModelSelectionResult;
   evidence: PulseModelSelectionEvidence;
+
+  /*
+   * P0.7.2.3
+   * Runtime identity expected for the selected model.
+   */
+  runtimeBinding?: PulseModelRuntimeBinding;
+
   fingerprint: string;
 }
 
@@ -538,6 +551,29 @@ export function fingerprintPulseModelSelection(
             ),
         },
 
+        runtimeBinding:
+          input.runtimeBinding
+            ? {
+                selectionModelRef:
+                  input.runtimeBinding
+                    .selectionModelRef,
+
+                runtimeModelRef:
+                  input.runtimeBinding
+                    .runtimeModelRef ||
+                  null,
+
+                mode:
+                  input.runtimeBinding
+                    .mode,
+
+                adapterId:
+                  input.runtimeBinding
+                    .adapterId ||
+                  null,
+              }
+            : null,
+
         evidence: {
           eligibleCandidates:
             [
@@ -695,6 +731,7 @@ export function createPulseModelSelectionContract(
     profile: PulseModelTaskProfile;
     rawSelection: ModelSelectionResult;
     candidates: DigitalBoostModel[];
+    runtimeBinding?: PulseModelRuntimeBindingInput;
   },
 ): PulseModelSelectionContract {
   const evidence =
@@ -704,23 +741,40 @@ export function createPulseModelSelectionContract(
       input.candidates,
     );
 
+  const runtimeBinding =
+    buildPulseModelRuntimeBinding(
+      input.rawSelection.model,
+      input.runtimeBinding,
+    );
+
   return {
     contract:
       PULSE_MODEL_INTELLIGENCE_CONTRACT,
+
     taskProfile:
       input.profile,
+
     rawSelection:
       input.rawSelection,
+
     evidence,
+
+    runtimeBinding,
+
     fingerprint:
       fingerprintPulseModelSelection({
         contract:
           PULSE_MODEL_INTELLIGENCE_CONTRACT,
+
         taskProfile:
           input.profile,
+
         rawSelection:
           input.rawSelection,
+
         evidence,
+
+        runtimeBinding,
       }),
   };
 }

@@ -345,3 +345,252 @@ test(
     );
   },
 );
+
+
+test(
+  "runtime blocks OpenClaw selection without explicit binding",
+  async () => {
+    const base =
+      makeSelection();
+
+    const unboundSelection = {
+      ...base,
+
+      rawSelection: {
+        ...base.rawSelection,
+
+        model: {
+          ...base.rawSelection.model!,
+          provider:
+            "openclaw" as const,
+          modelId:
+            "tool-model",
+        },
+      },
+
+      runtimeBinding: {
+        contract:
+          "p0.7.2.3" as const,
+
+        selectionModelRef:
+          "openclaw/tool-model",
+
+        mode:
+          "UNBOUND" as const,
+      },
+    };
+
+    let executed =
+      false;
+
+    const bridge:
+      PulseInferenceRuntimeBridge = {
+        async runTask() {
+          executed = true;
+
+          return {
+            accepted: true,
+            status: "completed",
+            model:
+              "ollama/qwen3",
+            result:
+              "No debería ejecutarse.",
+          };
+        },
+      };
+
+    const result =
+      await executePulseInference({
+        selection:
+          unboundSelection,
+
+        request:
+          makeRequest(),
+
+        bridge,
+      });
+
+    assert.equal(
+      executed,
+      false,
+    );
+
+    assert.equal(
+      result.status,
+      "FAILED",
+    );
+
+    assert.equal(
+      result.failure,
+      "MODEL_RUNTIME_BINDING_UNAVAILABLE",
+    );
+  },
+);
+
+test(
+  "explicit adapter sends runtime identity",
+  async () => {
+    const model = {
+      provider:
+        "openclaw" as const,
+
+      modelId:
+        "tool-model",
+
+      displayName:
+        "tool-model",
+
+      capabilities: [
+        "general",
+        "reasoning",
+        "structured",
+      ] as const,
+
+      contextWindow:
+        32768,
+
+      available:
+        true,
+
+      preferredTasks: [
+        "reasoning",
+      ],
+
+      fallbackPriority:
+        20,
+
+      discoveredAt:
+        "2026-01-01T00:00:00.000Z",
+    };
+
+    const adaptedSelection =
+      createPulseModelSelectionContract({
+        profile: {
+          contract:
+            "p0.7.0",
+
+          task:
+            "reason",
+
+          taskKind:
+            "reasoning",
+
+          requiredCapabilities: [
+            "reasoning",
+          ],
+
+          risk:
+            "L1",
+
+          requireTools:
+            false,
+
+          requireStructuredOutput:
+            false,
+        },
+
+        rawSelection: {
+          model,
+
+          reason:
+            "Explicit runtime adapter selected.",
+
+          fallbackUsed:
+            false,
+        },
+
+        candidates: [
+          model,
+        ],
+
+        runtimeBinding: {
+          mode:
+            "EXPLICIT_ADAPTER",
+
+          runtimeModelRef:
+            "ollama/qwen3",
+
+          adapterId:
+            "openclaw-local-ollama-v1",
+        },
+      });
+
+    assert.equal(
+      adaptedSelection.evidence.selectedModelRef,
+      "openclaw/tool-model",
+    );
+
+    assert.equal(
+      adaptedSelection.runtimeBinding?.selectionModelRef,
+      "openclaw/tool-model",
+    );
+
+    assert.equal(
+      adaptedSelection.runtimeBinding?.runtimeModelRef,
+      "ollama/qwen3",
+    );
+
+    let received:
+      Record<string, unknown> |
+      undefined;
+
+    const bridge:
+      PulseInferenceRuntimeBridge = {
+        async runTask(input) {
+          received =
+            input as unknown as
+              Record<string, unknown>;
+
+          return {
+            accepted:
+              true,
+
+            status:
+              "completed",
+
+            model:
+              "ollama/qwen3",
+
+            result:
+              "Resultado adaptado.",
+          };
+        },
+      };
+
+    const result =
+      await executePulseInference({
+        selection:
+          adaptedSelection,
+
+        request:
+          makeRequest(),
+
+        bridge,
+      });
+
+    assert.equal(
+      received?.model,
+      "ollama/qwen3",
+    );
+
+    assert.equal(
+      received?.strictModelBinding,
+      true,
+    );
+
+    assert.equal(
+      result.status,
+      "COMPLETED",
+    );
+
+    assert.equal(
+      result.modelRef,
+      "openclaw/tool-model",
+    );
+
+    assert.equal(
+      result.runtimeModelRef,
+      "ollama/qwen3",
+    );
+  },
+);

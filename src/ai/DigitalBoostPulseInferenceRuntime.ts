@@ -1,23 +1,16 @@
 /**
  * DigitalBoostPulseInferenceRuntime
  *
- * P0.7.2.2 — Runtime Inference Integration.
+ * P0.7.2.3 — Model Identity & Runtime Binding.
  *
- * Conecta:
+ * Separates:
  *
- * ModelSelectionContract
- *      ↓
- * PulseInferenceRequest
- *      ↓
- * OpenClaw Bridge
- *      ↓
- * runtime model identity
- *      ↓
- * PulseInferenceResult
+ *   selectionModelRef
+ *        ↓
+ *   runtimeModelRef
  *
- * No concede permisos.
- * No ejecuta acciones.
- * No modifica Governance.
+ * Runtime execution is permitted only when a verified
+ * PulseModelRuntimeBinding exists.
  */
 
 import type {
@@ -40,6 +33,10 @@ import type {
   PulseModelSelectionContract,
 } from "./DigitalBoostModelIntelligence";
 
+import {
+  validatePulseModelRuntimeBinding,
+} from "./DigitalBoostModelRuntimeBinding";
+
 export const PULSE_RUNTIME_INFERENCE_CONTRACT =
   "p0.7.2.2" as const;
 
@@ -54,6 +51,7 @@ export type PulseInferenceRuntimeRequest =
     PulseInferenceRequest,
     | "contract"
     | "modelRef"
+    | "expectedRuntimeModelRef"
     | "selectionFingerprint"
   >;
 
@@ -108,13 +106,22 @@ function getSelectedModelRef(
 function buildFailedResult(
   request:
     PulseInferenceRuntimeRequest,
-  modelRef: string,
-  selectionFingerprint: string,
+
+  modelRef:
+    string,
+
+  selectionFingerprint:
+    string,
+
   failure:
     | "INVALID_REQUEST"
-    | "MODEL_BINDING_MISMATCH",
-  error: string,
-): PulseInferenceResult {
+    | "MODEL_BINDING_MISMATCH"
+    | "MODEL_RUNTIME_BINDING_UNAVAILABLE",
+
+  error:
+    string,
+):
+  PulseInferenceResult {
   const now =
     new Date().toISOString();
 
@@ -129,6 +136,9 @@ function buildFailedResult(
       request.requestId,
 
     modelRef,
+
+    runtimeModelRef:
+      undefined,
 
     provider:
       "openclaw",
@@ -174,17 +184,54 @@ function buildFailedResult(
 export async function executePulseInference(
   input:
     ExecutePulseInferenceInput,
-): Promise<PulseInferenceResult> {
+):
+  Promise<PulseInferenceResult> {
   const {
     selection,
     request,
   } = input;
 
   const modelRef =
-    getSelectedModelRef(selection);
+    getSelectedModelRef(
+      selection,
+    );
 
   const fingerprint =
     selection.fingerprint;
+
+  /*
+   * The runtime binding is now a first-class security
+   * boundary.
+   *
+   * Without a valid binding, PULSE must not execute.
+   */
+  const runtimeBinding =
+    selection.runtimeBinding;
+
+  const runtimeBindingValidation =
+    validatePulseModelRuntimeBinding(
+      runtimeBinding,
+    );
+
+  if (
+    !runtimeBinding ||
+    !runtimeBindingValidation.valid ||
+    runtimeBinding.mode ===
+      "UNBOUND" ||
+    !runtimeBinding.runtimeModelRef
+  ) {
+    return buildFailedResult(
+      request,
+
+      modelRef,
+
+      fingerprint,
+
+      "MODEL_RUNTIME_BINDING_UNAVAILABLE",
+
+      "No verified runtime model binding is available for the selected model.",
+    );
+  }
 
   if (
     !selection.rawSelection.model ||
@@ -195,25 +242,56 @@ export async function executePulseInference(
   ) {
     return buildFailedResult(
       request,
+
       modelRef,
+
       fingerprint,
+
       "INVALID_REQUEST",
+
       "No executable model selection is available for runtime inference.",
     );
   }
 
+  /*
+   * Selection evidence and runtime binding must agree.
+   */
   if (
     selection.evidence.selectedModelRef !==
     modelRef
   ) {
     return buildFailedResult(
       request,
+
       modelRef,
+
       fingerprint,
+
       "MODEL_BINDING_MISMATCH",
+
       "Selection evidence does not match the selected model.",
     );
   }
+
+  if (
+    runtimeBinding.selectionModelRef !==
+    modelRef
+  ) {
+    return buildFailedResult(
+      request,
+
+      modelRef,
+
+      fingerprint,
+
+      "MODEL_BINDING_MISMATCH",
+
+      "Runtime binding does not match the selected model.",
+    );
+  }
+
+  const expectedRuntimeModelRef =
+    runtimeBinding.runtimeModelRef;
 
   const runtimeRequest:
     PulseInferenceRequest = {
@@ -224,6 +302,8 @@ export async function executePulseInference(
       request.requestId,
 
     modelRef,
+
+    expectedRuntimeModelRef,
 
     selectionFingerprint:
       fingerprint,
@@ -279,8 +359,15 @@ export async function executePulseInference(
       prompt:
         runtimeRequest.prompt,
 
+      /*
+       * The backend receives the runtime identity.
+       *
+       * It does NOT receive a provider/model identity
+       * invented from the semantic selection when an
+       * explicit adapter exists.
+       */
       model:
-        runtimeRequest.modelRef,
+        expectedRuntimeModelRef,
 
       context:
         runtimeRequest.context,
@@ -303,6 +390,9 @@ export async function executePulseInference(
   const latencyMs =
     Date.now() - started;
 
+  /*
+   * Runtime identity must come from the runtime result.
+   */
   const runtimeModelRef =
     typeof bridgeResult.model ===
       "string"
@@ -363,7 +453,8 @@ export function createPulseInferenceRuntimeRequest(
     contextVersion?:
       number;
   },
-): PulseInferenceRuntimeRequest {
+):
+  PulseInferenceRuntimeRequest {
   return {
     requestId:
       input.requestId,
