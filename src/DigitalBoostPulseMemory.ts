@@ -24,5 +24,6 @@ export type {
   PulseMemoryItem,
   PulseMemoryQuery,
   RememberPulseInput,
+  PulseMemoryVerificationEvidence,
   PulseMissionOutcomeMemoryInput,
 } from "./DigitalBoostPulseMemoryEngine";

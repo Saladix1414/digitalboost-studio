@@ -9,6 +9,11 @@ import {
   queryPulseMemory,
   rememberPulse,
 } from "../../src/DigitalBoostPulseMemory";
+
+import { pushExecutionAudit } from "../../src/DigitalBoostPulseLog";
+import {
+  createPulseExecutionAttestation,
+} from "../../src/DigitalBoostPulseOutcomeProof";
 import {
   cancelPulseMission,
   startPulseMission,
@@ -51,6 +56,63 @@ Object.defineProperty(globalThis, "localStorage", {
 
 function reset(): void {
   storage.clear();
+}
+
+
+function makeTenantVerificationEvidence(input: {
+  tenantId: string;
+  store: string;
+  missionId: string;
+  requestId: string;
+}) {
+  const timestamp = new Date().toISOString();
+
+  const executionAuditId = pushExecutionAudit({
+    timestamp,
+    tenant_id: input.tenantId,
+    store_id: input.store,
+    actor_type: "system",
+    request_id: input.requestId,
+    intent: "memory-verification",
+    agent: "pulse",
+    risk_level: "L1",
+    tool: "memory-test",
+    approval_required: false,
+    status: "COMPLETED",
+    result_summary: "MEMORY_VERIFICATION",
+    mission_id: input.missionId,
+    plan_id: "plan_playbook_verification",
+    step_id: "step_playbook_verification",
+    step_index: 0,
+    verification_status: "VERIFIED",
+    verified: true,
+  });
+
+  const executionAttestation =
+    createPulseExecutionAttestation({
+      missionId: input.missionId,
+      planId: "plan_playbook_verification",
+      stepId: "step_playbook_verification",
+      stepIndex: 0,
+      action: "memory-test",
+      executionRequestId: input.requestId,
+      verificationStatus: "VERIFIED",
+      verified: true,
+      executionAudit: {
+        request_id: input.requestId,
+        event: "MEMORY_VERIFICATION",
+        state: "COMPLETED",
+        action: "memory-test",
+        timestamp,
+        execution_audit_id: executionAuditId,
+      },
+      state: "COMPLETED",
+    });
+
+  return {
+    executionAuditId,
+    executionAttestation,
+  };
 }
 
 test(
@@ -361,11 +423,25 @@ test(
 
     assert.ok(lesson);
 
+    const evidence =
+      makeTenantVerificationEvidence({
+        tenantId: tenant,
+        store: "PlaybookStore",
+        missionId: "lesson-fixture",
+        requestId: "req_lesson_fixture",
+      });
+
     assert.equal(
       verifyPulseMemory({
         id: lesson.id,
         tenantId: tenant,
-        evidenceRefs: ["verified-lesson"],
+        evidenceRefs: [
+          evidence.executionAuditId,
+        ],
+        evidence: {
+          executionAttestation:
+            evidence.executionAttestation,
+        },
       }),
       true,
     );

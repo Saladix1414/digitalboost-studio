@@ -12,6 +12,11 @@ import {
   rememberPreference,
 } from "../../src/DigitalBoostPulseMemory";
 
+import { pushExecutionAudit } from "../../src/DigitalBoostPulseLog";
+import {
+  createPulseExecutionAttestation,
+} from "../../src/DigitalBoostPulseOutcomeProof";
+
 class MemoryStorage {
   private readonly data = new Map<string, string>();
 
@@ -40,6 +45,63 @@ Object.defineProperty(globalThis, "localStorage", {
   value: storage,
   configurable: true,
 });
+
+function makeVerificationEvidence(input: {
+  tenantId: string;
+  store: string;
+  missionId: string;
+  requestId: string;
+}) {
+  const timestamp = new Date().toISOString();
+
+  const executionAuditId = pushExecutionAudit({
+    timestamp,
+    tenant_id: input.tenantId,
+    store_id: input.store,
+    actor_type: "system",
+    request_id: input.requestId,
+    intent: "memory-verification",
+    agent: "pulse",
+    risk_level: "L1",
+    tool: "memory-test",
+    approval_required: false,
+    status: "COMPLETED",
+    result_summary: "MEMORY_VERIFICATION",
+    mission_id: input.missionId,
+    plan_id: "plan_memory_engine",
+    step_id: "step_memory_engine",
+    step_index: 0,
+    verification_status: "VERIFIED",
+    verified: true,
+  });
+
+  const executionAttestation =
+    createPulseExecutionAttestation({
+      missionId: input.missionId,
+      planId: "plan_memory_engine",
+      stepId: "step_memory_engine",
+      stepIndex: 0,
+      action: "memory-test",
+      executionRequestId: input.requestId,
+      verificationStatus: "VERIFIED",
+      verified: true,
+      executionAudit: {
+        request_id: input.requestId,
+        event: "MEMORY_VERIFICATION",
+        state: "COMPLETED",
+        action: "memory-test",
+        timestamp,
+        execution_audit_id: executionAuditId,
+      },
+      state: "COMPLETED",
+    });
+
+  return {
+    executionAuditId,
+    executionAttestation,
+  };
+}
+
 
 function reset(): void {
   storage.clear();
@@ -195,11 +257,58 @@ test("verification is a separate operation", () => {
 
   assert.ok(item);
 
+  const timestamp = new Date().toISOString();
+
+  const executionAuditId = pushExecutionAudit({
+    timestamp,
+    tenant_id: "tenant-a",
+    store_id: "Nimbus",
+    actor_type: "system",
+    request_id: "req_memory_verify",
+    intent: "memory-verification",
+    agent: "pulse",
+    risk_level: "L1",
+    tool: "memory-test",
+    approval_required: false,
+    status: "COMPLETED",
+    result_summary: "MEMORY_VERIFICATION",
+    mission_id: "mission_memory_verify",
+    plan_id: "plan_memory_verify",
+    step_id: "step_memory_verify",
+    step_index: 0,
+    verification_status: "VERIFIED",
+    verified: true,
+  });
+
+  const executionAttestation =
+    createPulseExecutionAttestation({
+      missionId: "mission_memory_verify",
+      planId: "plan_memory_verify",
+      stepId: "step_memory_verify",
+      stepIndex: 0,
+      action: "memory-test",
+      executionRequestId: "req_memory_verify",
+      verificationStatus: "VERIFIED",
+      verified: true,
+      executionAudit: {
+        request_id: "req_memory_verify",
+        event: "MEMORY_VERIFICATION",
+        state: "COMPLETED",
+        action: "memory-test",
+        timestamp,
+        execution_audit_id: executionAuditId,
+      },
+      state: "COMPLETED",
+    });
+
   assert.equal(
     verifyPulseMemory({
       id: item.id,
       tenantId: "tenant-a",
-      evidenceRefs: ["verification-e1"],
+      evidenceRefs: [executionAuditId],
+      evidence: {
+        executionAttestation,
+      },
     }),
     true,
   );
@@ -270,10 +379,22 @@ test("governance requires prior verification", () => {
     false,
   );
 
+  const evidence = makeVerificationEvidence({
+    tenantId: "tenant-a",
+    store: "Nimbus",
+    missionId: "mission_governance",
+    requestId: "req_governance",
+  });
+
   assert.equal(
     verifyPulseMemory({
       id: item.id,
       tenantId: "tenant-a",
+      evidenceRefs: [evidence.executionAuditId],
+      evidence: {
+        executionAttestation:
+          evidence.executionAttestation,
+      },
     }),
     true,
   );
@@ -434,15 +555,45 @@ test("verified retrieval is deterministic", () => {
   assert.ok(low);
   assert.ok(high);
 
-  verifyPulseMemory({
-    id: low.id,
+  const lowEvidence = makeVerificationEvidence({
     tenantId: "tenant-a",
+    store: "Nimbus",
+    missionId: "mission_low",
+    requestId: "req_low",
   });
 
-  verifyPulseMemory({
-    id: high.id,
+  const highEvidence = makeVerificationEvidence({
     tenantId: "tenant-a",
+    store: "Nimbus",
+    missionId: "mission_high",
+    requestId: "req_high",
   });
+
+  assert.equal(
+    verifyPulseMemory({
+      id: low.id,
+      tenantId: "tenant-a",
+      evidenceRefs: [lowEvidence.executionAuditId],
+      evidence: {
+        executionAttestation:
+          lowEvidence.executionAttestation,
+      },
+    }),
+    true,
+  );
+
+  assert.equal(
+    verifyPulseMemory({
+      id: high.id,
+      tenantId: "tenant-a",
+      evidenceRefs: [highEvidence.executionAuditId],
+      evidence: {
+        executionAttestation:
+          highEvidence.executionAttestation,
+      },
+    }),
+    true,
+  );
 
   const rows = queryTrustedPulseMemory({
     tenantId: "tenant-a",
