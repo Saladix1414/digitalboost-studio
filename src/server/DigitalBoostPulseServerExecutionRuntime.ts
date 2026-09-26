@@ -1,3 +1,6 @@
+import { PersistentApprovalRepository } from "./DigitalBoostPulsePersistentApprovalRepository";
+import { reconcilePulseServerApproval } from "./DigitalBoostPulseServerApprovalReconciliation";
+
 import { assertPulseTenantIsolation } from "./DigitalBoostPulseTenantIsolation";
 /**
  * PULSE — Server Execution Runtime Composition
@@ -51,6 +54,10 @@ export interface PulseServerExecutionRuntimeOptions {
   readonly createClaimStore?: (
     tenantId: string,
   ) => PulseServerExecutionClaimStore;
+
+  readonly createApprovalRepository?: (
+    tenantId: string,
+  ) => PersistentApprovalRepository;
 }
 
 export function createPulseServerClaimStore(
@@ -188,6 +195,53 @@ const trustedRequest: PulseServerExecutionRequest = {
     ...validation.request,
     tenant_id: authorization.tenant_id,
   };
+
+  // P1.1-B — persisted approval is mandatory before claim.
+  const createApprovalRepository =
+    options.createApprovalRepository ??
+    ((tenantId: string) =>
+      new PersistentApprovalRepository({
+        tenantId,
+      }));
+
+  let approvalRepository: PersistentApprovalRepository;
+
+  try {
+    approvalRepository = createApprovalRepository(
+      authorization.tenant_id,
+    );
+  } catch {
+    return {
+      version: "pulse-server-executor-v1",
+      status: "REJECTED",
+      request_id: trustedRequest.request_id,
+      tenant_id: trustedRequest.tenant_id,
+      approval_id: trustedRequest.approval_id,
+      mission_id: trustedRequest.mission_id,
+      plan_id: trustedRequest.plan_id,
+      step_id: trustedRequest.step_id,
+      code: "APPROVAL_STORAGE_ERROR",
+    };
+  }
+
+  const approval = reconcilePulseServerApproval(
+    approvalRepository,
+    trustedRequest,
+  );
+
+  if (!approval.ok) {
+    return {
+      version: "pulse-server-executor-v1",
+      status: "REJECTED",
+      request_id: trustedRequest.request_id,
+      tenant_id: trustedRequest.tenant_id,
+      approval_id: trustedRequest.approval_id,
+      mission_id: trustedRequest.mission_id,
+      plan_id: trustedRequest.plan_id,
+      step_id: trustedRequest.step_id,
+      code: approval.code,
+    };
+  }
 
   return executePulseServerRequestWithServerClaimStore(
     trustedRequest,

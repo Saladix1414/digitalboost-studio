@@ -2,12 +2,29 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  mkdtempSync,
+  rmSync,
+} from "node:fs";
+
+import {
+  tmpdir,
+} from "node:os";
+
+import {
+  join,
+} from "node:path";
+
+import {
   createPulseServerExecutionRequest,
 } from "../../src/DigitalBoostPulseExecutionBoundary";
 
 import {
   executePulseServerRequestWithServerClaimStore,
 } from "../../src/server/DigitalBoostPulseServerExecutionRuntime";
+
+import {
+  PersistentApprovalRepository,
+} from "../../src/server/DigitalBoostPulsePersistentApprovalRepository";
 
 import type {
   PulseServerExecutionClaimInput,
@@ -376,13 +393,82 @@ test("P0.4.21 runtime rechaza acción no autorizada antes del claim", async () =
   assert.equal(claims, 0);
 });
 
-test("P0.4.21 runtime autorizado llega al executor", async () => {
+test("P0.4.21 runtime autorizado llega al executor", async (t) => {
   let selectedTenant = "";
   let executions = 0;
 
+  const input = authorizedRuntimeRequest();
+  const root = mkdtempSync(
+    join(
+      tmpdir(),
+      "pulse-p0421-runtime-",
+    ),
+  );
+
+  t.after(() => {
+    rmSync(
+      root,
+      {
+        recursive: true,
+        force: true,
+      },
+    );
+  });
+
+  const repository =
+    new PersistentApprovalRepository({
+      tenantId:
+        input.tenant_id,
+      rootDir:
+        root,
+    });
+
+  repository.create({
+    tenant_id:
+      input.tenant_id,
+    approval_id:
+      input.approval_id,
+    approval: {
+      approval_id:
+        input.approval_id,
+      request_id:
+        input.request_id,
+      action:
+        input.action,
+      state:
+        "APPROVED",
+      created_at:
+        "2026-09-26T12:00:00.000Z",
+      updated_at:
+        "2026-09-26T12:00:00.000Z",
+      binding: {
+        request_id:
+          input.request_id,
+        action:
+          input.action,
+        target:
+          "inventory",
+        risk:
+          "L2",
+        policy_version:
+          input.policy_version,
+        proposal_hash:
+          input.proposal_hash,
+        context_version:
+          input.expected_context_version,
+        actor:
+          "runtime-user",
+        tenant:
+          input.tenant_id,
+        expires_at:
+          "2099-01-01T00:00:00.000Z",
+      },
+    },
+  });
+
   const result =
     await executeAuthorizedPulseServerRequest(
-      authorizedRuntimeRequest(),
+      input,
       authPrincipal(),
       {
         authorizeAction: async (
@@ -394,6 +480,14 @@ test("P0.4.21 runtime autorizado llega al executor", async () => {
             principal.active_tenant_id === "tenant-runtime-alpha" &&
             request.action === "inventory"
           );
+        },
+
+        createApprovalRepository(tenantId) {
+          return new PersistentApprovalRepository({
+            tenantId,
+            rootDir:
+              root,
+          });
         },
 
         createClaimStore(tenantId) {
