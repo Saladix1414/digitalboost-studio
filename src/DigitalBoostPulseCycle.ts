@@ -239,6 +239,8 @@ export function runCycle(input: {
       input.contextId,
     contextVersion,
     intentClassification,
+    intentReconciliationRecord:
+      intentReconciliationRecord,
   });
 
   const mission =

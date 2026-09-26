@@ -8,6 +8,14 @@ import {
   type PulseIntentLabel,
 } from "./DigitalBoostPulseIntentEngine";
 
+import {
+  consumePulseIntentReconciliation,
+} from "./ai/DigitalBoostPulseIntentReconciliationConsumer";
+
+import type {
+  PulseIntentReconciliationRecord,
+} from "./ai/DigitalBoostPulseIntentReconciliationRegistry";
+
 export const PULSE_GOAL_ENGINE_CONTRACT =
   "p0.5.2";
 
@@ -22,6 +30,39 @@ export type PulseGoalDecision =
   | "CLARIFY"
   | "BLOCK";
 
+export const
+  PULSE_GOAL_RECONCILIATION_EVIDENCE_CONTRACT =
+    "p0.7.2.11" as const;
+
+export type
+  PulseGoalReconciliationEvidence = {
+  contract:
+    typeof
+      PULSE_GOAL_RECONCILIATION_EVIDENCE_CONTRACT;
+
+  observationId:
+    string;
+
+  recordId:
+    string;
+
+  reconciliationId:
+    string;
+
+  relation:
+    import(
+      "./ai/DigitalBoostPulseIntentReconciliation"
+    ).PulseIntentReconciliationResult[
+      "relation"
+    ];
+
+  sourceRegistryHash:
+    string;
+
+  source:
+    "pulse-intent-reconciliation-goal";
+};
+
 export type PulseGoalProvenance = {
   engine: string;
   source: "merchant" | "cycle" | "derived";
@@ -33,6 +74,8 @@ export type PulseGoalProvenance = {
   intent: PulseIntentLabel;
   intentConfidence: number;
   intentDecision: string;
+  intentReconciliation?:
+    PulseGoalReconciliationEvidence;
 };
 
 export type PulseGoalEvidenceRequirements = {
@@ -453,6 +496,8 @@ export type PulseGoalFingerprintInput = {
     intent: string;
     intentConfidence: number;
     intentDecision: string;
+    intentReconciliation?:
+      PulseGoalReconciliationEvidence;
   };
 };
 
@@ -518,9 +563,137 @@ export function fingerprintPulseGoalEngineGoal(
             goal.provenance.intentConfidence,
           intentDecision:
             goal.provenance.intentDecision,
+
+          ...(goal.provenance.intentReconciliation
+            ? {
+                intentReconciliation: {
+                  contract:
+                    goal.provenance
+                      .intentReconciliation
+                      .contract,
+
+                  observationId:
+                    goal.provenance
+                      .intentReconciliation
+                      .observationId,
+
+                  recordId:
+                    goal.provenance
+                      .intentReconciliation
+                      .recordId,
+
+                  reconciliationId:
+                    goal.provenance
+                      .intentReconciliation
+                      .reconciliationId,
+
+                  relation:
+                    goal.provenance
+                      .intentReconciliation
+                      .relation,
+
+                  sourceRegistryHash:
+                    goal.provenance
+                      .intentReconciliation
+                      .sourceRegistryHash,
+
+                  source:
+                    goal.provenance
+                      .intentReconciliation
+                      .source,
+                },
+              }
+            : {}),
         }
       : null,
   });
+}
+
+function buildGoalReconciliationEvidence(
+  input: {
+    record?:
+      PulseIntentReconciliationRecord;
+
+    tenantId?: string;
+    store?: string;
+    contextId?: string;
+    contextVersion?: string;
+  },
+): PulseGoalReconciliationEvidence | undefined {
+  if (!input.record) {
+    return undefined;
+  }
+
+  const expectedTenant =
+    input.tenantId ||
+    input.store ||
+    input.record.tenantId;
+
+  const observation =
+    consumePulseIntentReconciliation({
+      tenantId:
+        expectedTenant,
+
+      record:
+        input.record,
+
+      purpose:
+        "GOAL",
+    });
+
+  if (
+    input.store &&
+    observation.store &&
+    observation.store !==
+      input.store
+  ) {
+    throw new Error(
+      "GOAL_INTENT_RECONCILIATION_STORE_MISMATCH",
+    );
+  }
+
+  if (
+    input.contextId &&
+    observation.contextId !==
+      input.contextId
+  ) {
+    throw new Error(
+      "GOAL_INTENT_RECONCILIATION_CONTEXT_MISMATCH",
+    );
+  }
+
+  if (
+    input.contextVersion &&
+    observation.contextVersion !==
+      input.contextVersion
+  ) {
+    throw new Error(
+      "GOAL_INTENT_RECONCILIATION_CONTEXT_VERSION_MISMATCH",
+    );
+  }
+
+  return {
+    contract:
+      PULSE_GOAL_RECONCILIATION_EVIDENCE_CONTRACT,
+
+    observationId:
+      observation.observationId,
+
+    recordId:
+      observation.recordId,
+
+    reconciliationId:
+      observation.reconciliationId,
+
+    relation:
+      observation.relation,
+
+    sourceRegistryHash:
+      observation.sourceRegistryHash,
+
+    source:
+      "pulse-intent-reconciliation-goal",
+  };
 }
 
 export function buildPulseGoal(
@@ -533,6 +706,8 @@ export function buildPulseGoal(
     contextId?: string;
     contextVersion?: string;
     intentClassification?: PulseIntentClassification;
+    intentReconciliationRecord?:
+      PulseIntentReconciliationRecord;
   },
 ): PulseGoalClassification {
   const normalizedQuery =
@@ -602,6 +777,25 @@ export function buildPulseGoal(
     riskFloor === "L3" ||
     riskFloor === "L4";
 
+  const intentReconciliation =
+    buildGoalReconciliationEvidence({
+      record:
+        input.intentReconciliationRecord,
+
+      tenantId:
+        input.tenantId ||
+        input.store,
+
+      store:
+        input.store,
+
+      contextId:
+        input.contextId,
+
+      contextVersion:
+        input.contextVersion,
+    });
+
   const id =
     goalId({
       normalizedQuery,
@@ -639,6 +833,8 @@ export function buildPulseGoal(
       classification.confidence,
     intentDecision:
       classification.decision,
+    intentReconciliation:
+      intentReconciliation,
   };
 
   const provisional: Omit<

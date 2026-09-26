@@ -10,6 +10,10 @@ import {
   type PulseIntentClassification,
 } from "./DigitalBoostPulseGoalEngine";
 
+import type {
+  PulseIntentReconciliationRecord,
+} from "./ai/DigitalBoostPulseIntentReconciliationRegistry";
+
 export type PulsePlanStatus =
   | "DRAFT"
   | "READY"
@@ -162,6 +166,8 @@ function compilePulseGoalLegacy(input: {
   contextId?: string;
   contextVersion?: string;
   intentClassification?: PulseIntentClassification;
+  intentReconciliationRecord?:
+    PulseIntentReconciliationRecord;
 }): PulsePlan {
   const action = input.action;
 
@@ -184,6 +190,8 @@ function compilePulseGoalLegacy(input: {
         input.contextVersion,
       intentClassification:
         input.intentClassification,
+      intentReconciliationRecord:
+        input.intentReconciliationRecord,
     });
 
   const engineGoal =

@@ -22,6 +22,10 @@ import {
 } from "../../src/DigitalBoostPulseCycle.ts";
 
 import {
+  buildPulseGoal,
+} from "../../src/DigitalBoostPulseGoalEngine.ts";
+
+import {
   getPulseIntentReconciliationRecord,
   listPulseIntentReconciliationRecords,
   PULSE_INTENT_RECONCILIATION_STORAGE,
@@ -651,6 +655,261 @@ test(
     assert.equal(
       cycle.plan?.goal.intent,
       cycle.intentClassification?.primary,
+    );
+  },
+);
+
+
+test(
+  "P0.7.2.11 Goal consumes persisted reconciliation as provenance only",
+  () => {
+    const base =
+      runCycle(
+        cycleInput(),
+      );
+
+    const semantic =
+      makeSemantic({
+        contextVersion:
+          base.intentClassification
+            ?.provenance
+            .contextVersion,
+      });
+
+    const cycle =
+      runCycle(
+        cycleInput({
+          semanticObservation:
+            semantic,
+        }),
+      );
+
+    const evidence =
+      cycle.plan?.goal
+        .provenance
+        ?.intentReconciliation;
+
+    assert.ok(
+      evidence,
+    );
+
+    assert.equal(
+      evidence?.contract,
+      "p0.7.2.11",
+    );
+
+    assert.equal(
+      evidence?.relation,
+      "AGREEMENT",
+    );
+
+    assert.equal(
+      evidence?.source,
+      "pulse-intent-reconciliation-goal",
+    );
+
+    assert.ok(
+      evidence?.observationId,
+    );
+
+    assert.equal(
+      cycle.plan?.goal.intent,
+      "analytics_sales",
+    );
+
+    assert.equal(
+      cycle.plan?.goal.decision,
+      "ALLOW_GOAL",
+    );
+  },
+);
+
+test(
+  "P0.7.2.11 CONFLICT remains observational",
+  () => {
+    const base =
+      runCycle(
+        cycleInput(),
+      );
+
+    const semantic =
+      makeSemantic({
+        label:
+          "design_hero",
+        contextVersion:
+          base.intentClassification
+            ?.provenance
+            .contextVersion,
+      });
+
+    const cycle =
+      runCycle(
+        cycleInput({
+          semanticObservation:
+            semantic,
+        }),
+      );
+
+    assert.equal(
+      cycle.intentClassification?.primary,
+      "analytics_sales",
+    );
+
+    assert.equal(
+      cycle.intentReconciliation?.relation,
+      "CONFLICT",
+    );
+
+    assert.equal(
+      cycle.plan?.goal.intent,
+      "analytics_sales",
+    );
+
+    assert.equal(
+      cycle.plan?.goal.decision,
+      "ALLOW_GOAL",
+    );
+
+    assert.equal(
+      cycle.plan?.goal
+        .provenance
+        ?.intentReconciliation
+        ?.relation,
+      "CONFLICT",
+    );
+  },
+);
+
+test(
+  "P0.7.2.11 tampered registry record is rejected by Goal",
+  () => {
+    const base =
+      runCycle(
+        cycleInput(),
+      );
+
+    const semantic =
+      makeSemantic({
+        contextVersion:
+          base.intentClassification
+            ?.provenance
+            .contextVersion,
+      });
+
+    const cycle =
+      runCycle(
+        cycleInput({
+          semanticObservation:
+            semantic,
+        }),
+      );
+
+    const record =
+      getPulseIntentReconciliationRecord({
+        tenantId:
+          TENANT,
+        recordId:
+          cycle.intentReconciliationRecordId!,
+      });
+
+    const tampered = {
+      ...record,
+      registryHash:
+        "tampered-registry-hash",
+    };
+
+    assert.throws(
+      () =>
+        buildPulseGoal({
+          q:
+            "revisar ventas",
+          action:
+            "analytics",
+          section:
+            SECTION,
+          store:
+            STORE,
+          tenantId:
+            TENANT,
+          contextId:
+            CONTEXT_ID,
+          contextVersion:
+            cycle.intentClassification
+              ?.provenance
+              .contextVersion,
+          intentClassification:
+            cycle.intentClassification,
+          intentReconciliationRecord:
+            tampered,
+        }),
+      /Persisted reconciliation record failed registry verification/,
+    );
+  },
+);
+
+test(
+  "P0.7.2.11 cross-tenant record is rejected by Goal",
+  () => {
+    const base =
+      runCycle(
+        cycleInput(),
+      );
+
+    const semantic =
+      makeSemantic({
+        contextVersion:
+          base.intentClassification
+            ?.provenance
+            .contextVersion,
+      });
+
+    const cycle =
+      runCycle(
+        cycleInput({
+          semanticObservation:
+            semantic,
+        }),
+      );
+
+    const record =
+      getPulseIntentReconciliationRecord({
+        tenantId:
+          TENANT,
+        recordId:
+          cycle.intentReconciliationRecordId!,
+      });
+
+    const tampered = {
+      ...record,
+      tenantId:
+        "attacker-tenant",
+    };
+
+    assert.throws(
+      () =>
+        buildPulseGoal({
+          q:
+            "revisar ventas",
+          action:
+            "analytics",
+          section:
+            SECTION,
+          store:
+            STORE,
+          tenantId:
+            TENANT,
+          contextId:
+            CONTEXT_ID,
+          contextVersion:
+            cycle.intentClassification
+              ?.provenance
+              .contextVersion,
+          intentClassification:
+            cycle.intentClassification,
+          intentReconciliationRecord:
+            tampered,
+        }),
+      /Persisted reconciliation record failed registry verification|TENANT_MISMATCH/,
     );
   },
 );
