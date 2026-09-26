@@ -15,6 +15,17 @@ export type PulseInput = {
   page?: string;
   blockCount?: number;
   heroTitle?: string;
+
+  /**
+   * P0.8.6 consumer context propagation.
+   *
+   * These fields are attribution/context metadata.
+   * They are NOT security authority.
+   */
+  requestId?: string;
+  tenantId?: string;
+  contextId?: string;
+  contextVersion?: string;
 };
 export type PulseDecision = {
   title: string;
