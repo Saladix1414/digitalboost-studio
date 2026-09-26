@@ -14,6 +14,10 @@ import {
   createPulseExecutionAttestation,
 } from "./DigitalBoostPulseOutcomeProof";
 
+import {
+  evaluatePulseAutonomyBeforeExecution,
+} from "./DigitalBoostPulseAutonomyExecutionGate";
+
 export type PulseMissionStepExecutionContext =
   PulseExecutionContext;
 
@@ -50,6 +54,36 @@ export function executePulseMissionStep(
   if (context.envelope.action !== step.action) {
     throw new Error(
       "Mission step action does not match execution action.",
+    );
+  }
+
+  const autonomyGate =
+    evaluatePulseAutonomyBeforeExecution({
+      mission,
+      envelope:
+        context.envelope,
+      approval:
+        context.approval,
+    });
+
+  /*
+   * Only CONTINUE may enter the execution path directly.
+   *
+   * DEFER_TO_GOVERNANCE is intentionally passed to the
+   * existing executor because Governance/Approval remains
+   * the canonical execution authority.
+   *
+   * BLOCK is a hard autonomy stop. No execution call is made.
+   */
+  if (
+    autonomyGate.disposition ===
+    "BLOCK"
+  ) {
+    throw new Error(
+      "PULSE_AUTONOMY_GATE_BLOCKED:" +
+      autonomyGate.decision.decision +
+      ":" +
+      autonomyGate.reason,
     );
   }
 

@@ -8,7 +8,12 @@ import {
 
 import {
   pausePulseMission,
+  startPulseMission,
 } from "../../src/DigitalBoostPulseMission";
+
+import {
+  compilePulseGoal,
+} from "../../src/DigitalBoostPulsePlan";
 import {
   evaluatePulsePolicy,
   createPulseApproval,
@@ -470,3 +475,183 @@ test("Policy REJECT no crea Mission", () => {
   assert.equal(cycle.mission, undefined);
 });
 
+
+test(
+  "P0.9.1-B MissionExecutor blocks approval checkpoint before execution",
+  () => {
+    const plan =
+      compilePulseGoal({
+        action:
+          "analyze",
+        store:
+          "AutonomyGateIntegration",
+      });
+
+    const checkpointPlan = {
+      ...plan,
+      steps:
+        plan.steps.map(
+          (step, index) =>
+            index === 0
+              ? {
+                  ...step,
+                  approvalLikely:
+                    true,
+                }
+              : step,
+        ),
+    };
+
+    const mission =
+      startPulseMission({
+        store:
+          "AutonomyGateIntegration",
+        plan:
+          checkpointPlan,
+        requestId:
+          "req_p091b_gate_integration",
+      });
+
+    assert.equal(
+      mission.state,
+      "AWAITING_APPROVAL",
+    );
+
+    const envelope =
+      evaluatePulsePolicy(
+        "analyze",
+        "L0",
+        false,
+        "req_p091b_gate_integration_exec",
+        {
+          action:
+            "analyze",
+          target:
+            "AutonomyGateIntegration:website-builder:analyze",
+          actor:
+            "merchant",
+          tenant:
+            "AutonomyGateIntegration",
+          context_version:
+            currentContextVersion({
+              store:
+                "AutonomyGateIntegration",
+              section:
+                "website-builder",
+            }),
+          proposal: {
+            action:
+              "analyze",
+          },
+        },
+      );
+
+    assert.equal(
+      envelope.policy,
+      "ALLOW",
+    );
+
+    assert.equal(
+      envelope.requires_approval,
+      false,
+    );
+
+    assert.throws(
+      () =>
+        executePulseMissionStep(
+          mission.id,
+          {
+            envelope,
+          },
+        ),
+      /PULSE_AUTONOMY_GATE_BLOCKED:AWAITING_APPROVAL/,
+    );
+
+    const audits = JSON.parse(
+      localStorage.getItem(
+        "db-pulse-audit-v1",
+      ) || "[]",
+    ) as Array<
+      Record<string, unknown>
+    >;
+
+    assert.equal(
+      audits.length,
+      0,
+    );
+  },
+);
+
+test(
+  "P0.9.1-B normal ALLOW mission remains executable",
+  () => {
+    const plan =
+      compilePulseGoal({
+        action:
+          "analyze",
+        store:
+          "AutonomyGateNormal",
+      });
+
+    const mission =
+      startPulseMission({
+        store:
+          "AutonomyGateNormal",
+        plan,
+        requestId:
+          "req_p091b_gate_normal",
+      });
+
+    assert.equal(
+      mission.state,
+      "RUNNING",
+    );
+
+    const envelope =
+      evaluatePulsePolicy(
+        "analyze",
+        "L0",
+        false,
+        "req_p091b_gate_normal_exec",
+        {
+          action:
+            "analyze",
+          target:
+            "AutonomyGateNormal:website-builder:analyze",
+          actor:
+            "merchant",
+          tenant:
+            "AutonomyGateNormal",
+          context_version:
+            currentContextVersion({
+              store:
+                "AutonomyGateNormal",
+              section:
+                "website-builder",
+            }),
+          proposal: {
+            action:
+              "analyze",
+          },
+        },
+      );
+
+    const result =
+      executePulseMissionStep(
+        mission.id,
+        {
+          envelope,
+        },
+      );
+
+    assert.equal(
+      result.execution.state,
+      "COMPLETED",
+    );
+
+    assert.equal(
+      result.mission?.stepIndex,
+      1,
+    );
+  },
+);
