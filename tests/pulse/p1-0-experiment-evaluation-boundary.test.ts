@@ -1,3 +1,30 @@
+
+function boundEvidence(
+  ref: string,
+  tenantId: string,
+  experimentId: string,
+  observation: {
+    variantId: string;
+    metric: string;
+    value: number | boolean;
+    observedAt: string;
+  },
+  verified = true,
+) {
+  return createPulseExperimentEvidence({
+    ref,
+    tenantId,
+    experimentId,
+    observation: {
+      ...observation,
+      evidenceRefs: [ref],
+    },
+    verified,
+  });
+}
+
+import { createPulseExperimentEvidence } from "../../src/DigitalBoostPulseExperimentEvaluation";
+
 import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 
@@ -162,12 +189,46 @@ test(
 
     const resolver: PulseExperimentEvidenceResolver = {
       resolve(ref) {
-        return {
+
+        const isA =
+
+          ref.endsWith("-a");
+
+
+        return boundEvidence(
+
           ref,
-          tenantId: "tenant-b",
-          experimentId: experiment.id,
-          verified: true,
-        };
+
+          "tenant-b",
+
+          experiment.id,
+
+          {
+
+            variantId:
+
+              isA ? "A" : "B",
+
+            metric:
+
+              "hero_title_present",
+
+            value:
+
+              isA ? 1 : 0,
+
+            observedAt:
+
+              isA
+
+                ? "2026-09-26T10:00:00.000Z"
+
+                : "2026-09-26T10:01:00.000Z",
+
+          },
+
+        );
+
       },
     };
 
@@ -207,12 +268,46 @@ test(
 
     const resolver: PulseExperimentEvidenceResolver = {
       resolve(ref) {
-        return {
+
+        const isA =
+
+          ref.endsWith("-a");
+
+
+        return boundEvidence(
+
           ref,
-          tenantId: "tenant-a",
-          experimentId: "another-experiment",
-          verified: true,
-        };
+
+          "tenant-a",
+
+          "another-experiment",
+
+          {
+
+            variantId:
+
+              isA ? "A" : "B",
+
+            metric:
+
+              "hero_title_present",
+
+            value:
+
+              isA ? 1 : 0,
+
+            observedAt:
+
+              isA
+
+                ? "2026-09-26T10:00:00.000Z"
+
+                : "2026-09-26T10:01:00.000Z",
+
+          },
+
+        );
+
       },
     };
 
@@ -252,12 +347,46 @@ test(
 
     const resolver: PulseExperimentEvidenceResolver = {
       resolve(ref) {
-        return {
+
+        const isA =
+
+          ref.endsWith("-a");
+
+
+        return boundEvidence(
+
           ref,
-          tenantId: "tenant-a",
-          experimentId: experiment.id,
-          verified: true,
-        };
+
+          "tenant-a",
+
+          experiment.id,
+
+          {
+
+            variantId:
+
+              isA ? "A" : "B",
+
+            metric:
+
+              "hero_title_present",
+
+            value:
+
+              isA ? 1 : 0,
+
+            observedAt:
+
+              isA
+
+                ? "2026-09-26T10:00:00.000Z"
+
+                : "2026-09-26T10:01:00.000Z",
+
+          },
+
+        );
+
       },
     };
 
@@ -290,12 +419,46 @@ test(
 
     const resolver: PulseExperimentEvidenceResolver = {
       resolve(ref) {
-        return {
+
+        const isA =
+
+          ref.endsWith("-a");
+
+
+        return boundEvidence(
+
           ref,
-          tenantId: "tenant-green",
-          experimentId: experiment.id,
-          verified: true,
-        };
+
+          "tenant-green",
+
+          experiment.id,
+
+          {
+
+            variantId:
+
+              isA ? "A" : "B",
+
+            metric:
+
+              "hero_title_present",
+
+            value:
+
+              isA ? 1 : 0,
+
+            observedAt:
+
+              isA
+
+                ? "2026-09-26T10:00:00.000Z"
+
+                : "2026-09-26T10:01:00.000Z",
+
+          },
+
+        );
+
       },
     };
 
@@ -336,12 +499,46 @@ test(
 
     const resolver: PulseExperimentEvidenceResolver = {
       resolve(ref) {
-        return {
+
+        const isA =
+
+          ref.endsWith("-a");
+
+
+        return boundEvidence(
+
           ref,
-          tenantId: "tenant-boundary",
-          experimentId: experiment.id,
-          verified: true,
-        };
+
+          "tenant-boundary",
+
+          experiment.id,
+
+          {
+
+            variantId:
+
+              isA ? "A" : "B",
+
+            metric:
+
+              "hero_title_present",
+
+            value:
+
+              isA ? 1 : 0,
+
+            observedAt:
+
+              isA
+
+                ? "2026-09-26T10:00:00.000Z"
+
+                : "2026-09-26T10:01:00.000Z",
+
+          },
+
+        );
+
       },
     };
 
@@ -397,6 +594,248 @@ test(
     assert.equal(
       "governance" in record,
       false,
+    );
+  },
+);
+
+test(
+  "RED TEAM: evidence variant mismatch is blocked",
+  () => {
+    const experiment =
+      createFixture();
+
+    const resolver: PulseExperimentEvidenceResolver = {
+      resolve(ref) {
+        return boundEvidence(
+          ref,
+          experiment.tenantId || "",
+          experiment.id,
+          {
+            variantId: "A",
+            metric: "hero_title_present",
+            value: 1,
+            observedAt:
+              "2026-09-26T10:00:00.000Z",
+          },
+        );
+      },
+    };
+
+    const result =
+      evaluatePulseExperiment({
+        experiment,
+        observations: [
+          {
+            variantId: "B",
+            metric: "hero_title_present",
+            value: 0,
+            observedAt:
+              "2026-09-26T10:01:00.000Z",
+            evidenceRefs: ["variant-a"],
+          },
+        ],
+        evidenceResolver:
+          resolver,
+      });
+
+    assert.equal(
+      result.status,
+      "BLOCKED",
+    );
+  },
+);
+
+test(
+  "RED TEAM: evidence metric mismatch is blocked",
+  () => {
+    const experiment =
+      createFixture();
+
+    const resolver: PulseExperimentEvidenceResolver = {
+      resolve(ref) {
+        return boundEvidence(
+          ref,
+          experiment.tenantId || "",
+          experiment.id,
+          {
+            variantId: "A",
+            metric: "wrong_metric",
+            value: 1,
+            observedAt:
+              "2026-09-26T10:00:00.000Z",
+          },
+        );
+      },
+    };
+
+    const result =
+      evaluatePulseExperiment({
+        experiment,
+        observations: [
+          {
+            variantId: "A",
+            metric: "hero_title_present",
+            value: 1,
+            observedAt:
+              "2026-09-26T10:00:00.000Z",
+            evidenceRefs: ["metric-a"],
+          },
+        ],
+        evidenceResolver:
+          resolver,
+      });
+
+    assert.equal(
+      result.status,
+      "BLOCKED",
+    );
+  },
+);
+
+test(
+  "RED TEAM: evidence value mismatch is blocked",
+  () => {
+    const experiment =
+      createFixture();
+
+    const resolver: PulseExperimentEvidenceResolver = {
+      resolve(ref) {
+        return boundEvidence(
+          ref,
+          experiment.tenantId || "",
+          experiment.id,
+          {
+            variantId: "A",
+            metric: "hero_title_present",
+            value: 0,
+            observedAt:
+              "2026-09-26T10:00:00.000Z",
+          },
+        );
+      },
+    };
+
+    const result =
+      evaluatePulseExperiment({
+        experiment,
+        observations: [
+          {
+            variantId: "A",
+            metric: "hero_title_present",
+            value: 1,
+            observedAt:
+              "2026-09-26T10:00:00.000Z",
+            evidenceRefs: ["value-a"],
+          },
+        ],
+        evidenceResolver:
+          resolver,
+      });
+
+    assert.equal(
+      result.status,
+      "BLOCKED",
+    );
+  },
+);
+
+test(
+  "RED TEAM: evidence timestamp mismatch is blocked",
+  () => {
+    const experiment =
+      createFixture();
+
+    const resolver: PulseExperimentEvidenceResolver = {
+      resolve(ref) {
+        return boundEvidence(
+          ref,
+          experiment.tenantId || "",
+          experiment.id,
+          {
+            variantId: "A",
+            metric: "hero_title_present",
+            value: 1,
+            observedAt:
+              "2026-09-26T09:00:00.000Z",
+          },
+        );
+      },
+    };
+
+    const result =
+      evaluatePulseExperiment({
+        experiment,
+        observations: [
+          {
+            variantId: "A",
+            metric: "hero_title_present",
+            value: 1,
+            observedAt:
+              "2026-09-26T10:00:00.000Z",
+            evidenceRefs: ["time-a"],
+          },
+        ],
+        evidenceResolver:
+          resolver,
+      });
+
+    assert.equal(
+      result.status,
+      "BLOCKED",
+    );
+  },
+);
+
+test(
+  "RED TEAM: tampered evidence binding hash is blocked",
+  () => {
+    const experiment =
+      createFixture();
+
+    const resolver: PulseExperimentEvidenceResolver = {
+      resolve(ref) {
+        const evidence =
+          boundEvidence(
+            ref,
+            experiment.tenantId || "",
+            experiment.id,
+            {
+              variantId: "A",
+              metric: "hero_title_present",
+              value: 1,
+              observedAt:
+                "2026-09-26T10:00:00.000Z",
+            },
+          );
+
+        return {
+          ...evidence,
+          bindingHash:
+            "fnv1a_FORGED",
+        };
+      },
+    };
+
+    const result =
+      evaluatePulseExperiment({
+        experiment,
+        observations: [
+          {
+            variantId: "A",
+            metric: "hero_title_present",
+            value: 1,
+            observedAt:
+              "2026-09-26T10:00:00.000Z",
+            evidenceRefs: ["hash-a"],
+          },
+        ],
+        evidenceResolver:
+          resolver,
+      });
+
+    assert.equal(
+      result.status,
+      "BLOCKED",
     );
   },
 );

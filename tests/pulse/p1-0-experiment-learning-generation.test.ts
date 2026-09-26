@@ -1,3 +1,30 @@
+
+function boundEvidence(
+  ref: string,
+  tenantId: string,
+  experimentId: string,
+  observation: {
+    variantId: string;
+    metric: string;
+    value: number | boolean;
+    observedAt: string;
+  },
+  verified = true,
+) {
+  return createPulseExperimentEvidence({
+    ref,
+    tenantId,
+    experimentId,
+    observation: {
+      ...observation,
+      evidenceRefs: [ref],
+    },
+    verified,
+  });
+}
+
+import { createPulseExperimentEvidence } from "../../src/DigitalBoostPulseExperimentEvaluation";
+
 import {
   test,
   beforeEach,
@@ -144,16 +171,27 @@ function acceptedEvaluation(
     resolve(
       ref: string,
     ) {
-      return {
+      const isA =
+        ref.endsWith("-a");
+
+      return boundEvidence(
         ref,
-        tenantId:
-          experiment.tenantId ||
+        experiment.tenantId ||
           "",
-        experimentId:
-          experiment.id,
-        verified:
-          true,
-      };
+        experiment.id,
+        {
+          variantId:
+            isA ? "A" : "B",
+          metric:
+            "hero_title_present",
+          value:
+            isA ? 1 : 0,
+          observedAt:
+            isA
+              ? "2026-09-26T10:00:00.000Z"
+              : "2026-09-26T10:01:00.000Z",
+        },
+      );
     },
   };
 
@@ -433,14 +471,26 @@ test(
           resolve(
             ref: string,
           ) {
-            return {
+            const isA =
+              ref.endsWith("-a");
+
+            return boundEvidence(
               ref,
-              tenantId: "",
-              experimentId:
-                started.id,
-              verified:
-                true,
-            };
+              "",
+              started.id,
+              {
+                variantId:
+                  isA ? "A" : "B",
+                metric:
+                  "hero_title_present",
+                value:
+                  isA ? 1 : 0,
+                observedAt:
+                  isA
+                    ? "2026-09-26T10:00:00.000Z"
+                    : "2026-09-26T10:01:00.000Z",
+              },
+            );
           },
         },
       });

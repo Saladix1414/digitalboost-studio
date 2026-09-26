@@ -1,3 +1,5 @@
+import { hashProposal } from "./DigitalBoostPulseContracts";
+
 import type { PulseExperiment } from "./DigitalBoostPulseExperiment";
 
 /**
@@ -45,7 +47,12 @@ export type PulseExperimentEvidence = {
   readonly ref: string;
   readonly tenantId: string;
   readonly experimentId: string;
+  readonly variantId: string;
+  readonly metric: string;
+  readonly value: number | boolean;
+  readonly observedAt: string;
   readonly verified: boolean;
+  readonly bindingHash: string;
 };
 
 export type PulseExperimentEvidenceResolver = {
@@ -84,6 +91,49 @@ function isFiniteObservationValue(
   );
 }
 
+export function createPulseExperimentEvidence(input: {
+  ref: string;
+  tenantId: string;
+  experimentId: string;
+  observation: PulseExperimentObservation;
+  verified: boolean;
+}): PulseExperimentEvidence {
+  const base = {
+    ref: input.ref,
+    tenantId: input.tenantId,
+    experimentId: input.experimentId,
+    variantId: input.observation.variantId,
+    metric: input.observation.metric,
+    value: input.observation.value,
+    observedAt: input.observation.observedAt,
+    verified: input.verified,
+  };
+
+  return {
+    ...base,
+    bindingHash: hashProposal(base),
+  };
+}
+
+export function verifyPulseExperimentEvidenceBinding(
+  evidence: PulseExperimentEvidence,
+): boolean {
+  const {
+    bindingHash,
+    ...base
+  } = evidence;
+
+  return (
+    !!evidence.ref.trim() &&
+    !!evidence.experimentId.trim() &&
+    !!evidence.variantId.trim() &&
+    !!evidence.metric.trim() &&
+    !!evidence.observedAt.trim() &&
+    !!bindingHash.trim() &&
+    hashProposal(base) === bindingHash
+  );
+}
+
 function observationEvidenceValid(
   experiment: PulseExperiment,
   observation: PulseExperimentObservation,
@@ -116,9 +166,21 @@ function observationEvidenceValid(
     }
 
     if (
+      !verifyPulseExperimentEvidenceBinding(
+        evidence,
+      )
+    ) {
+      return false;
+    }
+
+    if (
       evidence.verified !== true ||
       evidence.experimentId !== experiment.id ||
-      evidence.tenantId !== (experiment.tenantId || "")
+      evidence.tenantId !== (experiment.tenantId || "") ||
+      evidence.variantId !== observation.variantId ||
+      evidence.metric !== observation.metric ||
+      evidence.value !== observation.value ||
+      evidence.observedAt !== observation.observedAt
     ) {
       return false;
     }
