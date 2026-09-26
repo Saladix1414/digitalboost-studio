@@ -25,3 +25,5 @@ export * from './DigitalBoostPulseInferenceSemanticBoundary';
 export * from './DigitalBoostPulseIntentReconciliation';
 
 export * from './DigitalBoostPulseIntentReconciliationRegistry';
+
+export * from './DigitalBoostPulseIntentReconciliationConsumer';
