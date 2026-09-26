@@ -31,6 +31,10 @@ import {
 } from "../../src/server/DigitalBoostPulseDistributedProof";
 
 import {
+  PersistentApprovalRepository,
+} from "../../src/server/DigitalBoostPulsePersistentApprovalRepository";
+
+import {
   executePulseServerRequestWithDistributedProof,
 } from "../../src/server/DigitalBoostPulseServerProofExecution";
 
@@ -120,6 +124,67 @@ function fixture() {
       issued_at:
         timestamp,
     };
+
+  const approvalRoot =
+    join(
+      storage,
+      "approvals",
+    );
+
+  const approvalRepository =
+    new PersistentApprovalRepository({
+      tenantId,
+      rootDir:
+        approvalRoot,
+    });
+
+  approvalRepository.create({
+    tenant_id:
+      tenantId,
+    approval_id:
+      approvalId,
+    approval: {
+      approval_id:
+        approvalId,
+      request_id:
+        requestId,
+      action,
+      state:
+        "APPROVED",
+      binding: {
+        request_id:
+          requestId,
+        action,
+        target:
+          action,
+        risk:
+          "L2",
+        policy_version:
+          policyVersion,
+        proposal_hash:
+          proposalHash,
+        context_version:
+          contextVersion,
+        actor:
+          "runtime-user",
+        tenant:
+          tenantId,
+        expires_at:
+          "2099-01-01T00:00:00.000Z",
+      },
+    },
+  });
+
+  const principal = {
+    authenticated:
+      true,
+    subject_id:
+      "runtime-user",
+    active_tenant_id:
+      tenantId,
+    tenant_ids:
+      [tenantId],
+  };
 
   const attestation =
     createPulseExecutionAttestation({
@@ -266,6 +331,8 @@ function fixture() {
   };
 
   return {
+    approvalRoot,
+    principal,
     request,
     tenantId,
     attestation,
@@ -275,6 +342,104 @@ function fixture() {
     claimStore,
   };
 }
+
+function proofAuthorityOptions(
+  f: ReturnType<typeof fixture>,
+) {
+  return {
+    principal:
+      f.principal,
+    authorizeAction:
+      async () => true,
+    createApprovalRepository(
+      tenantId: string,
+    ) {
+      return new PersistentApprovalRepository({
+        tenantId,
+        rootDir:
+          f.approvalRoot,
+      });
+    },
+  };
+}
+
+test(
+  "P1.1-C nonexistent persisted approval cannot reach claim or execution",
+  async () => {
+    const f =
+      fixture();
+
+    let claims =
+      0;
+
+    let executions =
+      0;
+
+    const result =
+      await executePulseServerRequestWithDistributedProof(
+        {
+          ...f.request,
+          approval_id:
+            "approval-p11c-nonexistent",
+        },
+        {
+          ...proofAuthorityOptions(f),
+          claimStore: {
+            async claim() {
+              claims += 1;
+              return {
+                claimed:
+                  true,
+              };
+            },
+          },
+          executeAction:
+            async () => {
+              executions += 1;
+              return {
+                completed:
+                  true,
+                verified:
+                  true,
+                evidence_id:
+                  "unexpected-execution",
+              };
+            },
+          auditRepository:
+            f.auditRepository,
+          idempotencyRepository:
+            f.idempotencyRepository,
+          proofRepository:
+            f.proofRepository,
+        },
+      );
+
+    assert.equal(
+      result.status,
+      "REJECTED",
+    );
+
+    assert.equal(
+      result.code,
+      "APPROVAL_NOT_FOUND",
+    );
+
+    assert.equal(
+      result.proof_status,
+      "NOT_APPLICABLE",
+    );
+
+    assert.equal(
+      claims,
+      0,
+    );
+
+    assert.equal(
+      executions,
+      0,
+    );
+  },
+);
 
 test(
   "P0.4.32 EXECUTED + attestation produce PROVEN",
@@ -286,6 +451,7 @@ test(
       await executePulseServerRequestWithDistributedProof(
         f.request,
         {
+          ...proofAuthorityOptions(f),
           claimStore:
             f.claimStore,
           executeAction:
@@ -339,6 +505,7 @@ test(
       await executePulseServerRequestWithDistributedProof(
         f.request,
         {
+          ...proofAuthorityOptions(f),
           claimStore:
             f.claimStore,
           executeAction:
@@ -383,6 +550,7 @@ test(
       fixture();
 
     const options = {
+      ...proofAuthorityOptions(f),
       claimStore:
         f.claimStore,
       executeAction:

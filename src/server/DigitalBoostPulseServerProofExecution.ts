@@ -1,10 +1,22 @@
 import {
-  executePulseServerRequest,
   type PulseServerExecutionClaimStore,
   type PulseServerExecutionEvidence,
   type PulseServerExecutionRequest,
   type PulseServerExecutionResult,
 } from "../DigitalBoostPulseServerExecutor";
+
+import {
+  type PulseActionAuthorizer,
+  type PulsePrincipal,
+} from "./DigitalBoostPulseAuthorizationBoundary";
+
+import {
+  executeAuthorizedPulseServerRequest,
+} from "./DigitalBoostPulseServerExecutionRuntime";
+
+import {
+  PersistentApprovalRepository,
+} from "./DigitalBoostPulsePersistentApprovalRepository";
 
 import {
   issuePulseDistributedProof,
@@ -37,6 +49,16 @@ export type PulseServerProofExecutionResult =
 export type PulseServerProofExecutionOptions = {
   readonly claimStore:
     PulseServerExecutionClaimStore;
+
+  readonly principal:
+    PulsePrincipal;
+
+  readonly authorizeAction:
+    PulseActionAuthorizer;
+
+  readonly createApprovalRepository?: (
+    tenantId: string,
+  ) => PersistentApprovalRepository;
 
   readonly executeAction: (
     request: PulseServerExecutionRequest,
@@ -104,11 +126,17 @@ export async function
     PulseServerProofExecutionResult
   > {
   const result =
-    await executePulseServerRequest(
+    await executeAuthorizedPulseServerRequest(
       input,
+      options.principal,
       {
-        claimStore:
-          options.claimStore,
+        authorizeAction:
+          options.authorizeAction,
+        createApprovalRepository:
+          options.createApprovalRepository,
+        createClaimStore() {
+          return options.claimStore;
+        },
         executeAction:
           options.executeAction,
       },
