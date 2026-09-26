@@ -20,3 +20,4 @@ export * from './DigitalBoostPulseInferenceEvidenceRegistry';
 
 export * from './DigitalBoostPulseInferenceEvidenceConsumer';
 export * from './DigitalBoostPulseInferenceContextAdapter';
+export * from './DigitalBoostPulseInferenceSemanticBoundary';
