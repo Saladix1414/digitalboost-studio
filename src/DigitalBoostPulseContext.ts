@@ -2,6 +2,7 @@ import { buildStateSnapshot, fact, type PulseFact, type PulseStateSnapshot } fro
 import { loadSearchAdapter } from "./DigitalBoostPulseSearchAdapter";
 import { assemblePulseContext, contextItem, type PulseContextItem } from "./DigitalBoostPulseContextEngine";
 import { hashProposal } from "./DigitalBoostPulseContracts";
+import { assertInferenceObservationItem } from "./ai/DigitalBoostPulseInferenceContextBoundary";
 export type PulseContextSourceStatus = "available" | "partial" | "unavailable";
 export interface PulseContextDomain<T = unknown> {
   status: PulseContextSourceStatus; data: T; source: string;
@@ -89,7 +90,17 @@ function readCampaigns(): number | undefined {
   if (raw && typeof raw === "object" && Array.isArray((raw as { items?: unknown }).items)) return (raw as { items: unknown[] }).items.length;
   return undefined;
 }
-export function buildPulseContext(input: { store?: string; tenant?: string; range?: string; section?: string; page?: string; } = {}): PulseContext {
+
+export function buildPulseContext(
+  input: {
+    store?: string;
+    tenant?: string;
+    range?: string;
+    section?: string;
+    page?: string;
+    inferenceObservationItems?: readonly PulseContextItem[];
+  } = {},
+): PulseContext {
   const generatedAt = new Date().toISOString();
   const store = input.store || safeText("db-active-store-v1") || "unknown";
   const tenantId = input.tenant || safeText("db-active-tenant-v1") || safeText("db-tenant-v1") || "digitalboost";
@@ -244,14 +255,30 @@ export function buildPulseContext(input: { store?: string; tenant?: string; rang
         }),
     );
 
+  const inferenceObservationItems =
+    Array.from(
+      input.inferenceObservationItems ?? [],
+    );
+
+  for (const item of inferenceObservationItems) {
+    assertInferenceObservationItem(
+      item,
+      tenantId,
+    );
+  }
+
+  const assembledContextItems = [
+    ...contextItems,
+    ...inferenceObservationItems,
+  ];
+
   const assembly =
     assemblePulseContext({
       tenantId,
       snapshot,
       policyVersion:
         "pulse-gov-v1",
-      items:
-        contextItems,
+      items: assembledContextItems,
       now:
         Date.parse(
           generatedAt,
