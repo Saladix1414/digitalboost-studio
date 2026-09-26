@@ -2,7 +2,10 @@ import "./digitalboost-studio-pro.css";
 import { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { applyPulseDraft, appendPulseBlock, undoPulseApply, applyBlockAt, moveBlock, duplicateBlock, removeBlock, toggleHidden } from './DigitalBoostPulseApply';
-import { toolInspect, toolMap } from "./DigitalBoostPulseTools";
+import {
+  createPulseToolConsumerContext,
+  invokePulseToolForConsumer,
+} from "./DigitalBoostPulseToolConsumerAdapter";
 
 const SNIPPETS = [
   { id: "hero", kind: "hero", label: "Hero corto", title: "La coleccion que no pide permiso.", body: "Una promesa. Un boton.", cta: "Entrar" },
@@ -35,7 +38,48 @@ function Dock() {
   const [seo, setSeo] = useState(function () {
     try { return JSON.parse(localStorage.getItem("db-page-seo-v1") || "{}"); } catch { return {}; }
   });
-  const facts = useMemo(function () { return toolInspect(); }, [tab]);
+  const toolSession = useMemo(
+      function () {
+        const context =
+          createPulseToolConsumerContext({
+            section:
+              "website-builder",
+            q:
+              "studio",
+            agentId:
+              "design",
+            intent:
+              "content",
+          });
+
+        const facts =
+          invokePulseToolForConsumer<any>(
+            context,
+            "pulse.inspect",
+          ).output;
+
+        const map =
+          invokePulseToolForConsumer<string>(
+            context,
+            "pulse.map",
+            facts,
+          ).output;
+
+        return {
+          context,
+          facts,
+          map,
+        };
+      },
+      [tab],
+    );
+
+    const toolContext =
+      toolSession.context;
+    const facts =
+      toolSession.facts;
+    const toolMapOutput =
+      toolSession.map;
   const blocks = readBlocks();
   function passFilt(b: any) {
     const tp = String((b && (b.type || b.kind)) || '');
@@ -93,7 +137,7 @@ function Dock() {
             {tab === "audit" && (
               <div>
                 <p className="font-semibold">Problems · {facts.score}/100</p>
-                <pre className="mt-2 whitespace-pre-wrap text-[11px] text-[#AFC0D5]">{toolMap(facts)}</pre>
+                <pre className="mt-2 whitespace-pre-wrap text-[11px] text-[#AFC0D5]">{toolMapOutput}</pre>
                 {facts.notes.map(function (n) { return <p key={n} className="text-amber-200">· {n}</p>; })}
                 <button type="button" className="mt-3 h-11 w-full rounded-lg bg-cyan-400 text-xs font-semibold text-[#070D18]" onClick={function () { try { localStorage.setItem('db-pulse-seed', 'inspeccionar'); window.dispatchEvent(new Event('db-open-pulse')); } catch {} }}>Preguntar a PULSE</button>
               </div>

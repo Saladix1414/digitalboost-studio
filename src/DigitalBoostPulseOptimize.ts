@@ -1,9 +1,29 @@
 import { seoFacts } from "./DigitalBoostPulseSeo";
-import { toolInspect } from "./DigitalBoostPulseTools";
+import {
+  createPulseToolConsumerContext,
+  createPulseToolConsumerContextFromInput,
+  invokePulseToolForConsumer,
+} from "./DigitalBoostPulseToolConsumerAdapter";
 import type { PulseInput } from "./DigitalBoostPulseKB";
 
 export function pulseOptimizeOnce(input?: PulseInput) {
-  const facts = toolInspect(input);
+  const toolContext = input
+    ? createPulseToolConsumerContextFromInput(
+        input,
+      )
+    : createPulseToolConsumerContext({
+        section: "dashboard",
+        q: "optimizar",
+        agentId: "ops",
+        intent: "optimization",
+      });
+
+  const facts =
+    invokePulseToolForConsumer<any>(
+      toolContext,
+      "pulse.inspect",
+      input,
+    ).output;
   const seo = seoFacts();
   const proposals: Array<Record<string, unknown>> = [];
 

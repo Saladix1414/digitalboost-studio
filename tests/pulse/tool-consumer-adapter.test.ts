@@ -493,3 +493,64 @@ test(
     );
   },
 );
+test(
+  "P0.8.6-B consumers do not import or directly call raw tools",
+  () => {
+    const files = [
+      "src/DigitalBoostPulseRouter.ts",
+      "src/DigitalBoostPulseSkills.ts",
+      "src/DigitalBoostPulseKB.ts",
+      "src/DigitalBoostPulseOptimize.ts",
+      "src/DigitalBoostStudioDock.tsx",
+    ];
+
+    for (const file of files) {
+      const source =
+        fs.readFileSync(
+          path.resolve(file),
+          "utf8",
+        );
+
+      assert.doesNotMatch(
+        source,
+        /DigitalBoostPulseTools/,
+        `${file} imports raw DigitalBoostPulseTools`,
+      );
+
+      assert.doesNotMatch(
+        source,
+        /tool(Inspect|ScoreLine|Map|Nba|Orders|Stock|Theme|Diff|Range)\s*\(/,
+        `${file} contains a direct raw tool call`,
+      );
+
+      assert.match(
+        source,
+        /invokePulseToolForConsumer/,
+        `${file} is not using the canonical consumer adapter`,
+      );
+    }
+  },
+);
+
+test(
+  "P0.8.6-B adapter is the only consumer-to-evidence bridge",
+  () => {
+    const source =
+      fs.readFileSync(
+        path.resolve(
+          "src/DigitalBoostPulseToolConsumerAdapter.ts",
+        ),
+        "utf8",
+      );
+
+    assert.match(
+      source,
+      /invokePulseToolWithEvidence/,
+    );
+
+    assert.doesNotMatch(
+      source,
+      /DigitalBoostPulseTools/,
+    );
+  },
+);

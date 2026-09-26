@@ -1,5 +1,8 @@
 import { routeTools } from "./DigitalBoostPulseRouter";
-import { toolInspect, toolScoreLine } from "./DigitalBoostPulseTools";
+import {
+  createPulseToolConsumerContextFromInput,
+  invokePulseToolForConsumer,
+} from "./DigitalBoostPulseToolConsumerAdapter";
 
 import { runCycle } from "./DigitalBoostPulseCycle";
 import type { PulseDecisionEnvelope, PulseApproval } from "./DigitalBoostPulseGovernance";
@@ -175,7 +178,25 @@ function finish(
 }
 
 export function decide(input: PulseInput): PulseDecision {
-  const facts = toolInspect(input);
+  const toolContext =
+    createPulseToolConsumerContextFromInput(
+      input,
+    );
+
+  const facts =
+    invokePulseToolForConsumer<any>(
+      toolContext,
+      "pulse.inspect",
+      input,
+    ).output;
+
+  const routedInput = input.requestId
+    ? input
+    : {
+        ...input,
+        requestId:
+          toolContext.requestId,
+      };
   if (!input.heroTitle) input.heroTitle = facts.heroTitle;
   if (!input.blockCount) input.blockCount = facts.blocks;
   if (!input.page) input.page = facts.page;
@@ -189,12 +210,16 @@ export function decide(input: PulseInput): PulseDecision {
     const f = facts;
     return finish(input, {
       title: "PULSE · Inspect",
-      body: toolScoreLine(f) + ". " + f.store + " · " + f.page + " · " + f.blocks + " bloques. Hero: «" + (f.heroTitle || "—") + "». " + (f.notes.length ? f.notes.join(". ") + "." : "Sin notas.") + " Esto salió de localStorage, no lo inventé.",
+      body: invokePulseToolForConsumer<string>(
+          toolContext,
+          "pulse.score",
+          f,
+        ).output + ". " + f.store + " · " + f.page + " · " + f.blocks + " bloques. Hero: «" + (f.heroTitle || "—") + "». " + (f.notes.length ? f.notes.join(". ") + "." : "Sin notas.") + " Esto salió de localStorage, no lo inventé.",
       action: input.section === "website-builder" ? "website-builder" : "dashboard",
       label: "Seguir"
     });
   }
-  const routed = routeTools(input, q, finish);
+  const routed = routeTools(routedInput, q, finish);
   if (routed) return routed;
   if (q.indexOf("dataset") !== -1 || q.indexOf("jsonl") !== -1) {
     const n = countExamples();
