@@ -10,6 +10,7 @@ import {
 import {
   queryPulseMemory,
   queryTrustedPulseMemory,
+  rememberPulse,
 } from "../../src/DigitalBoostPulseMemory";
 
 import { compilePlaybook } from "../../src/DigitalBoostPulseIntel";
@@ -147,7 +148,7 @@ test(
 );
 
 test(
-  "RED TEAM: RUNNING experiment lesson remains untrusted until durable verification",
+  "RED TEAM: STOPPING RUNNING experiment creates no lesson",
   () => {
     const experiment = createPulseExperiment(
       experimentInput("tenant-c"),
@@ -172,12 +173,10 @@ test(
       scope: "P1Store",
     });
 
-    assert.equal(lessons.length, 1);
-
-    assert.notEqual(
-      lessons[0].trust,
-      "VERIFIED",
-      "Experimental stop reason must not become trusted learning by itself.",
+    assert.equal(
+      lessons.length,
+      0,
+      "Stopping an experiment must not create learning.",
     );
 
     const trusted = queryTrustedPulseMemory({
@@ -194,22 +193,23 @@ test(
 test(
   "RED TEAM: legacy playbook path rejects an unverified experimental lesson",
   () => {
-    const experiment = createPulseExperiment(
-      experimentInput(),
-    );
-
-    assert.ok(experiment);
-
-    const started = startPulseExperiment(experiment.id);
-
-    assert.ok(started);
-
-    const stopped = stopPulseExperiment(
-      experiment.id,
-      "unverified-learning",
-    );
-
-    assert.ok(stopped);
+    rememberPulse({
+      kind: "lesson",
+      scope: "P1Store",
+      store: "P1Store",
+      source: "executor",
+      evidenceRefs: ["fixture-unverified-evidence"],
+      confidence: 0.6,
+      content: {
+        experimentId: "fixture-experiment",
+        hypothesis: {
+          statement: "hero title is present",
+          metric: "hero_title_present",
+          direction: "up",
+        },
+        result: "unverified-learning",
+      },
+    });
 
     const lessons = queryPulseMemory({
       kind: "lesson",
@@ -217,6 +217,10 @@ test(
     });
 
     assert.equal(lessons.length, 1);
+    assert.notEqual(
+      lessons[0].trust,
+      "VERIFIED",
+    );
 
     const report = compilePlaybook("P1Store");
 

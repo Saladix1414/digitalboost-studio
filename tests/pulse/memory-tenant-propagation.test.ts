@@ -265,41 +265,33 @@ test(
 );
 
 test(
-  "P0.6.1 experiment lesson preserves explicit tenant",
+  "P0.6.1 explicit tenant is preserved for lesson fixture",
   () => {
     reset();
 
     const tenant = "tenant-experiment";
-    const experiment = createPulseExperiment({
-      store: "SharedStore",
+    const experimentId = "experiment-fixture";
+
+    const lesson = rememberPulse({
+      kind: "lesson",
+      scope: "SharedStore",
       tenantId: tenant,
-      hypothesis: {
-        statement: "hero title is present",
-        metric: "hero_title_present",
-        direction: "up",
-      },
-      variants: [
-        {
-          id: "a",
-          label: "A",
-          action: "hero",
-          payload: {},
+      store: "SharedStore",
+      source: "executor",
+      evidenceRefs: ["fixture-evidence"],
+      confidence: 0.6,
+      content: {
+        experimentId,
+        hypothesis: {
+          statement: "hero title is present",
+          metric: "hero_title_present",
+          direction: "up",
         },
-      ],
+        result: "fixture",
+      },
     });
 
-    assert.ok(experiment);
-
-    const started = startPulseExperiment(experiment.id);
-
-    assert.ok(started);
-
-    const stopped = stopPulseExperiment(
-      experiment.id,
-      "manual-test-stop",
-    );
-
-    assert.ok(stopped);
+    assert.ok(lesson);
 
     const lessons = queryPulseMemory({
       kind: "lesson",
@@ -314,7 +306,7 @@ test(
         typeof lessons[0].content === "object" &&
         (lessons[0].content as Record<string, unknown>)
           .experimentId,
-      experiment.id,
+      experimentId,
     );
   },
 );

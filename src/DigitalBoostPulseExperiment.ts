@@ -1,4 +1,3 @@
-import { rememberPulse } from "./DigitalBoostPulseMemory";
 export type PulseExperimentStatus = "DRAFT" | "RUNNING" | "STOPPED" | "COMPLETED" | "REJECTED";
 export type PulseVariant = { id: string; label: string; action: string; payload: Record<string, unknown> };
 export type PulseHypothesis = { statement: string; metric: string; direction: "up" | "down" };
@@ -83,20 +82,10 @@ export function startPulseExperiment(id: string): PulseExperiment | null {
 export function stopPulseExperiment(id: string, reason: string): PulseExperiment | null {
   const exp = readAll().filter(function (e) { return e.id === id; })[0];
   if (!exp || exp.status !== "RUNNING") return null;
-  const stopped = save(Object.assign({}, exp, { status: "STOPPED", result: reason }));
-  rememberPulse({
-    kind: "lesson",
-    scope: stopped.store,
-    tenantId: stopped.tenantId,
-    store: stopped.store,
-    source: "executor",
-    evidenceRefs: [stopped.id],
-    confidence: 0.6,
-    content: {
-      experimentId: stopped.id,
-      hypothesis: stopped.hypothesis,
+  return save(
+    Object.assign({}, exp, {
+      status: "STOPPED",
       result: reason,
-    },
-  });
-  return stopped;
+    }),
+  );
 }
