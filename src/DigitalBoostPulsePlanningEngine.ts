@@ -4,7 +4,51 @@ import type {
   PulsePlanStep,
 } from "./DigitalBoostPulsePlan";
 
+import {
+  consumePulseIntentReconciliation,
+} from "./ai/DigitalBoostPulseIntentReconciliationConsumer";
+
+import {
+  getPulseIntentReconciliationRecord,
+} from "./ai/DigitalBoostPulseIntentReconciliationRegistry";
+
+import type {
+  PulseIntentReconciliationRecord,
+} from "./ai/DigitalBoostPulseIntentReconciliationRegistry";
+
 export const PULSE_PLANNING_ENGINE_CONTRACT = "p0.5.3" as const;
+
+export const
+  PULSE_PLANNING_RECONCILIATION_EVIDENCE_CONTRACT =
+  "p0.7.2.12" as const;
+
+export type PulsePlanningReconciliationEvidence = {
+  contract:
+    typeof
+      PULSE_PLANNING_RECONCILIATION_EVIDENCE_CONTRACT;
+
+  observationId:
+    string;
+
+  recordId:
+    string;
+
+  reconciliationId:
+    string;
+
+  relation:
+    import(
+      "./ai/DigitalBoostPulseIntentReconciliation"
+    ).PulseIntentReconciliationResult[
+      "relation"
+    ];
+
+  sourceRegistryHash:
+    string;
+
+  source:
+    "pulse-intent-reconciliation-planning";
+};
 
 export type PulsePlanDecision =
   | "ALLOW_PLAN"
@@ -46,6 +90,9 @@ export type PulsePlanProvenance = {
   contextVersion: string;
   priority: string;
   riskFloor: string;
+
+  intentReconciliation?:
+    PulsePlanningReconciliationEvidence;
 };
 
 export type PulsePlanningResult = {
@@ -55,6 +102,153 @@ export type PulsePlanningResult = {
 };
 
 type PlanningGoal = PulsePlan["goal"];
+
+function consumeGoalReconciliationForPlanning(
+  goal: PlanningGoal,
+):
+  PulsePlanningReconciliationEvidence |
+  undefined {
+  const goalEvidence =
+    goal.provenance
+      ?.intentReconciliation;
+
+  if (!goalEvidence) {
+    return undefined;
+  }
+
+  if (
+    goalEvidence.contract !==
+      "p0.7.2.11" ||
+    goalEvidence.source !==
+      "pulse-intent-reconciliation-goal"
+  ) {
+    throw new Error(
+      "PLANNING_INTENT_RECONCILIATION_GOAL_EVIDENCE_INVALID",
+    );
+  }
+
+  const tenantId =
+    (
+      goal.tenantId ||
+      goal.store ||
+      ""
+    ).trim();
+
+  if (!tenantId) {
+    throw new Error(
+      "PLANNING_INTENT_RECONCILIATION_TENANT_MISSING",
+    );
+  }
+
+  let record:
+    PulseIntentReconciliationRecord;
+
+  try {
+    record =
+      getPulseIntentReconciliationRecord({
+        tenantId,
+        recordId:
+          goalEvidence.recordId,
+      });
+  } catch (error) {
+    throw new Error(
+      "PLANNING_INTENT_RECONCILIATION_RECORD_UNAVAILABLE",
+      {
+        cause:
+          error,
+      },
+    );
+  }
+
+  const observation =
+    consumePulseIntentReconciliation({
+      tenantId,
+
+      record,
+
+      purpose:
+        "PLANNING",
+    });
+
+  if (
+    goal.provenance?.tenantId &&
+    observation.tenantId !==
+      goal.provenance.tenantId
+  ) {
+    throw new Error(
+      "PLANNING_INTENT_RECONCILIATION_TENANT_MISMATCH",
+    );
+  }
+
+  if (
+    goal.contextId &&
+    observation.contextId !==
+      goal.contextId
+  ) {
+    throw new Error(
+      "PLANNING_INTENT_RECONCILIATION_CONTEXT_MISMATCH",
+    );
+  }
+
+  if (
+    goal.contextVersion &&
+    observation.contextVersion !==
+      goal.contextVersion
+  ) {
+    throw new Error(
+      "PLANNING_INTENT_RECONCILIATION_CONTEXT_VERSION_MISMATCH",
+    );
+  }
+
+  if (
+    goal.store &&
+    observation.store &&
+    observation.store !==
+      goal.store
+  ) {
+    throw new Error(
+      "PLANNING_INTENT_RECONCILIATION_STORE_MISMATCH",
+    );
+  }
+
+  if (
+    observation.recordId !==
+      goalEvidence.recordId ||
+    observation.reconciliationId !==
+      goalEvidence.reconciliationId ||
+    observation.relation !==
+      goalEvidence.relation ||
+    observation.sourceRegistryHash !==
+      goalEvidence.sourceRegistryHash
+  ) {
+    throw new Error(
+      "PLANNING_INTENT_RECONCILIATION_PROVENANCE_MISMATCH",
+    );
+  }
+
+  return {
+    contract:
+      PULSE_PLANNING_RECONCILIATION_EVIDENCE_CONTRACT,
+
+    observationId:
+      observation.observationId,
+
+    recordId:
+      observation.recordId,
+
+    reconciliationId:
+      observation.reconciliationId,
+
+    relation:
+      observation.relation,
+
+    sourceRegistryHash:
+      observation.sourceRegistryHash,
+
+    source:
+      "pulse-intent-reconciliation-planning",
+  };
+}
 
 function levelOf(value: string | undefined): number {
   const match = String(value || "").match(/^L([0-4])$/);
@@ -179,6 +373,48 @@ export function fingerprintPulsePlanPlanning(
           contextVersion: plan.planningProvenance.contextVersion,
           priority: plan.planningProvenance.priority,
           riskFloor: plan.planningProvenance.riskFloor,
+
+          ...(plan.planningProvenance
+            .intentReconciliation
+            ? {
+                intentReconciliation: {
+                  contract:
+                    plan.planningProvenance
+                      .intentReconciliation
+                      .contract,
+
+                  observationId:
+                    plan.planningProvenance
+                      .intentReconciliation
+                      .observationId,
+
+                  recordId:
+                    plan.planningProvenance
+                      .intentReconciliation
+                      .recordId,
+
+                  reconciliationId:
+                    plan.planningProvenance
+                      .intentReconciliation
+                      .reconciliationId,
+
+                  relation:
+                    plan.planningProvenance
+                      .intentReconciliation
+                      .relation,
+
+                  sourceRegistryHash:
+                    plan.planningProvenance
+                      .intentReconciliation
+                      .sourceRegistryHash,
+
+                  source:
+                    plan.planningProvenance
+                      .intentReconciliation
+                      .source,
+                },
+              }
+            : {}),
         }
       : null,
   });
@@ -423,6 +659,11 @@ export function preparePulsePlan(
   const source = input.plan;
   const goal = source.goal;
 
+  const planningIntentReconciliation =
+    consumeGoalReconciliationForPlanning(
+      goal,
+    );
+
   const validation = validatePlanGraph(source.steps);
 
   const preparedSteps = source.steps.map(
@@ -484,6 +725,13 @@ export function preparePulsePlan(
         goal.contextVersion || "",
       priority: goal.priority || "",
       riskFloor: goal.riskFloor,
+
+      ...(planningIntentReconciliation
+        ? {
+            intentReconciliation:
+              planningIntentReconciliation,
+          }
+        : {}),
     },
   };
 
