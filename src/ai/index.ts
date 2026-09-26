@@ -19,3 +19,4 @@ export * from './DigitalBoostPulseInferenceEvidence';
 export * from './DigitalBoostPulseInferenceEvidenceRegistry';
 
 export * from './DigitalBoostPulseInferenceEvidenceConsumer';
+export * from './DigitalBoostPulseInferenceContextAdapter';
