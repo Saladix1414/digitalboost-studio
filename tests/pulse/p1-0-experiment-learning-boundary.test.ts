@@ -5,7 +5,9 @@ import {
   createPulseExperiment,
   startPulseExperiment,
   stopPulseExperiment,
-} from "../../src/DigitalBoostPulseExperiment";
+
+  completePulseExperiment,
+  rejectPulseExperiment,} from "../../src/DigitalBoostPulseExperiment";
 
 import {
   queryPulseMemory,
@@ -231,6 +233,266 @@ test(
     );
   },
 );
+
+test(
+  "GREEN: stopped experiment can complete only through explicit completion",
+  () => {
+    const experiment =
+      createPulseExperiment(
+        experimentInput(
+          "tenant-e",
+        ),
+      );
+
+    assert.ok(
+      experiment,
+    );
+
+    const started =
+      startPulseExperiment(
+        experiment.id,
+      );
+
+    assert.ok(
+      started,
+    );
+
+    assert.equal(
+      completePulseExperiment(
+        started.id,
+        "completed-with-explicit-path",
+      ),
+      null,
+    );
+
+    const stopped =
+      stopPulseExperiment(
+        started.id,
+        "manual-stop-before-completion",
+      );
+
+    assert.ok(
+      stopped,
+    );
+
+    assert.equal(
+      stopped.status,
+      "STOPPED",
+    );
+
+    const completed =
+      completePulseExperiment(
+        stopped.id,
+        "evaluation-finished",
+      );
+
+    assert.ok(
+      completed,
+    );
+
+    assert.equal(
+      completed.status,
+      "COMPLETED",
+    );
+
+    assert.equal(
+      completed.result,
+      "evaluation-finished",
+    );
+
+    assert.equal(
+      completePulseExperiment(
+        completed.id,
+        "second-completion",
+      ),
+      null,
+    );
+  },
+);
+
+test(
+  "GREEN: draft experiment can be explicitly rejected",
+  () => {
+    const experiment =
+      createPulseExperiment(
+        experimentInput(
+          "tenant-reject",
+        ),
+      );
+
+    assert.ok(
+      experiment,
+    );
+
+    const rejected =
+      rejectPulseExperiment(
+        experiment.id,
+        "proposal-rejected",
+      );
+
+    assert.ok(
+      rejected,
+    );
+
+    assert.equal(
+      rejected.status,
+      "REJECTED",
+    );
+
+    assert.equal(
+      rejected.result,
+      "proposal-rejected",
+    );
+
+    assert.equal(
+      startPulseExperiment(
+        rejected.id,
+      ),
+      null,
+    );
+
+    assert.equal(
+      rejectPulseExperiment(
+        rejected.id,
+        "second-rejection",
+      ),
+      null,
+    );
+  },
+);
+
+test(
+  "RED TEAM: running experiment cannot be rejected",
+  () => {
+    const experiment =
+      createPulseExperiment(
+        experimentInput(
+          "tenant-running-reject",
+        ),
+      );
+
+    assert.ok(
+      experiment,
+    );
+
+    const started =
+      startPulseExperiment(
+        experiment.id,
+      );
+
+    assert.ok(
+      started,
+    );
+
+    assert.equal(
+      rejectPulseExperiment(
+        started.id,
+        "forged-rejection",
+      ),
+      null,
+    );
+  },
+);
+
+test(
+  "RED TEAM: stopped experiment cannot be rejected",
+  () => {
+    const experiment =
+      createPulseExperiment(
+        experimentInput(
+          "tenant-stopped-reject",
+        ),
+      );
+
+    assert.ok(
+      experiment,
+    );
+
+    const started =
+      startPulseExperiment(
+        experiment.id,
+      );
+
+    assert.ok(
+      started,
+    );
+
+    const stopped =
+      stopPulseExperiment(
+        started.id,
+        "manual-stop",
+      );
+
+    assert.ok(
+      stopped,
+    );
+
+    assert.equal(
+      rejectPulseExperiment(
+        stopped.id,
+        "forged-rejection",
+      ),
+      null,
+    );
+  },
+);
+
+test(
+  "RED TEAM: blank lifecycle reason cannot transition state",
+  () => {
+    const draft =
+      createPulseExperiment(
+        experimentInput(
+          "tenant-blank",
+        ),
+      );
+
+    assert.ok(
+      draft,
+    );
+
+    assert.equal(
+      rejectPulseExperiment(
+        draft.id,
+        "   ",
+      ),
+      null,
+    );
+
+    const started =
+      startPulseExperiment(
+        draft.id,
+      );
+
+    assert.ok(
+      started,
+    );
+
+    const stopped =
+      stopPulseExperiment(
+        started.id,
+        "stop",
+      );
+
+    assert.ok(
+      stopped,
+    );
+
+    assert.equal(
+      completePulseExperiment(
+        stopped.id,
+        "   ",
+      ),
+      null,
+    );
+
+    assert.equal(
+      stopped.status,
+      "STOPPED",
+    );
+  },
+);
+
 
 test(
   "RED TEAM: experiment lifecycle must not claim COMPLETED without an explicit completion path",

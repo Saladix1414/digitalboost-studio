@@ -89,3 +89,82 @@ export function stopPulseExperiment(id: string, reason: string): PulseExperiment
     }),
   );
 }
+
+
+export function completePulseExperiment(
+  id: string,
+  result: string,
+): PulseExperiment | null {
+  const normalizedResult =
+    result.trim();
+
+  if (!normalizedResult) {
+    return null;
+  }
+
+  const exp =
+    readAll().find(
+      function (e) {
+        return e.id === id;
+      },
+    );
+
+  if (
+    !exp ||
+    exp.status !== "STOPPED"
+  ) {
+    return null;
+  }
+
+  return save(
+    Object.assign(
+      {},
+      exp,
+      {
+        status:
+          "COMPLETED",
+        result:
+          normalizedResult,
+      },
+    ),
+  );
+}
+
+export function rejectPulseExperiment(
+  id: string,
+  reason: string,
+): PulseExperiment | null {
+  const normalizedReason =
+    reason.trim();
+
+  if (!normalizedReason) {
+    return null;
+  }
+
+  const exp =
+    readAll().find(
+      function (e) {
+        return e.id === id;
+      },
+    );
+
+  if (
+    !exp ||
+    exp.status !== "DRAFT"
+  ) {
+    return null;
+  }
+
+  return save(
+    Object.assign(
+      {},
+      exp,
+      {
+        status:
+          "REJECTED",
+        result:
+          normalizedReason,
+      },
+    ),
+  );
+}
