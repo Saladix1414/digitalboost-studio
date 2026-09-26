@@ -16,7 +16,24 @@ function writeState(state: { last: Record<string, number> }) {
   if (typeof localStorage === "undefined") return;
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
 }
-export function onPulseSignal(handler: BusHandler) { handlers.push(handler); }
+export function onPulseSignal(handler: BusHandler): () => void {
+  handlers.push(handler);
+
+  let active = true;
+
+  return function unsubscribe() {
+    if (!active) return;
+
+    active = false;
+
+    const index =
+      handlers.indexOf(handler);
+
+    if (index >= 0) {
+      handlers.splice(index, 1);
+    }
+  };
+}
 export function emitPulseSignal(signal: PulseSignal) {
   handlers.forEach(function (h) { try { h(signal); } catch {} });
 }
