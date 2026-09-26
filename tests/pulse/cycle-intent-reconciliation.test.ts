@@ -21,6 +21,12 @@ import {
   runCycle,
 } from "../../src/DigitalBoostPulseCycle.ts";
 
+import {
+  getPulseIntentReconciliationRecord,
+  listPulseIntentReconciliationRecords,
+  PULSE_INTENT_RECONCILIATION_STORAGE,
+} from "../../src/ai/DigitalBoostPulseIntentReconciliationRegistry.ts";
+
 const TENANT =
   "cycle-reconcile-tenant";
 
@@ -32,6 +38,51 @@ const SECTION =
 
 const CONTEXT_ID =
   "ctx-cycle-reconcile";
+
+const storage = new Map<string, string>();
+
+const localStorageMock = {
+  getItem(key: string) {
+    return storage.has(key)
+      ? storage.get(key)!
+      : null;
+  },
+
+  setItem(
+    key: string,
+    value: string,
+  ) {
+    storage.set(
+      key,
+      String(value),
+    );
+  },
+
+  removeItem(key: string) {
+    storage.delete(key);
+  },
+};
+
+Object.defineProperty(
+  globalThis,
+  "localStorage",
+  {
+    value: localStorageMock,
+    configurable: true,
+  },
+);
+
+function resetPersistence() {
+  storage.clear();
+  storage.set(
+    PULSE_INTENT_RECONCILIATION_STORAGE,
+    "[]",
+  );
+  storage.set(
+    "db-pulse-audit-v1",
+    "[]",
+  );
+}
 
 function makeSemantic(
   options: {
@@ -138,6 +189,10 @@ function makeSemantic(
     },
   });
 }
+
+test.beforeEach(() => {
+  resetPersistence();
+});
 
 function cycleInput(
   extra: Record<string, unknown> = {},
@@ -263,6 +318,162 @@ test(
 
     assert.equal(
       cycle.intentReconciliation?.canOverrideIntent,
+      false,
+    );
+  },
+);
+
+test(
+  "semantic reconciliation is persisted with the cycle request binding",
+  () => {
+    const base =
+      runCycle(
+        cycleInput(),
+      );
+
+    const semantic =
+      makeSemantic({
+        contextVersion:
+          base.intentClassification
+            ?.provenance
+            .contextVersion,
+      });
+
+    const cycle =
+      runCycle(
+        cycleInput({
+          semanticObservation:
+            semantic,
+        }),
+      );
+
+    assert.ok(
+      cycle.intentReconciliationRecordId,
+    );
+
+    const record =
+      getPulseIntentReconciliationRecord({
+        tenantId:
+          TENANT,
+        recordId:
+          cycle.intentReconciliationRecordId!,
+      });
+
+    assert.equal(
+      record.tenantId,
+      TENANT,
+    );
+
+    assert.equal(
+      record.store,
+      STORE,
+    );
+
+    assert.equal(
+      record.requestId,
+      cycle.request_id,
+    );
+
+    assert.equal(
+      record.reconciliationId,
+      cycle.intentReconciliation?.reconciliationId,
+    );
+
+    assert.equal(
+      record.relation,
+      cycle.intentReconciliation?.relation,
+    );
+
+    assert.equal(
+      listPulseIntentReconciliationRecords({
+        tenantId:
+          TENANT,
+      }).length,
+      1,
+    );
+  },
+);
+
+test(
+  "general audit links reconciliation without execution authority",
+  () => {
+    const base =
+      runCycle(
+        cycleInput(),
+      );
+
+    const semantic =
+      makeSemantic({
+        contextVersion:
+          base.intentClassification
+            ?.provenance
+            .contextVersion,
+      });
+
+    const cycle =
+      runCycle(
+        cycleInput({
+          semanticObservation:
+            semantic,
+        }),
+      );
+
+    const auditRows =
+      JSON.parse(
+        storage.get(
+          "db-pulse-audit-v1",
+        ) || "[]",
+      ) as Array<
+        Record<string, unknown>
+      >;
+
+    const row =
+      auditRows.find(
+        (candidate) =>
+          candidate.request_id ===
+          cycle.request_id,
+      );
+
+    assert.ok(row);
+
+    assert.equal(
+      row.context_version,
+      cycle.intentClassification
+        ?.provenance
+        .contextVersion,
+    );
+
+    assert.match(
+      String(
+        row.result_summary,
+      ),
+      /reconciliation=/,
+    );
+
+    assert.match(
+      String(
+        row.result_summary,
+      ),
+      /relation=AGREEMENT/,
+    );
+
+    assert.equal(
+      row.execution_issuer,
+      undefined,
+    );
+
+    assert.equal(
+      row.execution_audit_id,
+      undefined,
+    );
+
+    assert.equal(
+      cycle.intentReconciliation?.authority,
+      "RULE_ENGINE",
+    );
+
+    assert.equal(
+      cycle.intentReconciliation?.canSupportExecution,
       false,
     );
   },

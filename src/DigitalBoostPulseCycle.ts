@@ -22,6 +22,11 @@ import {
   reconcilePulseIntent,
   type PulseIntentReconciliationResult,
 } from "./ai/DigitalBoostPulseIntentReconciliation";
+import {
+  createPulseIntentReconciliationRecord,
+  savePulseIntentReconciliationRecord,
+  type PulseIntentReconciliationRecord,
+} from "./ai/DigitalBoostPulseIntentReconciliationRegistry";
 import type {
   PulseInferenceSemanticObservation,
 } from "./ai/DigitalBoostPulseInferenceSemanticBoundary";
@@ -42,6 +47,7 @@ export type CycleMeta = {
   mission?: PulseMission;
   intentClassification?: PulseIntentClassification;
   intentReconciliation?: PulseIntentReconciliationResult;
+  intentReconciliationRecordId?: string;
   goalDecision?: PulseGoalDecision;
 };
 
@@ -111,6 +117,9 @@ export function runCycle(input: {
         })
       : undefined;
 
+  let intentReconciliationRecord:
+    PulseIntentReconciliationRecord | undefined;
+
   const envelope = evaluatePulsePolicy(
     input.action,
     risk,
@@ -130,6 +139,22 @@ export function runCycle(input: {
     envelope.policy === "REQUIRE_APPROVAL"
       ? createPulseApproval(envelope)
       : null;
+
+  if (intentReconciliation !== undefined) {
+    intentReconciliationRecord =
+      savePulseIntentReconciliationRecord(
+        createPulseIntentReconciliationRecord({
+          tenantId:
+            intentReconciliation.tenantId,
+          store:
+            input.store,
+          requestId:
+            envelope.request_id,
+          reconciliation:
+            intentReconciliation,
+        }),
+      );
+  }
 
   const card =
     envelope.policy === "REQUIRE_APPROVAL"
@@ -180,7 +205,16 @@ export function runCycle(input: {
           : envelope.policy === "REQUIRE_APPROVAL"
             ? "AWAITING_APPROVAL"
             : "PENDING",
-      result_summary: input.title,
+      result_summary:
+        intentReconciliationRecord !== undefined
+          ? input.title +
+            " | reconciliation=" +
+            intentReconciliationRecord.recordId +
+            " | relation=" +
+            intentReconciliationRecord.relation
+          : input.title,
+      context_version:
+        contextVersion,
     });
   } catch {}
   try {
@@ -235,6 +269,8 @@ export function runCycle(input: {
       intentClassification,
     intentReconciliation:
       intentReconciliation,
+    intentReconciliationRecordId:
+      intentReconciliationRecord?.recordId,
     goalDecision:
       plan.goal.decision,
     agent: agent,
