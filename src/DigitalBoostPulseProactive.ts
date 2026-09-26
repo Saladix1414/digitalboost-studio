@@ -4,6 +4,7 @@ export type PulseSignalKind = "opportunity" | "risk" | "stale-context" | "approv
 export type PulseSignal = {
   id: string; kind: PulseSignalKind; title: string; body: string;
   action: string; significance: number; source: string; createdAt: string;
+  missionId?: string;
 };
 type BusHandler = (signal: PulseSignal) => void;
 const handlers: BusHandler[] = [];

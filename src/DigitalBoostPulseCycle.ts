@@ -30,6 +30,9 @@ import {
 import type {
   PulseInferenceSemanticObservation,
 } from "./ai/DigitalBoostPulseInferenceSemanticBoundary";
+import {
+  startPulseAutonomyRuntime,
+} from "./DigitalBoostPulseAutonomyRuntime";
 
 export type CycleMeta = {
   request_id: string;
@@ -65,6 +68,8 @@ export function runCycle(input: {
   contextId?: string;
   semanticObservation?: PulseInferenceSemanticObservation;
 }): CycleMeta {
+  startPulseAutonomyRuntime();
+
   const contextVersion =
     currentContextVersion({
       store: input.store,
