@@ -191,6 +191,7 @@ export function compilePlaybook(
         kind: "lesson",
         scope: store,
         status: "ACTIVE",
+        trust: "VERIFIED",
       });
 
   if (!lessons.length) {

@@ -82,7 +82,7 @@ export function startPulseExperiment(id: string): PulseExperiment | null {
 }
 export function stopPulseExperiment(id: string, reason: string): PulseExperiment | null {
   const exp = readAll().filter(function (e) { return e.id === id; })[0];
-  if (!exp || (exp.status !== "RUNNING" && exp.status !== "DRAFT")) return null;
+  if (!exp || exp.status !== "RUNNING") return null;
   const stopped = save(Object.assign({}, exp, { status: "STOPPED", result: reason }));
   rememberPulse({
     kind: "lesson",
