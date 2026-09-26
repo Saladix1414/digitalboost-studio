@@ -1,6 +1,9 @@
 
 import { classifyIntent, classifyRisk, pickAgent, isWriteIntent, type PulseIntent, type PulseRisk, type PulseAgent } from "./DigitalBoostPulseConst";
-import { classifyPulseIntent, type PulseIntentClassification } from "./DigitalBoostPulseIntentEngine";
+import {
+  classifyPulseIntent,
+  type PulseIntentClassification,
+} from "./DigitalBoostPulseIntentEngine";
 import { type PulseGoalDecision } from "./DigitalBoostPulseGoalEngine";
 import { approvalCard, type PulseCard } from "./DigitalBoostPulseCard";
 import { pushAudit, requestId } from "./DigitalBoostPulseLog";
@@ -15,6 +18,13 @@ import {
 } from "./DigitalBoostPulseGovernance";
 import { currentContextVersion } from "./DigitalBoostPulseContext";
 import { resolvePulseTenantAttribution } from "./DigitalBoostPulseTenant";
+import {
+  reconcilePulseIntent,
+  type PulseIntentReconciliationResult,
+} from "./ai/DigitalBoostPulseIntentReconciliation";
+import type {
+  PulseInferenceSemanticObservation,
+} from "./ai/DigitalBoostPulseInferenceSemanticBoundary";
 
 export type CycleMeta = {
   request_id: string;
@@ -31,6 +41,7 @@ export type CycleMeta = {
   plan?: PulsePlan;
   mission?: PulseMission;
   intentClassification?: PulseIntentClassification;
+  intentReconciliation?: PulseIntentReconciliationResult;
   goalDecision?: PulseGoalDecision;
 };
 
@@ -45,14 +56,32 @@ export function runCycle(input: {
   alreadyConfirm: boolean;
   draft?: { kind: string; title: string; body: string; cta: string };
   proposal?: Record<string, unknown> | null;
+  contextId?: string;
+  semanticObservation?: PulseInferenceSemanticObservation;
 }): CycleMeta {
-  const legacyIntent = classifyIntent(input.q, input.section);
-  const intentClassification = classifyPulseIntent({
-    q: input.q,
-    section: input.section,
-    store: input.store,
-    tenantId: input.tenantId || input.store,
-  });
+  const contextVersion =
+    currentContextVersion({
+      store: input.store,
+      section: input.section,
+    });
+
+  const legacyIntent = classifyIntent(
+    input.q,
+    input.section,
+  );
+
+  const intentClassification =
+    classifyPulseIntent({
+      q: input.q,
+      section: input.section,
+      store: input.store,
+      tenantId:
+        input.tenantId ||
+        input.store,
+      contextId:
+        input.contextId,
+      contextVersion,
+    });
   const intent = intentClassification.legacyIntent || legacyIntent;
   const write = isWriteIntent(intent) || input.alreadyConfirm;
   const risk = classifyRisk(intent, input.action);
@@ -72,11 +101,15 @@ export function runCycle(input: {
             body: input.body,
           };
 
-  const contextVersion =
-    currentContextVersion({
-      store: input.store,
-      section: input.section,
-    });
+  const intentReconciliation =
+    input.semanticObservation !== undefined
+      ? reconcilePulseIntent({
+          intentClassification:
+            intentClassification,
+          semanticObservation:
+            input.semanticObservation,
+        })
+      : undefined;
 
   const envelope = evaluatePulsePolicy(
     input.action,
@@ -165,7 +198,11 @@ export function runCycle(input: {
     action: input.action,
     section: input.section,
     store: input.store,
-    tenantId: input.tenantId || input.store,
+    tenantId:
+      input.tenantId ||
+      input.store,
+    contextId:
+      input.contextId,
     contextVersion,
     intentClassification,
   });
@@ -194,8 +231,12 @@ export function runCycle(input: {
     actor: "merchant",
     tenant: input.store,
     intent: intent,
-    intentClassification: intentClassification,
-    goalDecision: plan.goal.decision,
+    intentClassification:
+      intentClassification,
+    intentReconciliation:
+      intentReconciliation,
+    goalDecision:
+      plan.goal.decision,
     agent: agent,
     risk: risk,
     write: write,
