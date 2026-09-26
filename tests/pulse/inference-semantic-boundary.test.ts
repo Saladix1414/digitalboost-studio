@@ -644,13 +644,36 @@ test(
 );
 
 test(
-  "semantic observation identity is deterministic",
+  "semantic observation identity is deterministic for the same source observation",
   () => {
+    const source =
+      observation();
+
+    const context =
+      makeContext();
+
+    const candidate =
+      makeCandidate();
+
     const first =
-      project();
+      projectPulseInferenceSemanticObservation({
+        observation:
+          source,
+
+        context,
+
+        candidate,
+      });
 
     const second =
-      project();
+      projectPulseInferenceSemanticObservation({
+        observation:
+          source,
+
+        context,
+
+        candidate,
+      });
 
     assert.equal(
       first.candidate.candidateHash,
