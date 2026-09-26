@@ -25,7 +25,12 @@ import {
 } from "../../src/DigitalBoostPulseControlledLearning";
 
 import {
+  compilePlaybook,
+} from "../../src/DigitalBoostPulseIntel";
+
+import {
   queryPulseMemory,
+  queryTrustedPulseMemory,
   verifyPulseMemory,
 } from "../../src/DigitalBoostPulseMemory";
 
@@ -537,6 +542,97 @@ test(
     assert.equal(
       rows[0].trust,
       "OBSERVED",
+    );
+  },
+);
+
+
+test(
+  "P1.0-G: OBSERVED learning never enters trusted Playbook",
+  () => {
+    reset();
+
+    const fixture =
+      createFixture();
+
+    const result =
+      rememberPulseExperimentLesson(
+        fixture,
+      );
+
+    assert.equal(
+      result.ok,
+      true,
+    );
+
+    if (!result.ok) {
+      return;
+    }
+
+    const observed =
+      queryPulseMemory({
+        tenantId:
+          "tenant-learning",
+        kind: "lesson",
+        store:
+          "LearningStore",
+        status:
+          "ACTIVE",
+      });
+
+    assert.equal(
+      observed.length,
+      1,
+    );
+
+    assert.equal(
+      observed[0].source,
+      "learning",
+    );
+
+    assert.equal(
+      observed[0].sourceType,
+      "LEARNING",
+    );
+
+    assert.equal(
+      observed[0].trust,
+      "OBSERVED",
+    );
+
+    const trusted =
+      queryTrustedPulseMemory({
+        tenantId:
+          "tenant-learning",
+        kind:
+          "lesson",
+        scope:
+          "LearningStore",
+        store:
+          "LearningStore",
+        minimumTrust:
+          "VERIFIED",
+      });
+
+    assert.equal(
+      trusted.length,
+      0,
+    );
+
+    const playbook =
+      compilePlaybook(
+        "LearningStore",
+        "tenant-learning",
+      );
+
+    assert.equal(
+      playbook.ok,
+      false,
+    );
+
+    assert.deepEqual(
+      playbook.steps,
+      [],
     );
   },
 );
