@@ -40,6 +40,7 @@ export type PulseMemorySourceType =
   | "EXECUTOR"
   | "VERIFICATION"
   | "PREFERENCE_UI"
+  | "LEARNING"
   | "LEGACY";
 
 export type PulseMemoryIdentityMode =
@@ -164,6 +165,7 @@ const ALLOWED_SOURCES = new Set([
   "executor",
   "verification",
   "preference-ui",
+  "learning",
 ]);
 
 function assertTenantId(value: string): void {
@@ -356,6 +358,8 @@ function deriveSourceType(source: string): PulseMemorySourceType {
       return "VERIFICATION";
     case "preference-ui":
       return "PREFERENCE_UI";
+    case "learning":
+      return "LEARNING";
     default:
       return "LEGACY";
   }
