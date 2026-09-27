@@ -186,14 +186,11 @@ export default function CommerceOSOverview({
               </div>
               <h2 className="mt-5 text-lg font-semibold">Cola operativa de Commerce OS</h2>
               <div className="mt-5 space-y-2">
-                <button type="button" onClick={() => onNavigate?.("website-builder")} className="w-full rounded-lg border border-white/10 bg-black/20 p-3 text-left hover:border-violet-400/45">
-                  <div className="flex items-center gap-2 text-sm font-medium"><WandSparkles size={14} className="text-violet-300" /> Mejorar homepage</div>
+                <button type="button" onClick={() => onNavigate?.("pulse-bot")} className="w-full rounded-lg border border-cyan-400/40 bg-cyan-400/10 p-3 text-left">
+                  <div className="text-sm font-medium text-cyan-300">Abrir cola Pulse Bot</div>
                 </button>
-                <button type="button" onClick={() => onNavigate?.("campaigns")} className="w-full rounded-lg border border-white/10 bg-black/20 p-3 text-left hover:border-cyan-400/40">
-                  <div className="flex items-center gap-2 text-sm font-medium"><Zap size={14} className="text-cyan-300" /> Crear campaña</div>
-                </button>
-                <button type="button" onClick={() => onPulse?.()} className="w-full rounded-lg border border-cyan-400/40 bg-cyan-400/10 p-3 text-left">
-                  <div className="text-sm font-medium text-cyan-300">Abrir Pulse Bot</div>
+                <button type="button" onClick={() => onNavigate?.("orders")} className="w-full rounded-lg border border-white/10 bg-black/20 p-3 text-left">
+                  <div className="text-sm font-medium">Ver pedidos del ledger</div>
                 </button>
               </div>
             </div>

@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import ProductInventoryPro from "./ProductInventoryPro";
 import CommerceOSOverview from "./CommerceOSOverview";
+import DigitalBoostPulseBotPanel from "./commerce/DigitalBoostPulseBotPanel";
+import DigitalBoostMarketplacePanel from "./commerce/DigitalBoostMarketplacePanel";
 import DigitalBoostSearch from "./DigitalBoostSearch.tsx";
 import DigitalBoostOsKpiPaint from "./DigitalBoostOsKpiPaint.tsx";
 import DigitalBoostStoreSwitch from "./DigitalBoostStoreSwitch.tsx";
@@ -70,7 +72,7 @@ type StoreSection =
   | "seo"
   | "payments"
   | "campaigns"
-  | "settings" | "website-builder";
+  | "settings" | "website-builder" | "pulse-bot" | "marketplace";
 
 type Product = {
   id: number;
@@ -212,6 +214,8 @@ const navGroups: {
       { id: "inventory", label: "Inventario", icon: Boxes },
       { id: "orders", label: "Pedidos", icon: ClipboardList },
       { id: "customers", label: "Clientes", icon: Users },
+      { id: "pulse-bot", label: "Pulse Bot", icon: Bell },
+      { id: "marketplace", label: "Marketplace", icon: Store },
     ],
   },
   {
@@ -378,9 +382,9 @@ export default function StoreBuilderWorkspace({
   }, []);
 
   useEffect(function () {
-    function openPulse() { setShowAI(true); }
-    window.addEventListener("db-open-pulse", openPulse);
-    return function () { window.removeEventListener("db-open-pulse", openPulse); };
+    function openPulseBot() { setSection("pulse-bot"); }
+    window.addEventListener("db-open-pulse-bot", openPulseBot);
+    return function () { window.removeEventListener("db-open-pulse-bot", openPulseBot); };
   }, []);
   const [showSearch, setShowSearch] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -3269,13 +3273,19 @@ const filteredProducts = useMemo(() => {
 
       case "dashboard":
         return (
-          <CommerceOSOverview onPulse={() => setShowAI(true)} 
+          <CommerceOSOverview onPulse={() => setSection("pulse-bot")}
             products={products}
             orders={orders}
             customers={customers}
             onNavigate={(target) => setSection(target as StoreSection)}
           />
         );
+
+      case "pulse-bot":
+        return <DigitalBoostPulseBotPanel />;
+
+      case "marketplace":
+        return <DigitalBoostMarketplacePanel />;
 
       case "products":
         return renderProducts();
@@ -3670,11 +3680,11 @@ const filteredProducts = useMemo(() => {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowAI(true)}
+              onClick={() => setSection("pulse-bot")}
               className="hidden items-center gap-2 rounded-lg border border-violet-400/20 bg-violet-500/20 px-3 py-2 text-xs text-violet-300 sm:flex"
             >
               <Sparkles size={14} />
-              PULSE
+              Pulse Bot
             </button>
 
             <button className="rounded-lg p-2 text-[#475569] hover:bg-[#0A0E16]">
@@ -3702,7 +3712,7 @@ const filteredProducts = useMemo(() => {
       {showIntegrations && (<DigitalBoostIntegrations onClose={() => setShowIntegrations(false)} />)}
       {showHealth && (<DigitalBoostHealth onClose={() => setShowHealth(false)} onFix={(id) => { setShowHealth(false); setSection(id as any); }} />)}
       {showSearch && (<DigitalBoostSearch onClose={() => setShowSearch(false)} onNavigate={(id) => { setShowSearch(false); setSection(id); }} onOpenHealth={() => setShowHealth(true)} onOpenAI={() => setShowAI(true)} />)}
-      {showAI && (<DigitalBoostOperator onOpenSearch={() => setShowSearch(true)} onOpenHealth={() => setShowHealth(true)} onOpenAutomations={() => setShowAutomations(true)} onOpenConsole={() => setShowConsole(true)} section={section} onClose={() => { setShowAI(false); }} onNavigate={(id) => { setShowAI(false); setSection(id); }} />)}
+      {showAI && section === "website-builder" && (<DigitalBoostOperator onOpenSearch={() => setShowSearch(true)} onOpenHealth={() => setShowHealth(true)} onOpenAutomations={() => setShowAutomations(true)} onOpenConsole={() => setShowConsole(true)} section={section} onClose={() => { setShowAI(false); }} onNavigate={(id) => { setShowAI(false); setSection(id); }} />)}
       {false && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/20 p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg rounded-2xl border border-violet-400/20 bg-[#0B1B30] shadow-2xl">

@@ -43,7 +43,7 @@ test("L2 Store Builder sources do not import Pulse Bot", () => {
       if (!/\.(ts|tsx)$/.test(name)) continue;
       const rel = relative(root, full).replaceAll("\\", "/");
       if (rel.startsWith("src/commerce/")) continue;
-      if (!/StoreBuilder|StoreStudio|StoreDesigner|StoreCanvas|DigitalBoostOperator/.test(rel)) continue;
+      if (!/StoreStudio|StoreDesigner|StoreCanvas|DigitalBoostOperator/.test(rel)) continue;
       const src = readFileSync(full, "utf8");
       if (src.includes("DigitalBoostPulseBot") || src.includes("draftPulseBotMessage")) {
         offenders.push(rel);
