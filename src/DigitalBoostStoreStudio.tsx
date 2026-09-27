@@ -237,7 +237,7 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
     recordSiteBinding({
       tenantId: "local-tenant",
       siteId: "site-local",
-      hostname: null,
+      hostname: window.location.host || null,
       published: true,
     });
     setSaved(true);

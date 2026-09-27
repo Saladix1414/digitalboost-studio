@@ -1,3 +1,4 @@
+import { validateMarketAsset } from "./DigitalBoostMarketAssetGuard";
 export const MARKETPLACE_CONTRACT = "cos-market-v1" as const;
 export const MARKET_TAKE_RATE = 0.08;
 const LS_KEY = "db-commerce-marketplace-v1";
@@ -124,6 +125,13 @@ export function addMarketListing(input: {
     return { ok: false as const, reason: "seller y título requeridos" };
   }
   if (!(input.price > 0)) return { ok: false as const, reason: "precio > 0" };
+  const guard = validateMarketAsset({
+    title,
+    rail: input.rail,
+    price: input.price,
+    assetRef: input.productId,
+  });
+  if (!guard.ok) return { ok: false as const, reason: guard.issues[0] };
   const seller = bag(tenantId).sellers.find((s) => s.id === input.sellerId);
   if (!seller) return { ok: false as const, reason: "seller no existe" };
   if (seller.state === "suspended") return { ok: false as const, reason: "seller suspendido" };
