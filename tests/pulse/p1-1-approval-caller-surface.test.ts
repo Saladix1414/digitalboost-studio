@@ -31,3 +31,19 @@ test("P1.1-D only Governance and ClientExecutionGate may call approvePulseAction
   }
   assert.deepEqual(offenders, []);
 });
+
+test("P1.1-D only Executor, ClientExecutionGate and MissionExecutor may call executePulseAction in src", () => {
+  const allowed = new Set([
+    "src/DigitalBoostPulseExecutor.ts",
+    "src/DigitalBoostPulseClientExecutionGate.ts",
+    "src/DigitalBoostPulseMissionExecutor.ts",
+  ]);
+  const offenders: string[] = [];
+  for (const file of walk(join(root, "src"))) {
+    const rel = relative(root, file).replaceAll("\\", "/");
+    const src = readFileSync(file, "utf8");
+    if (!src.includes("executePulseAction({") && !src.includes("export function executePulseAction(")) continue;
+    if (!allowed.has(rel)) offenders.push(rel);
+  }
+  assert.deepEqual(offenders, []);
+});
