@@ -1,0 +1,19 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+
+test("Marketing hub does not open PULSE or invent 1047", () => {
+  const src = readFileSync(join(root, "src", "DigitalBoostMarketingHub.tsx"), "utf8");
+  assert.equal(src.includes("db-open-pulse"), false);
+  assert.equal(src.includes("1047 en preparacion"), false);
+  assert.match(src, /draftPulseBotMessage/);
+});
+
+test("Marketing nav mounts MarketingHub not SEO Center", () => {
+  const src = readFileSync(join(root, "src", "StoreBuilderWorkspace.tsx"), "utf8");
+  assert.match(src, /case "marketing":\s*return \(<DigitalBoostMarketingHub/);
+});

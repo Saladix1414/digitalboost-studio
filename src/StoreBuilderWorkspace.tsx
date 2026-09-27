@@ -3390,7 +3390,7 @@ const filteredProducts = useMemo(() => {
         );
 
       case "marketing":
-        return (<DigitalBoostSeoCenter />);
+        return (<DigitalBoostMarketingHub />);
 
       case "seo":
         return (<DigitalBoostSeoCenter />);
