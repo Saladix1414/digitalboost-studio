@@ -147,7 +147,10 @@ export function recordCommerceProduct(input: CommerceProduct): CommerceProduct {
 }
 
 export function recordCommerceOrder(input: CommerceOrder): CommerceOrder {
-  bag(input.tenantId).orders.push(input);
+  const data = bag(input.tenantId);
+  const idx = data.orders.findIndex((item) => item.id === input.id);
+  if (idx >= 0) data.orders[idx] = input;
+  else data.orders.push(input);
   writeAll();
   return input;
 }

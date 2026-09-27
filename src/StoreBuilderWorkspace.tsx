@@ -3655,11 +3655,11 @@ const filteredProducts = useMemo(() => {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setSection("pulse-bot")}
+              onClick={() => section === "website-builder" ? setShowAI(true) : setSection("pulse-bot")}
               className="hidden items-center gap-2 rounded-lg border border-violet-400/20 bg-violet-500/20 px-3 py-2 text-xs text-violet-300 sm:flex"
             >
               <Sparkles size={14} />
-              Pulse Bot
+              {section === "website-builder" ? "PULSE" : "Pulse Bot"}
             </button>
 
             <button className="rounded-lg p-2 text-[#475569] hover:bg-[#0A0E16]">

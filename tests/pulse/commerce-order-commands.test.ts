@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { resetCommerceLedger } from "../../src/commerce/DigitalBoostCommerceLedger.ts";
+import { getCommerceSnapshot, resetCommerceLedger } from "../../src/commerce/DigitalBoostCommerceLedger.ts";
 import {
   dispatchCommerceOrderCommand,
   resetCommerceOrderCommands,
@@ -44,4 +44,14 @@ test("paid then fulfilled is allowed", () => {
   assert.equal(paid.ok, true);
   const fulfilled = dispatchCommerceOrderCommand({ type: "MARK_FULFILLED", tenantId: "t1", id: "o3" });
   assert.equal(fulfilled.ok, true);
+});
+
+test("paid command does not duplicate ledger rows", () => {
+  resetCommerceLedger();
+  resetCommerceOrderCommands();
+  dispatchCommerceOrderCommand({ type: "CREATE_ORDER", tenantId: "t1", id: "o4", amount: 15 });
+  dispatchCommerceOrderCommand({ type: "MARK_PAID", tenantId: "t1", id: "o4" });
+  const snap = getCommerceSnapshot("t1");
+  assert.equal(snap.orders.length, 1);
+  assert.equal(snap.orders[0].paymentState, "PAID");
 });
