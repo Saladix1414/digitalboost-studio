@@ -13,4 +13,7 @@ test("Commerce OS overview does not render decorative production metrics", () =>
   }
   assert.match(src, /Sin datos/);
   assert.match(src, /No se muestran datos de demostración/);
+  assert.match(src, /getCommerceSnapshot/);
+  assert.match(src, /Pulse Bot/);
+  assert.equal(src.includes("Hablar con PULSE"), false);
 });

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useOsRange } from "./DigitalBoostOsRangeData";
+import { getCommerceSnapshot } from "./commerce/DigitalBoostCommerceLedger";
 import "./commerce-os-core.css";
 import {
   ArrowUpRight,
@@ -16,6 +17,7 @@ type CommerceOSOverviewProps = {
   products?: any[];
   orders?: any[];
   customers?: any[];
+  tenantId?: string;
 };
 
 function money(n: number) {
@@ -61,24 +63,33 @@ export default function CommerceOSOverview({
   products = [],
   orders = [],
   customers = [],
+  tenantId = "local-tenant",
 }: CommerceOSOverviewProps) {
   useOsRange();
+  const snap = getCommerceSnapshot(tenantId);
+  const ledgerOrders = snap.orders;
+  const ledgerProducts = snap.products;
+  const ledgerCustomers = snap.customers;
+  const useLedger = true;
+  const viewOrders = useLedger ? ledgerOrders : orders;
+  const viewProducts = useLedger ? ledgerProducts : products;
+  const viewCustomers = useLedger ? ledgerCustomers : customers;
 
-  const sales = orders.reduce((s: number, o: any) => s + (Number(o.total) || 0), 0);
-  const hasOrders = orders.length > 0;
-  const hasCustomers = customers.length > 0;
-  const ticket = hasOrders ? Math.round(sales / orders.length) : null;
-  const conv = hasCustomers ? (orders.length / customers.length) * 100 : null;
+  const sales = snap.netSales;
+  const hasOrders = viewOrders.length > 0;
+  const hasCustomers = viewCustomers.length > 0;
+  const ticket = hasOrders && sales !== null ? Math.round(sales / viewOrders.length) : null;
+  const conv = null;
   const pulse = useMemo(() => [], []);
 
   const metrics = [
-    { label: "Ventas", value: hasOrders ? money(sales) : "Sin datos", delta: hasOrders ? "datos locales" : "sin pedidos", tone: "#34d399", pct: hasOrders ? 1 : 0, go: "analytics" },
+    { label: "Ventas", value: sales === null ? "Sin datos" : money(sales), delta: sales === null ? "ledger vacío" : "ledger", tone: "#34d399", pct: hasOrders ? 1 : 0, go: "analytics" },
     { label: "Pedidos", value: hasOrders ? String(orders.length) : "Sin datos", delta: hasOrders ? "datos locales" : "sin pedidos", tone: "#22d3ee", pct: hasOrders ? 1 : 0, go: "orders" },
     { label: "Clientes", value: hasCustomers ? String(customers.length) : "Sin datos", delta: hasCustomers ? "datos locales" : "sin clientes", tone: "#a78bfa", pct: hasCustomers ? 1 : 0, go: "customers" },
     { label: "Conversión", value: conv === null ? "Sin datos" : `${conv.toFixed(0)}%`, delta: conv === null ? "sin base" : "datos locales", tone: "#fbbf24", pct: conv === null ? 0 : Math.min(1, conv / 100), go: "analytics" },
   ];
 
-  const feed = hasOrders ? orders.slice(0, 4) : [];
+  const feed = hasOrders ? viewOrders.slice(0, 4) : [];
 
   return (
     <div
@@ -154,7 +165,7 @@ export default function CommerceOSOverview({
               </button>
             </div>
             <div className="mt-4 grid grid-cols-3 gap-2">
-              {[["Ticket", ticket === null ? "Sin datos" : money(ticket)], ["Productos", products.length ? String(products.length) : "Sin datos"], ["Conv.", conv === null ? "Sin datos" : `${conv.toFixed(0)}%`]].map(([l, v]) => (
+              {[["Ticket", ticket === null ? "Sin datos" : money(ticket)], ["Productos", viewProducts.length ? String(viewProducts.length) : "Sin datos"], ["Conv.", conv === null ? "Sin datos" : `${conv.toFixed(0)}%`]].map(([l, v]) => (
                 <div key={l} className="rounded-lg border border-white/10 bg-[#070d18] p-3">
                   <div className="text-[10px] uppercase tracking-[0.12em] text-slate-500">{l}</div>
                   <div className="mt-2 text-sm font-semibold tabular-nums">{v}</div>
@@ -171,9 +182,9 @@ export default function CommerceOSOverview({
             <div className="relative">
               <div className="flex items-center gap-2 text-violet-300">
                 <Sparkles size={14} />
-                <span className="text-[10px] font-semibold uppercase tracking-[0.16em]">PULSE</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em]">Pulse Bot</span>
               </div>
-              <h2 className="mt-5 text-lg font-semibold">¿Qué quiere PULSE tocar?</h2>
+              <h2 className="mt-5 text-lg font-semibold">Cola operativa de Commerce OS</h2>
               <div className="mt-5 space-y-2">
                 <button type="button" onClick={() => onNavigate?.("website-builder")} className="w-full rounded-lg border border-white/10 bg-black/20 p-3 text-left hover:border-violet-400/45">
                   <div className="flex items-center gap-2 text-sm font-medium"><WandSparkles size={14} className="text-violet-300" /> Mejorar homepage</div>
@@ -182,7 +193,7 @@ export default function CommerceOSOverview({
                   <div className="flex items-center gap-2 text-sm font-medium"><Zap size={14} className="text-cyan-300" /> Crear campaña</div>
                 </button>
                 <button type="button" onClick={() => onPulse?.()} className="w-full rounded-lg border border-cyan-400/40 bg-cyan-400/10 p-3 text-left">
-                  <div className="text-sm font-medium text-cyan-300">Hablar con PULSE</div>
+                  <div className="text-sm font-medium text-cyan-300">Abrir Pulse Bot</div>
                 </button>
               </div>
             </div>
@@ -204,9 +215,9 @@ export default function CommerceOSOverview({
               <button key={o.id} type="button" onClick={() => onNavigate?.("orders")} className="flex w-full items-center gap-3 rounded-lg border border-white/10 bg-[#070d18] px-3 py-3 text-left hover:border-cyan-400/30">
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium">#{o.id}</div>
-                  <div className="truncate text-xs text-slate-500">{o.customer} · {o.status || o.state || ""}</div>
+                  <div className="truncate text-xs text-slate-500">{o.customerId || o.customer || "sin cliente"} · {o.paymentState || o.status || o.state || ""}</div>
                 </div>
-                <div className="text-sm font-semibold tabular-nums text-cyan-300">{money(Number(o.total) || 0)}</div>
+                <div className="text-sm font-semibold tabular-nums text-cyan-300">{money(Number(o.total?.amount ?? o.total) || 0)}</div>
                 <ChevronRight size={14} className="text-slate-600" />
               </button>
             ))}
