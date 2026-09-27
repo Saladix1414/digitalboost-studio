@@ -3425,10 +3425,10 @@ const filteredProducts = useMemo(() => {
         );
 
       case "marketing":
-        return (<DigitalBoostMarketingHub />);
+        return (<div className="relative z-10 isolate min-h-[70vh] rounded-2xl bg-[#0A1020]"><DigitalBoostMarketingHub /></div>);
 
       case "seo":
-        return (<DigitalBoostSeoCenter />);
+        return (<div className="relative z-10 isolate min-h-[70vh] rounded-2xl bg-[#0A1020]"><DigitalBoostSeoCenter /></div>);
 
       case "settings":
         return (
@@ -3557,7 +3557,7 @@ const filteredProducts = useMemo(() => {
                   >
                     {group.items.map((item) => {
                       const Icon = item.icon;
-                      const active = section === item.id || (section === 'seo' && (item.id === 'marketing' || item.id === 'seo'));
+                      const active = section === item.id;
 
                       return (
                         <button
@@ -3565,8 +3565,7 @@ const filteredProducts = useMemo(() => {
                           type="button"
                           onClick={() => {
                             if (item.id === "marketing") {
-                              try { localStorage.setItem("db-seo-tab-v1", "marketing"); } catch {}
-                              setSection("seo");
+                              setSection("marketing");
                             } else {
                               setSection(item.id);
                             }

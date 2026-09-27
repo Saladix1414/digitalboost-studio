@@ -112,8 +112,11 @@ export default function CommerceOSOverview({
               Operá, diseñá y publicá desde un OS navy. El Store Builder es el estudio; este plano es el cerebro.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
-              <button type="button" onClick={() => onNavigate?.("website-builder")} className="inline-flex h-11 items-center rounded-lg bg-cyan-400 px-5 text-sm font-semibold text-[#070d18]">
+              <button type="button" onClick={() => onNavigate?.("website-builder")} className="inline-flex h-11 items-center rounded-lg bg-violet-500 px-5 text-sm font-semibold text-white">
                 Abrir Store Builder
+              </button>
+              <button type="button" onClick={() => onNavigate?.("marketplace")} className="inline-flex h-11 items-center rounded-lg bg-violet-500 px-5 text-sm font-semibold text-white">
+                Abrir Marketplace
               </button>
               <button type="button" onClick={() => onNavigate?.("orders")} className="inline-flex h-11 items-center rounded-lg border border-white/10 px-5 text-sm">
                 Ver pedidos

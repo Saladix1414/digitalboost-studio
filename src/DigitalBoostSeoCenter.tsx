@@ -18,11 +18,11 @@ export default function DigitalBoostSeoCenter() {
   const cats = scoreCats(issues);
   useEffect(function () {
     setRobots(s.robots || DEFAULT_ROBOTS);
-    document.body.classList.add('db-seo-open');
+    
     const el = document.getElementById('db-studio-dock');
     if (el) el.style.display = 'none';
     return function () {
-      document.body.classList.remove('db-seo-open');
+      
       if (el) el.style.display = '';
     };
   }, []);
