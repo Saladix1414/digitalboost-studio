@@ -1,3 +1,4 @@
+import { runBotRules } from "./DigitalBoostCommerceBotRules";
 import { validateMarketAsset } from "./DigitalBoostMarketAssetGuard";
 export const MARKETPLACE_CONTRACT = "cos-market-v1" as const;
 export const MARKET_TAKE_RATE = 0.08;
@@ -149,6 +150,7 @@ export function addMarketListing(input: {
   };
   bag(tenantId).listings.push(listing);
   writeAll();
+  if (listing.state === "listed") runBotRules(tenantId, "listing.listed");
   return listing;
 }
 
