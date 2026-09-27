@@ -1,4 +1,4 @@
-import { emitCommerceSync } from "./DigitalBoostCommerceSync";
+import { emitCommerceSync, pingCommerceSyncPeers } from "./DigitalBoostCommerceSync";
 export const SITE_BINDING_CONTRACT = "cos-l1-site-binding-v1" as const;
 const LS_KEY = "db-commerce-site-binding-v1";
 
@@ -27,6 +27,7 @@ function readAll(): void {
 
 function writeAll(): void {
   emitCommerceSync("binding");
+  pingCommerceSyncPeers();
   try {
     localStorage.setItem(LS_KEY, JSON.stringify([...bindings.values()]));
   } catch {}

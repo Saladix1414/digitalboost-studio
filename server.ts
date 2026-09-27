@@ -24,6 +24,29 @@ async function startServer() {
   // DigitalBoost OpenClaw API debe registrarse antes de Vite/Spa fallback.
   registerOpenClawRoutes(app);
 
+  const commerceSyncClients = new Set();
+  app.get("/api/commerce/sync", (req, res) => {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders?.();
+    res.write("event: hello\ndata: {}\n\n");
+    commerceSyncClients.add(res);
+    const ping = setInterval(() => {
+      try { res.write("event: ping\ndata: {}\n\n"); } catch {}
+    }, 15000);
+    req.on("close", () => {
+      clearInterval(ping);
+      commerceSyncClients.delete(res);
+    });
+  });
+  app.post("/api/commerce/sync/ping", (_req, res) => {
+    for (const client of commerceSyncClients) {
+      try { client.write("event: commerce\ndata: {\"reason\":\"peer\"}\n\n"); } catch {}
+    }
+    res.json({ ok: true, peers: commerceSyncClients.size });
+  });
+
   app.post('/api/generate', async (req, res) => {
     try {
       const { prompt, type, currentHtml } = req.body;

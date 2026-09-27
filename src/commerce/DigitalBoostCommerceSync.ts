@@ -25,3 +25,21 @@ export function subscribeCommerceSync(onChange: () => void): () => void {
     } catch {}
   };
 }
+
+export function connectCommerceSyncStream(): () => void {
+  let source: EventSource | null = null;
+  try {
+    source = new EventSource("/api/commerce/sync");
+    source.addEventListener("commerce", () => emitCommerceSync("sse"));
+    source.addEventListener("hello", () => emitCommerceSync("sse-hello"));
+  } catch {}
+  return () => {
+    try { source?.close(); } catch {}
+  };
+}
+
+export function pingCommerceSyncPeers(): void {
+  try {
+    void fetch("/api/commerce/sync/ping", { method: "POST" });
+  } catch {}
+}
