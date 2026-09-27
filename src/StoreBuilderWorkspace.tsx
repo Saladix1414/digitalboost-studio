@@ -1639,6 +1639,11 @@ const filteredProducts = useMemo(() => {
         }
       />
 
+      {products.length === 0 && (
+        <div className="rounded-xl border border-white/10 bg-[#070d18] px-4 py-6 text-sm text-slate-400">
+          Sin productos en el ledger. No se muestra catálogo de demostración.
+        </div>
+      )}
       <ProductInventoryPro
         products={products.map((product) => ({
           ...product,
@@ -1672,9 +1677,9 @@ const filteredProducts = useMemo(() => {
       />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Metric title="Unidades disponibles" value="1.284" />
-        <Metric title="Stock bajo" value="3" />
-        <Metric title="Agotados" value="1" />
+        <Metric title="Unidades disponibles" value={products.length ? String(products.reduce((s, p) => s + p.stock, 0)) : "Sin datos"} />
+        <Metric title="Stock bajo" value={products.length ? String(products.filter((p) => p.stock > 0 && p.stock < 10).length) : "Sin datos"} />
+        <Metric title="Agotados" value={products.length ? String(products.filter((p) => p.stock === 0).length) : "Sin datos"} />
       </div>
 
       <Panel title="Estado del inventario">
@@ -1998,6 +2003,11 @@ const filteredProducts = useMemo(() => {
           );
         })()}
 
+        {orders.length === 0 && (
+          <div className="rounded-xl border border-white/10 bg-[#070d18] px-4 py-6 text-sm text-slate-400">
+            Sin pedidos en el ledger. No se muestran órdenes de demostración.
+          </div>
+        )}
         <Panel>
           <OrderTable
             orders={orders}

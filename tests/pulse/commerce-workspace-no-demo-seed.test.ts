@@ -12,4 +12,7 @@ test("Commerce OS workspace seeds are empty", () => {
   assert.equal(src.includes("DB-HOOD-001"), false);
   assert.match(src, /const productsSeed: Product\[\] = \[\];/);
   assert.match(src, /const ordersSeed: Order\[\] = \[\];/);
+  assert.equal(src.includes('value="1.284"'), false);
+  assert.match(src, /Sin productos en el ledger/);
+  assert.match(src, /Sin pedidos en el ledger/);
 });
