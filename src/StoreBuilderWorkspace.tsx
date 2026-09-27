@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import ProductInventoryPro from "./ProductInventoryPro";
 import CommerceOSOverview from "./CommerceOSOverview";
+import { getCommerceSnapshot, recordCommerceCustomer, recordCommerceOrder, recordCommerceProduct, resetCommerceLedger } from "./commerce/DigitalBoostCommerceLedger";
 import DigitalBoostPulseBotPanel from "./commerce/DigitalBoostPulseBotPanel";
 import DigitalBoostMarketplacePanel from "./commerce/DigitalBoostMarketplacePanel";
 import DigitalBoostSearch from "./DigitalBoostSearch.tsx";
@@ -252,8 +253,32 @@ export default function StoreBuilderWorkspace({
     );
     publishSection(String(section));
   }, [section]);
-  const [products, setProducts] = useState(productsSeed);
-  const [orders, setOrders] = useState(ordersSeed);
+  const [products, setProducts] = useState(() => {
+    const snap = getCommerceSnapshot("local-tenant");
+    if (!snap.products.length) return productsSeed;
+    return snap.products.map((item, index) => ({
+      id: index + 1,
+      name: item.title,
+      sku: item.sku || item.id,
+      price: item.price.amount,
+      stock: item.stock,
+      status: "Activo" as const,
+      category: "General",
+    }));
+  });
+  const [orders, setOrders] = useState(() => {
+    const snap = getCommerceSnapshot("local-tenant");
+    if (!snap.orders.length) return ordersSeed;
+    return snap.orders.map((item) => ({
+      id: item.id,
+      customer: item.customerId || "sin cliente",
+      total: item.total.amount,
+      status: item.paymentState === "PAID" ? "Pagado" : "Unpaid",
+      items: 1,
+      date: item.createdAt,
+    }));
+  });
+
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [aiOrderId, setAiOrderId] = useState<string | null>(null);
 
@@ -1652,8 +1677,7 @@ const filteredProducts = useMemo(() => {
           description: "",
         }))}
         onChange={(updated) => {
-          setProducts(
-            updated.map((product) => ({
+          const next = updated.map((product) => ({
               id: product.id,
               name: product.name,
               sku: product.sku,
@@ -1661,8 +1685,19 @@ const filteredProducts = useMemo(() => {
               stock: product.stock,
               status: product.status,
               category: product.category,
-            }))
-          );
+          }));
+          setProducts(next);
+          resetCommerceLedger();
+          for (const product of next) {
+            recordCommerceProduct({
+              id: String(product.id),
+              tenantId: "local-tenant",
+              title: product.name,
+              sku: product.sku,
+              price: { amount: Number(product.price) || 0, currency: "USD" },
+              stock: Number(product.stock) || 0,
+            });
+          }
         }}
       />
 

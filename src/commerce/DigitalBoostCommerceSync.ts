@@ -40,6 +40,8 @@ export function connectCommerceSyncStream(): () => void {
 
 export function pingCommerceSyncPeers(): void {
   try {
-    void fetch("/api/commerce/sync/ping", { method: "POST" });
+    if (typeof fetch !== "function") return;
+    if (typeof window === "undefined") return;
+    void fetch("/api/commerce/sync/ping", { method: "POST" }).catch(() => {});
   } catch {}
 }
