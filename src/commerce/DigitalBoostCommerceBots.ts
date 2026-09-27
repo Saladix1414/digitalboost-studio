@@ -7,6 +7,9 @@ export const COMMERCE_BOT_SKILLS = [
   "cart.recovery",
   "returns.intake",
   "stock.alert",
+  "price.drop",
+  "review.ask",
+  "upsell.related",
 ] as const;
 
 export type CommerceBotSkill = (typeof COMMERCE_BOT_SKILLS)[number];
@@ -17,6 +20,8 @@ export type CommerceBot = {
   readonly name: string;
   readonly skills: readonly CommerceBotSkill[];
   readonly state: "draft";
+  readonly personality: string;
+  readonly channel: "in_app" | "mail_draft";
 };
 
 const bags = new Map<string, CommerceBot[]>();
@@ -73,6 +78,8 @@ export function createCommerceBot(input: {
     name,
     skills,
     state: "draft",
+    personality: "directo y breve",
+    channel: "in_app",
   };
   bag(tenantId).push(bot);
   writeAll();
@@ -85,6 +92,19 @@ export function renameCommerceBot(tenantId: string, botId: string, name: string)
   const idx = list.findIndex((b) => b.id === botId);
   if (idx < 0) return { ok: false as const, reason: "bot not found" };
   list[idx] = { ...list[idx], name: nextName };
+  writeAll();
+  return list[idx];
+}
+
+export function updateCommerceBot(
+  tenantId: string,
+  botId: string,
+  patch: Partial<Pick<CommerceBot, "personality" | "channel" | "name">>,
+) {
+  const list = bag(tenantId);
+  const idx = list.findIndex((b) => b.id === botId);
+  if (idx < 0) return { ok: false as const, reason: "bot not found" };
+  list[idx] = { ...list[idx], ...patch };
   writeAll();
   return list[idx];
 }

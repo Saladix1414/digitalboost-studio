@@ -34,6 +34,7 @@ export default function DigitalBoostMarketplacePanel() {
   const [note, setNote] = useState("");
   const [wallet, setWallet] = useState("");
   const [tick, setTick] = useState(0);
+  const [showSalesDesk, setShowSalesDesk] = useState(false);
   const market = useMemo(() => getMarketplaceSnapshot(tenantId), [tenantId, tick, store.tick]);
   const seller = market.sellers[0];
   const publicItems = useMemo(() => listPublicMarketListings(), [tick, store.tick]);
@@ -54,6 +55,15 @@ export default function DigitalBoostMarketplacePanel() {
         <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
           <span>Market · tenant {tenantId}</span>
           <span>Take {Math.round(MARKET_TAKE_RATE * 100)}% · escrow off</span>
+        </div>
+        <div className="mt-2 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setShowSalesDesk(true)}
+            className="rounded-full bg-gradient-to-r from-fuchsia-500 to-cyan-400 px-4 py-1.5 text-[11px] font-semibold text-[#0E1420]"
+          >
+            Bot de ventas
+          </button>
         </div>
         <h1 className="mt-3 text-[28px] font-semibold tracking-tight">Encontrá o publicá</h1>
         <form
@@ -251,6 +261,23 @@ export default function DigitalBoostMarketplacePanel() {
       )}
 
       {tab === "bots" && <DigitalBoostMarketBotsPanel tenantId={tenantId} />}
+      {showSalesDesk && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/40" onClick={() => setShowSalesDesk(false)}>
+          <aside className="h-full w-[min(100%,500px)] overflow-y-auto border-l border-white/10 bg-[#121826] p-5 sm:w-[min(100%,500px)]" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-fuchsia-300">Market · agente</p>
+                <h2 className="mt-1 text-lg font-semibold">Bot de ventas</h2>
+                <p className="mt-1 text-xs text-slate-400">Cierra carritos, avisa stock y deja pedidos en draft. No cobra.</p>
+              </div>
+              <button type="button" className="text-slate-400" onClick={() => setShowSalesDesk(false)}>Cerrar</button>
+            </div>
+            <div className="mt-4">
+              <DigitalBoostMarketBotsPanel tenantId={tenantId} />
+            </div>
+          </aside>
+        </div>
+      )}
     </div>
   );
 }
