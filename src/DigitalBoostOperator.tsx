@@ -2,10 +2,9 @@
 import { useEffect, useRef, useState } from "react";
 import { explain, analyze, analyzeSmart, isBuilder, type PulseDecision } from "./DigitalBoostPulseBrain";
 import {
-  approvePulseAction,
   rejectPulseAction,
 } from "./DigitalBoostPulseGovernance";
-import { executePulseAction } from "./DigitalBoostPulseExecutor";
+import { executePulseClientAction } from "./DigitalBoostPulseClientExecutionGate";
 
 
 function readCanvas() {
@@ -127,10 +126,9 @@ export default function DigitalBoostOperator(props: {
         });
         return;
       }
-      approval = approvePulseAction(approval);
     }
 
-    let result = executePulseAction({
+    let result = executePulseClientAction({
       envelope: out.envelope,
       approval: approval,
       draft: out.draft,
@@ -142,7 +140,8 @@ export default function DigitalBoostOperator(props: {
         else if (action === "__console" && props.onOpenConsole) props.onOpenConsole();
         else if (action === "__integrations" && props.onOpenIntegrations) props.onOpenIntegrations();
         else props.onNavigate(action);
-      }
+      },
+      userGesture: true
     });
 
     const ok = result.state === "COMPLETED";
@@ -193,10 +192,9 @@ export default function DigitalBoostOperator(props: {
         return;
       }
 
-      approval = approvePulseAction(approval);
     }
 
-    const result = executePulseAction({
+    const result = executePulseClientAction({
       envelope: out.envelope,
       approval: approval,
       draft: out.draft,
@@ -209,7 +207,8 @@ export default function DigitalBoostOperator(props: {
         else if (action === "__console" && props.onOpenConsole) props.onOpenConsole();
         else if (action === "__integrations" && props.onOpenIntegrations) props.onOpenIntegrations();
         else props.onNavigate(action);
-      }
+      },
+      userGesture: true
     });
 
     if (result.state !== "COMPLETED") {
