@@ -14,6 +14,8 @@ export default function DigitalBoostMarketingHub() {
     c: "manual",
   });
   const [log, setLog] = useState("Marketing OS: OG + UTM. Sin GMV inventado.");
+  const [tab, setTab] = useState<"og" | "utm">("og");
+
 
   function saveHomeOg(title: string, desc: string) {
     const ov = { ...(s.overrides || {}) };
@@ -43,6 +45,10 @@ export default function DigitalBoostMarketingHub() {
         <p className="mt-2 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-[11px] text-cyan-200">
           {log}
         </p>
+        <div className="mt-3 flex gap-2">
+          <button type="button" onClick={() => setTab("og")} className={`h-9 rounded-md px-3 text-xs ${tab === "og" ? "bg-cyan-400 text-[#070d18]" : "border border-white/10"}`}>OG</button>
+          <button type="button" onClick={() => setTab("utm")} className={`h-9 rounded-md px-3 text-xs ${tab === "utm" ? "bg-cyan-400 text-[#070d18]" : "border border-white/10"}`}>UTM</button>
+        </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-2xl border border-white/10 bg-[#0B1B30] p-5">

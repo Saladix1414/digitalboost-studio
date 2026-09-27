@@ -3,13 +3,14 @@ import {
   activateMarketSeller,
   addMarketListing,
   getMarketplaceSnapshot,
+  listPublicMarketListings,
   MARKET_TAKE_RATE,
   registerMarketSeller,
   type MarketRail,
 } from "./DigitalBoostMarketplace";
-import { useCommerceLive } from "./useCommerceLive";
-import DigitalBoostMarketBotsPanel from "./DigitalBoostMarketBotsPanel";
 import { requestWalletAccount } from "./DigitalBoostWeb3Rail";
+import { useCommerceStore } from "./DigitalBoostCommerceContext";
+import DigitalBoostMarketBotsPanel from "./DigitalBoostMarketBotsPanel";
 
 const RAILS: { id: MarketRail | "all"; label: string }[] = [
   { id: "all", label: "Todo" },
@@ -20,12 +21,9 @@ const RAILS: { id: MarketRail | "all"; label: string }[] = [
   { id: "gift_card", label: "Gift card" },
 ];
 
-export default function DigitalBoostMarketplacePanel({
-  tenantId = "local-tenant",
-}: {
-  tenantId?: string;
-}) {
-  useCommerceLive(tenantId);
+export default function DigitalBoostMarketplacePanel() {
+  const store = useCommerceStore();
+  const tenantId = store.tenantId;
   const [tab, setTab] = useState<"explore" | "sell" | "bots">("explore");
   const [rail, setRail] = useState<MarketRail | "all">("all");
   const [q, setQ] = useState("");
@@ -33,12 +31,12 @@ export default function DigitalBoostMarketplacePanel({
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [sellRail, setSellRail] = useState<MarketRail>("physical");
-  const [note, setNote] = useState("Plaza vacía. GMV unavailable.");
-  const [wallet, setWallet] = useState("sin wallet");
+  const [note, setNote] = useState("");
+  const [wallet, setWallet] = useState("");
   const [tick, setTick] = useState(0);
-  const market = useMemo(() => getMarketplaceSnapshot(tenantId), [tenantId, tick]);
+  const market = useMemo(() => getMarketplaceSnapshot(tenantId), [tenantId, tick, store.tick]);
   const seller = market.sellers[0];
-
+  const publicItems = useMemo(() => listPublicMarketListings(), [tick, store.tick]);
   const items = market.listings.filter((item) => {
     if (rail !== "all" && item.rail !== rail) return false;
     if (q.trim() && !item.title.toLowerCase().includes(q.trim().toLowerCase())) return false;
@@ -51,73 +49,118 @@ export default function DigitalBoostMarketplacePanel({
   }
 
   return (
-    <div className="relative z-20 isolate overflow-hidden rounded-2xl border border-white/10 bg-[#0A1020] text-[#F7FAFF]">
-      <div className="border-b border-white/10 px-4 py-4 sm:px-6">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">DigitalBoost Market</p>
-        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Comprá y publicá</h1>
-            <p className="mt-1 max-w-lg text-sm text-slate-400">
-              Estilo plaza + studio. Take {Math.round(MARKET_TAKE_RATE * 100)}%. NFT/cripto quedan draft hasta tener rail.
-            </p>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-[#070d18] px-4 py-2 text-right">
-            <div className="text-[10px] uppercase tracking-wide text-slate-500">GMV</div>
-            <div className="font-semibold tabular-nums text-slate-300">{market.gmv === null ? "—" : market.gmv}</div>
-          </div>
+    <div className="relative z-20 isolate bg-[#0E1420] text-[#E8EEF7]">
+      <div className="border-b border-white/8 px-4 py-5 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+          <span>Market · tenant {tenantId}</span>
+          <span>Take {Math.round(MARKET_TAKE_RATE * 100)}% · escrow off</span>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button type="button" onClick={() => setTab("explore")} className={`h-10 rounded-lg px-4 text-sm ${tab === "explore" ? "bg-cyan-400 text-[#070d18]" : "border border-white/10"}`}>Explorar</button>
-          <button type="button" onClick={() => setTab("bots")} className={`h-10 rounded-lg px-4 text-sm ${tab === "bots" ? "bg-cyan-400 text-[#070d18]" : "border border-white/10"}`}>Bots</button>
-          <button type="button" onClick={() => setTab("sell")} className={`h-10 rounded-lg px-4 text-sm ${tab === "sell" ? "bg-cyan-400 text-[#070d18]" : "border border-white/10"}`}>Vender</button>
-          <button
-            type="button"
-            className="h-10 rounded-lg border border-white/10 px-4 text-sm"
-            onClick={async () => {
-              const result = await requestWalletAccount();
-              if (!result.ok) {
-                setWallet("sin wallet");
-                setNote(result.reason);
-                return;
-              }
-              setWallet(result.value);
-              setNote("Wallet " + result.value);
-            }}
-          >
-            {wallet === "sin wallet" ? "Conectar wallet" : wallet.slice(0, 10) + "…"}
-          </button>
+        <h1 className="mt-3 text-[28px] font-semibold tracking-tight">Encontrá o publicá</h1>
+        <form
+          className="mt-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setTab("explore");
+          }}
+        >
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar publicaciones"
+            className="h-12 w-full rounded-md border border-white/10 bg-[#161D2B] px-4 text-[15px] outline-none ring-cyan-400/0 focus:ring-2"
+          />
+        </form>
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+          {RAILS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => { setRail(item.id); setTab("explore"); }}
+              className={`h-8 shrink-0 rounded-md px-3 text-[11px] ${rail === item.id ? "bg-cyan-400 text-[#0E1420]" : "bg-[#161D2B] text-slate-300"}`}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      <p className="mx-4 mt-4 rounded-lg border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-[12px] text-cyan-100 sm:mx-6">{note}</p>
+      <div className="grid grid-cols-3 border-b border-white/8 text-center">
+        <div className="px-2 py-3">
+          <div className="text-[10px] uppercase tracking-wide text-slate-500">Listings</div>
+          <div className="mt-1 font-medium tabular-nums">{market.listings.length}</div>
+        </div>
+        <div className="border-x border-white/8 px-2 py-3">
+          <div className="text-[10px] uppercase tracking-wide text-slate-500">Seller</div>
+          <div className="mt-1 truncate text-sm">{seller ? seller.state : "ninguno"}</div>
+        </div>
+        <div className="px-2 py-3">
+          <div className="text-[10px] uppercase tracking-wide text-slate-500">GMV</div>
+          <div className="mt-1 font-medium tabular-nums">{market.gmv === null ? "—" : market.gmv}</div>
+        </div>
+      </div>
+
+      <div className="flex border-b border-white/8">
+        {(["explore", "sell", "bots"] as const).map((id) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setTab(id)}
+            className={`h-11 flex-1 text-sm ${tab === id ? "border-b-2 border-cyan-400 text-white" : "text-slate-500"}`}
+          >
+            {id === "explore" ? "Comprar" : id === "sell" ? "Vender" : "Bots"}
+          </button>
+        ))}
+      </div>
+
+      {note && (
+        <p className="mx-4 mt-3 rounded-md bg-[#161D2B] px-3 py-2 text-[12px] text-slate-300 sm:mx-6">{note}</p>
+      )}
 
       {tab === "explore" && (
-        <div className="space-y-4 px-4 py-4 sm:px-6">
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar publicación" className="h-11 flex-1 rounded-lg border border-white/10 bg-[#070d18] px-3 text-sm" />
-          </div>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {RAILS.map((item) => (
-              <button key={item.id} type="button" onClick={() => setRail(item.id)} className={`h-9 shrink-0 rounded-full px-3 text-xs ${rail === item.id ? "bg-white text-[#070d18]" : "border border-white/10 text-slate-300"}`}>
-                {item.label}
-              </button>
-            ))}
-          </div>
+        <div className="px-4 py-4 sm:px-6">
           {items.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/15 bg-[#070d18] px-4 py-16 text-center text-sm text-slate-500">
-              No hay publicaciones en este riel. No se muestran colecciones demo.
+            <div className="space-y-8">
+              <div className="py-10 text-center">
+                <p className="text-sm text-slate-400">Tu vitrina está vacía.</p>
+                <button type="button" onClick={() => setTab("sell")} className="mt-4 h-10 rounded-md bg-cyan-400 px-4 text-sm font-semibold text-[#0E1420]">
+                  Publicar primero
+                </button>
+              </div>
+              <div>
+                <div className="flex items-end justify-between">
+                  <h2 className="text-sm font-medium">Catálogo global</h2>
+                  <span className="text-[11px] text-slate-500">{publicItems.length} listed</span>
+                </div>
+                {publicItems.length === 0 ? (
+                  <p className="mt-3 bg-[#161D2B] px-3 py-8 text-center text-sm text-slate-500">
+                    Todavía no hay publicaciones listed de ningún tenant.
+                  </p>
+                ) : (
+                  <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
+                    {publicItems.map((item) => (
+                      <article key={item.tenantId + item.id} className="bg-[#161D2B]">
+                        <div className="flex aspect-square items-end bg-[#1C2433] p-2 text-[10px] uppercase text-slate-500">{item.rail}</div>
+                        <div className="p-2">
+                          <p className="truncate text-xs">{item.title}</p>
+                          <p className="text-[11px] tabular-nums">USD {item.price}</p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
               {items.map((item) => (
-                <article key={item.id} className="overflow-hidden rounded-2xl border border-[#1f2937] bg-[#0d1721]">
-                  <div className="flex aspect-square items-center justify-center bg-[#101B32] text-[11px] uppercase tracking-wide text-slate-500">
+                <article key={item.id} className="bg-[#161D2B]">
+                  <div className="flex aspect-square items-end bg-[#1C2433] p-3 text-[10px] uppercase tracking-wide text-slate-500">
                     {item.rail}
                   </div>
                   <div className="space-y-1 p-3">
-                    <div className="truncate text-sm font-medium">{item.title}</div>
-                    <div className="text-[11px] uppercase text-slate-500">{item.state}{item.railReady ? "" : " · rail pending"}</div>
-                    <div className="text-sm tabular-nums text-cyan-300">USD {item.price}</div>
+                    <h2 className="truncate text-sm">{item.title}</h2>
+                    <p className="text-[11px] text-slate-500">{item.state}{item.railReady ? "" : " · rail off"}</p>
+                    <p className="text-sm tabular-nums">USD {item.price}</p>
                   </div>
                 </article>
               ))}
@@ -127,71 +170,86 @@ export default function DigitalBoostMarketplacePanel({
       )}
 
       {tab === "sell" && (
-        <div className="space-y-4 px-4 py-4 sm:px-6">
-          <section className="rounded-2xl border border-white/10 bg-[#101B32] p-4">
-            <h2 className="text-sm font-semibold">1. Seller</h2>
+        <div className="space-y-6 px-4 py-5 sm:px-6">
+          <div>
+            <p className="text-[11px] uppercase tracking-wide text-slate-500">Escritorio seller</p>
+            <div className="mt-2 grid grid-cols-3 gap-2 text-center text-xs">
+              <div className="bg-[#161D2B] px-2 py-3">¿Órdenes nuevas?<br /><span className="text-slate-500">—</span></div>
+              <div className="bg-[#161D2B] px-2 py-3">¿Cobré?<br /><span className="text-slate-500">—</span></div>
+              <div className="bg-[#161D2B] px-2 py-3">¿Listings?<br /><span>{market.listings.length}</span></div>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium">Identidad</p>
             {seller ? (
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 bg-[#070d18] px-3 py-3 text-sm">
+              <div className="mt-2 flex items-center justify-between bg-[#161D2B] px-3 py-3 text-sm">
                 <span>{seller.name} · {seller.state}</span>
                 {seller.state === "pending" && (
-                  <button type="button" className="h-9 rounded-lg bg-cyan-400 px-3 text-xs font-semibold text-[#070d18]" onClick={() => {
+                  <button type="button" className="text-cyan-300" onClick={() => {
                     const result = activateMarketSeller(tenantId, seller.id);
                     refresh("ok" in result && "reason" in result ? result.reason : "Seller activo");
                   }}>Activar</button>
                 )}
               </div>
             ) : (
-              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre del seller" className="h-11 flex-1 rounded-lg border border-white/10 bg-[#070d18] px-3 text-sm" />
-                <button type="button" className="h-11 rounded-lg bg-cyan-400 px-4 text-xs font-semibold text-[#070d18]" onClick={() => {
+              <div className="mt-2 flex gap-2">
+                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" className="h-11 flex-1 rounded-md border border-white/10 bg-[#161D2B] px-3 text-sm" />
+                <button type="button" className="h-11 rounded-md bg-cyan-400 px-3 text-sm font-semibold text-[#0E1420]" onClick={() => {
                   const result = registerMarketSeller({ tenantId, name });
                   refresh("ok" in result && result.ok === false ? result.reason : "Seller pending");
                   setName("");
-                }}>Registrar</button>
+                }}>Alta</button>
               </div>
             )}
-          </section>
+          </div>
 
-          <section className="rounded-2xl border border-white/10 bg-[#101B32] p-4">
-            <h2 className="text-sm font-semibold">2. Publicar</h2>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título" className="h-11 rounded-lg border border-white/10 bg-[#070d18] px-3 text-sm sm:col-span-2" />
-              <select value={sellRail} onChange={(e) => setSellRail(e.target.value as MarketRail)} className="h-11 rounded-lg border border-white/10 bg-[#070d18] px-3 text-sm">
-                {RAILS.filter((r) => r.id !== "all").map((r) => (
-                  <option key={r.id} value={r.id}>{r.label}</option>
-                ))}
-              </select>
-              <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Precio USD" inputMode="decimal" className="h-11 rounded-lg border border-white/10 bg-[#070d18] px-3 text-sm" />
+          <div>
+            <p className="text-sm font-medium">Nueva publicación</p>
+            <div className="mt-2 space-y-2">
+              <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título" className="h-11 w-full rounded-md border border-white/10 bg-[#161D2B] px-3 text-sm" />
+              <div className="grid grid-cols-2 gap-2">
+                <select value={sellRail} onChange={(e) => setSellRail(e.target.value as MarketRail)} className="h-11 rounded-md border border-white/10 bg-[#161D2B] px-3 text-sm">
+                  {RAILS.filter((r) => r.id !== "all").map((r) => (
+                    <option key={r.id} value={r.id}>{r.label}</option>
+                  ))}
+                </select>
+                <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="USD" inputMode="decimal" className="h-11 rounded-md border border-white/10 bg-[#161D2B] px-3 text-sm" />
+              </div>
+              <button
+                type="button"
+                className="h-11 w-full rounded-md bg-cyan-400 text-sm font-semibold text-[#0E1420]"
+                onClick={() => {
+                  if (!seller) return refresh("Alta de seller primero");
+                  const result = addMarketListing({ tenantId, sellerId: seller.id, title, rail: sellRail, price: Number(price) });
+                  if ("ok" in result && result.ok === false) refresh(result.reason);
+                  else {
+                    refresh(result.state === "listed" ? "Publicado" : "Draft");
+                    setTitle("");
+                    setPrice("");
+                    setTab("explore");
+                  }
+                }}
+              >
+                Publicar
+              </button>
             </div>
-            <button
-              type="button"
-              className="mt-3 h-11 w-full rounded-lg bg-cyan-400 text-sm font-semibold text-[#070d18]"
-              onClick={() => {
-                if (!seller) {
-                  refresh("Registrá un seller primero");
-                  return;
-                }
-                const result = addMarketListing({
-                  tenantId,
-                  sellerId: seller.id,
-                  title,
-                  rail: sellRail,
-                  price: Number(price),
-                });
-                if ("ok" in result && result.ok === false) refresh(result.reason);
-                else {
-                  refresh(result.state === "listed" ? "Publicado" : "Draft. NFT/cripto o seller pending.");
-                  setTitle("");
-                  setPrice("");
-                  setTab("explore");
-                }
-              }}
-            >
-              Publicar
-            </button>
-          </section>
+          </div>
+
+          <button
+            type="button"
+            className="text-xs text-slate-500"
+            onClick={async () => {
+              const result = await requestWalletAccount();
+              setWallet(result.ok ? result.value : "");
+              setNote(result.ok ? result.value : result.reason);
+            }}
+          >
+            {wallet ? wallet.slice(0, 12) + "…" : "Conectar wallet (opcional)"}
+          </button>
         </div>
       )}
+
       {tab === "bots" && <DigitalBoostMarketBotsPanel tenantId={tenantId} />}
     </div>
   );

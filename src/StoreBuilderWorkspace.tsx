@@ -33,6 +33,7 @@ import CommerceOSOverview from "./CommerceOSOverview";
 import { getCommerceSnapshot, recordCommerceCustomer, recordCommerceOrder, recordCommerceProduct, resetCommerceLedger } from "./commerce/DigitalBoostCommerceLedger";
 import DigitalBoostPulseBotPanel from "./commerce/DigitalBoostPulseBotPanel";
 import DigitalBoostMarketplacePanel from "./commerce/DigitalBoostMarketplacePanel";
+import { CommerceStoreProvider } from "./commerce/DigitalBoostCommerceContext";
 import DigitalBoostSearch from "./DigitalBoostSearch.tsx";
 import DigitalBoostOsKpiPaint from "./DigitalBoostOsKpiPaint.tsx";
 import DigitalBoostStoreSwitch from "./DigitalBoostStoreSwitch.tsx";
@@ -3260,7 +3261,7 @@ const filteredProducts = useMemo(() => {
         return <DigitalBoostPulseBotPanel />;
 
       case "marketplace":
-        return <DigitalBoostMarketplacePanel />;
+        return (<CommerceStoreProvider tenantId="local-tenant"><DigitalBoostMarketplacePanel /></CommerceStoreProvider>);
 
       case "products":
         return renderProducts();

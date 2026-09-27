@@ -151,3 +151,14 @@ export function addMarketListing(input: {
   writeAll();
   return listing;
 }
+
+export function listPublicMarketListings() {
+  readAll();
+  const out: MarketListing[] = [];
+  for (const bag of bags.values()) {
+    for (const listing of bag.listings) {
+      if (listing.state === "listed") out.push(listing);
+    }
+  }
+  return out;
+}
