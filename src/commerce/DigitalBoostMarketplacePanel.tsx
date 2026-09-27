@@ -8,6 +8,7 @@ import {
   type MarketRail,
 } from "./DigitalBoostMarketplace";
 import { useCommerceLive } from "./useCommerceLive";
+import { requestWalletAccount } from "./DigitalBoostWeb3Rail";
 
 const RAILS: { id: MarketRail | "all"; label: string }[] = [
   { id: "all", label: "Todo" },
@@ -32,6 +33,7 @@ export default function DigitalBoostMarketplacePanel({
   const [price, setPrice] = useState("");
   const [sellRail, setSellRail] = useState<MarketRail>("physical");
   const [note, setNote] = useState("Plaza vacía. GMV unavailable.");
+  const [wallet, setWallet] = useState("sin wallet");
   const [tick, setTick] = useState(0);
   const market = useMemo(() => getMarketplaceSnapshot(tenantId), [tenantId, tick]);
   const seller = market.sellers[0];
@@ -66,6 +68,22 @@ export default function DigitalBoostMarketplacePanel({
         <div className="mt-4 flex flex-wrap gap-2">
           <button type="button" onClick={() => setTab("explore")} className={`h-10 rounded-lg px-4 text-sm ${tab === "explore" ? "bg-cyan-400 text-[#070d18]" : "border border-white/10"}`}>Explorar</button>
           <button type="button" onClick={() => setTab("sell")} className={`h-10 rounded-lg px-4 text-sm ${tab === "sell" ? "bg-cyan-400 text-[#070d18]" : "border border-white/10"}`}>Vender</button>
+          <button
+            type="button"
+            className="h-10 rounded-lg border border-white/10 px-4 text-sm"
+            onClick={async () => {
+              const result = await requestWalletAccount();
+              if (!result.ok) {
+                setWallet("sin wallet");
+                setNote(result.reason);
+                return;
+              }
+              setWallet(result.value);
+              setNote("Wallet " + result.value);
+            }}
+          >
+            {wallet === "sin wallet" ? "Conectar wallet" : wallet.slice(0, 10) + "…"}
+          </button>
         </div>
       </div>
 
