@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { buildPages, loadSeo, saveSeo, utmOf } from "./DigitalBoostSeo";
 import { draftPulseBotMessage } from "./commerce/DigitalBoostPulseBot";
+import { buildCommerceUtm } from "./commerce/DigitalBoostCommerceUtm";
 
 export default function DigitalBoostMarketingHub() {
   const [s, setS] = useState(() => loadSeo());
@@ -65,9 +66,19 @@ export default function DigitalBoostMarketingHub() {
           <button
             className="mt-3 h-10 w-full rounded-lg bg-white/10 text-xs"
             onClick={() => {
-              const x = utmOf(utm.u, utm.s, utm.m, utm.c);
-              navigator.clipboard.writeText(x);
-              setLog("UTM: " + x);
+              const built = buildCommerceUtm({
+                path: utm.u || "/",
+                source: utm.s,
+                medium: utm.m,
+                campaign: utm.c,
+                tenantId: "local-tenant",
+              });
+              if (!built.ok) {
+                setLog("UTM unavailable: " + built.reason);
+                return;
+              }
+              navigator.clipboard.writeText(built.url);
+              setLog("UTM: " + built.url);
             }}
           >
             Copiar UTM

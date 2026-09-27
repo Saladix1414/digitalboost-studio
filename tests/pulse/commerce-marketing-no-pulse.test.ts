@@ -11,6 +11,7 @@ test("Marketing hub does not open PULSE or invent 1047", () => {
   assert.equal(src.includes("db-open-pulse"), false);
   assert.equal(src.includes("1047 en preparacion"), false);
   assert.match(src, /draftPulseBotMessage/);
+  assert.match(src, /buildCommerceUtm/);
 });
 
 test("Marketing nav mounts MarketingHub not SEO Center", () => {
