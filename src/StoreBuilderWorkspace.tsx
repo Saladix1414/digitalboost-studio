@@ -2925,28 +2925,28 @@ const filteredProducts = useMemo(() => {
       <div className="space-y-6">
         <PageTitle
           title="Analytics"
-          subtitle="Visión general del rendimiento de tu tienda."
+          subtitle="Solo ledger. Sin sesiones de sitio no hay conversión."
         />
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Metric
             title="Facturación"
-            value={formatCurrency(totalRevenue)}
+            value={totalOrders ? formatCurrency(totalRevenue) : "Sin datos"}
           />
 
           <Metric
             title="Pedidos"
-            value={String(totalOrders)}
+            value={totalOrders ? String(totalOrders) : "Sin datos"}
           />
 
           <Metric
             title="Clientes"
-            value={String(totalCustomers)}
+            value={totalCustomers ? String(totalCustomers) : "Sin datos"}
           />
 
           <Metric
             title="Ticket promedio"
-            value={formatCurrency(averageOrderValue)}
+            value={totalOrders ? formatCurrency(averageOrderValue) : "Sin datos"}
           />
         </div>
 

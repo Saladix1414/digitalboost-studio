@@ -15,4 +15,6 @@ test("Commerce OS workspace seeds are empty", () => {
   assert.equal(src.includes('value="1.284"'), false);
   assert.match(src, /Sin productos en el ledger/);
   assert.match(src, /Sin pedidos en el ledger/);
+  assert.match(src, /Solo ledger/);
+  assert.match(src, /totalOrders \? formatCurrency\(totalRevenue\) : "Sin datos"/);
 });
