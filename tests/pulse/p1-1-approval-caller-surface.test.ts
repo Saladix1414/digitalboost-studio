@@ -36,7 +36,6 @@ test("P1.1-D only Executor, ClientExecutionGate and MissionExecutor may call exe
   const allowed = new Set([
     "src/DigitalBoostPulseExecutor.ts",
     "src/DigitalBoostPulseClientExecutionGate.ts",
-    "src/DigitalBoostPulseMissionExecutor.ts",
   ]);
   const offenders: string[] = [];
   for (const file of walk(join(root, "src"))) {

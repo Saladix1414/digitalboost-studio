@@ -5,10 +5,13 @@ import {
 } from "./DigitalBoostPulseMission";
 
 import {
-  executePulseAction,
   type PulseExecutionContext,
   type PulseExecutionOutcome,
 } from "./DigitalBoostPulseExecutor";
+
+import {
+  executePulseClientAction,
+} from "./DigitalBoostPulseClientExecutionGate";
 
 import {
   createPulseExecutionAttestation,
@@ -87,7 +90,7 @@ export function executePulseMissionStep(
     );
   }
 
-  const execution = executePulseAction({
+  const execution = executePulseClientAction({
     ...context,
     trace: {
       mission_id: mission.id,
@@ -95,6 +98,7 @@ export function executePulseMissionStep(
       step_id: step.id,
       step_index: mission.stepIndex,
     },
+    userGesture: false,
   });
 
   if (execution.state === "AWAITING_APPROVAL") {
