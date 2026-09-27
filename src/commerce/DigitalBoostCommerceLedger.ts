@@ -1,3 +1,4 @@
+import { emitCommerceSync } from "./DigitalBoostCommerceSync";
 export const COMMERCE_LEDGER_CONTRACT = "cos-l0-ledger-v1" as const;
 
 export type CommerceMoney = {
@@ -80,6 +81,7 @@ function readAll(): void {
 }
 
 function writeAll(): void {
+  emitCommerceSync("ledger");
   try {
     const dump: Record<string, TenantBag> = {};
     for (const [id, bag] of bags) dump[id] = bag;

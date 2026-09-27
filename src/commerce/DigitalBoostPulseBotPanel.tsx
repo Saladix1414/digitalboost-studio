@@ -1,3 +1,4 @@
+import { useCommerceLive } from "./useCommerceLive";
 import { evaluatePulseBotBrain } from "./DigitalBoostPulseBotBrain";
 
 export default function DigitalBoostPulseBotPanel({
@@ -5,6 +6,7 @@ export default function DigitalBoostPulseBotPanel({
 }: {
   tenantId?: string;
 }) {
+  useCommerceLive(tenantId);
   const brief = evaluatePulseBotBrain(tenantId);
   return (
     <div className="space-y-4 rounded-2xl border border-white/10 bg-[#0A1020] p-5 text-[#F7FAFF]">

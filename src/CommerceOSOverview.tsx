@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useOsRange } from "./DigitalBoostOsRangeData";
-import { getCommerceSnapshot } from "./commerce/DigitalBoostCommerceLedger";
-import { getSiteBinding } from "./commerce/DigitalBoostSiteBinding";
+import { useCommerceLive } from "./commerce/useCommerceLive";
 import "./commerce-os-core.css";
 import {
   ArrowUpRight,
@@ -67,8 +66,7 @@ export default function CommerceOSOverview({
   tenantId = "local-tenant",
 }: CommerceOSOverviewProps) {
   useOsRange();
-  const snap = getCommerceSnapshot(tenantId);
-  const binding = getSiteBinding(tenantId);
+  const { snap, binding } = useCommerceLive(tenantId);
   const ledgerOrders = snap.orders;
   const ledgerProducts = snap.products;
   const ledgerCustomers = snap.customers;
