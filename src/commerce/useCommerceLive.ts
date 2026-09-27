@@ -1,18 +1,18 @@
-import { useEffect, useState } from "react";
-import { getCommerceSnapshot } from "./DigitalBoostCommerceLedger";
-import { getSiteBinding } from "./DigitalBoostSiteBinding";
-import { connectCommerceSyncStream, subscribeCommerceSync } from "./DigitalBoostCommerceSync";
+import { useSyncExternalStore } from "react";
+import {
+  readCommerceStore,
+  subscribeCommerceStore,
+  getCommerceStoreVersion,
+} from "./DigitalBoostCommerceStore";
+import { connectCommerceSyncStream } from "./DigitalBoostCommerceSync";
+import { useEffect } from "react";
 
 export function useCommerceLive(tenantId = "local-tenant") {
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const off = subscribeCommerceSync(() => setTick((n) => n + 1));
-    const close = connectCommerceSyncStream();
-    return () => { off(); close(); };
-  }, []);
-  return {
-    tick,
-    snap: getCommerceSnapshot(tenantId),
-    binding: getSiteBinding(tenantId),
-  };
+  useEffect(() => connectCommerceSyncStream(), []);
+  useSyncExternalStore(
+    subscribeCommerceStore,
+    getCommerceStoreVersion,
+    getCommerceStoreVersion,
+  );
+  return readCommerceStore(tenantId);
 }
