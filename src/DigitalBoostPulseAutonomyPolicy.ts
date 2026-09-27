@@ -34,7 +34,7 @@ import type {
 export const PULSE_AUTONOMY_POLICY_CONTRACT =
   "p0.9.0" as const;
 
-export type PulseAutonomyDecision =
+export type PulseAutonomyDecisionKind =
   | "CONTINUE"
   | "PAUSE"
   | "AWAITING_APPROVAL"
@@ -148,7 +148,7 @@ export interface PulseAutonomyInput {
 
 export interface PulseAutonomyDecision {
   readonly contract: typeof PULSE_AUTONOMY_POLICY_CONTRACT;
-  readonly decision: PulseAutonomyDecision;
+  readonly decision: PulseAutonomyDecisionKind;
   readonly reason: PulseAutonomyReason;
 
   readonly continueAllowed: boolean;
@@ -197,7 +197,7 @@ function normalizedMaxRetries(
 
 function result(
   input: PulseAutonomyInput,
-  decision: PulseAutonomyDecision,
+  decision: PulseAutonomyDecisionKind,
   reason: PulseAutonomyReason,
 ): PulseAutonomyDecision {
   const retries =
