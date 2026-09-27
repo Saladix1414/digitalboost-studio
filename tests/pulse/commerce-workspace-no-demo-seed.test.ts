@@ -17,4 +17,6 @@ test("Commerce OS workspace seeds are empty", () => {
   assert.match(src, /Sin pedidos en el ledger/);
   assert.match(src, /Solo ledger/);
   assert.match(src, /totalOrders \? formatCurrency\(totalRevenue\) : "Sin datos"/);
+  assert.match(src, /Pulse Bot no publica campañas/);
+  assert.equal(src.includes("Creá una campaña desde el PULSE."), false);
 });

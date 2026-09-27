@@ -2748,7 +2748,7 @@ const filteredProducts = useMemo(() => {
               Todavía no hay campañas creadas.
             </p>
             <p className="mt-1 text-xs text-[#475569]">
-              Creá una campaña desde el PULSE.
+              Creá una campaña manual. Pulse Bot no publica campañas. PULSE no opera en Commerce OS.
             </p>
           </div>
         </Panel>
