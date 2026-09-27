@@ -58,10 +58,40 @@ type TenantBag = {
 };
 
 const bags = new Map<string, TenantBag>();
+const LS_KEY = "db-commerce-ledger-v1";
+
+function readAll(): void {
+  if (bags.size) return;
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) as Record<string, TenantBag>;
+    if (!parsed || typeof parsed !== "object") return;
+    for (const [id, bag] of Object.entries(parsed)) {
+      if (!id || !bag) continue;
+      bags.set(id, {
+        products: Array.isArray(bag.products) ? bag.products : [],
+        orders: Array.isArray(bag.orders) ? bag.orders : [],
+        customers: Array.isArray(bag.customers) ? bag.customers : [],
+        events: Array.isArray(bag.events) ? bag.events : [],
+      });
+    }
+  } catch {}
+}
+
+function writeAll(): void {
+  try {
+    const dump: Record<string, TenantBag> = {};
+    for (const [id, bag] of bags) dump[id] = bag;
+    localStorage.setItem(LS_KEY, JSON.stringify(dump));
+  } catch {}
+}
+
 
 function bag(tenantId: string): TenantBag {
   const id = tenantId.trim();
   if (!id) throw new Error("tenantId is required");
+  readAll();
   const existing = bags.get(id);
   if (existing) return existing;
   const created: TenantBag = {
@@ -76,11 +106,13 @@ function bag(tenantId: string): TenantBag {
 
 export function resetCommerceLedger(): void {
   bags.clear();
+  try { localStorage.removeItem(LS_KEY); } catch {}
 }
 
 export function getCommerceSnapshot(tenantId: string): CommerceSnapshot {
   const id = tenantId.trim();
   if (!id) throw new Error("tenantId is required");
+  readAll();
   const data = bags.get(id) ?? {
     products: [],
     orders: [],
@@ -107,15 +139,18 @@ export function recordCommerceProduct(input: CommerceProduct): CommerceProduct {
     throw new Error("tenantId is required");
   }
   bag(input.tenantId).products.push(input);
+  writeAll();
   return input;
 }
 
 export function recordCommerceOrder(input: CommerceOrder): CommerceOrder {
   bag(input.tenantId).orders.push(input);
+  writeAll();
   return input;
 }
 
 export function recordCommerceCustomer(input: CommerceCustomer): CommerceCustomer {
   bag(input.tenantId).customers.push(input);
+  writeAll();
   return input;
 }
