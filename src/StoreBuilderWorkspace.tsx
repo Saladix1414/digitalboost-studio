@@ -102,79 +102,9 @@ type Customer = {
   lastPurchase: string;
 };
 
-const productsSeed: Product[] = [
-  {
-    id: 1,
-    name: "DigitalBoost Hoodie",
-    sku: "DB-HOOD-001",
-    price: 59.99,
-    stock: 42,
-    status: "Activo",
-    category: "Ropa",
-  },
-  {
-    id: 2,
-    name: "Creator Pro Pack",
-    sku: "DB-CREATOR-002",
-    price: 129,
-    stock: 18,
-    status: "Activo",
-    category: "Digital",
-  },
-  {
-    id: 3,
-    name: "Neon Developer Cap",
-    sku: "DB-CAP-003",
-    price: 34.9,
-    stock: 7,
-    status: "Activo",
-    category: "Ropa",
-  },
-  {
-    id: 4,
-    name: "AI Business Template",
-    sku: "DB-AI-004",
-    price: 79,
-    stock: 0,
-    status: "Borrador",
-    category: "Digital",
-  },
-];
+const productsSeed: Product[] = [];
 
-const ordersSeed: Order[] = [
-  {
-    id: "#DB-1048",
-    customer: "Martín González",
-    total: 189.98,
-    status: "Pagado",
-    items: 3,
-    date: "Hoy, 10:42",
-  },
-  {
-    id: "#DB-1047",
-    customer: "Sofía Rodríguez",
-    total: 59.99,
-    status: "En preparación",
-    items: 1,
-    date: "Hoy, 09:31",
-  },
-  {
-    id: "#DB-1046",
-    customer: "Lucas Fernández",
-    total: 129,
-    status: "Enviado",
-    items: 1,
-    date: "Ayer, 18:20",
-  },
-  {
-    id: "#DB-1045",
-    customer: "Camila Torres",
-    total: 94.89,
-    status: "Entregado",
-    items: 2,
-    date: "Ayer, 15:08",
-  },
-];
+const ordersSeed: Order[] = [];
 
 const customersSeed: Customer[] = ordersSeed.map((order, index) => ({
   id: index + 1,
