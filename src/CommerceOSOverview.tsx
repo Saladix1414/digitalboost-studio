@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { rangeMul, useOsRange } from "./DigitalBoostOsRangeData";
+import { useOsRange } from "./DigitalBoostOsRangeData";
 import "./commerce-os-core.css";
 import {
   ArrowUpRight,
@@ -62,30 +62,23 @@ export default function CommerceOSOverview({
   orders = [],
   customers = [],
 }: CommerceOSOverviewProps) {
-  const osRange = useOsRange();
-  const osMul = rangeMul(osRange);
-  const osSales = Math.round(474 * osMul);
-  const osOrders = Math.max(1, Math.round(4 * osMul));
-  const osClients = Math.max(1, Math.round(4 * osMul));
+  useOsRange();
 
   const sales = orders.reduce((s: number, o: any) => s + (Number(o.total) || 0), 0);
-  const ticket = orders.length ? Math.round(sales / orders.length) : 0;
-  const conv = customers.length ? (orders.length / customers.length) * 100 : 0;
-  const pulse = useMemo(() => [38, 52, 46, 64, 58, 73, 61, 86, 68, 91, 78, 97], []);
+  const hasOrders = orders.length > 0;
+  const hasCustomers = customers.length > 0;
+  const ticket = hasOrders ? Math.round(sales / orders.length) : null;
+  const conv = hasCustomers ? (orders.length / customers.length) * 100 : null;
+  const pulse = useMemo(() => [], []);
 
   const metrics = [
-    { label: "Ventas", value: money(Math.round((sales || 474) * osMul)), delta: "+18,4%", tone: "#34d399", pct: 0.74, go: "analytics" },
-    { label: "Pedidos", value: String(Math.max(1, Math.round((orders.length || 4) * osMul))), delta: "+12,1%", tone: "#22d3ee", pct: 0.42, go: "orders" },
-    { label: "Clientes", value: String(Math.max(1, Math.round((customers.length || 4) * osMul))), delta: "+9,7%", tone: "#a78bfa", pct: 0.51, go: "customers" },
-    { label: "Conversión", value: `${conv.toFixed(0) || 25}%`, delta: "live", tone: "#fbbf24", pct: Math.min(1, conv / 100 || 0.25), go: "analytics" },
+    { label: "Ventas", value: hasOrders ? money(sales) : "Sin datos", delta: hasOrders ? "datos locales" : "sin pedidos", tone: "#34d399", pct: hasOrders ? 1 : 0, go: "analytics" },
+    { label: "Pedidos", value: hasOrders ? String(orders.length) : "Sin datos", delta: hasOrders ? "datos locales" : "sin pedidos", tone: "#22d3ee", pct: hasOrders ? 1 : 0, go: "orders" },
+    { label: "Clientes", value: hasCustomers ? String(customers.length) : "Sin datos", delta: hasCustomers ? "datos locales" : "sin clientes", tone: "#a78bfa", pct: hasCustomers ? 1 : 0, go: "customers" },
+    { label: "Conversión", value: conv === null ? "Sin datos" : `${conv.toFixed(0)}%`, delta: conv === null ? "sin base" : "datos locales", tone: "#fbbf24", pct: conv === null ? 0 : Math.min(1, conv / 100), go: "analytics" },
   ];
 
-  const feed = (orders.length ? orders : [
-    { id: "DB-1048", customer: "Martín González", status: "Pagado", total: 190 },
-    { id: "DB-1047", customer: "Sofía Rodríguez", status: "En preparación", total: 60 },
-    { id: "DB-1046", customer: "Lucas Fernández", status: "Enviado", total: 129 },
-    { id: "DB-1045", customer: "Camila Torres", status: "Entregado", total: 95 },
-  ]).slice(0, 4);
+  const feed = hasOrders ? orders.slice(0, 4) : [];
 
   return (
     <div
@@ -127,7 +120,7 @@ export default function CommerceOSOverview({
             <div>
               <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-                Store live · nimbus.digitalboost.shop
+                Store · sin publicación verificada
               </div>
               <h2 className="mt-2 text-xl font-semibold">Experiencia lista para evolucionar</h2>
             </div>
@@ -161,17 +154,15 @@ export default function CommerceOSOverview({
               </button>
             </div>
             <div className="mt-4 grid grid-cols-3 gap-2">
-              {[["Ticket", money(Math.round((ticket || 118) * osMul))], ["Productos", String(products.length || 4)], ["Conv.", `${(conv || 25).toFixed(0)}%`]].map(([l, v]) => (
+              {[["Ticket", ticket === null ? "Sin datos" : money(ticket)], ["Productos", products.length ? String(products.length) : "Sin datos"], ["Conv.", conv === null ? "Sin datos" : `${conv.toFixed(0)}%`]].map(([l, v]) => (
                 <div key={l} className="rounded-lg border border-white/10 bg-[#070d18] p-3">
                   <div className="text-[10px] uppercase tracking-[0.12em] text-slate-500">{l}</div>
                   <div className="mt-2 text-sm font-semibold tabular-nums">{v}</div>
                 </div>
               ))}
             </div>
-            <div className="mt-5 flex h-36 items-end gap-1.5 rounded-lg border border-white/10 bg-[#070d18] px-3 pb-3 pt-5">
-              {pulse.map((h, i) => (
-                <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-violet-500 to-cyan-400" style={{ height: `${h}%` }} />
-              ))}
+            <div className="mt-5 flex h-36 items-center justify-center rounded-lg border border-white/10 bg-[#070d18] px-3 text-sm text-slate-500">
+              {pulse.length ? "Serie local" : "Sin serie de datos"}
             </div>
           </section>
 
@@ -204,6 +195,11 @@ export default function CommerceOSOverview({
             <button type="button" onClick={() => onNavigate?.("orders")} className="text-xs text-cyan-300">Ver pedidos</button>
           </div>
           <div className="space-y-2">
+            {feed.length === 0 && (
+              <div className="rounded-lg border border-white/10 bg-[#070d18] px-3 py-4 text-sm text-slate-500">
+                Sin pedidos locales. No se muestran datos de demostración.
+              </div>
+            )}
             {feed.map((o: any) => (
               <button key={o.id} type="button" onClick={() => onNavigate?.("orders")} className="flex w-full items-center gap-3 rounded-lg border border-white/10 bg-[#070d18] px-3 py-3 text-left hover:border-cyan-400/30">
                 <div className="min-w-0 flex-1">
