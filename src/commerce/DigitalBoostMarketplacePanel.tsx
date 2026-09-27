@@ -8,6 +8,7 @@ import {
   type MarketRail,
 } from "./DigitalBoostMarketplace";
 import { useCommerceLive } from "./useCommerceLive";
+import DigitalBoostMarketBotsPanel from "./DigitalBoostMarketBotsPanel";
 import { requestWalletAccount } from "./DigitalBoostWeb3Rail";
 
 const RAILS: { id: MarketRail | "all"; label: string }[] = [
@@ -25,7 +26,7 @@ export default function DigitalBoostMarketplacePanel({
   tenantId?: string;
 }) {
   useCommerceLive(tenantId);
-  const [tab, setTab] = useState<"explore" | "sell">("explore");
+  const [tab, setTab] = useState<"explore" | "sell" | "bots">("explore");
   const [rail, setRail] = useState<MarketRail | "all">("all");
   const [q, setQ] = useState("");
   const [name, setName] = useState("");
@@ -67,6 +68,7 @@ export default function DigitalBoostMarketplacePanel({
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           <button type="button" onClick={() => setTab("explore")} className={`h-10 rounded-lg px-4 text-sm ${tab === "explore" ? "bg-cyan-400 text-[#070d18]" : "border border-white/10"}`}>Explorar</button>
+          <button type="button" onClick={() => setTab("bots")} className={`h-10 rounded-lg px-4 text-sm ${tab === "bots" ? "bg-cyan-400 text-[#070d18]" : "border border-white/10"}`}>Bots</button>
           <button type="button" onClick={() => setTab("sell")} className={`h-10 rounded-lg px-4 text-sm ${tab === "sell" ? "bg-cyan-400 text-[#070d18]" : "border border-white/10"}`}>Vender</button>
           <button
             type="button"
@@ -190,6 +192,7 @@ export default function DigitalBoostMarketplacePanel({
           </section>
         </div>
       )}
+      {tab === "bots" && <DigitalBoostMarketBotsPanel tenantId={tenantId} />}
     </div>
   );
 }

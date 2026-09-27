@@ -3,6 +3,7 @@ import {
   recordCommerceOrder,
   type CommerceOrder,
 } from "./DigitalBoostCommerceLedger";
+import { notifyBotsOfPayment } from "./DigitalBoostCommerceBotPayments";
 
 export const ORDER_COMMAND_CONTRACT = "cos-order-command-v1" as const;
 
@@ -96,6 +97,7 @@ export function dispatchCommerceOrderCommand(
 
   index.set(key(tenantId, id), next);
   recordCommerceOrder(next);
+  if (command.type === "MARK_PAID") notifyBotsOfPayment({ tenantId, orderId: id });
   void getCommerceSnapshot(tenantId);
   return { ok: true, order: next };
 }
