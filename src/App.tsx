@@ -192,7 +192,7 @@ const AppLogo = ({ className = "w-7 h-7" }: { className?: string }) => {
   return <DragonLogo className={className} />;
 };
 
-export type ToolMode = 'web' | 'store' | 'landing' | 'nft' | 'pro';
+export type ToolMode = 'forge' | 'store' | 'nexus' | 'websites' | 'islands';
 type CopilotRole = 'designer' | 'coder' | 'copywriter' | 'seo' | 'marketing' | 'ecommerce' | 'nft' | 'ux';
 type ViewportMode = 'mobile' | 'tablet' | 'desktop';
 
@@ -568,12 +568,12 @@ const BootScreen = ({ onDone }: { onDone: () => void }) => {
 // =========================================================================
 const SplashScreen = ({ onContinue }: { onContinue: () => void }) => {
   const cards: { icon: typeof Code; title: string; desc: string; accent: 'cyan' | 'purple'; mode: ToolMode }[] = [
-    { icon: Code, title: 'DESARROLLO WEB', desc: 'Crea sin límites. Construye el futuro.', accent: 'cyan', mode: 'web' },
-    { icon: Hexagon, title: 'NFTs & MARKETPLACE', desc: 'Crea. Colecciona. Intercambia valor.', accent: 'purple', mode: 'nft' },
+    { icon: Code, title: 'IA FORGE', desc: 'Crea sin límites. Construye el futuro.', accent: 'cyan', mode: 'forge' },
+    { icon: Hexagon, title: 'WEBSITES BUILDER', desc: 'Crea. Colecciona. Intercambia valor.', accent: 'purple', mode: 'websites' },
     { icon: ShoppingCart, title: 'TIENDAS VIRTUALES', desc: 'Vende en cualquier lugar. Haz crecer tu marca.', accent: 'cyan', mode: 'store' },
-    { icon: Bot, title: 'IA INTEGRADA', desc: 'Automatiza. Optimiza. Multiplica tu potencial.', accent: 'purple', mode: 'web' },
-    { icon: AppWindow, title: 'LANDING PAGES', desc: 'Impacta. Convierte. Escala tu negocio.', accent: 'cyan', mode: 'landing' },
-    { icon: Terminal, title: 'HERRAMIENTAS DEV', desc: 'Potentes. Flexibles. Sin límites.', accent: 'purple', mode: 'pro' },
+    { icon: Bot, title: 'IA FORGE', desc: 'Automatiza. Optimiza. Multiplica tu potencial.', accent: 'purple', mode: 'forge' },
+    { icon: AppWindow, title: 'NEXUS', desc: 'Impacta. Convierte. Escala tu negocio.', accent: 'cyan', mode: 'nexus' },
+    { icon: Terminal, title: 'TRADING ISLANDS', desc: 'Potentes. Flexibles. Sin límites.', accent: 'purple', mode: 'islands' },
   ];
 
   return (
@@ -688,11 +688,11 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
   };
 
   const tools = [
-    { id: 'web' as ToolMode, icon: Code, title: 'Desarrollo Web con IA', desc: 'Crea sitios web completos con inteligencia artificial.' },
+    { id: 'forge' as ToolMode, icon: Code, title: 'IA Forge', desc: 'Forja sitios y piezas con IA. Sin demo de métricas.' },
     { id: 'store' as ToolMode, icon: ShoppingCart, title: 'Tiendas Virtuales', desc: 'Crea tu tienda online profesional al estilo Shopify.' },
-    { id: 'landing' as ToolMode, icon: AppWindow, title: 'Landing Pages', desc: 'Diseña landing pages que convierten con IA.' },
-    { id: 'nft' as ToolMode, icon: Hexagon, title: 'NFTs & Marketplace', desc: 'Crea, vende y gestiona tus NFTs con facilidad.' },
-    { id: 'pro' as ToolMode, icon: Terminal, title: 'Herramientas Pro', desc: 'Herramientas avanzadas para desarrolladores.' },
+    { id: 'nexus' as ToolMode, icon: AppWindow, title: 'Nexus', desc: 'Hub de landings y campañas. Un solo punto de entrada.' },
+    { id: 'websites' as ToolMode, icon: Hexagon, title: 'Websites Builder', desc: 'Constructor de sitios. Canvas y páginas, no un marketplace.' },
+    { id: 'islands' as ToolMode, icon: Terminal, title: 'Trading Islands', desc: 'Islas de intercambio. Rails reales cuando existan.' },
   ];
 
   const stats = [
@@ -720,8 +720,8 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
             <button onClick={goToTools} className="hover:text-white transition-colors flex items-center gap-1">Herramientas <ChevronDown size={14} className="text-slate-500" /></button>
             <button onClick={goToTools} className="hover:text-white transition-colors">Precios</button>
             <button onClick={goToTools} className="hover:text-white transition-colors flex items-center gap-1">Recursos <ChevronDown size={14} className="text-slate-500" /></button>
-            <button onClick={() => onSelectTool('pro')} className="hover:text-white transition-colors">Docs</button>
-            <button onClick={() => onSelectTool('pro')} className="hover:text-white transition-colors flex items-center gap-1">Empresa <ChevronDown size={14} className="text-slate-500" /></button>
+            <button onClick={() => onSelectTool('islands')} className="hover:text-white transition-colors">Docs</button>
+            <button onClick={() => onSelectTool('islands')} className="hover:text-white transition-colors flex items-center gap-1">Empresa <ChevronDown size={14} className="text-slate-500" /></button>
           </div>
 
           <div className="hidden lg:flex items-center gap-3">
@@ -740,11 +740,11 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
         {mobileMenuOpen && (
           <div className="lg:hidden bg-[#050510] border-b border-slate-800 px-6 py-4 space-y-3">
             <button onClick={goToTools} className="block w-full text-left py-2 text-sm font-semibold text-sky-400">Herramientas</button>
-            <button onClick={() => { onSelectTool('web'); setMobileMenuOpen(false); }} className="block w-full text-left py-2 text-sm text-slate-300">Desarrollo Web con IA</button>
-            <button onClick={() => { onSelectTool('landing'); setMobileMenuOpen(false); }} className="block w-full text-left py-2 text-sm text-slate-300">Landing Pages</button>
+            <button onClick={() => { onSelectTool('forge'); setMobileMenuOpen(false); }} className="block w-full text-left py-2 text-sm text-slate-300">IA Forge</button>
+            <button onClick={() => { onSelectTool('nexus'); setMobileMenuOpen(false); }} className="block w-full text-left py-2 text-sm text-slate-300">Nexus</button>
             <button onClick={() => { onSelectTool('store'); setMobileMenuOpen(false); }} className="block w-full text-left py-2 text-sm text-slate-300">Tiendas Virtuales</button>
-            <button onClick={() => { onSelectTool('nft'); setMobileMenuOpen(false); }} className="block w-full text-left py-2 text-sm text-slate-300">NFTs & Marketplace</button>
-            <button onClick={() => { onSelectTool('pro'); setMobileMenuOpen(false); }} className="block w-full text-left py-2 text-sm text-slate-300">Herramientas Pro</button>
+            <button onClick={() => { onSelectTool('websites'); setMobileMenuOpen(false); }} className="block w-full text-left py-2 text-sm text-slate-300">Websites Builder</button>
+            <button onClick={() => { onSelectTool('islands'); setMobileMenuOpen(false); }} className="block w-full text-left py-2 text-sm text-slate-300">Trading Islands</button>
           </div>
         )}
       </nav>
@@ -826,10 +826,10 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
               <div className="flex items-center gap-3"><Palette size={16} className="text-violet-400"/> Diseño UI/UX inteligente</div>
               <div className="flex items-center gap-3"><MessageSquare size={16} className="text-violet-400"/> Contenido y copys que convierten</div>
             </div>
-            <button onClick={() => onSelectTool('web')} className="mt-8 border border-sky-500/40 rounded-lg px-5 py-2.5 text-xs font-semibold text-slate-200 hover:bg-sky-500/10 transition-colors">Conocer más sobre IA</button>
+            <button onClick={() => onSelectTool('forge')} className="mt-8 border border-sky-500/40 rounded-lg px-5 py-2.5 text-xs font-semibold text-slate-200 hover:bg-sky-500/10 transition-colors">Conocer más sobre IA</button>
           </div>
 
-          <button onClick={() => onSelectTool('web')} className="xl:col-span-8 text-left bg-[#03060d] border border-[#1b2a43] rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,.55)] hover:border-sky-400/50 transition-colors">
+          <button onClick={() => onSelectTool('forge')} className="xl:col-span-8 text-left bg-[#03060d] border border-[#1b2a43] rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,.55)] hover:border-sky-400/50 transition-colors">
             <div className="h-11 border-b border-[#1b2a43] bg-[#050817] flex items-center justify-between px-4">
               <div className="flex items-center gap-2 text-[11px] font-bold text-slate-300 font-mono"><Sparkles size={13} className="text-[#a855f7]"/> AI WEB BUILDER</div>
               <div className="text-[10px] text-emerald-400 font-mono bg-emerald-950/60 px-2 py-1 rounded border border-emerald-800">EN VIVO</div>
@@ -888,8 +888,8 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
             <div className="flex items-center gap-2.5 mb-4"><AppLogo className="w-7 h-7"/><span className="font-bold text-lg text-white">DIGITAL<span className="text-[#6366f1]">BOOST</span></span></div>
             <p className="text-xs text-slate-400 max-w-sm leading-relaxed">El sistema creativo impulsado por IA para diseñar, programar, optimizar y escalar productos digitales de alto impacto.</p>
           </div>
-          <div><h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Producto</h4><div className="space-y-2.5 text-xs text-slate-400"><button onClick={() => onSelectTool('web')} className="block hover:text-white">Herramientas</button><button onClick={() => onSelectTool('store')} className="block hover:text-white">Tiendas</button><button onClick={() => onSelectTool('landing')} className="block hover:text-white">Landing Pages</button><button onClick={() => onSelectTool('nft')} className="block hover:text-white">NFTs</button></div></div>
-          <div><h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Recursos</h4><div className="space-y-2.5 text-xs text-slate-400"><button onClick={() => onSelectTool('pro')} className="block hover:text-white">Dev Tools</button><button onClick={() => onSelectTool('web')} className="block hover:text-white">Copilot IA</button><button onClick={goToTools} className="block hover:text-white">Comunidad</button></div></div>
+          <div><h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Producto</h4><div className="space-y-2.5 text-xs text-slate-400"><button onClick={() => onSelectTool('forge')} className="block hover:text-white">Herramientas</button><button onClick={() => onSelectTool('store')} className="block hover:text-white">Tiendas</button><button onClick={() => onSelectTool('nexus')} className="block hover:text-white">Nexus</button><button onClick={() => onSelectTool('websites')} className="block hover:text-white">NFTs</button></div></div>
+          <div><h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Recursos</h4><div className="space-y-2.5 text-xs text-slate-400"><button onClick={() => onSelectTool('islands')} className="block hover:text-white">Dev Tools</button><button onClick={() => onSelectTool('forge')} className="block hover:text-white">Copilot IA</button><button onClick={goToTools} className="block hover:text-white">Comunidad</button></div></div>
           <div><h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Empresa</h4><div className="space-y-2.5 text-xs text-slate-400"><span className="block">Sobre nosotros</span><span className="block">Contacto</span><span className="block">Trabaja con nosotros</span><span className="block">© 2026 DigitalBoost</span></div></div>
         </div>
       </footer>
@@ -910,7 +910,7 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
   // HTML Inicial basado en la categoría
   const [htmlCode, setHtmlCode] = useState<string>(() => {
     if (initialMode === 'store') return '';
-    if (initialMode === 'landing') return TEMPLATES.landing.html;
+    if (initialMode === 'nexus') return TEMPLATES.landing.html;
     return TEMPLATES.agency.html;
   });
 
@@ -1066,20 +1066,20 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
         
         {/* Modos Rápidos */}
         <div className="flex items-center gap-1 sm:gap-2">
-          {(['web', 'landing', 'store', 'nft', 'pro'] as ToolMode[]).map((t) => (
+          {(['forge', 'nexus', 'store', 'websites', 'islands'] as ToolMode[]).map((t) => (
             <button
               key={t}
               onClick={() => {
                 setActiveTab(t);
                 if (t === 'store') handleSelectTemplate('ecommerce');
-                else if (t === 'landing') handleSelectTemplate('landing');
-                else if (t === 'web') handleSelectTemplate('agency');
+                else if (t === 'nexus') handleSelectTemplate('landing');
+                else if (t === 'forge') handleSelectTemplate('agency');
               }}
               className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold capitalize transition-all ${
                 activeTab === t ? 'bg-[#3b82f6] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
-              {t === 'web' ? 'Web IA' : t === 'store' ? 'Tienda' : t === 'landing' ? 'Landing' : t === 'nft' ? 'NFT' : 'Dev'}
+              {t === 'forge' ? 'IA Forge' : t === 'store' ? 'Tienda' : t === 'nexus' ? 'Nexus' : t === 'websites' ? 'Websites' : 'Islands'}
             </button>
           ))}
         </div>

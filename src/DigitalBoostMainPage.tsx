@@ -30,8 +30,8 @@ const stats = [
 const tools = [
   [
     Code2,
-    "Desarrollo Web con IA",
-    "Crea sitios web completos con inteligencia artificial.",
+    "IA Forge",
+    "Forja sitios y piezas con IA.",
   ],
   [
     ShoppingCart,
@@ -40,18 +40,18 @@ const tools = [
   ],
   [
     LayoutTemplate,
-    "Landing Pages",
-    "Diseña landing pages que convierten con la IA.",
+    "Nexus",
+    "Hub de landings y campañas.",
   ],
   [
     Hexagon,
-    "NFTs & Marketplace",
-    "Crea, vende y gestiona tus NFTs con facilidad.",
+    "Websites Builder",
+    "Constructor de sitios. Canvas y páginas.",
   ],
   [
     Terminal,
-    "Herramientas Pro",
-    "Herramientas avanzadas para desarrolladores.",
+    "Trading Islands",
+    "Islas de intercambio. Rails reales cuando existan.",
   ],
 ];
 
@@ -182,7 +182,7 @@ export default function DigitalBoostMainPage({
             </button>
 
             <button
-              onClick={() => openTool("web")}
+              onClick={() => openTool("forge")}
               className={`rounded-lg px-5 py-2.5 text-sm font-bold shadow-[0_0_25px_rgba(90,70,255,.35)] ${neon}`}
             >
               Comenzar ahora
@@ -238,7 +238,7 @@ export default function DigitalBoostMainPage({
 
             <div className="mt-6 flex flex-wrap gap-4">
               <button
-                onClick={() => openTool("web")}
+                onClick={() => openTool("forge")}
                 className={`rounded-lg px-7 py-3 font-bold shadow-[0_0_28px_rgba(100,40,255,.3)] ${neon}`}
               >
                 Comenzar gratis
@@ -336,11 +336,11 @@ export default function DigitalBoostMainPage({
 
               <button
                 onClick={() => {
-                  if (title === "Desarrollo Web con IA") openTool("web");
+                  if (title === "IA Forge") openTool("forge");
                   else if (title === "Tiendas Virtuales") openTool("store");
-                  else if (title === "Landing Pages") openTool("landing");
-                  else if (title === "NFTs & Marketplace") openTool("nft");
-                  else if (title === "Herramientas Pro") openTool("pro");
+                  else if (title === "Nexus") openTool("nexus");
+                  else if (title === "Websites Builder") openTool("websites");
+                  else if (title === "Trading Islands") openTool("islands");
                 }}
                 className="mt-3 text-xs text-cyan-300 hover:text-cyan-200"
               >
@@ -474,7 +474,7 @@ export default function DigitalBoostMainPage({
           <div className="grid grid-cols-2 items-center gap-5 text-center text-lg font-semibold text-slate-300 md:grid-cols-7">
 
             <button
-              onClick={() => openTool("web")}
+              onClick={() => openTool("forge")}
               className="text-cyan-400 transition hover:scale-105 hover:text-cyan-300"
               title="Abrir herramientas de IA"
             >
@@ -498,7 +498,7 @@ export default function DigitalBoostMainPage({
             </button>
 
             <button
-              onClick={() => openTool("pro")}
+              onClick={() => openTool("islands")}
               className="transition hover:scale-105 hover:text-white"
               title="Herramientas para desarrolladores"
             >
@@ -506,7 +506,7 @@ export default function DigitalBoostMainPage({
             </button>
 
             <button
-              onClick={() => openTool("web")}
+              onClick={() => openTool("forge")}
               className="transition hover:scale-105 hover:text-white"
               title="Desarrollo Web"
             >
@@ -514,7 +514,7 @@ export default function DigitalBoostMainPage({
             </button>
 
             <button
-              onClick={() => openTool("web")}
+              onClick={() => openTool("forge")}
               className="transition hover:scale-105 hover:text-white"
               title="Cloudflare"
             >
@@ -522,7 +522,7 @@ export default function DigitalBoostMainPage({
             </button>
 
             <button
-              onClick={() => openTool("nft")}
+              onClick={() => openTool("websites")}
               className="transition hover:scale-105 hover:text-white"
               title="NFTs e IPFS"
             >
@@ -564,7 +564,7 @@ export default function DigitalBoostMainPage({
                 Para comenzar a crear.
               </p>
               <button
-                onClick={() => openTool("web")}
+                onClick={() => openTool("forge")}
                 className="mt-5 w-full rounded-lg border border-indigo-400/40 px-4 py-2 text-sm"
               >
                 Comenzar
@@ -581,7 +581,7 @@ export default function DigitalBoostMainPage({
                 Más potencia para tus proyectos.
               </p>
               <button
-                onClick={() => openTool("pro")}
+                onClick={() => openTool("islands")}
                 className="mt-5 w-full rounded-lg bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400 px-4 py-2 text-sm font-bold"
               >
                 Probar Pro
@@ -627,7 +627,7 @@ export default function DigitalBoostMainPage({
 
           <div className="relative z-10 mt-6 text-center md:mt-0">
             <button
-              onClick={() => openTool("web")}
+              onClick={() => openTool("forge")}
               className={`rounded-lg px-8 py-3 font-bold shadow-[0_0_30px_rgba(100,40,255,.3)] ${neon}`}
             >
               Comenzar ahora gratis
