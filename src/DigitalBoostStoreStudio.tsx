@@ -1,3 +1,4 @@
+import { recordSiteBinding } from "./commerce/DigitalBoostSiteBinding";
 import "./digitalboost-store-theme.css";
 import "./digitalboost-os.css";
 
@@ -233,6 +234,12 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
   function publish() {
     saveCanvasPage(page, blocks);
     setHistory(pushSnapshot({ label: "Publicado · " + page, source: "publish", blocks, theme: (typeof theme !== "undefined" ? theme : undefined) }));
+    recordSiteBinding({
+      tenantId: "local-tenant",
+      siteId: "site-local",
+      hostname: null,
+      published: true,
+    });
     setSaved(true);
     window.setTimeout(() => setSaved(false), 1600);
   }

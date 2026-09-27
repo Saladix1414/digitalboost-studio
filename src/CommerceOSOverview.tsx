@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useOsRange } from "./DigitalBoostOsRangeData";
 import { getCommerceSnapshot } from "./commerce/DigitalBoostCommerceLedger";
+import { getSiteBinding } from "./commerce/DigitalBoostSiteBinding";
 import "./commerce-os-core.css";
 import {
   ArrowUpRight,
@@ -67,6 +68,7 @@ export default function CommerceOSOverview({
 }: CommerceOSOverviewProps) {
   useOsRange();
   const snap = getCommerceSnapshot(tenantId);
+  const binding = getSiteBinding(tenantId);
   const ledgerOrders = snap.orders;
   const ledgerProducts = snap.products;
   const ledgerCustomers = snap.customers;
@@ -131,7 +133,7 @@ export default function CommerceOSOverview({
             <div>
               <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-                Store · sin publicación verificada
+                {binding?.published ? "Store · publicado " + (binding.hostname || binding.siteId) : "Store · sin publicación verificada"}
               </div>
               <h2 className="mt-2 text-xl font-semibold">Experiencia lista para evolucionar</h2>
             </div>
