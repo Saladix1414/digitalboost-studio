@@ -1,4 +1,5 @@
 import DigitalBoostMainPage from './DigitalBoostMainPage';
+import IAForgePage from './IAForgePage';
 import StoreBuilderWorkspace from './StoreBuilderWorkspace';
 import WebsitesBuilderWorkspace from './WebsitesBuilderWorkspace';
 import { useState, useEffect } from 'react';
@@ -1045,6 +1046,12 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
     document.body.removeChild(element);
   };
 
+  if (activeTab === 'forge') {
+    return (
+      <IAForgePage onClose={onBack} />
+    );
+  }
+
   if (activeTab === 'store') {
     return (
       <div className="min-h-screen bg-[#030308]">
@@ -1389,11 +1396,17 @@ function readAppScreen(): AppScreen {
 function readAppTool(): ToolMode {
   try {
     const saved = localStorage.getItem(APP_TOOL_KEY);
-    if (saved === "web" || saved === "store" || saved === "landing" || saved === "nft" || saved === "pro") {
+    if (
+      saved === "forge" ||
+      saved === "store" ||
+      saved === "nexus" ||
+      saved === "websites" ||
+      saved === "islands"
+    ) {
       return saved;
     }
   } catch {}
-  return "web";
+  return "forge";
 }
 
 export default function App() {

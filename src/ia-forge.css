@@ -1,0 +1,1296 @@
+[data-ia-forge="true"] {
+  --forge-bg: #06090f;
+  --forge-bg-deep: #03060b;
+  --forge-panel: #0b111b;
+  --forge-panel-2: #0e1622;
+  --forge-panel-3: #111c2a;
+
+  --forge-line: rgba(151, 174, 210, 0.12);
+  --forge-line-strong: rgba(86, 157, 255, 0.24);
+
+  --forge-text: #f4f8ff;
+  --forge-text-2: #b8c5d8;
+  --forge-muted: #728198;
+
+  --forge-blue: #3b82f6;
+  --forge-blue-bright: #5b9cff;
+  --forge-cyan: #22d3ee;
+  --forge-violet: #8b5cf6;
+  --forge-green: #22c55e;
+  --forge-amber: #f59e0b;
+  --forge-red: #ef4444;
+
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at 42% -10%,
+      rgba(59, 130, 246, 0.13),
+      transparent 34%
+    ),
+    linear-gradient(
+      180deg,
+      #070b12 0%,
+      var(--forge-bg) 38%,
+      var(--forge-bg-deep) 100%
+    );
+
+  color: var(--forge-text);
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  display: grid;
+  grid-template-rows: 58px minmax(0, 1fr) 42px;
+
+  height: 100vh;
+  overflow: hidden;
+}
+
+.ia-forge *,
+.ia-forge *::before,
+.ia-forge *::after {
+  box-sizing: border-box;
+}
+
+.ia-forge button,
+.ia-forge textarea {
+  font: inherit;
+}
+
+.ia-forge button {
+  color: inherit;
+}
+
+.ia-forge__topbar {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(220px, 310px) 1fr auto;
+  align-items: center;
+  gap: 18px;
+
+  border-bottom: 1px solid var(--forge-line);
+  background: rgba(5, 9, 15, 0.86);
+  backdrop-filter: blur(18px);
+  padding: 0 14px 0 16px;
+}
+
+.ia-forge__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ia-forge__brand-mark {
+  width: 31px;
+  height: 31px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 9px;
+  border: 1px solid rgba(91, 156, 255, 0.26);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(59, 130, 246, 0.22),
+      rgba(34, 211, 238, 0.04)
+    );
+
+  color: #8eb8ff;
+
+  box-shadow:
+    inset 0 0 18px rgba(59, 130, 246, 0.08),
+    0 0 24px rgba(59, 130, 246, 0.08);
+}
+
+.ia-forge__brand-title {
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 750;
+  letter-spacing: 0.11em;
+}
+
+.ia-forge__brand-subtitle {
+  margin-top: 4px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: var(--forge-muted);
+  font-size: 9px;
+  letter-spacing: 0.035em;
+}
+
+.ia-forge__crumbs {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: var(--forge-muted);
+  font-size: 10px;
+}
+
+.ia-forge__project-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  color: var(--forge-text-2);
+  background: transparent;
+  border: 0;
+  padding: 6px 4px;
+
+  cursor: pointer;
+}
+
+.ia-forge__crumb-separator {
+  opacity: 0.34;
+}
+
+.ia-forge__top-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ia-forge__icon-button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+
+  display: grid;
+  place-items: center;
+
+  background: transparent;
+  color: var(--forge-muted);
+  cursor: pointer;
+
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.ia-forge__icon-button:hover {
+  color: var(--forge-text);
+  border-color: var(--forge-line);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.ia-forge__runtime-state {
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 0 10px;
+
+  border: 1px solid var(--forge-line);
+  border-radius: 7px;
+
+  color: var(--forge-muted);
+  background: rgba(255, 255, 255, 0.022);
+
+  font-size: 9px;
+  letter-spacing: 0.025em;
+}
+
+.ia-forge__state-dot {
+  width: 6px;
+  height: 6px;
+
+  flex: 0 0 auto;
+
+  border-radius: 999px;
+  background: #64748b;
+
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.09);
+}
+
+.ia-forge__workspace {
+  min-height: 0;
+
+  display: grid;
+  grid-template-columns: 204px minmax(0, 1fr) 270px;
+
+  position: relative;
+}
+
+.ia-forge__sidebar {
+  min-width: 0;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  border-right: 1px solid var(--forge-line);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 16, 25, 0.88),
+      rgba(6, 10, 16, 0.94)
+    );
+
+  padding: 12px 9px 10px;
+}
+
+.ia-forge__nav-label {
+  padding: 4px 9px 9px;
+
+  color: #627187;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.19em;
+  text-transform: uppercase;
+}
+
+.ia-forge__nav {
+  overflow-y: auto;
+  min-height: 0;
+
+  scrollbar-width: thin;
+  scrollbar-color: #182333 transparent;
+}
+
+.ia-forge__nav-item {
+  width: 100%;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  position: relative;
+
+  margin: 1px 0;
+  padding: 0 10px;
+
+  border: 1px solid transparent;
+  border-radius: 7px;
+
+  background: transparent;
+  color: #8796aa;
+
+  font-size: 10px;
+  font-weight: 520;
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.ia-forge__nav-item:hover {
+  color: #cbd7e9;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.ia-forge__nav-item--active {
+  color: #eef5ff;
+
+  border-color: rgba(59, 130, 246, 0.13);
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(59, 130, 246, 0.14),
+      rgba(59, 130, 246, 0.025)
+    );
+}
+
+.ia-forge__nav-item--active svg {
+  color: #6da5ff;
+}
+
+.ia-forge__nav-pulse {
+  width: 5px;
+  height: 5px;
+
+  margin-left: auto;
+
+  border-radius: 50%;
+
+  background: var(--forge-blue-bright);
+
+  box-shadow: 0 0 10px rgba(91, 156, 255, 0.8);
+}
+
+.ia-forge__sidebar-footer {
+  margin-top: auto;
+  padding-top: 10px;
+
+  border-top: 1px solid var(--forge-line);
+}
+
+.ia-forge__sidebar-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 10px 10px;
+
+  color: #718198;
+}
+
+.ia-forge__sidebar-status svg {
+  color: #5b9cff;
+}
+
+.ia-forge__sidebar-status div {
+  min-width: 0;
+}
+
+.ia-forge__sidebar-status strong,
+.ia-forge__sidebar-status span {
+  display: block;
+}
+
+.ia-forge__sidebar-status strong {
+  color: #aab9cc;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.ia-forge__sidebar-status span {
+  margin-top: 2px;
+  font-size: 8px;
+}
+
+.ia-forge__canvas {
+  min-width: 0;
+  min-height: 0;
+
+  overflow-y: auto;
+
+  padding: 24px 26px 34px;
+
+  background:
+    linear-gradient(
+      rgba(255, 255, 255, 0.012) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.012) 1px,
+      transparent 1px
+    );
+
+  background-size: 34px 34px;
+
+  scrollbar-width: thin;
+  scrollbar-color: #1b2839 transparent;
+}
+
+.ia-forge__canvas-head {
+  max-width: 1080px;
+  margin: 0 auto 22px;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.ia-forge__eyebrow {
+  color: #5d7190;
+
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.ia-forge__canvas-head h1 {
+  margin: 5px 0 0;
+
+  color: #f5f8fd;
+
+  font-size: clamp(19px, 2vw, 25px);
+  line-height: 1.2;
+  font-weight: 620;
+  letter-spacing: -0.025em;
+}
+
+.ia-forge__canvas-actions {
+  display: flex;
+  gap: 7px;
+}
+
+.ia-forge__secondary-button,
+.ia-forge__primary-button,
+.ia-forge__build-button {
+  min-height: 31px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  border-radius: 7px;
+
+  padding: 0 11px;
+
+  font-size: 9px;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.ia-forge__secondary-button {
+  border: 1px solid var(--forge-line);
+  color: #a6b4c7;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.ia-forge__primary-button,
+.ia-forge__build-button {
+  border: 1px solid rgba(91, 156, 255, 0.32);
+
+  color: #eaf2ff;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.84),
+      rgba(59, 130, 246, 0.58)
+    );
+
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
+}
+
+.ia-forge__secondary-button:hover,
+.ia-forge__primary-button:hover,
+.ia-forge__build-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.ia-forge__composer {
+  max-width: 1080px;
+
+  position: relative;
+
+  margin: 0 auto;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(91, 156, 255, 0.18);
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(17, 27, 42, 0.94),
+      rgba(9, 14, 23, 0.96)
+    );
+
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.ia-forge__composer-glow {
+  width: 340px;
+  height: 180px;
+
+  position: absolute;
+  top: -125px;
+  left: 32%;
+
+  border-radius: 50%;
+
+  background: rgba(59, 130, 246, 0.18);
+
+  filter: blur(75px);
+  pointer-events: none;
+}
+
+.ia-forge__composer-head {
+  position: relative;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+
+  padding: 18px 19px 12px;
+}
+
+.ia-forge__composer-kicker {
+  color: #6599eb;
+
+  font-size: 8px;
+  font-weight: 760;
+  letter-spacing: 0.18em;
+}
+
+.ia-forge__composer h2 {
+  max-width: 620px;
+
+  margin: 6px 0 0;
+
+  font-size: 14px;
+  font-weight: 540;
+  color: #dde7f5;
+}
+
+.ia-forge__mode-chip {
+  flex: 0 0 auto;
+
+  border: 1px solid rgba(91, 156, 255, 0.2);
+  border-radius: 999px;
+
+  padding: 5px 9px;
+
+  background: rgba(59, 130, 246, 0.08);
+
+  color: #85aff0;
+
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.ia-forge__composer textarea {
+  width: calc(100% - 38px);
+  min-height: 104px;
+
+  display: block;
+
+  margin: 2px 19px 0;
+  padding: 14px 15px;
+
+  resize: vertical;
+
+  border: 1px solid rgba(148, 163, 184, 0.09);
+  border-radius: 9px;
+
+  outline: none;
+
+  color: #e7edf7;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(3, 7, 13, 0.58),
+      rgba(5, 10, 17, 0.74)
+    );
+
+  font-size: 11px;
+  line-height: 1.7;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ia-forge__composer textarea::placeholder {
+  color: #4e6077;
+}
+
+.ia-forge__composer textarea:focus {
+  border-color: rgba(91, 156, 255, 0.3);
+
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, 0.055);
+}
+
+.ia-forge__composer-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+
+  padding: 12px 19px 16px;
+
+  color: #65758b;
+
+  font-size: 8px;
+}
+
+.ia-forge__build-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.ia-forge__create-grid {
+  max-width: 1080px;
+
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+
+  gap: 8px;
+
+  margin: 10px auto 0;
+}
+
+.ia-forge__create-card {
+  min-height: 92px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  padding: 12px;
+
+  border: 1px solid var(--forge-line);
+  border-radius: 9px;
+
+  background: rgba(9, 15, 24, 0.78);
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease;
+}
+
+.ia-forge__create-card:hover {
+  transform: translateY(-1px);
+
+  border-color: rgba(91, 156, 255, 0.22);
+
+  background: rgba(14, 23, 36, 0.9);
+}
+
+.ia-forge__create-card--active {
+  border-color: rgba(91, 156, 255, 0.3);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(37, 99, 235, 0.11),
+      rgba(10, 17, 27, 0.9)
+    );
+}
+
+.ia-forge__create-icon {
+  width: 27px;
+  height: 27px;
+
+  display: grid;
+  place-items: center;
+
+  margin-bottom: 9px;
+
+  border: 1px solid rgba(91, 156, 255, 0.15);
+  border-radius: 7px;
+
+  color: #6da5ff;
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.ia-forge__create-card strong {
+  font-size: 9px;
+  font-weight: 670;
+  color: #d7e1ee;
+}
+
+.ia-forge__create-card > span {
+  margin-top: 4px;
+
+  color: #68798f;
+
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.ia-forge__graph-panel {
+  max-width: 1080px;
+
+  margin: 10px auto 0;
+
+  border: 1px solid var(--forge-line);
+  border-radius: 11px;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 16, 25, 0.86),
+      rgba(6, 10, 16, 0.92)
+    );
+}
+
+.ia-forge__panel-head {
+  height: 57px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 16px;
+
+  border-bottom: 1px solid var(--forge-line);
+}
+
+.ia-forge__panel-head h2 {
+  margin: 3px 0 0;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ia-forge__panel-meta {
+  color: #66758a;
+  font-size: 8px;
+}
+
+.ia-forge__graph {
+  height: 270px;
+
+  position: relative;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(59, 130, 246, 0.055),
+      transparent 42%
+    ),
+    linear-gradient(
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px
+    );
+
+  background-size:
+    auto,
+    26px 26px,
+    26px 26px;
+}
+
+.ia-forge__graph-lines {
+  width: 100%;
+  height: 100%;
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+}
+
+.ia-forge__graph-lines line {
+  stroke: rgba(91, 156, 255, 0.22);
+  stroke-width: 0.22;
+  vector-effect: non-scaling-stroke;
+}
+
+.ia-forge__graph-node {
+  min-width: 108px;
+
+  position: absolute;
+  z-index: 2;
+
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 8px;
+
+  padding: 8px 11px;
+
+  color: #8f9db0;
+
+  background: rgba(7, 12, 19, 0.92);
+
+  cursor: pointer;
+
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.18);
+}
+
+.ia-forge__graph-node--focus {
+  border-color: rgba(91, 156, 255, 0.32);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(37, 99, 235, 0.16),
+      rgba(9, 15, 24, 0.96)
+    );
+
+  box-shadow:
+    0 0 24px rgba(59, 130, 246, 0.1),
+    0 10px 28px rgba(0, 0, 0, 0.22);
+}
+
+.ia-forge__graph-node-dot {
+  width: 5px;
+  height: 5px;
+
+  position: absolute;
+  top: -3px;
+
+  border-radius: 50%;
+
+  background: #65758a;
+}
+
+.ia-forge__graph-node--focus
+  .ia-forge__graph-node-dot {
+  background: var(--forge-blue-bright);
+
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, 0.08),
+    0 0 9px rgba(91, 156, 255, 0.65);
+}
+
+.ia-forge__graph-node strong {
+  color: #bac8da;
+
+  font-size: 8px;
+  font-weight: 730;
+  letter-spacing: 0.08em;
+}
+
+.ia-forge__graph-node small {
+  margin-top: 3px;
+
+  color: #596a80;
+  font-size: 7px;
+}
+
+.ia-forge__empty-surface {
+  max-width: 1080px;
+  min-height: 390px;
+
+  margin: 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--forge-line);
+  border-radius: 12px;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(59, 130, 246, 0.05),
+      transparent 38%
+    ),
+    rgba(7, 12, 19, 0.78);
+
+  text-align: center;
+}
+
+.ia-forge__empty-icon {
+  width: 54px;
+  height: 54px;
+
+  display: grid;
+  place-items: center;
+
+  margin-bottom: 15px;
+
+  border: 1px solid rgba(91, 156, 255, 0.2);
+  border-radius: 14px;
+
+  color: #6da5ff;
+
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.ia-forge__empty-surface h2 {
+  max-width: 480px;
+
+  margin: 8px 0 0;
+
+  font-size: 16px;
+  font-weight: 560;
+}
+
+.ia-forge__empty-surface p {
+  max-width: 540px;
+
+  margin: 10px 20px 0;
+
+  color: #697a90;
+
+  font-size: 9px;
+  line-height: 1.65;
+}
+
+.ia-forge__inspector {
+  min-width: 0;
+  min-height: 0;
+
+  overflow-y: auto;
+
+  border-left: 1px solid var(--forge-line);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 16, 25, 0.94),
+      rgba(6, 10, 16, 0.96)
+    );
+
+  scrollbar-width: thin;
+  scrollbar-color: #1a2637 transparent;
+}
+
+.ia-forge__inspector-head {
+  min-height: 63px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 12px 12px 11px 14px;
+
+  border-bottom: 1px solid var(--forge-line);
+}
+
+.ia-forge__inspector-head h2 {
+  margin: 4px 0 0;
+
+  color: #d7e1ee;
+
+  font-size: 10px;
+  font-weight: 610;
+}
+
+.ia-forge__inspector-block {
+  padding: 14px;
+
+  border-bottom: 1px solid var(--forge-line);
+}
+
+.ia-forge__inspector-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  margin-bottom: 10px;
+
+  color: #8392a7;
+
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.ia-forge__inspector-rows {
+  display: grid;
+  gap: 8px;
+}
+
+.ia-forge__inspector-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+
+  font-size: 8px;
+}
+
+.ia-forge__inspector-row span {
+  color: #63738a;
+}
+
+.ia-forge__inspector-row strong {
+  color: #a6b4c7;
+
+  font-weight: 560;
+  text-align: right;
+}
+
+.ia-forge__governance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  border: 1px solid rgba(91, 156, 255, 0.13);
+  border-radius: 7px;
+
+  padding: 8px;
+
+  background: rgba(59, 130, 246, 0.045);
+
+  font-size: 8px;
+}
+
+.ia-forge__governance span {
+  color: #66778d;
+}
+
+.ia-forge__governance strong {
+  color: #7baaff;
+  font-weight: 620;
+}
+
+.ia-forge__inspector-block p {
+  margin: 9px 0 0;
+
+  color: #58697f;
+
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.ia-forge__inspector-restore {
+  width: 32px;
+  height: 42px;
+
+  position: absolute;
+  right: 0;
+  top: 10px;
+  z-index: 10;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid var(--forge-line);
+  border-right: 0;
+  border-radius: 7px 0 0 7px;
+
+  color: #8495aa;
+  background: #0b111b;
+
+  cursor: pointer;
+}
+
+.ia-forge__runtime-strip {
+  min-width: 0;
+
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+
+  border-top: 1px solid var(--forge-line);
+
+  background: #05080e;
+
+  padding: 0 12px;
+}
+
+.ia-forge__runtime-tabs {
+  height: 100%;
+
+  display: flex;
+  align-items: stretch;
+}
+
+.ia-forge__runtime-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  border: 0;
+  border-bottom: 1px solid transparent;
+
+  padding: 0 9px;
+
+  color: #68788d;
+  background: transparent;
+
+  font-size: 8px;
+
+  cursor: pointer;
+}
+
+.ia-forge__runtime-tab--active {
+  color: #b4c5da;
+  border-bottom-color: #5b9cff;
+}
+
+.ia-forge__runtime-message {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding-left: 12px;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #59697e;
+
+  font-size: 8px;
+}
+
+.ia-forge__runtime-health {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  color: #617187;
+
+  font-size: 8px;
+}
+
+@media (max-width: 1100px) {
+  .ia-forge__workspace {
+    grid-template-columns: 184px minmax(0, 1fr) 235px;
+  }
+
+  .ia-forge__create-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 880px) {
+  .ia-forge__workspace {
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  .ia-forge__sidebar {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  .ia-forge__nav-label,
+  .ia-forge__nav-item span,
+  .ia-forge__sidebar-status,
+  .ia-forge__sidebar-footer .ia-forge__nav-item span {
+    display: none;
+  }
+
+  .ia-forge__nav-item {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .ia-forge__nav-pulse {
+    position: absolute;
+    right: 4px;
+  }
+
+  .ia-forge__inspector {
+    width: min(300px, 82vw);
+
+    position: absolute;
+    z-index: 20;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    box-shadow: -20px 0 45px rgba(0, 0, 0, 0.3);
+  }
+
+  .ia-forge__topbar {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .ia-forge__brand-subtitle,
+  .ia-forge__runtime-state,
+  .ia-forge__crumbs > span {
+    display: none;
+  }
+}
+
+@media (max-width: 620px) {
+  [data-ia-forge="true"] {
+    grid-template-rows: 52px minmax(0, 1fr) 40px;
+  }
+
+  .ia-forge__topbar {
+    padding-left: 10px;
+    padding-right: 8px;
+  }
+
+  .ia-forge__brand-title {
+    font-size: 10px;
+  }
+
+  .ia-forge__project-button {
+    max-width: 118px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ia-forge__canvas {
+    padding: 16px 12px 28px;
+  }
+
+  .ia-forge__canvas-head {
+    align-items: center;
+  }
+
+  .ia-forge__secondary-button {
+    display: none;
+  }
+
+  .ia-forge__create-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ia-forge__composer-head {
+    flex-direction: column;
+  }
+
+  .ia-forge__composer-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ia-forge__build-button {
+    width: 100%;
+  }
+
+  .ia-forge__graph {
+    height: 300px;
+  }
+
+  .ia-forge__graph-node {
+    min-width: 84px;
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+
+  .ia-forge__runtime-strip {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .ia-forge__runtime-message {
+    display: none;
+  }
+
+  .ia-forge__runtime-tab {
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+}

@@ -87,7 +87,7 @@ function StatRow({
   );
 }
 
-type ToolMode = 'web' | 'store' | 'landing' | 'nft' | 'pro';
+type ToolMode = 'forge' | 'store' | 'nexus' | 'websites' | 'islands';
 
 interface DigitalBoostMainPageProps {
   onSelectTool: (mode: ToolMode) => void;
