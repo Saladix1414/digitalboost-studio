@@ -1,5 +1,6 @@
 import DigitalBoostMainPage from './DigitalBoostMainPage';
 import StoreBuilderWorkspace from './StoreBuilderWorkspace';
+import WebsitesBuilderWorkspace from './WebsitesBuilderWorkspace';
 import { useState, useEffect } from 'react';
 import { 
 
@@ -909,7 +910,7 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
   
   // HTML Inicial basado en la categoría
   const [htmlCode, setHtmlCode] = useState<string>(() => {
-    if (initialMode === 'store') return '';
+    if (initialMode === 'store' || initialMode === 'websites') return '';
     if (initialMode === 'nexus') return TEMPLATES.landing.html;
     return TEMPLATES.agency.html;
   });
@@ -1044,7 +1045,24 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
     document.body.removeChild(element);
   };
 
-  if (activeTab === 'store') { return (<div className="min-h-screen bg-[#030308]"><StoreBuilderWorkspace onBack={onBack} /></div>); }
+  if (activeTab === 'store') {
+    return (
+      <div className="min-h-screen bg-[#030308]">
+        <StoreBuilderWorkspace onBack={onBack} />
+      </div>
+    );
+  }
+
+  if (activeTab === 'websites') {
+    return (
+      <div className="min-h-screen bg-[#030308]">
+        <WebsitesBuilderWorkspace
+          initialKind="web"
+          onBack={onBack}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#030308] text-white flex flex-col">

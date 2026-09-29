@@ -47,6 +47,183 @@ async function startServer() {
     res.json({ ok: true, peers: commerceSyncClients.size });
   });
 
+  app.post('/api/websites-builder/brief', async (req, res) => {
+    try {
+      const {
+        prompt,
+        kind = "web",
+        preferredDesignLanguage,
+      } = req.body || {};
+
+      if (typeof prompt !== "string" || !prompt.trim()) {
+        return res.status(400).json({
+          error: "Prompt requerido.",
+        });
+      }
+
+      if (prompt.length > 6000) {
+        return res.status(400).json({
+          error: "Prompt demasiado largo.",
+        });
+      }
+
+      const allowedLanguages = [
+        "Digital Editorial",
+        "Dark Intelligence",
+        "Commerce Luxury",
+        "Neo-Brutalist",
+        "Soft Precision",
+        "Experimental",
+        "Commerce Native",
+        "Data Native",
+      ];
+
+      const safeKind =
+        kind === "landing" ? "landing" : "web";
+
+      const preferred =
+        allowedLanguages.includes(preferredDesignLanguage)
+          ? preferredDesignLanguage
+          : "Soft Precision";
+
+      const ai = getGeminiClient();
+
+      if (!ai) {
+        return res.status(503).json({
+          error: "Gemini no configurado.",
+          fallbackAllowed: true,
+        });
+      }
+
+      const instruction = `
+You are DigitalBoost Web Operator.
+
+AUTHORITY:
+- Proposal only.
+- Do not mutate files.
+- Do not deploy.
+- Return JSON only.
+- Do not return HTML.
+
+DATA INTEGRITY:
+- Never invent production metrics.
+- Never invent customers, awards, revenue,
+  conversion rates, testimonials or social proof.
+- If evidence was not supplied, proof MUST be
+  exactly "Por definir".
+
+Avoid generic SaaS composition.
+
+Allowed design languages:
+${allowedLanguages.join(", ")}
+
+Preferred design language:
+${preferred}
+
+Return:
+{
+  "brief": {
+    "kind": "${safeKind}",
+    "projectName": "...",
+    "audience": "...",
+    "offer": "...",
+    "goal": "...",
+    "tone": "...",
+    "designLanguage": "${preferred}",
+    "headline": "...",
+    "subheadline": "...",
+    "primaryCta": "...",
+    "proof": "Por definir"
+  },
+  "tokens": {
+    "background": "#000000",
+    "surface": "#000000",
+    "foreground": "#ffffff",
+    "muted": "#999999",
+    "accent": "#000000",
+    "accentForeground": "#ffffff",
+    "border": "#000000"
+  }
+}
+
+USER INTENT:
+${prompt.trim()}
+`;
+
+      const response =
+        await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: instruction,
+        });
+
+      const raw =
+        typeof response.text === "string"
+          ? response.text
+          : "";
+
+      const clean = raw
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/\s*```$/i, "")
+        .trim();
+
+      let parsed;
+
+      try {
+        parsed = JSON.parse(clean);
+      } catch {
+        return res.status(502).json({
+          error: "Respuesta no estructurada.",
+          fallbackAllowed: true,
+        });
+      }
+
+      if (!parsed?.brief) {
+        return res.status(502).json({
+          error: "Brief inválido.",
+          fallbackAllowed: true,
+        });
+      }
+
+      parsed.brief.kind = safeKind;
+
+      if (
+        !allowedLanguages.includes(
+          parsed.brief.designLanguage
+        )
+      ) {
+        parsed.brief.designLanguage = preferred;
+      }
+
+      if (
+        typeof parsed.brief.proof !== "string" ||
+        !parsed.brief.proof.trim()
+      ) {
+        parsed.brief.proof = "Por definir";
+      }
+
+      return res.json({
+        authority: "proposal-only",
+        dataPolicy:
+          "no-invented-production-metrics",
+        brief: parsed.brief,
+        tokens: parsed.tokens || {},
+      });
+
+    } catch (error) {
+      console.error(
+        "Web Operator error:",
+        error
+      );
+
+      return res.status(500).json({
+        error:
+          "No se pudo generar el website brief.",
+        fallbackAllowed: true,
+      });
+    }
+  });
+
   app.post('/api/generate', async (req, res) => {
     try {
       const { prompt, type, currentHtml } = req.body;
