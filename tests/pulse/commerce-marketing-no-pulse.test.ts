@@ -15,6 +15,41 @@ test("Marketing hub does not open PULSE or invent 1047", () => {
 });
 
 test("Marketing nav mounts MarketingHub not SEO Center", () => {
-  const src = readFileSync(join(root, "src", "StoreBuilderWorkspace.tsx"), "utf8");
-  assert.match(src, /case "marketing":\s*return \(<DigitalBoostMarketingHub/);
+  const src = readFileSync(
+    join(root, "src", "StoreBuilderWorkspace.tsx"),
+    "utf8",
+  );
+
+  const start =
+    src.indexOf('case "marketing":');
+
+  const end =
+    src.indexOf('case "seo":', start);
+
+  assert.notEqual(
+    start,
+    -1,
+    "marketing route must exist",
+  );
+
+  assert.notEqual(
+    end,
+    -1,
+    "seo route must follow marketing route",
+  );
+
+  const marketingBlock =
+    src.slice(start, end);
+
+  assert.match(
+    marketingBlock,
+    /DigitalBoostMarketingHub/,
+  );
+
+  assert.equal(
+    marketingBlock.includes(
+      "DigitalBoostSeoCenter",
+    ),
+    false,
+  );
 });

@@ -84,8 +84,8 @@ export default function CommerceOSOverview({
 
   const metrics = [
     { label: "Ventas", value: sales === null ? "Sin datos" : money(sales), delta: sales === null ? "ledger vacío" : "ledger", tone: "#34d399", pct: hasOrders ? 1 : 0, go: "analytics" },
-    { label: "Pedidos", value: hasOrders ? String(orders.length) : "Sin datos", delta: hasOrders ? "datos locales" : "sin pedidos", tone: "#22d3ee", pct: hasOrders ? 1 : 0, go: "orders" },
-    { label: "Clientes", value: hasCustomers ? String(customers.length) : "Sin datos", delta: hasCustomers ? "datos locales" : "sin clientes", tone: "#a78bfa", pct: hasCustomers ? 1 : 0, go: "customers" },
+    { label: "Pedidos", value: hasOrders ? String(viewOrders.length) : "Sin datos", delta: hasOrders ? "datos locales" : "sin pedidos", tone: "#22d3ee", pct: hasOrders ? 1 : 0, go: "orders" },
+    { label: "Clientes", value: hasCustomers ? String(viewCustomers.length) : "Sin datos", delta: hasCustomers ? "datos locales" : "sin clientes", tone: "#a78bfa", pct: hasCustomers ? 1 : 0, go: "customers" },
     { label: "Conversión", value: conv === null ? "Sin datos" : `${conv.toFixed(0)}%`, delta: conv === null ? "sin base" : "datos locales", tone: "#fbbf24", pct: conv === null ? 0 : Math.min(1, conv / 100), go: "analytics" },
   ];
 

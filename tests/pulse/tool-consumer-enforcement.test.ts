@@ -38,7 +38,10 @@ function trackedSourceFiles(): string[] {
       (file) =>
         (file.endsWith(".ts") ||
           file.endsWith(".tsx")) &&
-        !file.endsWith(".d.ts"),
+        !file.endsWith(".d.ts") &&
+        fs.existsSync(
+          path.resolve(file),
+        ),
     );
 }
 
