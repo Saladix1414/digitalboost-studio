@@ -5,8 +5,12 @@ import {
   briefToBuilderBlocks,
   createDesignTokens,
   createFallbackBrief,
+  createWebsiteProjectFromBrief,
+  getWebsiteHomePage,
   normalizeBrief,
+  updateWebsiteProjectFromCanvas,
   verifyWebsitesBuilderProject,
+  websiteProjectToCanvasBlocks,
 } from "../../src/WebsitesBuilderModel.ts";
 
 test("fallback creates four blocks without fake proof", () => {
@@ -111,5 +115,167 @@ test("verification reports EMPTY data state", () => {
   assert.equal(
     data?.detail.includes("EMPTY"),
     true
+  );
+});
+
+test("canonical website project preserves brief kind and creates Home", () => {
+  const brief = createFallbackBrief(
+    "Landing editorial para captar consultas",
+    "landing",
+    "Digital Editorial"
+  );
+
+  const tokens = createDesignTokens(
+    brief.designLanguage
+  );
+
+  const project =
+    createWebsiteProjectFromBrief(
+      brief,
+      tokens
+    );
+
+  assert.equal(project.schemaVersion, 1);
+  assert.equal(project.kind, "landing");
+  assert.equal(project.status, "draft");
+  assert.equal(project.pages.length, 1);
+  assert.equal(project.pages[0].slug, "/");
+  assert.equal(project.pages[0].sections.length, 4);
+
+  assert.equal(
+    project.governance.authority,
+    "proposal-only"
+  );
+
+  assert.equal(
+    project.governance.execution,
+    "user-approved"
+  );
+
+  assert.equal(
+    project.governance.publishing,
+    "preview-only"
+  );
+});
+
+test("website project round-trips through the canvas projection", () => {
+  const brief = createFallbackBrief(
+    "Website para un estudio de arquitectura",
+    "web",
+    "Digital Editorial"
+  );
+
+  const tokens = createDesignTokens(
+    brief.designLanguage
+  );
+
+  const project =
+    createWebsiteProjectFromBrief(
+      brief,
+      tokens
+    );
+
+  const blocks =
+    websiteProjectToCanvasBlocks(
+      project
+    );
+
+  assert.equal(blocks.length, 4);
+  assert.equal(blocks[0].id, "canonical-hero");
+  assert.equal(blocks[1].id, "canonical-value");
+  assert.equal(blocks[2].id, "canonical-proof");
+  assert.equal(blocks[3].id, "canonical-cta");
+
+  const edited = blocks.map(
+    (block) =>
+      block.id === "canonical-hero"
+        ? {
+            ...block,
+            text: "Headline editado",
+            align: "center" as const,
+            fontSize: 52,
+          }
+        : block
+  );
+
+  const updated =
+    updateWebsiteProjectFromCanvas(
+      project,
+      edited
+    );
+
+  const projected =
+    websiteProjectToCanvasBlocks(
+      updated
+    );
+
+  assert.equal(
+    projected[0].text,
+    "Headline editado"
+  );
+
+  assert.equal(
+    projected[0].align,
+    "center"
+  );
+
+  assert.equal(
+    projected[0].fontSize,
+    52
+  );
+
+  assert.equal(
+    getWebsiteHomePage(updated)
+      .sections.length,
+    4
+  );
+});
+
+test("canvas order and deletion become canonical project structure", () => {
+  const brief = createFallbackBrief(
+    "Website de servicios profesionales",
+    "web",
+    "Soft Precision"
+  );
+
+  const tokens = createDesignTokens(
+    brief.designLanguage
+  );
+
+  const project =
+    createWebsiteProjectFromBrief(
+      brief,
+      tokens
+    );
+
+  const blocks =
+    websiteProjectToCanvasBlocks(
+      project
+    );
+
+  const changed = [
+    blocks[3],
+    blocks[0],
+    blocks[1],
+  ];
+
+  const updated =
+    updateWebsiteProjectFromCanvas(
+      project,
+      changed
+    );
+
+  const projected =
+    websiteProjectToCanvasBlocks(
+      updated
+    );
+
+  assert.deepEqual(
+    projected.map((block) => block.id),
+    [
+      "canonical-cta",
+      "canonical-hero",
+      "canonical-value",
+    ]
   );
 });

@@ -405,3 +405,360 @@ export function verifyWebsitesBuilderProject(
     checks,
   };
 }
+
+/* -------------------------------------------------------------------------- */
+/* Canonical Websites Builder project graph                                   */
+/*                                                                            */
+/* The canvas may continue rendering BuilderBlock[] as an editable projection */
+/* of a page. This graph is the durable product model and must remain UI       */
+/* independent.                                                               */
+/* -------------------------------------------------------------------------- */
+
+export type WebsiteProjectStatus =
+  | "draft"
+  | "ready-for-verification"
+  | "verified";
+
+export type WebsiteComponentType =
+  | "heading"
+  | "text"
+  | "button"
+  | "image"
+  | "navigation"
+  | "list"
+  | "form"
+  | "custom";
+
+export interface WebsiteComponent {
+  id: string;
+  type: WebsiteComponentType;
+  name: string;
+  content: Record<string, unknown>;
+  dataState: WebDataState;
+  dataSource?: string;
+  bindings?: Record<string, string>;
+}
+
+export interface WebsiteSection {
+  id: string;
+  type: string;
+  name: string;
+  hidden: boolean;
+  components: WebsiteComponent[];
+  settings: Record<string, unknown>;
+}
+
+export interface WebsitePage {
+  id: string;
+  name: string;
+  slug: string;
+  title: string;
+  description: string;
+  sections: WebsiteSection[];
+  seo: {
+    title: string;
+    description: string;
+    indexable: boolean;
+  };
+}
+
+export interface WebsiteProject {
+  schemaVersion: 1;
+  id: string;
+  name: string;
+  kind: WebsitesBuilderKind;
+  status: WebsiteProjectStatus;
+
+  brief: WebsitesBuilderBrief;
+  designTokens: WebDesignTokens;
+
+  pages: WebsitePage[];
+
+  data: {
+    state: WebDataState;
+    sources: string[];
+  };
+
+  governance: {
+    authority: "proposal-only";
+    execution: "user-approved";
+    publishing: "preview-only";
+  };
+}
+
+function projectIdFromBrief(
+  brief: WebsitesBuilderBrief
+): string {
+  const base =
+    brief.offer ||
+    brief.headline ||
+    "website";
+
+  const slug = base
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+
+  return `website-${slug || "project"}`;
+}
+
+export function createWebsiteProject(
+  brief: WebsitesBuilderBrief,
+  tokens: WebDesignTokens
+): WebsiteProject {
+  const projectId = projectIdFromBrief(brief);
+
+  return {
+    schemaVersion: 1,
+    id: projectId,
+    name:
+      brief.offer ||
+      brief.headline ||
+      "Untitled website",
+    kind: brief.kind,
+    status: "draft",
+
+    brief,
+    designTokens: tokens,
+
+    pages: [
+      {
+        id: `${projectId}-home`,
+        name: "Home",
+        slug: "/",
+        title: brief.headline,
+        description: brief.subheadline,
+
+        sections: [],
+
+        seo: {
+          title: brief.headline,
+          description: brief.subheadline,
+          indexable: true,
+        },
+      },
+    ],
+
+    data: {
+      state: "EMPTY",
+      sources: [],
+    },
+
+    governance: {
+      authority: "proposal-only",
+      execution: "user-approved",
+      publishing: "preview-only",
+    },
+  };
+}
+
+export function getWebsiteHomePage(
+  project: WebsiteProject
+): WebsitePage {
+  const home =
+    project.pages.find(
+      (page) => page.slug === "/"
+    ) || project.pages[0];
+
+  if (!home) {
+    throw new Error(
+      "Website project requires at least one page."
+    );
+  }
+
+  return home;
+}
+
+export function updateWebsitePageSections(
+  project: WebsiteProject,
+  pageId: string,
+  sections: WebsiteSection[]
+): WebsiteProject {
+  if (
+    !project.pages.some(
+      (page) => page.id === pageId
+    )
+  ) {
+    return project;
+  }
+
+  return {
+    ...project,
+    pages: project.pages.map((page) =>
+      page.id === pageId
+        ? {
+            ...page,
+            sections,
+          }
+        : page
+    ),
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Website Project <-> Canvas projection                                      */
+/* -------------------------------------------------------------------------- */
+
+export function canvasBlocksToWebsiteSections(
+  blocks: WebCanvasBlockSeed[]
+): WebsiteSection[] {
+  return blocks.map((block) => ({
+    id: block.id,
+    type: block.type,
+    name: block.label,
+    hidden: false,
+
+    components: [
+      {
+        id: `${block.id}-content`,
+        type:
+          block.type === "button"
+            ? "button"
+            : block.type === "image"
+            ? "image"
+            : block.type === "hero"
+            ? "heading"
+            : "text",
+        name: `${block.label} content`,
+        content: {
+          text: block.text,
+        },
+        dataState: "EMPTY",
+      },
+    ],
+
+    settings: {
+      background: block.background,
+      color: block.color,
+      fontSize: block.fontSize,
+      padding: block.padding,
+      align: block.align,
+      width: block.width,
+    },
+  }));
+}
+
+export function websiteSectionsToCanvasBlocks(
+  sections: WebsiteSection[]
+): WebCanvasBlockSeed[] {
+  return sections.map((section) => {
+    const component =
+      section.components[0];
+
+    const settings =
+      section.settings || {};
+
+    const text =
+      component &&
+      typeof component.content.text === "string"
+        ? component.content.text
+        : "";
+
+    const type =
+      section.type === "hero" ||
+      section.type === "text" ||
+      section.type === "image" ||
+      section.type === "button" ||
+      section.type === "products" ||
+      section.type === "features" ||
+      section.type === "banner" ||
+      section.type === "footer"
+        ? section.type
+        : "text";
+
+    return {
+      id: section.id,
+      type,
+      label:
+        section.name ||
+        "Section",
+      text,
+
+      background:
+        typeof settings.background === "string"
+          ? settings.background
+          : "#ffffff",
+
+      color:
+        typeof settings.color === "string"
+          ? settings.color
+          : "#0f172a",
+
+      fontSize:
+        typeof settings.fontSize === "number"
+          ? settings.fontSize
+          : 18,
+
+      padding:
+        typeof settings.padding === "number"
+          ? settings.padding
+          : 32,
+
+      align:
+        settings.align === "center" ||
+        settings.align === "right"
+          ? settings.align
+          : "left",
+
+      width:
+        typeof settings.width === "number"
+          ? settings.width
+          : 100,
+    };
+  });
+}
+
+export function createWebsiteProjectFromBrief(
+  brief: WebsitesBuilderBrief,
+  tokens: WebDesignTokens
+): WebsiteProject {
+  const project =
+    createWebsiteProject(
+      brief,
+      tokens
+    );
+
+  const home =
+    getWebsiteHomePage(project);
+
+  const sections =
+    canvasBlocksToWebsiteSections(
+      briefToBuilderBlocks(
+        brief,
+        tokens
+      )
+    );
+
+  return updateWebsitePageSections(
+    project,
+    home.id,
+    sections
+  );
+}
+
+export function updateWebsiteProjectFromCanvas(
+  project: WebsiteProject,
+  blocks: WebCanvasBlockSeed[]
+): WebsiteProject {
+  const home =
+    getWebsiteHomePage(project);
+
+  return updateWebsitePageSections(
+    project,
+    home.id,
+    canvasBlocksToWebsiteSections(
+      blocks
+    )
+  );
+}
+
+export function websiteProjectToCanvasBlocks(
+  project: WebsiteProject
+): WebCanvasBlockSeed[] {
+  return websiteSectionsToCanvasBlocks(
+    getWebsiteHomePage(project).sections
+  );
+}
