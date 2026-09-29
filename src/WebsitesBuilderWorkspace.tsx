@@ -60,6 +60,9 @@ const railItems = [
   ["settings", Settings2, "Setup"],
 ] as const;
 
+type RailTool =
+  (typeof railItems)[number][0];
+
 export default function WebsitesBuilderWorkspace({
   onBack,
   initialKind = "web",
@@ -68,6 +71,9 @@ export default function WebsitesBuilderWorkspace({
     useState<WebsitesBuilderKind>(
       initialKind
     );
+
+  const [activeTool, setActiveTool] =
+    useState<RailTool>("build");
 
   const [prompt, setPrompt] =
     useState("");
@@ -319,13 +325,12 @@ export default function WebsitesBuilderWorkspace({
               Data · Empty
             </div>
 
-            <button
-              type="button"
-              className="db-primary flex items-center gap-2 px-4 py-2.5 text-[10px]"
-            >
+            <div className="db-preview-status flex items-center gap-2 px-3 py-2.5 text-[10px]">
               <Monitor size={13} />
-              Preview
-            </button>
+              {applied
+                ? "Canvas ready"
+                : "No preview yet"}
+            </div>
           </div>
         </div>
       </header>
@@ -343,7 +348,10 @@ export default function WebsitesBuilderWorkspace({
                   key={id}
                   type="button"
                   data-active={
-                    id === "build"
+                    activeTool === id
+                  }
+                  onClick={() =>
+                    setActiveTool(id)
                   }
                   className="db-rail-button"
                   title={label}
@@ -359,6 +367,8 @@ export default function WebsitesBuilderWorkspace({
         </nav>
 
         <aside className="db-operator">
+          {activeTool === "build" && (
+            <>
           <section className="db-panel p-4">
             <div className="db-panel-header">
               <div className="flex items-center gap-2.5">
@@ -595,6 +605,317 @@ export default function WebsitesBuilderWorkspace({
                 )}
               </div>
             </section>
+          )}
+            </>
+          )}
+
+          {activeTool === "pages" && (
+            <div className="space-y-4">
+              <section className="db-suite-heading">
+                <div className="db-kicker">
+                  Site structure
+                </div>
+
+                <h2 className="mt-2 text-base font-semibold">
+                  Pages
+                </h2>
+
+                <p className="mt-1 text-[10px] leading-relaxed text-slate-500">
+                  Estructura actual del proyecto.
+                  No se crean páginas ficticias.
+                </p>
+              </section>
+
+              <section className="db-panel p-3">
+                <div className="db-page-card" data-active="true">
+                  <div className="flex items-center gap-3">
+                    <div className="db-page-icon">
+                      <FileText size={14} />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-semibold">
+                        Home
+                      </div>
+
+                      <div className="mt-1 truncate text-[9px] text-slate-600">
+                        /
+                      </div>
+                    </div>
+
+                    <span className="db-live-chip">
+                      Active
+                    </span>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <div className="db-metric-tile">
+                      <span>Sections</span>
+                      <strong>
+                        {canvasBlocks.length}
+                      </strong>
+                    </div>
+
+                    <div className="db-metric-tile">
+                      <span>Status</span>
+                      <strong>
+                        {applied
+                          ? "Draft"
+                          : "Empty"}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section className="db-panel p-4">
+                <div className="text-[9px] font-bold uppercase tracking-[.14em] text-slate-500">
+                  Page title
+                </div>
+
+                <div className="mt-2 text-xs leading-relaxed text-slate-300">
+                  {active
+                    ? active.brief.headline
+                    : "No page direction applied yet."}
+                </div>
+              </section>
+            </div>
+          )}
+
+          {activeTool === "styles" && (
+            <div className="space-y-4">
+              <section className="db-suite-heading">
+                <div className="db-kicker">
+                  Design system
+                </div>
+
+                <h2 className="mt-2 text-base font-semibold">
+                  Styles
+                </h2>
+
+                <p className="mt-1 text-[10px] leading-relaxed text-slate-500">
+                  Tokens derivados de la dirección visual actual.
+                </p>
+              </section>
+
+              {active ? (
+                <>
+                  <section className="db-panel p-4">
+                    <div className="text-[9px] font-bold uppercase tracking-[.14em] text-slate-500">
+                      Design language
+                    </div>
+
+                    <div className="mt-2 text-sm font-semibold text-[#e8ff2f]">
+                      {active.brief.designLanguage}
+                    </div>
+                  </section>
+
+                  <section className="db-panel p-4">
+                    <div className="text-[9px] font-bold uppercase tracking-[.14em] text-slate-500">
+                      Color tokens
+                    </div>
+
+                    <div className="mt-4 space-y-2">
+                      {[
+                        ["Background", active.tokens.background],
+                        ["Surface", active.tokens.surface],
+                        ["Foreground", active.tokens.foreground],
+                        ["Muted", active.tokens.muted],
+                        ["Accent", active.tokens.accent],
+                        ["Border", active.tokens.border],
+                      ].map(([label, value]) => (
+                        <div
+                          key={label}
+                          className="db-token-row"
+                        >
+                          <div
+                            className="db-token-swatch"
+                            style={{
+                              background:
+                                value,
+                            }}
+                          />
+
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[10px] font-semibold">
+                              {label}
+                            </div>
+
+                            <div className="mt-0.5 truncate text-[9px] text-slate-600">
+                              {value}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="db-panel p-4">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="db-metric-tile">
+                        <span>Radius</span>
+                        <strong>
+                          {active.tokens.radius}px
+                        </strong>
+                      </div>
+
+                      <div className="db-metric-tile">
+                        <span>Container</span>
+                        <strong>
+                          {active.tokens.container}px
+                        </strong>
+                      </div>
+                    </div>
+                  </section>
+                </>
+              ) : (
+                <section className="db-panel p-4">
+                  <div className="text-xs text-slate-500">
+                    Generá una dirección visual para inspeccionar el sistema de diseño.
+                  </div>
+                </section>
+              )}
+            </div>
+          )}
+
+          {activeTool === "seo" && (
+            <div className="space-y-4">
+              <section className="db-suite-heading">
+                <div className="db-kicker">
+                  Search foundation
+                </div>
+
+                <h2 className="mt-2 text-base font-semibold">
+                  SEO
+                </h2>
+
+                <p className="mt-1 text-[10px] leading-relaxed text-slate-500">
+                  Metadata derivada del brief.
+                  No representa publicación activa.
+                </p>
+              </section>
+
+              <section className="db-panel p-4">
+                <div className="text-[9px] font-bold uppercase tracking-[.14em] text-slate-500">
+                  Title draft
+                </div>
+
+                <div className="mt-2 rounded-xl border border-white/[.06] bg-black/20 p-3 text-xs leading-relaxed text-slate-300">
+                  {active
+                    ? active.brief.headline
+                    : "No title available."}
+                </div>
+
+                <div className="mt-4 text-[9px] font-bold uppercase tracking-[.14em] text-slate-500">
+                  Description draft
+                </div>
+
+                <div className="mt-2 rounded-xl border border-white/[.06] bg-black/20 p-3 text-[10px] leading-relaxed text-slate-400">
+                  {active
+                    ? active.brief.subheadline
+                    : "No description available."}
+                </div>
+              </section>
+
+              <section className="db-panel p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-[10px] font-semibold">
+                      Publishing state
+                    </div>
+
+                    <div className="mt-1 text-[9px] text-slate-600">
+                      Preview boundary only
+                    </div>
+                  </div>
+
+                  <span className="db-neutral-chip">
+                    Draft
+                  </span>
+                </div>
+              </section>
+            </div>
+          )}
+
+          {activeTool === "settings" && (
+            <div className="space-y-4">
+              <section className="db-suite-heading">
+                <div className="db-kicker">
+                  Workspace
+                </div>
+
+                <h2 className="mt-2 text-base font-semibold">
+                  Setup
+                </h2>
+
+                <p className="mt-1 text-[10px] leading-relaxed text-slate-500">
+                  Estado real y límites operativos del proyecto.
+                </p>
+              </section>
+
+              <section className="db-panel p-4">
+                <div className="db-setting-row">
+                  <span>Project type</span>
+                  <strong>{kind}</strong>
+                </div>
+
+                <div className="db-setting-row">
+                  <span>Data</span>
+                  <strong>EMPTY</strong>
+                </div>
+
+                <div className="db-setting-row">
+                  <span>Authority</span>
+                  <strong>
+                    Proposal only
+                  </strong>
+                </div>
+
+                <div className="db-setting-row">
+                  <span>Execution</span>
+                  <strong>
+                    User approved
+                  </strong>
+                </div>
+
+                <div className="db-setting-row">
+                  <span>Publishing</span>
+                  <strong>
+                    Preview only
+                  </strong>
+                </div>
+              </section>
+
+              <section className="db-panel p-4">
+                <div className="text-[9px] font-bold uppercase tracking-[.14em] text-slate-500">
+                  Current canvas
+                </div>
+
+                <div className="mt-3 flex items-end justify-between">
+                  <div>
+                    <div className="text-2xl font-semibold">
+                      {canvasBlocks.length}
+                    </div>
+
+                    <div className="mt-1 text-[9px] text-slate-600">
+                      Structured sections
+                    </div>
+                  </div>
+
+                  <div
+                    className={
+                      applied
+                        ? "db-live-chip"
+                        : "db-neutral-chip"
+                    }
+                  >
+                    {applied
+                      ? "Active"
+                      : "Empty"}
+                  </div>
+                </div>
+              </section>
+            </div>
           )}
         </aside>
 

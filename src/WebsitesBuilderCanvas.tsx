@@ -1,6 +1,5 @@
 import "./website-builder-v2-light.css";
 import "./websites-builder/websites-builder-canvas.css";
-import "./websites-builder/websites-builder-canvas.css";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   AlignCenter,
@@ -18,6 +17,7 @@ import {
   Plus,
   Redo2,
   Save,
+  Settings2,
   Smartphone,
   Tablet,
   Trash2,
@@ -101,58 +101,82 @@ const initialBlocks: BuilderBlock[] = [
   },
 ];
 
+type BlockCategory =
+  | "All"
+  | "Structure"
+  | "Content"
+  | "Media"
+  | "Conversion";
+
+const blockCategories: BlockCategory[] = [
+  "All",
+  "Structure",
+  "Content",
+  "Media",
+  "Conversion",
+];
+
 const blockLibrary: Array<{
   type: BlockType;
   label: string;
   description: string;
+  category: Exclude<BlockCategory, "All">;
   icon: React.ElementType;
 }> = [
   {
     type: "hero",
     label: "Hero",
-    description: "Encabezado principal",
-    icon: Layout,
-  },
-  {
-    type: "text",
-    label: "Texto",
-    description: "Bloque de contenido",
-    icon: Type,
-  },
-  {
-    type: "image",
-    label: "Imagen",
-    description: "Imagen destacada",
-    icon: Eye,
-  },
-  {
-    type: "button",
-    label: "Botón",
-    description: "Llamada a la acción",
-    icon: Move,
-  },
-  {
-    type: "products",
-    label: "Productos",
-    description: "Productos del Commerce OS",
+    description: "Primary introduction and value proposition",
+    category: "Structure",
     icon: Layout,
   },
   {
     type: "features",
-    label: "Características",
-    description: "Beneficios o servicios",
+    label: "Features",
+    description: "Benefits, capabilities or service pillars",
+    category: "Content",
     icon: Palette,
   },
   {
-    type: "banner",
-    label: "Banner",
-    description: "Promoción destacada",
+    type: "text",
+    label: "Editorial",
+    description: "Long-form copy and supporting narrative",
+    category: "Content",
+    icon: Type,
+  },
+  {
+    type: "image",
+    label: "Media",
+    description: "Visual asset or image-led composition",
+    category: "Media",
+    icon: Eye,
+  },
+  {
+    type: "products",
+    label: "Collection",
+    description: "Structured visual collection or catalog",
+    category: "Content",
     icon: Layout,
+  },
+  {
+    type: "banner",
+    label: "Statement",
+    description: "High-impact message or announcement",
+    category: "Conversion",
+    icon: Layout,
+  },
+  {
+    type: "button",
+    label: "CTA",
+    description: "Focused conversion action",
+    category: "Conversion",
+    icon: Move,
   },
   {
     type: "footer",
     label: "Footer",
-    description: "Pie de página",
+    description: "Closing navigation and information",
+    category: "Structure",
     icon: Layout,
   },
 ];
@@ -268,11 +292,24 @@ export default function WebsitesBuilderCanvas({
   });
 
   const [selectedId, setSelectedId] = useState<string | null>(
-    initialBlocks[0]?.id || null
+    blocks[0]?.id || null
   );
 
   const [device, setDevice] = useState<DeviceMode>("desktop");
   const [preview, setPreview] = useState(false);
+  const [inspectorOpen, setInspectorOpen] =
+    useState(true);
+
+  const [libraryQuery, setLibraryQuery] =
+    useState("");
+
+  const [libraryOpen, setLibraryOpen] =
+    useState(false);
+
+  const [
+    libraryCategory,
+    setLibraryCategory,
+  ] = useState<BlockCategory>("All");
   const [history, setHistory] = useState<BuilderBlock[][]>([]);
   const [future, setFuture] = useState<BuilderBlock[][]>([]);
 
@@ -280,6 +317,31 @@ export default function WebsitesBuilderCanvas({
     () => blocks.find((block) => block.id === selectedId) || null,
     [blocks, selectedId]
   );
+
+  const filteredLibrary = useMemo(() => {
+    const query =
+      libraryQuery.trim().toLowerCase();
+
+    return blockLibrary.filter((item) => {
+      const categoryMatches =
+        libraryCategory === "All" ||
+        item.category === libraryCategory;
+
+      const queryMatches =
+        !query ||
+        item.label
+          .toLowerCase()
+          .includes(query) ||
+        item.description
+          .toLowerCase()
+          .includes(query) ||
+        item.category
+          .toLowerCase()
+          .includes(query);
+
+      return categoryMatches && queryMatches;
+    });
+  }, [libraryCategory, libraryQuery]);
 
   useEffect(() => {
     localStorage.setItem(
@@ -386,7 +448,7 @@ export default function WebsitesBuilderCanvas({
   if (preview) {
     return (
       <div data-websites-builder-canvas className="db-canvas-preview min-h-screen">
-        <div className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 bg-slate-50/95 px-4 py-3 backdrop-blur">
+        <div className="db-preview-toolbar sticky top-0 z-50 flex items-center justify-between border-b px-4 py-3 backdrop-blur">
           <div className="text-sm font-semibold">Preview del sitio</div>
 
           <button
@@ -417,7 +479,7 @@ export default function WebsitesBuilderCanvas({
                   {block.text}
                 </div>
               ) : block.type === "button" ? (
-                <button className="rounded-xl bg-violet-500 px-6 py-3 text-sm font-semibold text-white">
+                <button className="db-site-cta rounded-xl px-6 py-3 text-sm font-semibold">
                   {block.text}
                 </button>
               ) : (
@@ -447,13 +509,13 @@ export default function WebsitesBuilderCanvas({
 
           <div>
             <div className="text-sm font-semibold">{studioTitle}</div>
-            <div className="text-[10px] uppercase tracking-[.18em] text-cyan-300">
+            <div className="db-canvas-eyebrow text-[10px] uppercase tracking-[.18em]">
               {studioEyebrow}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-slate-50 p-1">
+        <div className="db-toolbar-cluster flex items-center gap-1 rounded-xl p-1">
           <button
             type="button"
             title="Deshacer"
@@ -501,6 +563,24 @@ export default function WebsitesBuilderCanvas({
 
           <button
             type="button"
+            onClick={() =>
+              setInspectorOpen(
+                (current) => !current
+              )
+            }
+            className={`db-inspector-toggle flex items-center gap-2 rounded-lg px-3 py-2 text-xs ${
+              inspectorOpen
+                ? "db-canvas-device-active"
+                : ""
+            }`}
+            aria-pressed={inspectorOpen}
+          >
+            <Settings2 size={14} />
+            Inspector
+          </button>
+
+          <button
+            type="button"
             onClick={() => setPreview(true)}
             className="db-canvas-preview-button flex items-center gap-2 rounded-lg px-3 py-2 text-xs"
           >
@@ -511,47 +591,174 @@ export default function WebsitesBuilderCanvas({
       </header>
 
       {/* MAIN EDITOR */}
-      <div className="grid min-h-0 flex-1 lg:grid-cols-[230px_minmax(0,1fr)_280px]">
-        {/* BLOCK LIBRARY */}
-        <aside className="db-canvas-library border-b p-3 lg:border-b-0 lg:border-r">
-          <div className="mb-3 px-1">
-            <div className="text-xs font-semibold">Bloques</div>
-            <div className="mt-1 text-[10px] text-slate-500">
-              Agregá elementos al sitio
-            </div>
-          </div>
+      <div className="db-editor-grid grid min-h-0 flex-1">
+        {/* SECTION LIBRARY */}
+        <aside className="db-canvas-library db-left-tools border-b p-3">
+          <div className="db-library-compact">
+            <button
+              type="button"
+              className="db-library-trigger"
+              data-open={libraryOpen}
+              onClick={() =>
+                setLibraryOpen(
+                  (current) => !current
+                )
+              }
+              aria-expanded={libraryOpen}
+            >
+              <span className="flex min-w-0 items-center gap-3">
+                <span className="db-canvas-icon grid h-8 w-8 flex-none place-items-center rounded-lg">
+                  <Plus size={14} />
+                </span>
 
-          <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
-            {blockLibrary.map((item) => {
-              const Icon = item.icon;
-
-              return (
-                <button
-                  key={item.type}
-                  type="button"
-                  onClick={() => addBlock(item.type)}
-                  className="db-canvas-library-item group flex items-center gap-3 rounded-xl p-3 text-left"
-                >
-                  <span className="db-canvas-icon rounded-lg p-2">
-                    <Icon size={15} />
+                <span className="min-w-0 text-left">
+                  <span className="block text-[11px] font-semibold">
+                    Add section
                   </span>
 
-                  <span className="min-w-0">
-                    <span className="block text-xs font-semibold">
-                      {item.label}
-                    </span>
-                    <span className="block truncate text-[9px] text-slate-500">
-                      {item.description}
-                    </span>
+                  <span className="mt-0.5 block truncate text-[9px] text-slate-500">
+                    Browse structured website sections
                   </span>
+                </span>
+              </span>
 
-                  <Plus
-                    size={14}
-                    className="ml-auto text-slate-600 group-hover:text-cyan-300"
+              <span className="flex items-center gap-2">
+                <span className="db-library-count">
+                  {filteredLibrary.length}
+                </span>
+
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform ${
+                    libraryOpen
+                      ? "rotate-180"
+                      : ""
+                  }`}
+                />
+              </span>
+            </button>
+
+            {libraryOpen && (
+              <div className="db-library-dropdown">
+                <div className="db-library-search">
+                  <input
+                    type="search"
+                    value={libraryQuery}
+                    onChange={(event) =>
+                      setLibraryQuery(
+                        event.target.value
+                      )
+                    }
+                    placeholder="Search sections..."
+                    aria-label="Search sections"
+                    autoFocus
                   />
-                </button>
-              );
-            })}
+                </div>
+
+                <div className="db-library-categories">
+                  {blockCategories.map(
+                    (category) => (
+                      <button
+                        key={category}
+                        type="button"
+                        data-active={
+                          libraryCategory ===
+                          category
+                        }
+                        onClick={() =>
+                          setLibraryCategory(
+                            category
+                          )
+                        }
+                      >
+                        {category}
+                      </button>
+                    )
+                  )}
+                </div>
+
+                <div className="db-library-results">
+                  {filteredLibrary.map(
+                    (item) => {
+                      const Icon =
+                        item.icon;
+
+                      return (
+                        <button
+                          key={item.type}
+                          type="button"
+                          data-section={
+                            item.type
+                          }
+                          onClick={() => {
+                            addBlock(
+                              item.type
+                            );
+                            setLibraryOpen(
+                              false
+                            );
+                          }}
+                          className="db-section-card group w-full text-left"
+                        >
+                          <div
+                            className="db-section-preview"
+                            data-section={
+                              item.type
+                            }
+                          >
+                            <span />
+                            <span />
+                            <span />
+                            <span />
+                          </div>
+
+                          <div className="mt-2 flex items-start gap-2">
+                            <span className="db-canvas-icon rounded-lg p-2">
+                              <Icon
+                                size={13}
+                              />
+                            </span>
+
+                            <span className="min-w-0 flex-1">
+                              <span className="flex items-center gap-2">
+                                <span className="text-[10px] font-semibold">
+                                  {
+                                    item.label
+                                  }
+                                </span>
+
+                                <span className="db-section-category">
+                                  {
+                                    item.category
+                                  }
+                                </span>
+                              </span>
+
+                              <span className="mt-1 block text-[8px] leading-relaxed text-slate-500">
+                                {
+                                  item.description
+                                }
+                              </span>
+                            </span>
+
+                            <Plus
+                              size={13}
+                              className="mt-1 text-slate-600 transition group-hover:text-[#e8ff2f]"
+                            />
+                          </div>
+                        </button>
+                      );
+                    }
+                  )}
+
+                  {!filteredLibrary.length && (
+                    <div className="db-library-empty">
+                      No sections match this filter.
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </aside>
 
@@ -600,7 +807,7 @@ export default function WebsitesBuilderCanvas({
                       ) : block.type === "button" ? (
                         <button
                           type="button"
-                          className="rounded-xl bg-violet-500 px-6 py-3 text-sm font-semibold"
+                          className="db-site-cta rounded-xl px-6 py-3 text-sm font-semibold"
                         >
                           {block.text}
                         </button>
@@ -666,11 +873,11 @@ export default function WebsitesBuilderCanvas({
                     )}
 
                     <div className="pointer-events-none absolute left-1/2 top-1 -translate-x-1/2 opacity-0 transition group-hover:opacity-100">
-                      <GripVertical size={14} className="text-cyan-300" />
+                      <GripVertical size={14} className="text-[#e8ff2f]" />
                     </div>
 
                     {index === 0 && (
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-cyan-400/20" />
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[#e8ff2f]/20" />
                     )}
                   </div>
                 );
@@ -680,12 +887,30 @@ export default function WebsitesBuilderCanvas({
         </main>
 
         {/* INSPECTOR */}
-        <aside className="db-canvas-inspector overflow-y-auto border-t p-4 lg:border-l lg:border-t-0">
-          <div className="mb-5">
-            <div className="text-xs font-semibold">Inspector</div>
-            <div className="mt-1 text-[10px] text-slate-500">
-              Propiedades del elemento seleccionado
+        {inspectorOpen && (
+        <aside className="db-canvas-inspector db-right-inspector overflow-y-auto p-4">
+          <div className="mb-5 flex items-start justify-between gap-3">
+            <div>
+              <div className="text-xs font-semibold">
+                Inspector
+              </div>
+
+              <div className="mt-1 text-[10px] text-slate-500">
+                Propiedades del elemento seleccionado
+              </div>
             </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                setInspectorOpen(false)
+              }
+              className="db-inspector-close"
+              title="Cerrar Inspector"
+              aria-label="Cerrar Inspector"
+            >
+              <X size={14} />
+            </button>
           </div>
 
           {!selectedBlock ? (
@@ -695,7 +920,7 @@ export default function WebsitesBuilderCanvas({
           ) : (
             <div className="space-y-5">
               <div className="db-canvas-inspector-card rounded-xl p-3">
-                <div className="text-[10px] uppercase tracking-wider text-violet-300">
+                <div className="text-[10px] uppercase tracking-wider text-[#e8ff2f]">
                   Elemento
                 </div>
                 <div className="mt-1 text-sm font-semibold">
@@ -770,7 +995,7 @@ export default function WebsitesBuilderCanvas({
                   Alineación
                 </div>
 
-                <div className="grid grid-cols-3 gap-1 rounded-xl border border-white/10 bg-slate-50 p-1">
+                <div className="db-toolbar-cluster grid grid-cols-3 gap-1 rounded-xl p-1">
                   {(
                     [
                       ["left", AlignLeft],
@@ -854,7 +1079,7 @@ export default function WebsitesBuilderCanvas({
                 type="button"
                 onClick={() =>
                   localStorage.setItem(
-                    "digitalboost_websites_builder_canvas_v1",
+                    storageKey,
                     JSON.stringify(blocks)
                   )
                 }
@@ -866,6 +1091,7 @@ export default function WebsitesBuilderCanvas({
             </div>
           )}
         </aside>
+        )}
       </div>
     </div>
   );

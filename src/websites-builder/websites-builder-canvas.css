@@ -156,3 +156,1525 @@
 .db-canvas-studio input[type="range"] {
   accent-color: var(--canvas-neon);
 }
+
+/* =========================================================
+   DigitalBoost Websites Builder
+   Neon Graphite — Professional interaction polish
+   ========================================================= */
+
+.db-canvas-studio {
+  isolation: isolate;
+}
+
+.db-canvas-toolbar {
+  min-height: 58px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.025),
+    0 12px 32px rgba(0,0,0,.12);
+}
+
+.db-canvas-eyebrow {
+  color: var(--canvas-neon);
+  opacity: .8;
+}
+
+.db-toolbar-cluster {
+  border: 1px solid var(--canvas-border);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.035),
+      rgba(255,255,255,.01)
+    ),
+    #0d0f12;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.db-toolbar-cluster button {
+  transition:
+    color .16s ease,
+    background .16s ease,
+    transform .16s ease;
+}
+
+.db-toolbar-cluster button:hover:not(:disabled) {
+  color: #f6f7f9;
+  background: rgba(255,255,255,.045);
+}
+
+.db-toolbar-cluster button:active:not(:disabled) {
+  transform: scale(.94);
+}
+
+.db-canvas-library {
+  width: 100%;
+}
+
+.db-canvas-library-item {
+  min-height: 58px;
+  position: relative;
+  overflow: hidden;
+}
+
+.db-canvas-library-item::after {
+  content: "";
+  position: absolute;
+  inset: auto 10px 0;
+  height: 1px;
+  opacity: 0;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(232,255,47,.55),
+      transparent
+    );
+  transition: opacity .18s ease;
+}
+
+.db-canvas-library-item:hover::after {
+  opacity: 1;
+}
+
+.db-canvas-library-item:hover .db-canvas-icon {
+  box-shadow:
+    0 0 0 1px rgba(232,255,47,.15),
+    0 0 24px rgba(232,255,47,.08);
+}
+
+.db-canvas-icon {
+  transition:
+    box-shadow .18s ease,
+    transform .18s ease;
+}
+
+.db-canvas-library-item:hover .db-canvas-icon {
+  transform: translateY(-1px);
+}
+
+.db-canvas-stage {
+  scrollbar-color:
+    rgba(232,255,47,.28)
+    transparent;
+}
+
+.db-canvas-artboard {
+  position: relative;
+}
+
+.db-canvas-artboard::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.75);
+}
+
+.db-canvas-block {
+  outline: 0 solid transparent;
+}
+
+.db-canvas-block:hover {
+  z-index: 2;
+}
+
+.db-canvas-block[data-selected="true"] {
+  z-index: 3;
+}
+
+.db-canvas-block[data-selected="true"]::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: -1px;
+  z-index: 15;
+  border: 1px solid rgba(232,255,47,.86);
+}
+
+.db-canvas-label {
+  min-height: 26px;
+  font-weight: 750;
+  letter-spacing: .04em;
+}
+
+.db-canvas-actionbar {
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.db-canvas-actionbar button {
+  transition:
+    color .15s ease,
+    background .15s ease,
+    transform .15s ease;
+}
+
+.db-canvas-actionbar button:hover {
+  color: var(--canvas-neon);
+}
+
+.db-canvas-actionbar button:active {
+  transform: scale(.9);
+}
+
+.db-canvas-inspector {
+  scrollbar-color:
+    rgba(232,255,47,.22)
+    transparent;
+}
+
+.db-canvas-inspector-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.db-canvas-inspector-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--canvas-neon);
+  box-shadow:
+    0 0 14px rgba(232,255,47,.38);
+}
+
+.db-canvas-control {
+  min-height: 38px;
+}
+
+textarea.db-canvas-control {
+  min-height: 96px;
+}
+
+.db-canvas-control:hover {
+  border-color: rgba(255,255,255,.13) !important;
+}
+
+.db-canvas-control::selection {
+  background: rgba(232,255,47,.28);
+  color: #fff;
+}
+
+.db-canvas-studio input[type="range"] {
+  height: 4px;
+  cursor: pointer;
+}
+
+.db-canvas-device-active {
+  box-shadow:
+    inset 0 0 0 1px rgba(232,255,47,.12);
+}
+
+.db-canvas-preview-button,
+.db-canvas-save {
+  transition:
+    transform .15s ease,
+    box-shadow .15s ease,
+    background .15s ease;
+}
+
+.db-canvas-preview-button:hover,
+.db-canvas-save:hover {
+  transform: translateY(-1px);
+}
+
+.db-canvas-preview-button:active,
+.db-canvas-save:active {
+  transform: translateY(0) scale(.98);
+}
+
+.db-canvas-preview-button {
+  box-shadow:
+    0 8px 24px rgba(232,255,47,.10);
+}
+
+.db-canvas-preview-button:hover {
+  box-shadow:
+    0 12px 32px rgba(232,255,47,.16);
+}
+
+.db-canvas-save:hover {
+  background:
+    rgba(232,255,47,.10) !important;
+}
+
+.db-site-cta {
+  border: 0;
+  background: var(--canvas-neon);
+  color: #090a0c;
+  box-shadow:
+    0 8px 28px rgba(232,255,47,.15);
+  transition:
+    transform .15s ease,
+    box-shadow .15s ease;
+}
+
+.db-site-cta:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 12px 36px rgba(232,255,47,.22);
+}
+
+.db-preview-toolbar {
+  border-color: var(--canvas-border);
+  background:
+    rgba(13,15,17,.92);
+  color: #f4f6f8;
+  box-shadow:
+    0 12px 32px rgba(0,0,0,.16);
+}
+
+.db-canvas-preview-frame {
+  transition:
+    transform .22s ease,
+    box-shadow .22s ease;
+}
+
+@media (min-width: 1024px) {
+  .db-canvas-library {
+    width: auto;
+  }
+
+  .db-canvas-inspector {
+    width: auto;
+  }
+}
+
+@media (max-width: 1100px) {
+  .db-canvas-stage {
+    padding: 18px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .db-canvas-toolbar {
+    align-items: flex-start;
+  }
+
+  .db-canvas-stage {
+    padding: 12px !important;
+  }
+
+  .db-canvas-artboard {
+    min-height: 620px !important;
+  }
+
+  .db-canvas-library-item {
+    min-height: 54px;
+  }
+
+  .db-canvas-preview-frame {
+    margin: 14px;
+    border-radius: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-canvas-studio *,
+  .db-canvas-preview * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
+
+/* =========================================================
+   Section Library
+   ========================================================= */
+
+.db-library-count {
+  min-width: 25px;
+  height: 25px;
+  padding: 0 7px;
+  border: 1px solid var(--canvas-border);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.025);
+  color: var(--canvas-muted);
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.db-library-search {
+  position: relative;
+}
+
+.db-library-search input {
+  width: 100%;
+  height: 38px;
+  border: 1px solid var(--canvas-border);
+  border-radius: 11px;
+  padding: 0 11px;
+  outline: none;
+  background: #0d0f12;
+  color: var(--canvas-text);
+  font-size: 10px;
+  transition:
+    border-color .16s ease,
+    box-shadow .16s ease;
+}
+
+.db-library-search input::placeholder {
+  color: #5f6872;
+}
+
+.db-library-search input:focus {
+  border-color: rgba(232,255,47,.42);
+  box-shadow:
+    0 0 0 3px rgba(232,255,47,.045);
+}
+
+.db-library-categories {
+  margin-top: 9px;
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.db-library-categories::-webkit-scrollbar {
+  display: none;
+}
+
+.db-library-categories button {
+  flex: 0 0 auto;
+  border: 1px solid var(--canvas-border);
+  border-radius: 999px;
+  padding: 6px 8px;
+  background: rgba(255,255,255,.015);
+  color: var(--canvas-muted);
+  font-size: 8px;
+  font-weight: 750;
+  transition:
+    color .15s ease,
+    border-color .15s ease,
+    background .15s ease;
+}
+
+.db-library-categories button:hover {
+  color: var(--canvas-text);
+  border-color: rgba(255,255,255,.13);
+}
+
+.db-library-categories button[data-active="true"] {
+  border-color: rgba(232,255,47,.25);
+  background: rgba(232,255,47,.07);
+  color: var(--canvas-neon);
+}
+
+.db-section-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--canvas-border);
+  border-radius: 13px;
+  padding: 9px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.022),
+      rgba(255,255,255,.008)
+    ),
+    #111316;
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease;
+}
+
+.db-section-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(232,255,47,.24);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(232,255,47,.035),
+      rgba(255,255,255,.008)
+    ),
+    #111316;
+  box-shadow:
+    0 12px 32px rgba(0,0,0,.12);
+}
+
+.db-section-preview {
+  position: relative;
+  height: 66px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 9px;
+  background: #e9ebed;
+}
+
+/* Base preview pieces */
+.db-section-preview span {
+  position: absolute;
+  display: block;
+  border-radius: 999px;
+  background: #24272b;
+}
+
+/* HERO */
+.db-section-preview[data-section="hero"] span:nth-child(1) {
+  left: 9px;
+  top: 13px;
+  width: 42%;
+  height: 6px;
+}
+
+.db-section-preview[data-section="hero"] span:nth-child(2) {
+  left: 9px;
+  top: 24px;
+  width: 58%;
+  height: 3px;
+  opacity: .35;
+}
+
+.db-section-preview[data-section="hero"] span:nth-child(3) {
+  left: 9px;
+  top: 35px;
+  width: 23%;
+  height: 11px;
+  background: #d7ed26;
+}
+
+.db-section-preview[data-section="hero"] span:nth-child(4) {
+  right: 9px;
+  top: 9px;
+  width: 29%;
+  height: 48px;
+  border-radius: 7px;
+  background: #c8ccd0;
+}
+
+/* FEATURES / COLLECTION */
+.db-section-preview[data-section="features"] span,
+.db-section-preview[data-section="products"] span {
+  top: 17px;
+  width: 25%;
+  height: 34px;
+  border-radius: 7px;
+  background: #c7cbce;
+}
+
+.db-section-preview[data-section="features"] span:nth-child(1),
+.db-section-preview[data-section="products"] span:nth-child(1) {
+  left: 7%;
+}
+
+.db-section-preview[data-section="features"] span:nth-child(2),
+.db-section-preview[data-section="products"] span:nth-child(2) {
+  left: 38%;
+}
+
+.db-section-preview[data-section="features"] span:nth-child(3),
+.db-section-preview[data-section="products"] span:nth-child(3) {
+  right: 7%;
+}
+
+/* TEXT */
+.db-section-preview[data-section="text"] span:nth-child(1) {
+  left: 10px;
+  top: 14px;
+  width: 34%;
+  height: 5px;
+}
+
+.db-section-preview[data-section="text"] span:nth-child(2) {
+  left: 10px;
+  top: 26px;
+  width: 80%;
+  height: 3px;
+  opacity: .28;
+}
+
+.db-section-preview[data-section="text"] span:nth-child(3) {
+  left: 10px;
+  top: 34px;
+  width: 72%;
+  height: 3px;
+  opacity: .28;
+}
+
+.db-section-preview[data-section="text"] span:nth-child(4) {
+  left: 10px;
+  top: 42px;
+  width: 58%;
+  height: 3px;
+  opacity: .28;
+}
+
+/* IMAGE */
+.db-section-preview[data-section="image"] span:nth-child(1) {
+  inset: 8px;
+  border-radius: 7px;
+  background:
+    linear-gradient(
+      140deg,
+      #c0c5c9,
+      #d7dbde
+    );
+}
+
+.db-section-preview[data-section="image"] span:nth-child(2) {
+  left: 18%;
+  top: 30%;
+  width: 12px;
+  height: 12px;
+  background: #91989e;
+}
+
+/* CTA */
+.db-section-preview[data-section="button"] span:nth-child(1) {
+  left: 16%;
+  top: 17px;
+  width: 68%;
+  height: 5px;
+}
+
+.db-section-preview[data-section="button"] span:nth-child(2) {
+  left: 34%;
+  top: 32px;
+  width: 32%;
+  height: 14px;
+  background: #d7ed26;
+}
+
+/* BANNER */
+.db-section-preview[data-section="banner"] {
+  background: #25282c;
+}
+
+.db-section-preview[data-section="banner"] span:nth-child(1) {
+  left: 13%;
+  top: 24px;
+  width: 48%;
+  height: 6px;
+  background: #f0f1f2;
+}
+
+.db-section-preview[data-section="banner"] span:nth-child(2) {
+  right: 12%;
+  top: 20px;
+  width: 18%;
+  height: 14px;
+  background: #d7ed26;
+}
+
+/* FOOTER */
+.db-section-preview[data-section="footer"] {
+  background: #2a2d31;
+}
+
+.db-section-preview[data-section="footer"] span:nth-child(1) {
+  left: 9px;
+  top: 14px;
+  width: 18%;
+  height: 5px;
+  background: #e8ff2f;
+}
+
+.db-section-preview[data-section="footer"] span:nth-child(2),
+.db-section-preview[data-section="footer"] span:nth-child(3),
+.db-section-preview[data-section="footer"] span:nth-child(4) {
+  top: 31px;
+  width: 15%;
+  height: 3px;
+  background: #8c939a;
+}
+
+.db-section-preview[data-section="footer"] span:nth-child(2) {
+  left: 9px;
+}
+
+.db-section-preview[data-section="footer"] span:nth-child(3) {
+  left: 32%;
+}
+
+.db-section-preview[data-section="footer"] span:nth-child(4) {
+  left: 56%;
+}
+
+.db-section-category {
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 999px;
+  padding: 3px 5px;
+  color: #69717b;
+  font-size: 7px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.db-section-card:hover .db-section-category {
+  border-color: rgba(232,255,47,.13);
+  color: #9ca67a;
+}
+
+.db-library-empty {
+  border: 1px dashed var(--canvas-border);
+  border-radius: 12px;
+  padding: 22px 12px;
+  text-align: center;
+  color: var(--canvas-muted);
+  font-size: 9px;
+}
+
+/* =========================================================
+   Compact Section Library Dropdown
+   ========================================================= */
+
+.db-library-compact {
+  position: relative;
+}
+
+.db-library-trigger {
+  width: 100%;
+  min-height: 54px;
+  border: 1px solid var(--canvas-border);
+  border-radius: 13px;
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.022),
+      rgba(255,255,255,.008)
+    ),
+    #111316;
+  color: var(--canvas-text);
+  transition:
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease;
+}
+
+.db-library-trigger:hover,
+.db-library-trigger[data-open="true"] {
+  border-color:
+    rgba(232,255,47,.24);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(232,255,47,.035),
+      rgba(255,255,255,.008)
+    ),
+    #111316;
+}
+
+.db-library-trigger[data-open="true"] {
+  box-shadow:
+    0 0 0 3px rgba(232,255,47,.035);
+}
+
+.db-library-dropdown {
+  margin-top: 8px;
+  border: 1px solid var(--canvas-border);
+  border-radius: 14px;
+  padding: 10px;
+  background: #101215;
+  box-shadow:
+    0 22px 50px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.db-library-results {
+  max-height: 430px;
+  margin-top: 10px;
+  padding-right: 3px;
+  display: grid;
+  gap: 7px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(232,255,47,.22)
+    transparent;
+}
+
+/*
+ * Smaller visual cards inside the dropdown.
+ * The canvas gets the vertical space instead.
+ */
+.db-library-dropdown .db-section-preview {
+  height: 48px;
+}
+
+.db-library-dropdown .db-section-card {
+  padding: 7px;
+}
+
+@media (min-width: 1024px) {
+  .db-library-dropdown {
+    position: absolute;
+    z-index: 60;
+    left: 0;
+    top: calc(100% + 4px);
+    width: 330px;
+    max-width: min(330px, calc(100vw - 30px));
+  }
+
+  .db-library-results {
+    max-height: min(520px, calc(100vh - 260px));
+  }
+}
+
+@media (max-width: 1023px) {
+  /*
+   * Mobile/tablet:
+   * dropdown remains compact instead of pushing
+   * the actual website far below the editor.
+   */
+  .db-library-dropdown {
+    position: absolute;
+    z-index: 80;
+    left: 0;
+    right: 0;
+    top: calc(100% + 5px);
+  }
+
+  .db-library-results {
+    max-height: 310px;
+  }
+}
+
+/* =========================================================
+   Persistent Builder Layout
+   Tools left · Canvas center · Inspector right
+   ========================================================= */
+
+.db-editor-grid {
+  grid-template-columns:
+    220px
+    minmax(0, 1fr)
+    280px;
+  align-items: start;
+}
+
+.db-left-tools {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  z-index: 35;
+
+  max-height: calc(100vh - 128px);
+  overflow: visible;
+
+  border-right: 1px solid var(--canvas-border);
+  border-bottom: 0 !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      transparent
+    ),
+    #121417;
+}
+
+.db-left-tools .db-library-compact {
+  position: sticky;
+  top: 12px;
+}
+
+.db-left-tools .db-library-trigger {
+  box-shadow:
+    0 10px 28px rgba(0,0,0,.14);
+}
+
+.db-left-tools .db-library-dropdown {
+  left: 0;
+  right: auto;
+  width: min(330px, calc(100vw - 32px));
+}
+
+.db-right-inspector {
+  position: sticky;
+  top: 0;
+  align-self: start;
+
+  max-height: calc(100vh - 128px);
+  overflow-y: auto;
+
+  border-left: 1px solid var(--canvas-border);
+  border-top: 0 !important;
+}
+
+.db-canvas-stage {
+  min-width: 0;
+}
+
+/* Medium screens:
+   preserve side tools instead of stacking everything vertically. */
+@media (max-width: 1180px) {
+  .db-editor-grid {
+    grid-template-columns:
+      190px
+      minmax(0, 1fr)
+      240px;
+  }
+}
+
+/* Smaller tablet / phone:
+   left tools remain visible beside canvas;
+   inspector moves to an overlay-like narrow panel only when space allows. */
+@media (max-width: 850px) {
+  .db-editor-grid {
+    grid-template-columns:
+      168px
+      minmax(420px, 1fr);
+  }
+
+  .db-right-inspector {
+    grid-column: 1 / -1;
+
+    position: relative;
+    top: auto;
+
+    max-height: none;
+
+    border-left: 0;
+    border-top: 1px solid var(--canvas-border) !important;
+  }
+
+  .db-left-tools {
+    min-height: 100%;
+    max-height: none;
+  }
+
+  .db-left-tools .db-library-compact {
+    top: 8px;
+  }
+}
+
+/* Very narrow screens:
+   still avoid placing Add Section above the full canvas.
+   It becomes a slim left tool rail. */
+@media (max-width: 620px) {
+  .db-editor-grid {
+    grid-template-columns:
+      138px
+      minmax(390px, 1fr);
+  }
+
+  .db-left-tools {
+    padding: 8px !important;
+  }
+
+  .db-library-trigger {
+    min-height: 48px;
+    padding: 7px;
+  }
+
+  .db-library-trigger .db-canvas-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .db-library-trigger span span:last-child {
+    font-size: 8px;
+  }
+
+  .db-left-tools .db-library-dropdown {
+    position: fixed;
+    z-index: 100;
+
+    left: 10px;
+    top: 110px;
+
+    width: min(340px, calc(100vw - 20px));
+    max-height: calc(100vh - 130px);
+    overflow: hidden;
+  }
+
+  .db-left-tools .db-library-results {
+    max-height: calc(100vh - 265px);
+  }
+}
+
+/* =========================================================
+   Canvas-first layout correction
+   Section tools float; they do not consume canvas width.
+   ========================================================= */
+
+.db-editor-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    270px;
+  align-items: start;
+}
+
+/*
+ * Add Section becomes a floating control over
+ * the empty left edge of the workspace.
+ * It no longer creates a permanent grid column.
+ */
+.db-left-tools {
+  position: absolute !important;
+  z-index: 70;
+
+  top: 12px;
+  left: 12px;
+
+  width: 180px;
+  max-height: none;
+
+  padding: 0 !important;
+
+  border: 0 !important;
+  background: transparent !important;
+
+  overflow: visible;
+}
+
+.db-left-tools .db-library-compact {
+  position: relative;
+  top: auto;
+}
+
+.db-left-tools .db-library-trigger {
+  min-height: 48px;
+
+  border-color:
+    rgba(232,255,47,.14);
+
+  background:
+    rgba(13,15,17,.94);
+
+  box-shadow:
+    0 12px 34px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.035);
+
+  backdrop-filter: blur(14px);
+}
+
+/*
+ * Popover opens over the editor instead of pushing
+ * the canvas down or sideways.
+ */
+.db-left-tools .db-library-dropdown {
+  position: absolute !important;
+
+  top: calc(100% + 8px);
+  left: 0;
+  right: auto;
+
+  width: 320px;
+  max-width: calc(100vw - 32px);
+
+  background:
+    rgba(16,18,21,.98);
+
+  backdrop-filter: blur(18px);
+}
+
+/*
+ * Canvas owns the primary working area.
+ */
+.db-canvas-stage {
+  grid-column: 1;
+  width: 100%;
+  min-width: 0;
+  padding:
+    76px 22px 24px !important;
+}
+
+/*
+ * Inspector stays fixed only when there is
+ * enough room for a proper professional editor.
+ */
+.db-right-inspector {
+  grid-column: 2;
+
+  position: sticky;
+  top: 0;
+
+  width: 270px;
+  max-height:
+    calc(100vh - 128px);
+
+  border-left:
+    1px solid var(--canvas-border);
+
+  background: #121417;
+}
+
+/*
+ * Give the actual webpage more visual priority.
+ */
+.db-canvas-artboard {
+  width: min(
+    100%,
+    1120px
+  ) !important;
+
+  margin-inline: auto;
+}
+
+/* =========================================================
+   Medium screens
+   Inspector becomes floating instead of shrinking canvas.
+   ========================================================= */
+
+@media (max-width: 1250px) {
+  .db-editor-grid {
+    display: block;
+    position: relative;
+  }
+
+  .db-canvas-stage {
+    width: 100%;
+    padding:
+      76px 18px 24px !important;
+  }
+
+  .db-right-inspector {
+    position: absolute;
+
+    z-index: 65;
+
+    top: 12px;
+    right: 12px;
+
+    width: 250px;
+    max-height:
+      calc(100vh - 155px);
+
+    border:
+      1px solid var(--canvas-border) !important;
+
+    border-radius: 14px;
+
+    background:
+      rgba(17,20,23,.97);
+
+    box-shadow:
+      0 24px 60px rgba(0,0,0,.34);
+
+    backdrop-filter: blur(18px);
+  }
+
+  /*
+   * Give enough breathing room so text on the
+   * site does not become one narrow vertical line.
+   */
+  .db-canvas-artboard {
+    width:
+      min(100%, 900px) !important;
+  }
+}
+
+/* =========================================================
+   Phone / narrow tablet
+   Both tool panels become compact floating controls.
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .db-canvas-stage {
+    padding:
+      70px 10px 18px !important;
+  }
+
+  .db-left-tools {
+    top: 8px;
+    left: 8px;
+
+    width: 150px;
+  }
+
+  .db-left-tools .db-library-trigger {
+    min-height: 44px;
+    padding: 6px 8px;
+  }
+
+  .db-left-tools .db-library-dropdown {
+    position: fixed !important;
+
+    top: 105px;
+    left: 8px;
+
+    width:
+      calc(100vw - 16px);
+
+    max-height:
+      calc(100vh - 125px);
+
+    overflow: hidden;
+  }
+
+  .db-left-tools .db-library-results {
+    max-height:
+      calc(100vh - 260px);
+  }
+
+  /*
+   * Inspector floats over the right side.
+   * It no longer controls page width.
+   */
+  .db-right-inspector {
+    position: absolute;
+
+    top: 66px;
+    right: 8px;
+
+    width:
+      min(240px, 72vw);
+
+    max-height:
+      calc(100vh - 150px);
+
+    padding: 12px !important;
+
+    overflow-y: auto;
+  }
+
+  .db-canvas-artboard {
+    width:
+      min(100%, 720px) !important;
+  }
+}
+
+
+/* =========================================================
+   Canvas-first layout correction
+   Section tools float; they do not consume canvas width.
+   ========================================================= */
+
+.db-editor-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    270px;
+  align-items: start;
+}
+
+/*
+ * Add Section becomes a floating control over
+ * the empty left edge of the workspace.
+ * It no longer creates a permanent grid column.
+ */
+.db-left-tools {
+  position: absolute !important;
+  z-index: 70;
+
+  top: 12px;
+  left: 12px;
+
+  width: 180px;
+  max-height: none;
+
+  padding: 0 !important;
+
+  border: 0 !important;
+  background: transparent !important;
+
+  overflow: visible;
+}
+
+.db-left-tools .db-library-compact {
+  position: relative;
+  top: auto;
+}
+
+.db-left-tools .db-library-trigger {
+  min-height: 48px;
+
+  border-color:
+    rgba(232,255,47,.14);
+
+  background:
+    rgba(13,15,17,.94);
+
+  box-shadow:
+    0 12px 34px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.035);
+
+  backdrop-filter: blur(14px);
+}
+
+/*
+ * Popover opens over the editor instead of pushing
+ * the canvas down or sideways.
+ */
+.db-left-tools .db-library-dropdown {
+  position: absolute !important;
+
+  top: calc(100% + 8px);
+  left: 0;
+  right: auto;
+
+  width: 320px;
+  max-width: calc(100vw - 32px);
+
+  background:
+    rgba(16,18,21,.98);
+
+  backdrop-filter: blur(18px);
+}
+
+/*
+ * Canvas owns the primary working area.
+ */
+.db-canvas-stage {
+  grid-column: 1;
+  width: 100%;
+  min-width: 0;
+  padding:
+    76px 22px 24px !important;
+}
+
+/*
+ * Inspector stays fixed only when there is
+ * enough room for a proper professional editor.
+ */
+.db-right-inspector {
+  grid-column: 2;
+
+  position: sticky;
+  top: 0;
+
+  width: 270px;
+  max-height:
+    calc(100vh - 128px);
+
+  border-left:
+    1px solid var(--canvas-border);
+
+  background: #121417;
+}
+
+/*
+ * Give the actual webpage more visual priority.
+ */
+.db-canvas-artboard {
+  width: min(
+    100%,
+    1120px
+  ) !important;
+
+  margin-inline: auto;
+}
+
+/* =========================================================
+   Medium screens
+   Inspector becomes floating instead of shrinking canvas.
+   ========================================================= */
+
+@media (max-width: 1250px) {
+  .db-editor-grid {
+    display: block;
+    position: relative;
+  }
+
+  .db-canvas-stage {
+    width: 100%;
+    padding:
+      76px 18px 24px !important;
+  }
+
+  .db-right-inspector {
+    position: absolute;
+
+    z-index: 65;
+
+    top: 12px;
+    right: 12px;
+
+    width: 250px;
+    max-height:
+      calc(100vh - 155px);
+
+    border:
+      1px solid var(--canvas-border) !important;
+
+    border-radius: 14px;
+
+    background:
+      rgba(17,20,23,.97);
+
+    box-shadow:
+      0 24px 60px rgba(0,0,0,.34);
+
+    backdrop-filter: blur(18px);
+  }
+
+  /*
+   * Give enough breathing room so text on the
+   * site does not become one narrow vertical line.
+   */
+  .db-canvas-artboard {
+    width:
+      min(100%, 900px) !important;
+  }
+}
+
+/* =========================================================
+   Phone / narrow tablet
+   Both tool panels become compact floating controls.
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .db-canvas-stage {
+    padding:
+      70px 10px 18px !important;
+  }
+
+  .db-left-tools {
+    top: 8px;
+    left: 8px;
+
+    width: 150px;
+  }
+
+  .db-left-tools .db-library-trigger {
+    min-height: 44px;
+    padding: 6px 8px;
+  }
+
+  .db-left-tools .db-library-dropdown {
+    position: fixed !important;
+
+    top: 105px;
+    left: 8px;
+
+    width:
+      calc(100vw - 16px);
+
+    max-height:
+      calc(100vh - 125px);
+
+    overflow: hidden;
+  }
+
+  .db-left-tools .db-library-results {
+    max-height:
+      calc(100vh - 260px);
+  }
+
+  /*
+   * Inspector floats over the right side.
+   * It no longer controls page width.
+   */
+  .db-right-inspector {
+    position: absolute;
+
+    top: 66px;
+    right: 8px;
+
+    width:
+      min(240px, 72vw);
+
+    max-height:
+      calc(100vh - 150px);
+
+    padding: 12px !important;
+
+    overflow-y: auto;
+  }
+
+  .db-canvas-artboard {
+    width:
+      min(100%, 720px) !important;
+  }
+}
+
+/* =========================================================
+   Inspector toggle
+   ========================================================= */
+
+.db-inspector-toggle {
+  border: 1px solid var(--canvas-border);
+  background: rgba(255,255,255,.018);
+  color: var(--canvas-muted);
+  transition:
+    color .15s ease,
+    background .15s ease,
+    border-color .15s ease;
+}
+
+.db-inspector-toggle:hover {
+  color: var(--canvas-text);
+  border-color: rgba(255,255,255,.13);
+  background: rgba(255,255,255,.035);
+}
+
+.db-inspector-close {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid var(--canvas-border);
+  border-radius: 8px;
+
+  background: rgba(255,255,255,.02);
+  color: var(--canvas-muted);
+
+  transition:
+    color .15s ease,
+    background .15s ease,
+    border-color .15s ease,
+    transform .15s ease;
+}
+
+.db-inspector-close:hover {
+  color: var(--canvas-neon);
+  border-color: rgba(232,255,47,.22);
+  background: rgba(232,255,47,.05);
+}
+
+.db-inspector-close:active {
+  transform: scale(.92);
+}
+
+/*
+ * When inspector is absent, canvas naturally occupies
+ * the remaining grid because only one child column remains.
+ */
+.db-editor-grid:has(.db-right-inspector) {
+  grid-template-columns:
+    minmax(0, 1fr)
+    270px;
+}
+
+.db-editor-grid:not(:has(.db-right-inspector)) {
+  grid-template-columns:
+    minmax(0, 1fr);
+}
+
+@media (max-width: 1250px) {
+  .db-editor-grid:has(.db-right-inspector),
+  .db-editor-grid:not(:has(.db-right-inspector)) {
+    display: block;
+  }
+}
+
+@media (max-width: 760px) {
+  .db-inspector-toggle {
+    padding-inline: 8px;
+  }
+
+  .db-inspector-toggle {
+    font-size: 0;
+  }
+
+  .db-inspector-toggle svg {
+    margin: 0;
+  }
+}
