@@ -1,4 +1,6 @@
 import "./website-builder-v2-light.css";
+import "./websites-builder/websites-builder-canvas.css";
+import "./websites-builder/websites-builder-canvas.css";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   AlignCenter,
@@ -383,7 +385,7 @@ export default function WebsitesBuilderCanvas({
 
   if (preview) {
     return (
-      <div data-website-builder-v2 className="min-h-screen bg-white text-slate-900">
+      <div data-websites-builder-canvas className="db-canvas-preview min-h-screen">
         <div className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 bg-slate-50/95 px-4 py-3 backdrop-blur">
           <div className="text-sm font-semibold">Preview del sitio</div>
 
@@ -397,7 +399,7 @@ export default function WebsitesBuilderCanvas({
           </button>
         </div>
 
-        <div className="mx-auto max-w-6xl">
+        <div className="db-canvas-preview-frame">
           {blocks.filter(function (block) { return !(block && block.hidden); }).map((block) => (
             <div
               key={block.id}
@@ -429,9 +431,9 @@ export default function WebsitesBuilderCanvas({
   }
 
   return (
-    <div data-website-builder-v2 className="flex min-h-[calc(100vh-120px)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-xl">
+    <div data-websites-builder-canvas className="db-canvas-studio flex min-h-[calc(100vh-100px)] flex-col overflow-hidden">
       {/* TOP BAR */}
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-slate-50 px-4 py-3">
+      <header className="db-canvas-toolbar flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
         <div className="flex items-center gap-3">
           {onBack && (
             <button
@@ -487,7 +489,7 @@ export default function WebsitesBuilderCanvas({
               onClick={() => setDevice(mode)}
               className={`rounded-lg p-2 ${
                 device === mode
-                  ? "bg-violet-500/15 text-violet-300"
+                  ? "db-canvas-device-active"
                   : "text-slate-500 hover:bg-white/5"
               }`}
             >
@@ -500,7 +502,7 @@ export default function WebsitesBuilderCanvas({
           <button
             type="button"
             onClick={() => setPreview(true)}
-            className="flex items-center gap-2 rounded-lg bg-violet-500 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-400"
+            className="db-canvas-preview-button flex items-center gap-2 rounded-lg px-3 py-2 text-xs"
           >
             <Eye size={14} />
             Preview
@@ -511,7 +513,7 @@ export default function WebsitesBuilderCanvas({
       {/* MAIN EDITOR */}
       <div className="grid min-h-0 flex-1 lg:grid-cols-[230px_minmax(0,1fr)_280px]">
         {/* BLOCK LIBRARY */}
-        <aside className="border-b border-white/10 bg-slate-50 p-3 lg:border-b-0 lg:border-r">
+        <aside className="db-canvas-library border-b p-3 lg:border-b-0 lg:border-r">
           <div className="mb-3 px-1">
             <div className="text-xs font-semibold">Bloques</div>
             <div className="mt-1 text-[10px] text-slate-500">
@@ -528,9 +530,9 @@ export default function WebsitesBuilderCanvas({
                   key={item.type}
                   type="button"
                   onClick={() => addBlock(item.type)}
-                  className="group flex items-center gap-3 rounded-xl border border-white/10 bg-white/[.02] p-3 text-left transition hover:border-cyan-400/20 hover:bg-cyan-400/[.03]"
+                  className="db-canvas-library-item group flex items-center gap-3 rounded-xl p-3 text-left"
                 >
-                  <span className="rounded-lg bg-violet-500/10 p-2 text-violet-300">
+                  <span className="db-canvas-icon rounded-lg p-2">
                     <Icon size={15} />
                   </span>
 
@@ -554,12 +556,12 @@ export default function WebsitesBuilderCanvas({
         </aside>
 
         {/* CANVAS */}
-        <main className="relative min-h-[600px] overflow-auto bg-slate-100 p-5">
+        <main className="db-canvas-stage relative min-h-[600px] overflow-auto p-6">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,.05),transparent_40%)]" />
 
           <div className="relative mx-auto flex min-h-[700px] justify-center">
             <div
-              className={`${canvasWidth} min-h-[700px] overflow-hidden rounded-xl border border-white/10 bg-white shadow-2xl transition-all`}
+              className={`${canvasWidth} db-canvas-artboard min-h-[700px] overflow-hidden transition-all`}
             >
               {blocks.map((block, index) => {
                 const selected = selectedId === block.id;
@@ -576,14 +578,15 @@ export default function WebsitesBuilderCanvas({
                       fontSize: `${block.fontSize}px`,
                       width: `${block.width}%`,
                     }}
-                    className={`group relative cursor-pointer border transition ${
+                    className={`db-canvas-block group relative cursor-pointer border transition ${
                       selected
-                        ? "border-violet-400 ring-1 ring-violet-400/40"
-                        : "border-transparent hover:border-cyan-400/30"
+                        ? ""
+                        : "border-transparent"
                     }`}
+                    data-selected={selected}
                   >
                     {selected && (
-                      <div className="absolute left-2 top-2 z-10 flex items-center gap-1 rounded-lg border border-violet-400/20 bg-slate-50/90 px-2 py-1 text-[9px] text-violet-300 backdrop-blur">
+                      <div className="db-canvas-label absolute left-2 top-2 z-10 flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] backdrop-blur">
                         <Move size={10} />
                         {block.label}
                       </div>
@@ -615,7 +618,7 @@ export default function WebsitesBuilderCanvas({
                     </div>
 
                     {selected && (
-                      <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-lg border border-white/10 bg-slate-50/95 p-1">
+                      <div className="db-canvas-actionbar absolute bottom-2 right-2 flex items-center gap-1 rounded-lg p-1">
                         <button
                           type="button"
                           onClick={(event) => {
@@ -677,7 +680,7 @@ export default function WebsitesBuilderCanvas({
         </main>
 
         {/* INSPECTOR */}
-        <aside className="overflow-y-auto border-t border-white/10 bg-slate-50 p-4 lg:border-l lg:border-t-0">
+        <aside className="db-canvas-inspector overflow-y-auto border-t p-4 lg:border-l lg:border-t-0">
           <div className="mb-5">
             <div className="text-xs font-semibold">Inspector</div>
             <div className="mt-1 text-[10px] text-slate-500">
@@ -691,7 +694,7 @@ export default function WebsitesBuilderCanvas({
             </div>
           ) : (
             <div className="space-y-5">
-              <div className="rounded-xl border border-violet-400/15 bg-violet-400/[.04] p-3">
+              <div className="db-canvas-inspector-card rounded-xl p-3">
                 <div className="text-[10px] uppercase tracking-wider text-violet-300">
                   Elemento
                 </div>
@@ -710,7 +713,7 @@ export default function WebsitesBuilderCanvas({
                     updateSelected({ text: event.target.value })
                   }
                   rows={4}
-                  className="w-full resize-none rounded-xl border border-white/10 bg-slate-50 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/40"
+                  className="db-canvas-control w-full resize-none rounded-xl px-3 py-2 text-xs"
                 />
               </label>
 
@@ -781,7 +784,7 @@ export default function WebsitesBuilderCanvas({
                       onClick={() => updateSelected({ align })}
                       className={`flex justify-center rounded-lg p-2 ${
                         selectedBlock.align === align
-                          ? "bg-violet-500/15 text-violet-300"
+                          ? "db-canvas-device-active"
                           : "text-slate-500 hover:bg-white/5"
                       }`}
                     >
@@ -827,7 +830,7 @@ export default function WebsitesBuilderCanvas({
                       background: event.target.value,
                     })
                   }
-                  className="w-full rounded-xl border border-white/10 bg-slate-50 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/40"
+                  className="db-canvas-control w-full rounded-xl px-3 py-2 text-xs"
                 />
               </label>
 
@@ -843,7 +846,7 @@ export default function WebsitesBuilderCanvas({
                       color: event.target.value,
                     })
                   }
-                  className="w-full rounded-xl border border-white/10 bg-slate-50 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/40"
+                  className="db-canvas-control w-full rounded-xl px-3 py-2 text-xs"
                 />
               </label>
 
@@ -855,7 +858,7 @@ export default function WebsitesBuilderCanvas({
                     JSON.stringify(blocks)
                   )
                 }
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-400/5 px-4 py-3 text-xs font-semibold text-emerald-300 hover:bg-emerald-400/10"
+                className="db-canvas-save flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-semibold"
               >
                 <Save size={14} />
                 Guardar sitio

@@ -1,0 +1,158 @@
+.db-canvas-studio {
+  --canvas-shell: #101215;
+  --canvas-panel: #15181c;
+  --canvas-panel-2: #1a1e23;
+  --canvas-border: rgba(255,255,255,.075);
+  --canvas-muted: #747d88;
+  --canvas-text: #f4f6f8;
+  --canvas-neon: #e8ff2f;
+
+  color: var(--canvas-text) !important;
+  border: 1px solid var(--canvas-border) !important;
+  border-radius: 20px !important;
+  background: var(--canvas-shell) !important;
+  box-shadow:
+    0 24px 80px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.025) !important;
+}
+
+.db-canvas-toolbar {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.025), transparent),
+    #121417 !important;
+  border-color: var(--canvas-border) !important;
+}
+
+.db-canvas-library,
+.db-canvas-inspector {
+  background: #121417 !important;
+  border-color: var(--canvas-border) !important;
+  color: var(--canvas-text) !important;
+}
+
+.db-canvas-stage {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(232,255,47,.04), transparent 28%),
+    linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px),
+    #0b0d0f !important;
+  background-size:
+    auto,
+    24px 24px,
+    24px 24px,
+    auto !important;
+}
+
+.db-canvas-artboard {
+  border: 1px solid rgba(255,255,255,.11) !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.42),
+    0 0 0 1px rgba(0,0,0,.12) !important;
+}
+
+.db-canvas-block {
+  position: relative;
+  transition:
+    border-color .16s ease,
+    box-shadow .16s ease,
+    transform .16s ease !important;
+}
+
+.db-canvas-block:hover {
+  border-color: rgba(232,255,47,.42) !important;
+}
+
+.db-canvas-block[data-selected="true"] {
+  border-color: var(--canvas-neon) !important;
+  box-shadow:
+    inset 0 0 0 1px var(--canvas-neon),
+    0 0 0 2px rgba(232,255,47,.08) !important;
+}
+
+.db-canvas-label {
+  border: 1px solid rgba(232,255,47,.24) !important;
+  background: rgba(13,15,17,.94) !important;
+  color: var(--canvas-neon) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.2);
+}
+
+.db-canvas-actionbar {
+  border: 1px solid var(--canvas-border) !important;
+  background: rgba(13,15,17,.94) !important;
+  backdrop-filter: blur(12px);
+}
+
+.db-canvas-control {
+  border: 1px solid var(--canvas-border) !important;
+  background: #0d0f12 !important;
+  color: var(--canvas-text) !important;
+}
+
+.db-canvas-control:focus {
+  outline: none;
+  border-color: rgba(232,255,47,.5) !important;
+  box-shadow: 0 0 0 3px rgba(232,255,47,.05);
+}
+
+.db-canvas-library-item {
+  border: 1px solid var(--canvas-border) !important;
+  background: rgba(255,255,255,.018) !important;
+  transition: all .16s ease !important;
+}
+
+.db-canvas-library-item:hover {
+  border-color: rgba(232,255,47,.28) !important;
+  background: rgba(232,255,47,.035) !important;
+  transform: translateY(-1px);
+}
+
+.db-canvas-icon {
+  background: rgba(232,255,47,.075) !important;
+  color: var(--canvas-neon) !important;
+}
+
+.db-canvas-device-active {
+  background: rgba(232,255,47,.10) !important;
+  color: var(--canvas-neon) !important;
+}
+
+.db-canvas-preview-button {
+  background: var(--canvas-neon) !important;
+  color: #08090a !important;
+  font-weight: 800 !important;
+}
+
+.db-canvas-preview-button:hover {
+  background: #f0ff61 !important;
+}
+
+.db-canvas-inspector-card {
+  border: 1px solid rgba(232,255,47,.15) !important;
+  background: rgba(232,255,47,.035) !important;
+}
+
+.db-canvas-save {
+  border: 1px solid rgba(232,255,47,.20) !important;
+  background: rgba(232,255,47,.06) !important;
+  color: var(--canvas-neon) !important;
+}
+
+.db-canvas-preview {
+  background: #0b0d0f !important;
+  color: var(--canvas-text) !important;
+}
+
+.db-canvas-preview-frame {
+  max-width: 1200px;
+  margin: 32px auto;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 30px 100px rgba(0,0,0,.44);
+}
+
+.db-canvas-studio input[type="range"] {
+  accent-color: var(--canvas-neon);
+}

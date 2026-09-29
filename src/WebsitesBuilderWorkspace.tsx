@@ -6,12 +6,20 @@ import {
 import {
   CheckCircle2,
   CircleAlert,
+  FileText,
+  LayoutGrid,
   Loader2,
+  Monitor,
+  Palette,
+  Search,
+  Settings2,
   Sparkles,
   WandSparkles,
 } from "lucide-react";
 
 import WebsitesBuilderCanvas from "./WebsitesBuilderCanvas";
+
+import "./websites-builder/websites-builder.css";
 
 import {
   WEB_DESIGN_LANGUAGES,
@@ -43,6 +51,14 @@ const PROJECT_KEY =
 
 const CANVAS_KEY =
   "digitalboost_websites_builder_canvas_v1";
+
+const railItems = [
+  ["build", LayoutGrid, "Build"],
+  ["pages", FileText, "Pages"],
+  ["styles", Palette, "Styles"],
+  ["seo", Search, "SEO"],
+  ["settings", Settings2, "Setup"],
+] as const;
 
 export default function WebsitesBuilderWorkspace({
   onBack,
@@ -205,7 +221,7 @@ export default function WebsitesBuilderWorkspace({
       });
 
       setNotice(
-        "Propuesta generada. Todavía no modificó el canvas."
+        "Propuesta lista para revisión."
       );
     } catch {
       setProposal({
@@ -215,7 +231,7 @@ export default function WebsitesBuilderWorkspace({
       });
 
       setNotice(
-        "IA no disponible. Se usó un fallback determinista sin inventar evidencia."
+        "IA no disponible. Se usó un fallback determinista."
       );
     } finally {
       setLoading(false);
@@ -247,7 +263,7 @@ export default function WebsitesBuilderWorkspace({
     setProposal(null);
 
     setNotice(
-      "Propuesta aplicada al proyecto editable."
+      "Dirección aplicada al canvas."
     );
   }
 
@@ -255,73 +271,118 @@ export default function WebsitesBuilderWorkspace({
     setProposal(null);
 
     setNotice(
-      "Propuesta descartada. El canvas existente no cambió."
+      "Propuesta descartada."
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#030308] text-white">
-
-      <header className="border-b border-white/10 bg-[#05050b] px-4 py-3">
-
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3">
-
-          <div className="flex items-center gap-3">
-
+    <div className="db-websites-shell">
+      <header className="db-topbar">
+        <div className="db-topbar-inner">
+          <div className="flex min-w-0 items-center gap-3">
             {onBack && (
               <button
                 type="button"
                 onClick={onBack}
-                className="rounded-lg border border-white/10 px-3 py-2 text-xs text-slate-400"
+                className="db-secondary px-3 py-2 text-[10px]"
               >
-                ← Volver
+                ← Studio
               </button>
             )}
 
-            <div>
-              <div className="text-sm font-bold">
-                DigitalBoost Web Builder
-              </div>
-
-              <div className="text-[10px] uppercase tracking-[.18em] text-cyan-300">
-                Canonical Workspace
-              </div>
+            <div className="db-brand-mark">
+              D
             </div>
 
+            <div className="min-w-0">
+              <div className="db-brand-title">
+                DigitalBoost Websites
+              </div>
+
+              <div className="db-brand-subtitle">
+                Professional Website Studio
+              </div>
+            </div>
           </div>
 
-          <div className="text-[10px] text-emerald-300">
-            DATA · EMPTY
-          </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[.025] px-3 py-2 md:flex">
+              <span className="db-status-dot" />
+              <span className="text-[9px] font-bold uppercase tracking-[.14em] text-slate-400">
+                {applied
+                  ? "Project active"
+                  : "Draft workspace"}
+              </span>
+            </div>
 
+            <div className="hidden rounded-full border border-white/10 px-3 py-2 text-[9px] font-bold uppercase tracking-[.14em] text-slate-500 sm:block">
+              Data · Empty
+            </div>
+
+            <button
+              type="button"
+              className="db-primary flex items-center gap-2 px-4 py-2.5 text-[10px]"
+            >
+              <Monitor size={13} />
+              Preview
+            </button>
+          </div>
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-[1600px] gap-4 p-4 xl:grid-cols-[350px_minmax(0,1fr)]">
+      <div className="db-shell-grid">
+        <nav className="db-rail">
+          <div className="space-y-2">
+            {railItems.map(
+              ([
+                id,
+                Icon,
+                label,
+              ]) => (
+                <button
+                  key={id}
+                  type="button"
+                  data-active={
+                    id === "build"
+                  }
+                  className="db-rail-button"
+                  title={label}
+                >
+                  <Icon size={17} />
+                  <span className="db-rail-label">
+                    {label}
+                  </span>
+                </button>
+              )
+            )}
+          </div>
+        </nav>
 
-        <aside className="space-y-4">
-
-          <section className="rounded-2xl border border-white/10 bg-[#080812] p-4">
-
-            <div className="mb-4 flex items-center gap-2">
-              <WandSparkles
-                size={17}
-                className="text-violet-300"
-              />
-
-              <div>
-                <div className="text-sm font-semibold">
-                  Web Operator
+        <aside className="db-operator">
+          <section className="db-panel p-4">
+            <div className="db-panel-header">
+              <div className="flex items-center gap-2.5">
+                <div className="grid h-9 w-9 place-items-center rounded-xl border border-[#e8ff2f]/20 bg-[#e8ff2f]/[.06] text-[#e8ff2f]">
+                  <WandSparkles size={16} />
                 </div>
 
-                <div className="text-[10px] text-slate-500">
-                  Proposal only
+                <div>
+                  <div className="text-xs font-bold">
+                    Web Operator
+                  </div>
+
+                  <div className="db-kicker mt-1">
+                    AI direction
+                  </div>
                 </div>
               </div>
+
+              <span className="rounded-full border border-white/10 px-2 py-1 text-[8px] font-bold uppercase tracking-wider text-slate-500">
+                Proposal
+              </span>
             </div>
 
-            <div className="mb-3 grid grid-cols-2 gap-2">
-
+            <div className="mt-5 grid grid-cols-2 gap-2">
               {(
                 [
                   "web",
@@ -331,51 +392,61 @@ export default function WebsitesBuilderWorkspace({
                 <button
                   key={value}
                   type="button"
+                  data-active={
+                    kind === value
+                  }
                   onClick={() =>
                     setKind(value)
                   }
-                  className={`rounded-lg border px-3 py-2 text-xs ${
-                    kind === value
-                      ? "border-violet-400 bg-violet-500/10"
-                      : "border-white/10 text-slate-500"
-                  }`}
+                  className="db-chip px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider"
                 >
                   {value}
                 </button>
               ))}
-
             </div>
 
-            <textarea
-              rows={7}
-              value={prompt}
-              onChange={(event) =>
-                setPrompt(
-                  event.target.value
-                )
-              }
-              placeholder="Describe el sitio, audiencia, oferta y objetivo..."
-              className="w-full rounded-xl border border-white/10 bg-black/20 p-3 text-sm outline-none"
-            />
+            <label className="mt-5 block">
+              <span className="mb-2 block text-[9px] font-bold uppercase tracking-[.14em] text-slate-500">
+                Project direction
+              </span>
 
-            <select
-              value={language}
-              onChange={(event) =>
-                setLanguage(
-                  event.target
-                    .value as WebDesignLanguage
-                )
-              }
-              className="mt-3 w-full rounded-xl border border-white/10 bg-[#0b0b16] p-3 text-xs"
-            >
-              {WEB_DESIGN_LANGUAGES.map(
-                (item) => (
-                  <option key={item}>
-                    {item}
-                  </option>
-                )
-              )}
-            </select>
+              <textarea
+                rows={7}
+                value={prompt}
+                onChange={(event) =>
+                  setPrompt(
+                    event.target.value
+                  )
+                }
+                placeholder="Describe la marca, audiencia, oferta, objetivo y sensación visual..."
+                className="db-input resize-none p-3 text-xs leading-relaxed"
+              />
+            </label>
+
+            <label className="mt-3 block">
+              <span className="mb-2 block text-[9px] font-bold uppercase tracking-[.14em] text-slate-500">
+                Design language
+              </span>
+
+              <select
+                value={language}
+                onChange={(event) =>
+                  setLanguage(
+                    event.target
+                      .value as WebDesignLanguage
+                  )
+                }
+                className="db-select p-3 text-xs"
+              >
+                {WEB_DESIGN_LANGUAGES.map(
+                  (item) => (
+                    <option key={item}>
+                      {item}
+                    </option>
+                  )
+                )}
+              </select>
+            </label>
 
             <button
               type="button"
@@ -383,7 +454,7 @@ export default function WebsitesBuilderWorkspace({
               onClick={
                 generateProposal
               }
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-violet-500 px-4 py-3 text-xs font-bold"
+              className="db-primary mt-4 flex w-full items-center justify-center gap-2 px-4 py-3 text-xs disabled:opacity-50"
             >
               {loading ? (
                 <Loader2
@@ -394,54 +465,63 @@ export default function WebsitesBuilderWorkspace({
                 <Sparkles size={15} />
               )}
 
-              Generar propuesta
+              Generate direction
             </button>
 
             {notice && (
-              <div className="mt-3 rounded-lg border border-white/10 p-3 text-[11px] text-slate-400">
+              <div className="mt-3 rounded-xl border border-white/[.07] bg-black/20 p-3 text-[10px] leading-relaxed text-slate-400">
                 {notice}
               </div>
             )}
-
           </section>
 
           {active && (
-            <section className="rounded-2xl border border-white/10 bg-[#080812] p-4">
+            <section className="db-panel mt-4 p-4">
+              <div className="db-panel-header">
+                <div>
+                  <div className="text-[9px] font-bold uppercase tracking-[.16em] text-slate-500">
+                    Website brief
+                  </div>
 
-              <div className="flex justify-between text-xs font-semibold">
-                <span>
-                  Website brief
-                </span>
+                  <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-[#e8ff2f]">
+                    {active.source}
+                  </div>
+                </div>
 
-                <span className="text-cyan-300">
-                  {active.source}
-                </span>
+                <Sparkles
+                  size={14}
+                  className="text-[#e8ff2f]"
+                />
               </div>
 
-              <div className="mt-3 text-sm font-semibold">
+              <div className="mt-4 text-sm font-semibold leading-snug">
                 {active.brief.headline}
               </div>
 
-              <div className="mt-2 text-xs leading-relaxed text-slate-500">
+              <div className="mt-2 text-[11px] leading-relaxed text-slate-500">
                 {active.brief.subheadline}
               </div>
 
-              <div className="mt-3 text-[10px] text-slate-600">
-                Proof:{" "}
-                {active.brief.proof}
+              <div className="mt-4 rounded-xl border border-white/[.06] bg-black/20 p-3">
+                <div className="text-[8px] font-bold uppercase tracking-wider text-slate-600">
+                  Proof state
+                </div>
+
+                <div className="mt-1 text-[10px] text-slate-400">
+                  {active.brief.proof}
+                </div>
               </div>
 
               {proposal && (
                 <div className="mt-4 grid grid-cols-2 gap-2">
-
                   <button
                     type="button"
                     onClick={
                       applyProposal
                     }
-                    className="rounded-lg bg-emerald-500/15 px-3 py-2 text-xs text-emerald-300"
+                    className="db-primary px-3 py-2.5 text-[10px]"
                   >
-                    Aplicar
+                    Apply
                   </button>
 
                   <button
@@ -449,74 +529,76 @@ export default function WebsitesBuilderWorkspace({
                     onClick={
                       discardProposal
                     }
-                    className="rounded-lg border border-white/10 px-3 py-2 text-xs"
+                    className="db-secondary px-3 py-2.5 text-[10px]"
                   >
-                    Descartar
+                    Discard
                   </button>
-
                 </div>
               )}
-
             </section>
           )}
 
           {verification && (
-            <section className="rounded-2xl border border-white/10 bg-[#080812] p-4">
+            <section className="db-panel mt-4 p-4">
+              <div className="db-panel-header">
+                <div>
+                  <div className="text-[9px] font-bold uppercase tracking-[.16em] text-slate-500">
+                    Verification
+                  </div>
 
-              <div className="flex items-center justify-between text-xs font-semibold">
-                Verification
+                  <div className="mt-1 text-xs font-semibold">
+                    Project health
+                  </div>
+                </div>
 
                 {verification.passed ? (
                   <CheckCircle2
-                    size={16}
+                    size={17}
                     className="text-emerald-400"
                   />
                 ) : (
                   <CircleAlert
-                    size={16}
+                    size={17}
                     className="text-amber-400"
                   />
                 )}
               </div>
 
-              <div className="mt-3 space-y-2">
-
+              <div className="mt-4 space-y-2">
                 {verification.checks.map(
                   (check) => (
                     <div
                       key={check.id}
-                      className="text-[10px]"
+                      className="rounded-xl border border-white/[.05] bg-black/15 p-2.5"
                     >
-                      <span
-                        className={
-                          check.passed
-                            ? "text-emerald-400"
-                            : "text-amber-400"
-                        }
-                      >
-                        {check.passed
-                          ? "✓ "
-                          : "! "}
-                      </span>
+                      <div className="flex items-center gap-2 text-[10px] font-semibold">
+                        <span
+                          className={
+                            check.passed
+                              ? "text-emerald-400"
+                              : "text-amber-400"
+                          }
+                        >
+                          {check.passed
+                            ? "●"
+                            : "!"}
+                        </span>
 
-                      {check.label}
+                        {check.label}
+                      </div>
 
-                      <div className="ml-4 text-slate-600">
+                      <div className="mt-1 pl-4 text-[9px] leading-relaxed text-slate-600">
                         {check.detail}
                       </div>
                     </div>
                   )
                 )}
-
               </div>
-
             </section>
           )}
-
         </aside>
 
-        <main className="min-w-0">
-
+        <main className="db-workstage">
           {applied ? (
             <WebsitesBuilderCanvas
               seedBlocks={
@@ -525,42 +607,39 @@ export default function WebsitesBuilderWorkspace({
               storageKey={
                 CANVAS_KEY
               }
-              studioTitle="DigitalBoost Web Builder"
-              studioEyebrow="Canonical visual canvas"
-              backLabel="← Web Operator"
+              studioTitle="DigitalBoost Websites"
+              studioEyebrow="Visual canvas"
+              backLabel="← Operator"
               onBlocksChange={
                 setCanvasBlocks
               }
             />
           ) : (
-            <div className="flex min-h-[700px] items-center justify-center rounded-2xl border border-dashed border-white/10">
+            <div className="db-empty-stage">
+              <div className="max-w-sm px-8 text-center">
+                <div className="db-neon-orb mx-auto">
+                  <Sparkles size={22} />
+                </div>
 
-              <div className="max-w-md text-center">
+                <div className="db-kicker mt-5">
+                  Ready to design
+                </div>
 
-                <Sparkles
-                  size={28}
-                  className="mx-auto text-violet-300"
-                />
-
-                <h2 className="mt-4 font-semibold">
-                  Canvas esperando dirección
+                <h2 className="mt-3 text-xl font-semibold tracking-tight">
+                  Convertí una dirección en una web profesional.
                 </h2>
 
-                <p className="mt-2 text-sm text-slate-500">
-                  Generá, revisá y aplicá
-                  una propuesta antes de
-                  modificar el canvas.
+                <p className="mt-3 text-xs leading-relaxed text-slate-500">
+                  Definí la intención del sitio.
+                  DigitalBoost prepara la dirección,
+                  estructura y sistema visual antes
+                  de aplicar cambios al canvas.
                 </p>
-
               </div>
-
             </div>
           )}
-
         </main>
-
       </div>
-
     </div>
   );
 }
