@@ -1,6 +1,8 @@
 import type {
-  ApprovalRepositoryPersistence,
   ApprovalPersistenceLoadResult,
+  ApprovalPersistenceRevision,
+  ApprovalPersistenceSaveResult,
+  ApprovalRepositoryPersistence,
 } from "./approvalPersistence";
 
 import type {
@@ -43,9 +45,46 @@ type ApprovalPersistenceEnvelope = {
   readonly schemaVersion:
     typeof APPROVAL_STORAGE_SCHEMA_VERSION;
 
+  readonly revision:
+    ApprovalPersistenceRevision;
+
   readonly state:
     ApprovalRepositoryState;
 };
+
+export class StaleApprovalPersistenceError
+  extends Error {
+  readonly expectedRevision:
+    ApprovalPersistenceRevision | null;
+
+  readonly actualRevision:
+    ApprovalPersistenceRevision | null;
+
+  constructor(
+    expectedRevision:
+      ApprovalPersistenceRevision | null,
+
+    actualRevision:
+      ApprovalPersistenceRevision | null
+  ) {
+    super(
+      `Approval persistence revision conflict: expected ${
+        expectedRevision ?? "empty"
+      }, found ${
+        actualRevision ?? "empty"
+      }.`
+    );
+
+    this.name =
+      "StaleApprovalPersistenceError";
+
+    this.expectedRevision =
+      expectedRevision;
+
+    this.actualRevision =
+      actualRevision;
+  }
+}
 
 function isRecord(
   value:
@@ -208,7 +247,7 @@ function assertPersistedApprovalState(
 function parseEnvelope(
   serialized:
     string
-): ApprovalRepositoryState {
+): ApprovalPersistenceEnvelope {
   let parsed:
     unknown;
 
@@ -242,11 +281,81 @@ function parseEnvelope(
     );
   }
 
+  /*
+   * Backward compatibility:
+   * pre-18H v1 envelopes had no revision field.
+   * They are treated as revision 0.
+   */
+  const revision =
+    parsed.revision ===
+      undefined
+      ? 0
+      : parsed.revision;
+
+  if (
+    typeof revision !==
+      "number" ||
+    !Number.isInteger(
+      revision
+    ) ||
+    revision < 0
+  ) {
+    throw new Error(
+      "Approval persistence revision is invalid."
+    );
+  }
+
   assertPersistedApprovalState(
     parsed.state
   );
 
-  return parsed.state;
+  return {
+    schemaVersion:
+      APPROVAL_STORAGE_SCHEMA_VERSION,
+
+    revision,
+
+    state:
+      parsed.state,
+  };
+}
+
+function readCurrentEnvelope(
+  storage:
+    ApprovalKeyValueStorage
+): ApprovalPersistenceEnvelope | null {
+  const serialized =
+    storage.getItem(
+      APPROVAL_STORAGE_KEY
+    );
+
+  if (
+    serialized === null
+  ) {
+    return null;
+  }
+
+  return parseEnvelope(
+    serialized
+  );
+}
+
+function assertExpectedRevision(
+  expectedRevision:
+    ApprovalPersistenceRevision | null,
+
+  actualRevision:
+    ApprovalPersistenceRevision | null
+): void {
+  if (
+    expectedRevision !==
+    actualRevision
+  ) {
+    throw new StaleApprovalPersistenceError(
+      expectedRevision,
+      actualRevision
+    );
+  }
 }
 
 export function createLocalApprovalPersistence(
@@ -256,16 +365,19 @@ export function createLocalApprovalPersistence(
   return {
     async load():
       Promise<ApprovalPersistenceLoadResult> {
-      const serialized =
-        storage.getItem(
-          APPROVAL_STORAGE_KEY
+      const envelope =
+        readCurrentEnvelope(
+          storage
         );
 
       if (
-        serialized === null
+        envelope === null
       ) {
         return {
           state:
+            null,
+
+          revision:
             null,
 
           authoritative:
@@ -275,9 +387,10 @@ export function createLocalApprovalPersistence(
 
       return {
         state:
-          parseEnvelope(
-            serialized
-          ),
+          envelope.state,
+
+        revision:
+          envelope.revision,
 
         authoritative:
           false,
@@ -286,17 +399,43 @@ export function createLocalApprovalPersistence(
 
     async save(
       state:
-        ApprovalRepositoryState
+        ApprovalRepositoryState,
+
+      expectedRevision:
+        ApprovalPersistenceRevision | null
     ):
-      Promise<void> {
+      Promise<ApprovalPersistenceSaveResult> {
       assertPersistedApprovalState(
         state
       );
+
+      const current =
+        readCurrentEnvelope(
+          storage
+        );
+
+      const actualRevision =
+        current?.revision ??
+        null;
+
+      assertExpectedRevision(
+        expectedRevision,
+        actualRevision
+      );
+
+      const nextRevision =
+        (
+          actualRevision ??
+          0
+        ) + 1;
 
       const envelope:
         ApprovalPersistenceEnvelope = {
           schemaVersion:
             APPROVAL_STORAGE_SCHEMA_VERSION,
+
+          revision:
+            nextRevision,
 
           state,
         };
@@ -307,10 +446,62 @@ export function createLocalApprovalPersistence(
           envelope
         )
       );
+
+      return {
+        revision:
+          nextRevision,
+
+        authoritative:
+          false,
+      };
     },
 
-    async clear():
+    async clear(
+      expectedRevision:
+        ApprovalPersistenceRevision | null
+    ):
       Promise<void> {
+      const serialized =
+        storage.getItem(
+          APPROVAL_STORAGE_KEY
+        );
+
+      if (
+        serialized === null
+      ) {
+        assertExpectedRevision(
+          expectedRevision,
+          null
+        );
+
+        return;
+      }
+
+      try {
+        const current =
+          parseEnvelope(
+            serialized
+          );
+
+        assertExpectedRevision(
+          expectedRevision,
+          current.revision
+        );
+      } catch (
+        error
+      ) {
+        /*
+         * Explicit corruption recovery is allowed only when
+         * the caller has no trusted persisted revision.
+         */
+        if (
+          expectedRevision !==
+          null
+        ) {
+          throw error;
+        }
+      }
+
       storage.removeItem(
         APPROVAL_STORAGE_KEY
       );

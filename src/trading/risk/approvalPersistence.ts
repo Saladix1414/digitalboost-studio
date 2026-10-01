@@ -2,9 +2,23 @@ import type {
   ApprovalRepositoryState,
 } from "./reviewRepository";
 
+export type ApprovalPersistenceRevision =
+  number;
+
 export type ApprovalPersistenceLoadResult = {
   readonly state:
     ApprovalRepositoryState | null;
+
+  readonly revision:
+    ApprovalPersistenceRevision | null;
+
+  readonly authoritative:
+    false;
+};
+
+export type ApprovalPersistenceSaveResult = {
+  readonly revision:
+    ApprovalPersistenceRevision;
 
   readonly authoritative:
     false;
@@ -16,11 +30,17 @@ export interface ApprovalRepositoryPersistence {
 
   save(
     state:
-      ApprovalRepositoryState
-  ):
-    Promise<void>;
+      ApprovalRepositoryState,
 
-  clear():
+    expectedRevision:
+      ApprovalPersistenceRevision | null
+  ):
+    Promise<ApprovalPersistenceSaveResult>;
+
+  clear(
+    expectedRevision:
+      ApprovalPersistenceRevision | null
+  ):
     Promise<void>;
 }
 

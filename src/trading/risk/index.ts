@@ -114,6 +114,8 @@ export {
 
 export type {
   ApprovalPersistenceLoadResult,
+  ApprovalPersistenceSaveResult,
+  ApprovalPersistenceRevision,
   ApprovalRepositoryPersistence,
   ApprovalStoreLifecycle,
   ApprovalStoreLifecycleStatus,
@@ -122,6 +124,7 @@ export type {
 export {
   APPROVAL_STORAGE_SCHEMA_VERSION,
   APPROVAL_STORAGE_KEY,
+  StaleApprovalPersistenceError,
   createLocalApprovalPersistence,
   createBrowserApprovalPersistence,
 } from "./localApprovalPersistence";

@@ -10,13 +10,14 @@ import {
 } from "./approvalPersistence";
 
 import type {
-  ApprovalRepositoryState,
-} from "./reviewRepository";
-
-import type {
+  ApprovalPersistenceRevision,
   ApprovalRepositoryPersistence,
   ApprovalStoreLifecycle,
 } from "./approvalPersistence";
+
+import type {
+  ApprovalRepositoryState,
+} from "./reviewRepository";
 
 import type {
   RiskReviewProvenanceSource,
@@ -39,6 +40,10 @@ let lifecycle:
 
 let persistence:
   ApprovalRepositoryPersistence | null =
+    null;
+
+let persistenceRevision:
+  ApprovalPersistenceRevision | null =
     null;
 
 let persistenceOperationQueue:
@@ -127,6 +132,9 @@ export function configureApprovalStorePersistence(
 ): void {
   persistence =
     adapter;
+
+  persistenceRevision =
+    null;
 }
 
 export async function hydrateApprovalStore():
@@ -136,6 +144,9 @@ export async function hydrateApprovalStore():
   if (
     !persistence
   ) {
+    persistenceRevision =
+      null;
+
     setLifecycle({
       status:
         "ready",
@@ -165,6 +176,9 @@ export async function hydrateApprovalStore():
     const result =
       await persistence.load();
 
+    persistenceRevision =
+      result.revision;
+
     if (
       result.state
     ) {
@@ -189,6 +203,9 @@ export async function hydrateApprovalStore():
   } catch (
     error
   ) {
+    persistenceRevision =
+      null;
+
     setLifecycle({
       status:
         "error",
@@ -226,9 +243,17 @@ export async function persistApprovalStore():
   try {
     await enqueueApprovalPersistenceOperation(
       async () => {
-        await adapter.save(
-          snapshot
-        );
+        const expectedRevision =
+          persistenceRevision;
+
+        const result =
+          await adapter.save(
+            snapshot,
+            expectedRevision
+          );
+
+        persistenceRevision =
+          result.revision;
 
         persistedWriteSequence =
           sequence;
@@ -263,6 +288,9 @@ export function getApprovalPersistenceWriteState() {
     pending:
       persistenceWriteSequence -
       persistedWriteSequence,
+
+    revision:
+      persistenceRevision,
 
     authoritative:
       false as const,
@@ -327,7 +355,9 @@ export async function clearApprovalStorePersistence():
 
       await enqueueApprovalPersistenceOperation(
         async () => {
-          await adapter.clear();
+          await adapter.clear(
+            persistenceRevision
+          );
         }
       );
     } catch (
@@ -353,6 +383,9 @@ export async function clearApprovalStorePersistence():
   state =
     createEmptyApprovalRepositoryState();
 
+  persistenceRevision =
+    null;
+
   persistenceWriteSequence =
     0;
 
@@ -364,7 +397,6 @@ export async function clearApprovalStorePersistence():
 
   emit();
 }
-
 
 export async function recoverApprovalStorePersistence():
   Promise<boolean> {
