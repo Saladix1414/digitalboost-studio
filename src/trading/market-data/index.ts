@@ -12,4 +12,6 @@ export type {
   MarketDataMode,
   MarketDataSnapshot,
   MarketDataSource,
+  MarketDataStatus,
+  MarketDataHealth,
 } from "./types";

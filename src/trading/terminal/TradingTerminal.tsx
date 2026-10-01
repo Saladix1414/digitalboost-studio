@@ -39,6 +39,9 @@ export function TradingTerminal() {
 
   const mockMarkets =
     marketData.getMarkets();
+
+  const marketHealth =
+    marketData.getHealth();
   const [
     symbol,
     setSymbol,
@@ -198,8 +201,18 @@ export function TradingTerminal() {
           )}
         </div>
 
-        <StatusBadge tone="neutral">
-          Paper · Mock
+        <StatusBadge
+          tone={
+            marketHealth.status === "ready"
+              ? "positive"
+              : marketHealth.status === "stale"
+                ? "warning"
+                : marketHealth.status === "error"
+                  ? "negative"
+                  : "info"
+          }
+        >
+          {marketHealth.sourceLabel}
         </StatusBadge>
       </div>
 

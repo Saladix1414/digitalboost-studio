@@ -18,6 +18,18 @@ export const localMarketData:
   MarketDataSource = {
     mode: "local-fixture",
 
+    getHealth() {
+      return {
+        status: "ready",
+        sourceLabel:
+          "Local deterministic fixtures",
+        lastUpdatedAt:
+          LOCAL_MARKET_UPDATED_AT,
+        message:
+          "No external market connection is active.",
+      };
+    },
+
     getSnapshot(): MarketDataSnapshot {
       return {
         mode:

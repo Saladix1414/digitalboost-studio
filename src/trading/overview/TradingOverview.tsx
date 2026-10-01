@@ -281,6 +281,9 @@ export function TradingOverview({
 
   const mockMarkets =
     marketData.getMarkets();
+
+  const marketHealth =
+    marketData.getHealth();
   const portfolioValue =
     mockPortfolio.reduce(
       (total, position) =>
@@ -348,11 +351,25 @@ export function TradingOverview({
         />
 
         <MetricCard
-          label="Workspace"
-          value="Healthy"
-          secondary="Local deterministic state"
-          trend="Mock"
-          tone="neutral"
+          label="Market source"
+          value={
+            marketHealth.status === "ready"
+              ? "Ready"
+              : marketHealth.status
+          }
+          secondary={
+            marketHealth.sourceLabel
+          }
+          trend="Local"
+          tone={
+            marketHealth.status === "ready"
+              ? "positive"
+              : marketHealth.status === "stale"
+                ? "warning"
+                : marketHealth.status === "error"
+                  ? "negative"
+                  : "info"
+          }
           icon={
             <Activity
               size={15}
