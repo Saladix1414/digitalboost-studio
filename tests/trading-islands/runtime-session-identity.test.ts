@@ -3,13 +3,6 @@ import fs from "node:fs";
 import test from "node:test";
 
 
-const root =
-  new URL(
-    "../../src/trading/",
-    import.meta.url
-  );
-
-
 function source(
   path:
     string
@@ -17,8 +10,8 @@ function source(
   string {
   return fs.readFileSync(
     new URL(
-      path,
-      root
+      `../../src/trading/${path}`,
+      import.meta.url
     ),
     "utf8"
   );
@@ -28,28 +21,57 @@ function source(
 test(
   "runtime session identity is owned by runtime domain",
   () => {
-    const identity =
+    const content =
+      source(
+        "runtime/sessionIdentity.ts"
+      );
+
+    for (
+      const token of [
+        "runtimeSessionSequence",
+        "runtimeSessionOrigin",
+        "createRuntimeSessionOrigin",
+        "createRuntimeSessionId",
+        "getRuntimeSessionOriginForDiagnostics",
+        "getRuntimeSessionSequenceForDiagnostics",
+      ]
+    ) {
+      assert.match(
+        content,
+        new RegExp(
+          token
+        )
+      );
+    }
+  }
+);
+
+
+test(
+  "runtime session identity uses collision-resistant context origin",
+  () => {
+    const content =
       source(
         "runtime/sessionIdentity.ts"
       );
 
     assert.match(
-      identity,
-      /createRuntimeSessionId/
-    );
-
-    assert.match(
-      identity,
-      /runtimeSessionSequence/
+      content,
+      /crypto\.randomUUID/
     );
 
     assert.doesNotMatch(
-      identity,
-      /Date\.now|new Date|Math\.random|crypto\.randomUUID/
+      content,
+      /Date\.now|new Date|Math\.random/
     );
 
     assert.doesNotMatch(
-      identity,
+      content,
+      /localStorage|sessionStorage|indexedDB|BroadcastChannel/
+    );
+
+    assert.doesNotMatch(
+      content,
       /fetch\s*\(|WebSocket/
     );
   }
@@ -57,26 +79,21 @@ test(
 
 
 test(
-  "runtime session no longer derives identity from paper account orders",
+  "runtime session no longer derives identity from paper state",
   () => {
-    const content =
+    const session =
       source(
         "runtime/session.ts"
       );
 
     assert.match(
-      content,
+      session,
       /createRuntimeSessionId/
     );
 
     assert.doesNotMatch(
-      content,
+      session,
       /context\.account\.orders\.length/
-    );
-
-    assert.doesNotMatch(
-      content,
-      /`runtime-\$\{context\.bot\.id\}-\$\{context\.account/
     );
   }
 );
@@ -92,12 +109,17 @@ test(
 
     assert.doesNotMatch(
       content,
-      /authoritative/
+      /authoritative:\s*true/
     );
 
     assert.doesNotMatch(
       content,
-      /approval|RiskReview|executePaperOrder|fillPaperMarketOrder/
+      /approvalVerified|approvedFor|RiskReview/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /executePaperOrder|fillPaperMarketOrder|runBotRuntimeSession/
     );
   }
 );

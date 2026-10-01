@@ -3,15 +3,19 @@ import test from "node:test";
 
 import {
   createRuntimeSessionId,
+  getRuntimeSessionOriginForDiagnostics,
   getRuntimeSessionSequenceForDiagnostics,
   resetRuntimeSessionIdentityForTests,
 } from "../../src/trading/runtime/sessionIdentity.ts";
 
 
 test(
-  "repeated sessions for same bot receive distinct identities",
+  "same bot receives distinct ordered session ids",
   () => {
     resetRuntimeSessionIdentityForTests();
+
+    const origin =
+      getRuntimeSessionOriginForDiagnostics();
 
     const first =
       createRuntimeSessionId(
@@ -25,26 +29,34 @@ test(
 
     assert.equal(
       first,
-      "runtime-bot-1-1"
+      `runtime-bot-1-${origin}-1`
     );
 
     assert.equal(
       second,
-      "runtime-bot-1-2"
+      `runtime-bot-1-${origin}-2`
     );
 
     assert.notEqual(
       first,
       second
     );
+
+    assert.equal(
+      getRuntimeSessionSequenceForDiagnostics(),
+      2
+    );
   }
 );
 
 
 test(
-  "session identity sequence is process monotonic across bots",
+  "different bots share context origin but not session identity",
   () => {
     resetRuntimeSessionIdentityForTests();
+
+    const origin =
+      getRuntimeSessionOriginForDiagnostics();
 
     const first =
       createRuntimeSessionId(
@@ -63,53 +75,59 @@ test(
 
     assert.equal(
       first,
-      "runtime-bot-alpha-1"
+      `runtime-bot-alpha-${origin}-1`
     );
 
     assert.equal(
       second,
-      "runtime-bot-beta-2"
+      `runtime-bot-beta-${origin}-2`
     );
 
     assert.equal(
       third,
-      "runtime-bot-alpha-3"
-    );
-
-    assert.equal(
-      getRuntimeSessionSequenceForDiagnostics(),
-      3
+      `runtime-bot-alpha-${origin}-3`
     );
   }
 );
 
 
 test(
-  "identity reset is explicit and reserved for tests",
+  "runtime context origin is UUID shaped",
   () => {
-    resetRuntimeSessionIdentityForTests();
+    const origin =
+      getRuntimeSessionOriginForDiagnostics();
+
+    assert.match(
+      origin,
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    );
+  }
+);
+
+
+test(
+  "test sequence reset does not replace runtime context origin",
+  () => {
+    const before =
+      getRuntimeSessionOriginForDiagnostics();
 
     createRuntimeSessionId(
       "bot-1"
     );
 
-    assert.equal(
-      getRuntimeSessionSequenceForDiagnostics(),
-      1
-    );
-
     resetRuntimeSessionIdentityForTests();
+
+    const after =
+      getRuntimeSessionOriginForDiagnostics();
+
+    assert.equal(
+      after,
+      before
+    );
 
     assert.equal(
       getRuntimeSessionSequenceForDiagnostics(),
       0
-    );
-
-    assert.equal(
-      createRuntimeSessionId(
-        "bot-1"
-      ),
-      "runtime-bot-1-1"
     );
   }
 );
