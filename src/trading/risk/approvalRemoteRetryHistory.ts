@@ -53,6 +53,16 @@ export type ApprovalRemoteRetryHistoryEntry = {
   readonly idempotencyProtected:
     boolean;
 
+  /*
+   * Opaque observational correlation reference.
+   *
+   * This is the persistence mutation identity already created
+   * by the approval store. It is evidence only and never
+   * participates in retry, CAS, approval, or execution.
+   */
+  readonly mutationRef:
+    string | null;
+
   readonly authoritative:
     false;
 };
@@ -98,6 +108,9 @@ export function appendApprovalRemoteRetryHistory(
 
     readonly idempotencyProtected:
       boolean;
+
+    readonly mutationRef:
+      string | null;
   }
 ):
   ApprovalRemoteRetryHistory {
@@ -127,6 +140,9 @@ export function appendApprovalRemoteRetryHistory(
 
     idempotencyProtected:
       input.idempotencyProtected,
+
+    mutationRef:
+      input.mutationRef,
 
     authoritative:
       false,

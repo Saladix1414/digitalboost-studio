@@ -69,7 +69,11 @@ export function recordApprovalRemoteRetryAttempt(
     boolean,
 
   event:
-    ApprovalRemoteRetryAttemptEvent
+    ApprovalRemoteRetryAttemptEvent,
+
+  mutationRef:
+    string | null =
+      null
 ):
   void {
   history =
@@ -88,6 +92,8 @@ export function recordApprovalRemoteRetryAttempt(
           event.reason,
 
         idempotencyProtected,
+
+        mutationRef,
       }
     );
 

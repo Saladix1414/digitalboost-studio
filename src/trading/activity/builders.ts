@@ -460,11 +460,14 @@ export function activityFromRemoteRetryHistoryEntry(
         `Attempt ${entry.attempt}.`,
         `Reason ${entry.reason ?? "none"}.`,
         `Idempotency protected ${entry.idempotencyProtected ? "yes" : "no"}.`,
+        `Mutation ${entry.mutationRef ?? "untracked"}.`,
       ].join(
         " "
       ),
 
     referenceId:
-      `remote-retry-${entry.sequence}`,
+      entry.mutationRef
+        ? `remote-mutation:${entry.mutationRef}`
+        : `remote-retry-${entry.sequence}`,
   };
 }

@@ -170,7 +170,9 @@ export function createRemoteApprovalPersistence(
               recordApprovalRemoteRetryAttempt(
                 "write",
                 idempotencyKey !== null,
-                event
+                event,
+                mutation?.mutationId ??
+                  null
               ),
         });
 
@@ -219,7 +221,9 @@ export function createRemoteApprovalPersistence(
             recordApprovalRemoteRetryAttempt(
               "clear",
               idempotencyKey !== null,
-              event
+              event,
+              mutation?.mutationId ??
+                null
             ),
       });
     },
