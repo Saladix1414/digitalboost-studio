@@ -5,6 +5,8 @@ import {
 import {
   deserializeApprovalBackendReadResponse,
   mapApprovalBackendErrorDto,
+  parseApprovalBackendErrorDto,
+  parseApprovalBackendWriteResponse,
   serializeApprovalBackendClearRequest,
   serializeApprovalBackendWriteRequest,
 } from "./approvalBackendTransport";
@@ -17,8 +19,6 @@ import {
 } from "./approvalHttpClient";
 
 import type {
-  ApprovalBackendErrorDto,
-  ApprovalBackendWriteResponseDto,
 } from "./approvalBackendTransport";
 
 import type {
@@ -91,44 +91,39 @@ function parseJsonBody(
   }
 }
 
-
 function throwApprovalHttpBackendError(
   response:
     ApprovalHttpResponse
 ):
   never {
-  let dto:
-    ApprovalBackendErrorDto | null =
-      null;
-
   if (
     response.body !==
     null
   ) {
     try {
-      dto =
+      const parsed =
         JSON.parse(
           response.body
-        ) as ApprovalBackendErrorDto;
-    } catch {
-      dto =
-        null;
-    }
-  }
+        ) as unknown;
 
-  if (
-    dto !==
-    null &&
-    typeof dto.code ===
-      "string" &&
-    typeof dto.operation ===
-      "string" &&
-    typeof dto.message ===
-      "string"
-  ) {
-    throw mapApprovalBackendErrorDto(
-      dto
-    );
+      const dto =
+        parseApprovalBackendErrorDto(
+          parsed
+        );
+
+      throw mapApprovalBackendErrorDto(
+        dto
+      );
+    } catch (
+      error
+    ) {
+      if (
+        error instanceof
+          ApprovalBackendError
+      ) {
+        throw error;
+      }
+    }
   }
 
   throw new ApprovalBackendError({
@@ -151,7 +146,6 @@ function throwApprovalHttpBackendError(
       ),
   });
 }
-
 
 export function createApprovalHttpBackendClient(
   http:
@@ -273,23 +267,26 @@ export function createApprovalHttpBackendClient(
         );
       }
 
-      const dto =
-        parseJsonBody<
-          ApprovalBackendWriteResponseDto
-        >(
+      const parsed =
+        parseJsonBody(
           response
         );
 
-      if (
-        !Number.isInteger(
-          dto.revision
-        ) ||
-        dto.revision <
-          0
+      let dto;
+
+      try {
+        dto =
+          parseApprovalBackendWriteResponse(
+            parsed
+          );
+      } catch (
+        error
       ) {
         throw new ApprovalHttpClientError({
           message:
-            "Approval backend returned an invalid revision.",
+            error instanceof Error
+              ? `Approval backend returned invalid write response: ${error.message}`
+              : "Approval backend returned invalid write response.",
 
           code:
             "invalid-response",
