@@ -13,6 +13,10 @@ import type {
   RiskReviewInput,
 } from "./reviewTypes";
 
+import {
+  createRuntimeBindingFingerprint,
+} from "../runtime/binding";
+
 export function reviewPaperRisk(
   input:
     RiskReviewInput
@@ -116,6 +120,12 @@ export function reviewPaperRisk(
         check.passed
     );
 
+  const binding =
+    createRuntimeBindingFingerprint(
+      input.bot,
+      input.strategy
+    );
+
   const review:
     RiskReview = {
       id:
@@ -136,6 +146,9 @@ export function reviewPaperRisk(
 
       approvedFor:
         "paper-only",
+
+      bindingFingerprint:
+        binding.value,
 
       authoritative:
         true,

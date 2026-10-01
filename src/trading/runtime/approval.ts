@@ -10,6 +10,10 @@ import type {
   TradingStrategy,
 } from "../strategy";
 
+import {
+  createRuntimeBindingFingerprint,
+} from "./binding";
+
 export type RuntimeApprovalBindingResult = {
   readonly valid:
     boolean;
@@ -103,6 +107,25 @@ export function verifyRuntimeApproval(
 
       reason:
         "Bot strategy binding does not match runtime strategy.",
+    };
+  }
+
+  const runtimeBinding =
+    createRuntimeBindingFingerprint(
+      bot,
+      strategy
+    );
+
+  if (
+    review.bindingFingerprint !==
+    runtimeBinding.value
+  ) {
+    return {
+      valid:
+        false,
+
+      reason:
+        "Risk review binding is stale because bot or strategy configuration changed.",
     };
   }
 

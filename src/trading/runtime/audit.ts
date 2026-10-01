@@ -35,6 +35,10 @@ export function createRuntimeAuditRecord(
 
       approvalVerified:
         true,
+
+      bindingFingerprint:
+        result.runtime
+          .approvalBindingFingerprint,
     },
 
     decision:

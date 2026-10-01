@@ -21,6 +21,9 @@ export type RuntimeApprovalEvidence = {
 
   readonly approvalVerified:
     true;
+
+  readonly bindingFingerprint:
+    string;
 };
 
 export type RuntimeAuditRecord = {

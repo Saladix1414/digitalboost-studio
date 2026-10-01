@@ -49,6 +49,9 @@ export type RiskReview = {
   readonly approvedFor:
     "paper-only";
 
+  readonly bindingFingerprint:
+    string;
+
   readonly authoritative:
     true;
 };

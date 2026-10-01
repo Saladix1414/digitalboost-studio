@@ -39,3 +39,11 @@ export type {
   RuntimeApprovalEvidence,
   RuntimeAuditRecord,
 } from "./auditTypes";
+
+export {
+  createRuntimeBindingFingerprint,
+} from "./binding";
+
+export type {
+  RuntimeBindingFingerprint,
+} from "./binding";

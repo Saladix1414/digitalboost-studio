@@ -55,6 +55,9 @@ export function runBotRuntimeStep(
       approvalStrategyId:
         context.approval.strategyId,
 
+      approvalBindingFingerprint:
+        context.approval.bindingFingerprint,
+
       liveExecution:
         false,
     };
@@ -85,6 +88,9 @@ export function runBotRuntimeStep(
 
       approvalStrategyId:
         context.approval.strategyId,
+
+      approvalBindingFingerprint:
+        context.approval.bindingFingerprint,
 
       liveExecution:
         false,
@@ -123,6 +129,9 @@ export function runBotRuntimeStep(
       approvalStrategyId:
         context.approval.strategyId,
 
+      approvalBindingFingerprint:
+        context.approval.bindingFingerprint,
+
       liveExecution:
         false,
     };
@@ -155,6 +164,9 @@ export function runBotRuntimeStep(
 
       approvalStrategyId:
         context.approval.strategyId,
+
+      approvalBindingFingerprint:
+        context.approval.bindingFingerprint,
 
       liveExecution:
         false,
@@ -218,6 +230,9 @@ export function runBotRuntimeStep(
       approvalStrategyId:
         context.approval.strategyId,
 
+      approvalBindingFingerprint:
+        context.approval.bindingFingerprint,
+
       liveExecution:
         false,
     };
@@ -250,6 +265,9 @@ export function runBotRuntimeStep(
 
       approvalStrategyId:
         context.approval.strategyId,
+
+      approvalBindingFingerprint:
+        context.approval.bindingFingerprint,
 
       liveExecution:
         false,

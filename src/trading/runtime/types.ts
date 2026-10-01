@@ -76,6 +76,9 @@ export type BotRuntimeResult = {
   readonly approvalStrategyId:
     string;
 
+  readonly approvalBindingFingerprint:
+    string;
+
   readonly liveExecution:
     false;
 };
