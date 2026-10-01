@@ -466,7 +466,7 @@ test(
 
         assert.equal(
           error.operation,
-          "read"
+          "write"
         );
 
         return true;
