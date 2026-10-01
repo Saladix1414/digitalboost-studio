@@ -144,3 +144,17 @@ export {
 export type {
   ApprovalPersistenceCoordinator,
 } from "./approvalCoordination";
+
+export {
+  createApprovalBackendPersistenceBoundary,
+  createRemoteApprovalPersistence,
+} from "./remoteApprovalPersistence";
+
+export type {
+  ApprovalBackendClient,
+  ApprovalBackendClearInput,
+  ApprovalBackendPersistenceBoundary,
+  ApprovalBackendReadResult,
+  ApprovalBackendWriteInput,
+  ApprovalBackendWriteResult,
+} from "./remoteApprovalPersistence";
