@@ -133,7 +133,7 @@ test(
 );
 
 test(
-  "Bot Forge obtains a review and passes that review into runtime",
+  "Bot Forge keeps candidate review separate and passes active review into runtime",
   () => {
     const content =
       source(
@@ -147,12 +147,22 @@ test(
 
     assert.match(
       content,
-      /approvalDecision\.approved/
+      /candidateReview\?\.approved/
     );
 
     assert.match(
       content,
-      /approval:\s*approvalDecision\.review/
+      /setActiveReview\(/
+    );
+
+    assert.match(
+      content,
+      /approval:\s*activeReview/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /approval:\s*candidateReview\.review/
     );
   }
 );

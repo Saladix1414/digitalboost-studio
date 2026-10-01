@@ -75,7 +75,12 @@ test(
 
     assert.match(
       content,
-      /review\.checks/
+      /activeReview\?\.checks/
+    );
+
+    assert.match(
+      content,
+      /candidateDecision/
     );
 
     assert.match(
