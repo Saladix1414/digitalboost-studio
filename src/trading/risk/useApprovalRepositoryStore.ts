@@ -1,4 +1,9 @@
 import {
+  appendApprovalRecoveryAttemptHistory,
+  createApprovalRecoveryAttemptHistory,
+} from "./approvalRecoveryAttemptHistory";
+
+import {
   beginApprovalRecoveryAttempt,
   completeApprovalRecoveryAttempt,
   createIdleApprovalRecoveryAttempt,
@@ -136,6 +141,14 @@ export function useApprovalRepositoryStore() {
     createIdleApprovalRecoveryAttempt
   );
 
+
+  const [
+    recoveryAttemptHistory,
+    setRecoveryAttemptHistory,
+  ] = useState(
+    createApprovalRecoveryAttemptHistory
+  );
+
   const state =
     useSyncExternalStore(
       subscribeApprovalStore,
@@ -238,6 +251,24 @@ export function useApprovalRepositoryStore() {
             )
           );
 
+          setRecoveryAttemptHistory(
+            (
+              current
+            ) =>
+              appendApprovalRecoveryAttemptHistory(
+                current,
+                {
+                  action,
+
+                  status:
+                    "succeeded",
+
+                  diagnosticCode:
+                    null,
+                }
+              )
+          );
+
           return true;
         }
 
@@ -249,17 +280,56 @@ export function useApprovalRepositoryStore() {
           )
         );
 
+        setRecoveryAttemptHistory(
+          (
+            current
+          ) =>
+            appendApprovalRecoveryAttemptHistory(
+              current,
+              {
+                action,
+
+                status:
+                  "failed",
+
+                diagnosticCode:
+                  resultingDiagnostic?.code ??
+                  null,
+              }
+            )
+        );
+
         return false;
       } catch {
         const resultingDiagnostic =
           getApprovalRecoveryDiagnostic();
 
+        const diagnosticCode =
+          resultingDiagnostic?.code ??
+          "unknown";
+
         setRecoveryAttempt(
           failApprovalRecoveryAttempt(
             action,
-            resultingDiagnostic?.code ??
-              "unknown"
+            diagnosticCode
           )
+        );
+
+        setRecoveryAttemptHistory(
+          (
+            current
+          ) =>
+            appendApprovalRecoveryAttemptHistory(
+              current,
+              {
+                action,
+
+                status:
+                  "failed",
+
+                diagnosticCode,
+              }
+            )
         );
 
         return false;

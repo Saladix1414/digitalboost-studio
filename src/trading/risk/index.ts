@@ -308,3 +308,15 @@ export type {
   ApprovalRecoveryAttemptAction,
   ApprovalRecoveryAttemptStatus,
 } from "./approvalRecoveryAttempt";
+
+export {
+  APPROVAL_RECOVERY_HISTORY_LIMIT,
+  appendApprovalRecoveryAttemptHistory,
+  createApprovalRecoveryAttemptHistory,
+} from "./approvalRecoveryAttemptHistory";
+
+export type {
+  ApprovalRecoveryAttemptHistory,
+  ApprovalRecoveryAttemptHistoryEntry,
+  ApprovalRecoveryAttemptHistoryStatus,
+} from "./approvalRecoveryAttemptHistory";

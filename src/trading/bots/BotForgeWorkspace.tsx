@@ -196,6 +196,8 @@ export function BotForgeWorkspace() {
 
     recoveryAttempt,
 
+    recoveryAttemptHistory,
+
     runRecoveryAttempt,
 
     persistenceMode,
@@ -574,6 +576,67 @@ export function BotForgeWorkspace() {
               <small>
                 OBSERVATIONAL ONLY
               </small>
+
+
+              <div className="ti-approval-recovery-history">
+                <span className="ti-label">
+                  RECOVERY HISTORY
+                </span>
+
+                <strong>
+                  {
+                    recoveryAttemptHistory.entries.length
+                  } recorded
+                </strong>
+
+                {recoveryAttemptHistory.entries.length > 0 ? (
+                  <div>
+                    {
+                      recoveryAttemptHistory.entries
+                        .slice(-4)
+                        .reverse()
+                        .map(
+                          (
+                            entry
+                          ) => (
+                            <div
+                              key={
+                                entry.sequence
+                              }
+                            >
+                              <span>
+                                #{entry.sequence}
+                              </span>
+
+                              <span>
+                                {entry.action}
+                              </span>
+
+                              <span>
+                                {entry.status}
+                              </span>
+
+                              <span>
+                                {
+                                  entry.diagnosticCode ??
+                                  "none"
+                                }
+                              </span>
+                            </div>
+                          )
+                        )
+                    }
+                  </div>
+                ) : (
+                  <span>
+                    NO RECOVERY ATTEMPTS RECORDED
+                  </span>
+                )}
+
+                <small>
+                  IN-MEMORY EVIDENCE · NOT AUTHORITY
+                </small>
+              </div>
             </div>
 
 
