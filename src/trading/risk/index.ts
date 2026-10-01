@@ -99,6 +99,8 @@ export {
   configureApprovalStorePersistence,
   hydrateApprovalStore,
   persistApprovalStore,
+  waitForApprovalPersistenceQueue,
+  getApprovalPersistenceWriteState,
   bootstrapApprovalStore,
   acceptApprovalStoreReview,
   clearApprovalStorePersistence,

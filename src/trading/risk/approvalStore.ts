@@ -41,10 +41,43 @@ let persistence:
   ApprovalRepositoryPersistence | null =
     null;
 
+let persistenceOperationQueue:
+  Promise<void> =
+    Promise.resolve();
+
+let persistenceWriteSequence =
+  0;
+
+let persistedWriteSequence =
+  0;
+
 const listeners =
   new Set<
     ApprovalStoreListener
   >();
+
+function enqueueApprovalPersistenceOperation(
+  operation:
+    () => Promise<void>
+): Promise<void> {
+  const run =
+    persistenceOperationQueue.then(
+      operation,
+      operation
+    );
+
+  persistenceOperationQueue =
+    run.catch(
+      () => undefined
+    );
+
+  return run;
+}
+
+export async function waitForApprovalPersistenceQueue():
+  Promise<void> {
+  await persistenceOperationQueue;
+}
 
 function emit() {
   listeners.forEach(
@@ -98,6 +131,8 @@ export function configureApprovalStorePersistence(
 
 export async function hydrateApprovalStore():
   Promise<ApprovalRepositoryState> {
+  await waitForApprovalPersistenceQueue();
+
   if (
     !persistence
   ) {
@@ -173,15 +208,31 @@ export async function hydrateApprovalStore():
 
 export async function persistApprovalStore():
   Promise<void> {
+  const adapter =
+    persistence;
+
   if (
-    !persistence
+    !adapter
   ) {
     return;
   }
 
+  const snapshot =
+    state;
+
+  const sequence =
+    ++persistenceWriteSequence;
+
   try {
-    await persistence.save(
-      state
+    await enqueueApprovalPersistenceOperation(
+      async () => {
+        await adapter.save(
+          snapshot
+        );
+
+        persistedWriteSequence =
+          sequence;
+      }
     );
   } catch (
     error
@@ -199,6 +250,23 @@ export async function persistApprovalStore():
         false,
     });
   }
+}
+
+export function getApprovalPersistenceWriteState() {
+  return {
+    queued:
+      persistenceWriteSequence,
+
+    persisted:
+      persistedWriteSequence,
+
+    pending:
+      persistenceWriteSequence -
+      persistedWriteSequence,
+
+    authoritative:
+      false as const,
+  };
 }
 
 export function bootstrapApprovalStore(
@@ -254,7 +322,14 @@ export async function clearApprovalStorePersistence():
     persistence
   ) {
     try {
-      await persistence.clear();
+      const adapter =
+        persistence;
+
+      await enqueueApprovalPersistenceOperation(
+        async () => {
+          await adapter.clear();
+        }
+      );
     } catch (
       error
     ) {
@@ -277,6 +352,12 @@ export async function clearApprovalStorePersistence():
 
   state =
     createEmptyApprovalRepositoryState();
+
+  persistenceWriteSequence =
+    0;
+
+  persistedWriteSequence =
+    0;
 
   lifecycle =
     createApprovalStoreLifecycle();
