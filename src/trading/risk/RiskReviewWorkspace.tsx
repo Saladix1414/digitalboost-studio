@@ -108,6 +108,8 @@ export function RiskReviewWorkspace() {
 
     hydrate:
       rehydrateApprovalStore,
+
+    persistenceDiagnostics,
 } =
     useApprovalRepositoryStore();
 
@@ -369,6 +371,95 @@ export function RiskReviewWorkspace() {
                       : "GOVERNANCE LOCKED"}
                   </span>
                 </header>
+
+                <div className="ti-approval-diagnostics">
+                  <div className="ti-approval-diagnostics__header">
+                    <span>
+                      Persistence Diagnostics
+                    </span>
+
+                    <span>
+                      EVIDENCE ONLY
+                    </span>
+                  </div>
+
+                  <dl className="ti-approval-diagnostics__grid">
+                    <div>
+                      <dt>
+                        Review version
+                      </dt>
+
+                      <dd>
+                        {activeReviewVersion?.version ?? "NONE"}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>
+                        Storage revision
+                      </dt>
+
+                      <dd>
+                        {persistenceDiagnostics.revision ?? "EMPTY"}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>
+                        Writes queued
+                      </dt>
+
+                      <dd>
+                        {persistenceDiagnostics.queued}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>
+                        Writes persisted
+                      </dt>
+
+                      <dd>
+                        {persistenceDiagnostics.persisted}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>
+                        Writes pending
+                      </dt>
+
+                      <dd>
+                        {persistenceDiagnostics.pending}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>
+                        Lifecycle
+                      </dt>
+
+                      <dd>
+                        {approvalLifecycle.status.toUpperCase()}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  {(
+                    approvalLifecycle.status === "stale" ||
+                    approvalLifecycle.status === "error"
+                  ) && approvalLifecycle.error ? (
+                    <div className="ti-approval-diagnostics__reason">
+                      <span>
+                        Sync reason
+                      </span>
+
+                      <strong>
+                        {approvalLifecycle.error}
+                      </strong>
+                    </div>
+                  ) : null}
+                </div>
 
                 {approvalLifecycle.error ? (
                   <p className="ti-hydration-state__error">

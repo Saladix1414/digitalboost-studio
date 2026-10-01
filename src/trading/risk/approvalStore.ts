@@ -27,6 +27,23 @@ import type {
   RiskReview,
 } from "./reviewTypes";
 
+export type ApprovalPersistenceWriteDiagnostics = {
+  readonly queued:
+    number;
+
+  readonly persisted:
+    number;
+
+  readonly pending:
+    number;
+
+  readonly revision:
+    ApprovalPersistenceRevision | null;
+
+  readonly authoritative:
+    false;
+};
+
 type ApprovalStoreListener =
   () => void;
 
@@ -56,6 +73,24 @@ let persistenceWriteSequence =
 let persistedWriteSequence =
   0;
 
+let persistenceWriteDiagnostics:
+  ApprovalPersistenceWriteDiagnostics = {
+    queued:
+      0,
+
+    persisted:
+      0,
+
+    pending:
+      0,
+
+    revision:
+      null,
+
+    authoritative:
+      false,
+  };
+
 const listeners =
   new Set<
     ApprovalStoreListener
@@ -82,6 +117,27 @@ function enqueueApprovalPersistenceOperation(
 export async function waitForApprovalPersistenceQueue():
   Promise<void> {
   await persistenceOperationQueue;
+}
+
+function refreshPersistenceWriteDiagnostics():
+  void {
+  persistenceWriteDiagnostics = {
+    queued:
+      persistenceWriteSequence,
+
+    persisted:
+      persistedWriteSequence,
+
+    pending:
+      persistenceWriteSequence -
+      persistedWriteSequence,
+
+    revision:
+      persistenceRevision,
+
+    authoritative:
+      false,
+  };
 }
 
 function emit() {
@@ -135,6 +191,10 @@ export function configureApprovalStorePersistence(
 
   persistenceRevision =
     null;
+
+  refreshPersistenceWriteDiagnostics();
+
+  emit();
 }
 
 
@@ -169,6 +229,8 @@ export async function hydrateApprovalStore():
     persistenceRevision =
       null;
 
+    refreshPersistenceWriteDiagnostics();
+
     setLifecycle({
       status:
         "ready",
@@ -200,6 +262,8 @@ export async function hydrateApprovalStore():
 
     persistenceRevision =
       result.revision;
+
+    refreshPersistenceWriteDiagnostics();
 
     if (
       result.state
@@ -262,6 +326,9 @@ export async function persistApprovalStore():
   const sequence =
     ++persistenceWriteSequence;
 
+  refreshPersistenceWriteDiagnostics();
+  emit();
+
   try {
     await enqueueApprovalPersistenceOperation(
       async () => {
@@ -279,6 +346,9 @@ export async function persistApprovalStore():
 
         persistedWriteSequence =
           sequence;
+
+        refreshPersistenceWriteDiagnostics();
+        emit();
       }
     );
   } catch (
@@ -299,24 +369,9 @@ export async function persistApprovalStore():
   }
 }
 
-export function getApprovalPersistenceWriteState() {
-  return {
-    queued:
-      persistenceWriteSequence,
-
-    persisted:
-      persistedWriteSequence,
-
-    pending:
-      persistenceWriteSequence -
-      persistedWriteSequence,
-
-    revision:
-      persistenceRevision,
-
-    authoritative:
-      false as const,
-  };
+export function getApprovalPersistenceWriteState():
+  ApprovalPersistenceWriteDiagnostics {
+  return persistenceWriteDiagnostics;
 }
 
 export function bootstrapApprovalStore(
@@ -413,6 +468,8 @@ export async function clearApprovalStorePersistence():
 
   persistedWriteSequence =
     0;
+
+  refreshPersistenceWriteDiagnostics();
 
   lifecycle =
     createApprovalStoreLifecycle();

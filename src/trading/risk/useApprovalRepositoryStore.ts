@@ -8,6 +8,7 @@ import {
   bootstrapApprovalStore,
   configureApprovalStorePersistence,
   getApprovalStoreActiveReview,
+  getApprovalPersistenceWriteState,
   getApprovalStoreLifecycle,
   getApprovalStoreSnapshot,
   hydrateApprovalStore,
@@ -72,6 +73,13 @@ export function useApprovalRepositoryStore() {
       getApprovalStoreLifecycle
     );
 
+  const persistenceDiagnostics =
+    useSyncExternalStore(
+      subscribeApprovalStore,
+      getApprovalPersistenceWriteState,
+      getApprovalPersistenceWriteState
+    );
+
   useEffect(
     () => {
       startBrowserApprovalPersistence();
@@ -102,6 +110,8 @@ export function useApprovalRepositoryStore() {
     state,
 
     lifecycle,
+
+    persistenceDiagnostics,
 
     activeReview:
       getApprovalStoreActiveReview(),
