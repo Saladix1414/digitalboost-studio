@@ -16,4 +16,5 @@ export type {
 
 export {
   activityFromRecoveryAttemptHistoryEntry,
+  activityFromRemoteRetryHistoryEntry,
 } from "./builders";

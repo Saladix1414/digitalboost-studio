@@ -3,7 +3,8 @@ export type TradingActivitySource =
   | "risk-review"
   | "runtime"
   | "paper-ledger"
-  | "recovery";
+  | "recovery"
+  | "remote-retry";
 
 export type TradingActivityAuthority =
   | "none"

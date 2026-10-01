@@ -39,6 +39,7 @@ import {
 import {
   activityFromPaperLedger,
   activityFromRecoveryAttemptHistoryEntry,
+  activityFromRemoteRetryHistoryEntry,
   activityFromReviewChainIntegrity,
   activityFromReviewHistoryEntry,
   activityFromRiskReview,
@@ -56,6 +57,8 @@ export function ActivityWorkspace() {
       approvalRepository,
 
     recoveryAttemptHistory,
+
+    remoteRetryHistory,
   } =
     useApprovalRepositoryStore();
 
@@ -150,6 +153,26 @@ export function ActivityWorkspace() {
         ) {
           items.push(
             activityFromRecoveryAttemptHistoryEntry(
+              entry,
+              sequence
+            )
+          );
+
+          sequence +=
+            1;
+        }
+
+
+        /*
+         * Remote retry attempts are shared observational evidence.
+         * Activity does not create or influence retry decisions.
+         */
+        for (
+          const entry of
+          remoteRetryHistory.entries
+        ) {
+          items.push(
+            activityFromRemoteRetryHistoryEntry(
               entry,
               sequence
             )
@@ -289,6 +312,7 @@ export function ActivityWorkspace() {
       [
         approvalRepository.history,
         recoveryAttemptHistory,
+    remoteRetryHistory,
       ]
     );
 

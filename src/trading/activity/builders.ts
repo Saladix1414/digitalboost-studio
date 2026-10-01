@@ -2,6 +2,11 @@ import type {
   ApprovalRecoveryAttemptHistoryEntry,
 } from "../risk/approvalRecoveryAttemptHistory";
 
+
+import type {
+  ApprovalRemoteRetryHistoryEntry,
+} from "../risk/approvalRemoteRetryHistory";
+
 import type {
   PaperLedgerEntry,
 } from "../paper";
@@ -381,10 +386,85 @@ export function activityFromRecoveryAttemptHistoryEntry(
         ? "Approval recovery succeeded"
         : "Approval recovery failed",
 
-    detail:
+    message:
       `Action ${entry.action}. Diagnostic ${entry.diagnosticCode ?? "none"}.`,
 
     referenceId:
       `recovery-attempt-${entry.sequence}`,
+  };
+}
+
+
+export function activityFromRemoteRetryHistoryEntry(
+  entry:
+    ApprovalRemoteRetryHistoryEntry,
+
+  sequence:
+    number
+):
+  TradingActivityItem {
+  let severity:
+    TradingActivitySeverity =
+      "info";
+
+  if (
+    entry.status ===
+    "succeeded"
+  ) {
+    severity =
+      "success";
+  } else if (
+    entry.status ===
+      "failed"
+  ) {
+    severity =
+      "warning";
+  } else if (
+    entry.status ===
+      "retry"
+  ) {
+    severity =
+      "warning";
+  }
+
+  const title =
+    entry.status ===
+      "attempt"
+      ? `Remote approval ${entry.operation} attempt`
+      : entry.status ===
+          "retry"
+        ? `Remote approval ${entry.operation} retry`
+        : entry.status ===
+            "succeeded"
+          ? `Remote approval ${entry.operation} succeeded`
+          : `Remote approval ${entry.operation} failed`;
+
+  return {
+    id:
+      `activity-remote-retry-${entry.sequence}-${entry.operation}-${entry.attempt}-${entry.status}`,
+
+    sequence,
+
+    source:
+      "remote-retry",
+
+    authority:
+      "none",
+
+    severity,
+
+    title,
+
+    message:
+      [
+        `Attempt ${entry.attempt}.`,
+        `Reason ${entry.reason ?? "none"}.`,
+        `Idempotency protected ${entry.idempotencyProtected ? "yes" : "no"}.`,
+      ].join(
+        " "
+      ),
+
+    referenceId:
+      `remote-retry-${entry.sequence}`,
   };
 }
