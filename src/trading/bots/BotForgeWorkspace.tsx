@@ -40,6 +40,7 @@ import {
   createRiskReviewProvenance,
   evaluateRiskReviewFreshness,
   reviewPaperRisk,
+  validateRiskReviewChain,
   validateRiskReviewProvenance,
 } from "../risk";
 
@@ -214,6 +215,19 @@ export function BotForgeWorkspace() {
           })
         : null
   );
+
+  const chainIntegrity =
+    useMemo(
+      () =>
+        reviewHistory
+          ? validateRiskReviewChain(
+              reviewHistory
+            )
+          : null,
+      [
+        reviewHistory,
+      ]
+    );
 
   const candidateReview =
     useMemo(
@@ -842,6 +856,69 @@ export function BotForgeWorkspace() {
                 <p className="ti-bot-forge__approval-note">
                   A configuration change requires an explicit new review
                   before the bot can regain paper runtime eligibility.
+                </p>
+              </section>
+
+              <section className="ti-bot-forge__panel">
+                <header>
+                  <div>
+                    <span className="ti-label">
+                      Chain Integrity
+                    </span>
+
+                    <strong>
+                      {chainIntegrity?.valid
+                        ? "CHAIN VALID"
+                        : "CHAIN BROKEN"}
+                    </strong>
+                  </div>
+
+                  <span
+                    className={
+                      chainIntegrity?.valid
+                        ? "ti-chain-integrity ti-chain-integrity--valid"
+                        : "ti-chain-integrity ti-chain-integrity--invalid"
+                    }
+                  >
+                    {chainIntegrity?.checkedEntries ?? 0}
+                    {" "}
+                    VERIFIED
+                  </span>
+                </header>
+
+                {!chainIntegrity?.valid &&
+                chainIntegrity ? (
+                  <div className="ti-chain-integrity__issues">
+                    {chainIntegrity.issues.map(
+                      (
+                        issue,
+                        index
+                      ) => (
+                        <article
+                          key={
+                            `${issue.code}-${issue.index}-${index}`
+                          }
+                        >
+                          <strong>
+                            {issue.code}
+                          </strong>
+
+                          <span>
+                            {issue.detail}
+                          </span>
+                        </article>
+                      )
+                    )}
+                  </div>
+                ) : (
+                  <p className="ti-bot-forge__approval-note">
+                    Accepted review versions form a continuous evidence chain.
+                  </p>
+                )}
+
+                <p className="ti-bot-forge__approval-note">
+                  Chain status is observational. Runtime still requires the
+                  current active review.
                 </p>
               </section>
 

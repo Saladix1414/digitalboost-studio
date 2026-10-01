@@ -37,6 +37,10 @@ import {
   validateRiskReviewProvenance,
 } from "./reviewProvenanceValidation";
 
+import {
+  validateRiskReviewChain,
+} from "./reviewChainValidation";
+
 export function RiskReviewWorkspace() {
   const [
     selectedBotId,
@@ -152,6 +156,19 @@ export function RiskReviewWorkspace() {
       [
         bot,
         strategy,
+      ]
+    );
+
+  const chainIntegrity =
+    useMemo(
+      () =>
+        reviewHistory
+          ? validateRiskReviewChain(
+              reviewHistory
+            )
+          : null,
+      [
+        reviewHistory,
       ]
     );
 
@@ -674,6 +691,70 @@ export function RiskReviewWorkspace() {
                     Accept new review
                   </button>
                 </div>
+              </section>
+
+              <section className="ti-risk-review__panel">
+                <header>
+                  <div>
+                    <span className="ti-label">
+                      Chain Integrity
+                    </span>
+
+                    <strong>
+                      {chainIntegrity?.valid
+                        ? "CHAIN VALID"
+                        : "CHAIN BROKEN"}
+                    </strong>
+                  </div>
+
+                  <span
+                    className={
+                      chainIntegrity?.valid
+                        ? "ti-chain-integrity ti-chain-integrity--valid"
+                        : "ti-chain-integrity ti-chain-integrity--invalid"
+                    }
+                  >
+                    {chainIntegrity?.checkedEntries ?? 0}
+                    {" "}
+                    VERIFIED
+                  </span>
+                </header>
+
+                {!chainIntegrity?.valid &&
+                chainIntegrity ? (
+                  <div className="ti-chain-integrity__issues">
+                    {chainIntegrity.issues.map(
+                      (
+                        issue,
+                        index
+                      ) => (
+                        <article
+                          key={
+                            `${issue.code}-${issue.index}-${index}`
+                          }
+                        >
+                          <strong>
+                            {issue.code}
+                          </strong>
+
+                          <span>
+                            {issue.detail}
+                          </span>
+                        </article>
+                      )
+                    )}
+                  </div>
+                ) : (
+                  <p className="ti-risk-review__boundary-note">
+                    Review versions and supersedes links form a continuous
+                    evidence chain.
+                  </p>
+                )}
+
+                <p className="ti-risk-review__boundary-note">
+                  Chain integrity validates evidence only. It does not grant,
+                  renew, or replace runtime approval.
+                </p>
               </section>
 
               <section className="ti-risk-review__panel">

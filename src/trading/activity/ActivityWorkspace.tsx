@@ -1,4 +1,7 @@
-import {
+import {  activityFromReviewChainIntegrity,
+  appendRiskReviewHistory,
+  createRiskReviewHistory,
+
   useMemo,
 } from "react";
 
@@ -223,6 +226,24 @@ export function ActivityWorkspace() {
           items.push(
             activityFromReviewHistoryEntry(
               replacementHistoryEntry,
+              sequence
+            )
+          );
+
+          sequence +=
+            1;
+
+          const reviewHistory =
+            appendRiskReviewHistory(
+              createRiskReviewHistory(
+                initialHistoryEntry
+              ),
+              replacementHistoryEntry
+            );
+
+          items.push(
+            activityFromReviewChainIntegrity(
+              reviewHistory,
               sequence
             )
           );

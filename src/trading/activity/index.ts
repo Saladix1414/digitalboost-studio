@@ -4,6 +4,7 @@ export {
   activityFromRuntimeAudit,
   activityFromRuntimeAuditSummary,
   activityFromPaperLedger,
+  activityFromReviewChainIntegrity,
 } from "./builders";
 
 export type {

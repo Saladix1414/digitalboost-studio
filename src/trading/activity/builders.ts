@@ -3,11 +3,13 @@ import type {
 } from "../paper";
 
 import {
+  validateRiskReviewChain,
   validateRiskReviewProvenance,
 } from "../risk";
 
 import type {
   RiskReview,
+  RiskReviewHistory,
   RiskReviewHistoryEntry,
 } from "../risk";
 
@@ -285,5 +287,58 @@ export function activityFromReviewHistoryEntry(
 
     referenceId:
       provenance.reviewId,
+  };
+}
+
+export function activityFromReviewChainIntegrity(
+  history:
+    RiskReviewHistory,
+
+  sequence:
+    number
+): TradingActivityItem {
+  const integrity =
+    validateRiskReviewChain(
+      history
+    );
+
+  return {
+    id:
+      `activity-review-chain-${sequence}`,
+
+    sequence,
+
+    source:
+      "risk-review",
+
+    authority:
+      "none",
+
+    severity:
+      integrity.valid
+        ? "info"
+        : "danger",
+
+    title:
+      integrity.valid
+        ? "Risk review chain valid"
+        : "Risk review chain broken",
+
+    message:
+      integrity.valid
+        ? `${integrity.checkedEntries} review entries verified.`
+        : `INVALID EVIDENCE · ${integrity.issues.map(
+            issue =>
+              `${issue.code}: ${issue.detail}`
+          ).join(" | ")}`,
+
+    botId:
+      null,
+
+    strategyId:
+      null,
+
+    referenceId:
+      "risk-review-chain",
   };
 }

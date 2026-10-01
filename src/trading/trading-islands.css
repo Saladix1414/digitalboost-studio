@@ -8707,3 +8707,60 @@
   color:
     var(--ti-negative);
 }
+
+/* ============================================================
+   PHASE 17E — CHAIN INTEGRITY UI
+   ============================================================ */
+
+.ti-chain-integrity {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  min-height: 20px;
+  padding: 3px 7px;
+  border: 1px solid var(--ti-border-subtle);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.ti-chain-integrity--valid {
+  color: var(--ti-positive);
+}
+
+.ti-chain-integrity--invalid {
+  color: var(--ti-negative);
+}
+
+.ti-chain-integrity__issues {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.ti-chain-integrity__issues article {
+  display: grid;
+  grid-template-columns:
+    minmax(120px, 0.45fr)
+    minmax(0, 1.55fr);
+  gap: 12px;
+  padding: 9px 10px;
+  border: 1px solid var(--ti-border-subtle);
+}
+
+.ti-chain-integrity__issues strong {
+  color: var(--ti-negative);
+  font-size: 7px;
+  text-transform: uppercase;
+}
+
+.ti-chain-integrity__issues span {
+  color: var(--ti-muted);
+  font-size: 7px;
+}
+
+@media (max-width: 620px) {
+  .ti-chain-integrity__issues article {
+    grid-template-columns: 1fr;
+  }
+}
