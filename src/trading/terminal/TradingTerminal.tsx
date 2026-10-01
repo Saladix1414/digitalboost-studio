@@ -24,8 +24,8 @@ import {
 import CandlestickChart from "./CandlestickChart";
 
 import {
-  getTerminalIndicators,
-} from "./indicators";
+  indicatorEngine,
+} from "../indicators";
 
 import TerminalActivityPanel from "./TerminalActivityPanel";
 
@@ -152,7 +152,7 @@ export function TradingTerminal() {
   const indicators =
     useMemo(
       () =>
-        getTerminalIndicators(
+        indicatorEngine.snapshot(
           candles
         ),
       [candles]
@@ -386,7 +386,7 @@ export function TradingTerminal() {
             <span>
               RSI
               <strong>
-                {indicators.rsi.toFixed(
+                {indicators.rsi14.toFixed(
                   1
                 )}
               </strong>
