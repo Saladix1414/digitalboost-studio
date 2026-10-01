@@ -8604,3 +8604,62 @@
       1fr;
   }
 }
+
+/* ============================================================
+   PHASE 17B — PROVENANCE UI
+   ============================================================ */
+
+.ti-risk-review__history article,
+.ti-bot-forge__review-history article {
+  grid-template-columns:
+    minmax(56px, 0.35fr)
+    minmax(140px, 1.4fr)
+    minmax(100px, 0.8fr)
+    minmax(120px, 0.9fr)
+    minmax(120px, 0.9fr);
+}
+
+.ti-risk-review__history code,
+.ti-bot-forge__review-history code {
+  overflow:
+    hidden;
+
+  color:
+    var(--ti-muted);
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+
+  font-size:
+    7px;
+
+  text-overflow:
+    ellipsis;
+
+  white-space:
+    nowrap;
+}
+
+@media (max-width: 900px) {
+  .ti-risk-review__history article,
+  .ti-bot-forge__review-history article {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+}
+
+@media (max-width: 620px) {
+  .ti-risk-review__history article,
+  .ti-bot-forge__review-history article {
+    grid-template-columns:
+      1fr;
+  }
+}

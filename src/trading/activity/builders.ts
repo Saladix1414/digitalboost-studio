@@ -4,7 +4,7 @@ import type {
 
 import type {
   RiskReview,
-  VersionedRiskReview,
+  RiskReviewHistoryEntry,
 } from "../risk";
 
 import type {
@@ -226,14 +226,19 @@ export function activityFromRuntimeAuditSummary(
 
 export function activityFromReviewHistoryEntry(
   entry:
-    VersionedRiskReview,
+    RiskReviewHistoryEntry,
 
   sequence:
     number
 ): TradingActivityItem {
+  const {
+    versionedReview,
+    provenance,
+  } = entry;
+
   return {
     id:
-      `activity-review-history-${entry.review.id}-v${entry.version}`,
+      `activity-review-history-${versionedReview.review.id}-v${versionedReview.version}`,
 
     sequence,
 
@@ -244,26 +249,26 @@ export function activityFromReviewHistoryEntry(
       "none",
 
     severity:
-      entry.review.status ===
+      versionedReview.review.status ===
       "approved"
         ? "info"
         : "warning",
 
     title:
-      `Risk review v${entry.version} recorded`,
+      `Risk review v${versionedReview.version} recorded`,
 
     message:
-      entry.previousReviewId
-        ? `Accepted review ${entry.review.id} replaced ${entry.previousReviewId}.`
-        : `Initial accepted review ${entry.review.id} recorded.`,
+      provenance.supersedes
+        ? `${provenance.source} · ${provenance.createdFrom} · supersedes ${provenance.supersedes}`
+        : `${provenance.source} · ${provenance.createdFrom} · root review`,
 
     botId:
-      entry.review.botId,
+      provenance.botId,
 
     strategyId:
-      entry.review.strategyId,
+      provenance.strategyId,
 
     referenceId:
-      entry.review.id,
+      provenance.reviewId,
   };
 }

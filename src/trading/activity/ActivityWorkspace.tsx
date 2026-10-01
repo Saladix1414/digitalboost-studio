@@ -21,6 +21,7 @@ import {
 import {
   createInitialVersionedReview,
   createNextVersionedReview,
+  createRiskReviewProvenance,
   reviewPaperRisk,
 } from "../risk";
 
@@ -100,9 +101,21 @@ export function ActivityWorkspace() {
             reviewDecision.review
           );
 
+        const initialHistoryEntry = {
+          versionedReview:
+            initialVersion,
+
+          provenance:
+            createRiskReviewProvenance(
+              initialVersion,
+              "risk-review-workspace",
+              "initial-review"
+            ),
+        };
+
         items.push(
           activityFromReviewHistoryEntry(
-            initialVersion,
+            initialHistoryEntry,
             sequence
           )
         );
@@ -195,9 +208,21 @@ export function ActivityWorkspace() {
               reviewDecision.review
             );
 
+          const replacementHistoryEntry = {
+            versionedReview:
+              replacementVersion,
+
+            provenance:
+              createRiskReviewProvenance(
+                replacementVersion,
+                "bot-forge",
+                "explicit-rereview"
+              ),
+          };
+
           items.push(
             activityFromReviewHistoryEntry(
-              replacementVersion,
+              replacementHistoryEntry,
               sequence
             )
           );

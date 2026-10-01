@@ -882,6 +882,29 @@ export function BotForgeWorkspace() {
                         <span>
                           PREV · {item.versionedReview.previousReviewId ?? "ROOT"}
                         </span>
+
+                        <span>
+                          SOURCE · {item.provenance.source}
+                        </span>
+
+                        <span>
+                          CREATED · {item.provenance.createdFrom}
+                        </span>
+
+                        <span>
+                          SUPERSEDES · {item.provenance.supersedes ?? "ROOT"}
+                        </span>
+
+                        <code
+                          title={
+                            item.provenance.bindingFingerprint
+                          }
+                        >
+                          FP · {item.provenance.bindingFingerprint.slice(
+                            0,
+                            18
+                          )}…
+                        </code>
                       </article>
                     )
                   )}
