@@ -166,7 +166,12 @@ for (
 
       assert.match(
         handler[1],
-        /"remote"[\s\S]*?await[\s\S]*?\(\)[\s\S]*?return;/
+        /"remote"[\s\S]*?await[\s\S]*?runRecoveryAttempt\([\s\S]*?"rehydrate"[\s\S]*?\)[\s\S]*?return;/
+      );
+
+      assert.match(
+        handler[1],
+        /await[\s\S]*?runRecoveryAttempt\([\s\S]*?"recover-local"[\s\S]*?\)/
       );
     }
   );

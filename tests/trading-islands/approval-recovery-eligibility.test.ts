@@ -154,7 +154,12 @@ for (
 
       assert.match(
         content,
-        /disabled=\{!approvalRecoveryEligibility\.allowed\}/
+        /disabled=\{[\s\S]*?!approvalRecoveryEligibility\.allowed[\s\S]*?recoveryAttempt\.status\s*===\s*"retrying"[\s\S]*?\}/
+      );
+
+      assert.match(
+        content,
+        /!approvalRecoveryEligibility\.allowed[\s\S]*?return;/
       );
 
       assert.match(
