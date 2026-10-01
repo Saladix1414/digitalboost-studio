@@ -59,3 +59,9 @@ export {
 export type {
   RuntimeAuditEvidenceHistory,
 } from "./runtimeAuditStore";
+
+export {
+  createRuntimeSessionId,
+  getRuntimeSessionSequenceForDiagnostics,
+  resetRuntimeSessionIdentityForTests,
+} from "./sessionIdentity";

@@ -2,6 +2,10 @@ import {
   runBotRuntimeStep,
 } from "./botRuntime";
 
+import {
+  createRuntimeSessionId,
+} from "./sessionIdentity";
+
 import type {
   BotRuntimeContext,
   BotRuntimeResult,
@@ -62,7 +66,9 @@ export function runBotRuntimeSession(
     BotRuntimeContext
 ): BotRuntimeSessionResult {
   const sessionId =
-    `runtime-${context.bot.id}-${context.account.orders.length + 1}`;
+    createRuntimeSessionId(
+      context.bot.id
+    );
 
   const events:
     BotRuntimeEvent[] = [];
