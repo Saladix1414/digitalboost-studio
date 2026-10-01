@@ -103,3 +103,12 @@ export {
 export type {
   RuntimeEvidenceStorage,
 } from "./localRuntimeEvidencePersistence";
+
+export {
+  bootstrapRuntimeEvidenceBrowserPersistence,
+  resetRuntimeEvidenceBrowserBootstrapForTests,
+} from "./runtimeEvidenceBrowserBootstrap";
+
+export {
+  useRuntimeEvidenceBrowserBootstrap,
+} from "./useRuntimeEvidenceBrowserBootstrap";

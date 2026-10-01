@@ -46,6 +46,11 @@ import {
   MarketDataProvider,
 } from "./market-data";
 
+import {
+  useRuntimeEvidenceBrowserBootstrap,
+} from "./runtime/useRuntimeEvidenceBrowserBootstrap";
+
+
 import "./trading-islands.css";
 
 export type TradingIslandsWorkspaceProps = {
@@ -178,6 +183,8 @@ const workspaceTabs = [
 export function TradingIslandsWorkspace({
   onBack,
 }: TradingIslandsWorkspaceProps) {
+  useRuntimeEvidenceBrowserBootstrap();
+
   const [
     activeSection,
     setActiveSection,
