@@ -69,3 +69,13 @@ export type {
   RiskReviewProvenanceIntegrity,
   RiskReviewProvenanceIntegrityIssue,
 } from "./reviewProvenanceValidation";
+
+export {
+  validateRiskReviewChain,
+} from "./reviewChainValidation";
+
+export type {
+  RiskReviewChainIntegrity,
+  RiskReviewChainIntegrityIssue,
+  RiskReviewChainIntegrityIssueCode,
+} from "./reviewChainValidation";
