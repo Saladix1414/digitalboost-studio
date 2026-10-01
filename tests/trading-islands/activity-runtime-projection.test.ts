@@ -9,8 +9,10 @@ const root =
   );
 
 function source(
-  path: string
-): string {
+  path:
+    string
+):
+  string {
   return fs.readFileSync(
     new URL(
       path,
@@ -20,63 +22,68 @@ function source(
   );
 }
 
+
 test(
-  "Activity workspace projects runtime sessions and audit",
+  "Activity workspace does not manufacture runtime sessions",
   () => {
     const content =
       source(
         "activity/ActivityWorkspace.tsx"
       );
 
-    assert.match(
-      content,
-      /runBotRuntimeSession/
-    );
-
-    assert.match(
-      content,
-      /createRuntimeAuditRecord/
-    );
-
-    assert.match(
-      content,
-      /activityFromRuntimeAudit/
-    );
-
-    assert.match(
-      content,
-      /activityFromRuntimeAuditSummary/
-    );
+    for (
+      const forbidden of [
+        /runBotRuntimeSession/,
+        /runBotRuntimeStep/,
+        /createRuntimeAuditRecord/,
+        /createPaperAccount/,
+        /evaluateStrategy/,
+        /indicatorEngine/,
+        /localHistoricalData/,
+      ]
+    ) {
+      assert.doesNotMatch(
+        content,
+        forbidden
+      );
+    }
   }
 );
 
+
 test(
-  "Activity projection uses approved review binding",
+  "Activity workspace does not manufacture approval reviews",
   () => {
     const content =
       source(
         "activity/ActivityWorkspace.tsx"
       );
 
-    assert.match(
+    assert.doesNotMatch(
       content,
       /reviewPaperRisk/
     );
 
-    assert.match(
+    assert.doesNotMatch(
       content,
-      /reviewDecision\.approved/
+      /reviewDecision/
     );
 
-    assert.match(
+    assert.doesNotMatch(
       content,
       /approval:\s*reviewDecision\.review/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /activityFromRiskReview/
     );
   }
 );
 
+
 test(
-  "Activity projection includes resulting paper ledger",
+  "Activity projects actual repository review evidence",
   () => {
     const content =
       source(
@@ -85,23 +92,60 @@ test(
 
     assert.match(
       content,
-      /session\.runtime\.account/
+      /approvalRepository\.history/
     );
 
     assert.match(
       content,
-      /\.ledger/
+      /approvalRepository\.history\.entries/
     );
 
     assert.match(
       content,
-      /activityFromPaperLedger/
+      /activityFromReviewHistoryEntry/
+    );
+
+    assert.match(
+      content,
+      /activityFromReviewChainIntegrity/
     );
   }
 );
 
+
 test(
-  "Activity workspace identifies itself as read only projection",
+  "Activity projects shared recovery and retry evidence",
+  () => {
+    const content =
+      source(
+        "activity/ActivityWorkspace.tsx"
+      );
+
+    assert.match(
+      content,
+      /recoveryAttemptHistory\.entries/
+    );
+
+    assert.match(
+      content,
+      /remoteRetryHistory\.entries/
+    );
+
+    assert.match(
+      content,
+      /activityFromRecoveryAttemptHistoryEntry/
+    );
+
+    assert.match(
+      content,
+      /activityFromRemoteRetryHistoryEntry/
+    );
+  }
+);
+
+
+test(
+  "Activity remains a read only projection",
   () => {
     const content =
       source(
@@ -113,54 +157,19 @@ test(
       /READ-ONLY PROJECTION/
     );
 
-    assert.match(
-      content,
-      /read-only projection/i
-    );
-
-    assert.match(
-      content,
-      /Risk Review remains the approval/
-    );
-  }
-);
-
-test(
-  "Activity projection does not call execution boundary directly",
-  () => {
-    const content =
-      source(
-        "activity/ActivityWorkspace.tsx"
+    for (
+      const forbidden of [
+        /executePaperOrder/,
+        /fillPaperMarketOrder/,
+        /fetch\s*\(/,
+        /WebSocket/,
+        /DigitalBoostPulse|from\s+["'][^"']*\/pulse(?:\/|["'])|data-pulse|\.pulse-/i,
+      ]
+    ) {
+      assert.doesNotMatch(
+        content,
+        forbidden
       );
-
-    assert.doesNotMatch(
-      content,
-      /executePaperOrder/
-    );
-
-    assert.doesNotMatch(
-      content,
-      /fillPaperMarketOrder/
-    );
-
-    assert.doesNotMatch(
-      content,
-      /evaluatePaperRisk/
-    );
-
-    assert.doesNotMatch(
-      content,
-      /fetch\s*\(/
-    );
-
-    assert.doesNotMatch(
-      content,
-      /WebSocket/
-    );
-
-    assert.doesNotMatch(
-      content,
-      /DigitalBoostPulse|from\s+["'][^"']*\/pulse(?:\/|["'])|data-pulse|\.pulse-/i
-    );
+    }
   }
 );

@@ -50,12 +50,22 @@ test(
 
     assert.match(
       content,
-      /activityFromRiskReview/
+      /activityFromReviewHistoryEntry/
     );
 
     assert.match(
       content,
-      /activityFromPaperLedger/
+      /activityFromReviewChainIntegrity/
+    );
+
+    assert.match(
+      content,
+      /activityFromRecoveryAttemptHistoryEntry/
+    );
+
+    assert.match(
+      content,
+      /activityFromRemoteRetryHistoryEntry/
     );
   }
 );
@@ -131,6 +141,17 @@ test(
     assert.doesNotMatch(
       content,
       /runBotRuntimeStep/
+    );
+
+
+    assert.doesNotMatch(
+      content,
+      /runBotRuntimeSession/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /reviewPaperRisk/
     );
 
     assert.doesNotMatch(

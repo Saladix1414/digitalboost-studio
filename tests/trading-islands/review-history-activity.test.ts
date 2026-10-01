@@ -92,26 +92,31 @@ test(
 );
 
 test(
-  "runtime approval still uses current approved review not history projection",
+  "Activity history projection never becomes runtime approval",
   () => {
     const content =
       source(
         "activity/ActivityWorkspace.tsx"
       );
 
+    assert.doesNotMatch(
+      content,
+      /approval:\s*/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /reviewDecision/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /runBotRuntimeSession/
+    );
+
     assert.match(
       content,
-      /approval:\s*reviewDecision\.review/
-    );
-
-    assert.doesNotMatch(
-      content,
-      /approval:\s*initialVersion/
-    );
-
-    assert.doesNotMatch(
-      content,
-      /approval:\s*replacementVersion/
+      /approvalRepository\.history/
     );
   }
 );
