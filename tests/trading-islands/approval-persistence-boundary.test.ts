@@ -45,7 +45,12 @@ test(
 
     assert.match(
       content,
-      /clear\(\)/
+      /clear\(/
+    );
+
+    assert.match(
+      content,
+      /expectedRevision/
     );
   }
 );
