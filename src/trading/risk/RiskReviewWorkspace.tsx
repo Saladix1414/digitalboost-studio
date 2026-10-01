@@ -121,6 +121,10 @@ export function RiskReviewWorkspace() {
 
     recoveryDiagnostic,
 
+    recoveryAttempt,
+
+    runRecoveryAttempt,
+
     persistenceMode,
 
     bootstrapFailurePolicy,
@@ -291,9 +295,10 @@ export function RiskReviewWorkspace() {
         return;
       }
 
-
       if (
-        !approvalRecoveryEligibility.allowed
+        !approvalRecoveryEligibility.allowed ||
+        recoveryAttempt.status ===
+          "retrying"
       ) {
         return;
       }
@@ -302,11 +307,15 @@ export function RiskReviewWorkspace() {
         persistenceMode ===
           "remote"
       ) {
-        await rehydrateApprovalStore();
+        await runRecoveryAttempt(
+          "rehydrate"
+        );
         return;
       }
 
-      await recoverPersistence();
+      await runRecoveryAttempt(
+        "recover-local"
+      );
     };
 
   const approvalRecoveryDiagnosticLabel =
@@ -347,6 +356,32 @@ export function RiskReviewWorkspace() {
             <small>
               EVIDENCE ONLY · NOT AUTHORITY
             </small>
+
+
+            <div className="ti-approval-recovery-attempt">
+              <span className="ti-label">
+                RECOVERY ATTEMPT
+              </span>
+
+              <strong>
+                {recoveryAttempt.status}
+              </strong>
+
+              <span>
+                ACTION · {recoveryAttempt.action ?? "none"}
+              </span>
+
+              <span>
+                DIAGNOSTIC · {
+                  recoveryAttempt.diagnosticCode ??
+                  "none"
+                }
+              </span>
+
+              <small>
+                OBSERVATIONAL ONLY
+              </small>
+            </div>
 
 
             {persistenceMode === "remote" &&
@@ -595,7 +630,11 @@ export function RiskReviewWorkspace() {
                       type="button"
                       className="ti-hydration-recovery__button"
                       onClick={handleApprovalPersistenceRecovery}
-                  disabled={!approvalRecoveryEligibility.allowed}
+                  disabled={
+                    !approvalRecoveryEligibility.allowed ||
+                    recoveryAttempt.status ===
+                      "retrying"
+                  }
                     >
                       {approvalRecoveryPresentation.label}
                     </button>

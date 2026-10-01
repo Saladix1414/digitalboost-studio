@@ -295,3 +295,16 @@ export type {
   ApprovalRecoveryEligibility,
   ApprovalRecoveryEligibilityReason,
 } from "./approvalRecoveryEligibility";
+
+export {
+  beginApprovalRecoveryAttempt,
+  completeApprovalRecoveryAttempt,
+  createIdleApprovalRecoveryAttempt,
+  failApprovalRecoveryAttempt,
+} from "./approvalRecoveryAttempt";
+
+export type {
+  ApprovalRecoveryAttempt,
+  ApprovalRecoveryAttemptAction,
+  ApprovalRecoveryAttemptStatus,
+} from "./approvalRecoveryAttempt";

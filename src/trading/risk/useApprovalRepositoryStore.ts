@@ -1,4 +1,15 @@
 import {
+  beginApprovalRecoveryAttempt,
+  completeApprovalRecoveryAttempt,
+  createIdleApprovalRecoveryAttempt,
+  failApprovalRecoveryAttempt,
+} from "./approvalRecoveryAttempt";
+
+import type {
+  ApprovalRecoveryAttemptAction,
+} from "./approvalRecoveryAttempt";
+
+import {
   createApprovalBootstrapFailurePolicy,
 } from "./approvalBootstrapFailurePolicy";
 
@@ -24,6 +35,8 @@ import {
 
 import {
   useEffect,
+  useRef,
+  useState,
   useSyncExternalStore,
 } from "react";
 
@@ -111,6 +124,18 @@ function startBrowserApprovalPersistence():
 }
 
 export function useApprovalRepositoryStore() {
+  const recoveryAttemptInFlight =
+    useRef(
+      false
+    );
+
+  const [
+    recoveryAttempt,
+    setRecoveryAttempt,
+  ] = useState(
+    createIdleApprovalRecoveryAttempt
+  );
+
   const state =
     useSyncExternalStore(
       subscribeApprovalStore,
@@ -165,6 +190,84 @@ export function useApprovalRepositoryStore() {
     },
     []
   );
+
+  const runRecoveryAttempt =
+    async (
+      action:
+        ApprovalRecoveryAttemptAction
+    ):
+      Promise<boolean> => {
+      if (
+        recoveryAttemptInFlight.current
+      ) {
+        return false;
+      }
+
+      recoveryAttemptInFlight.current =
+        true;
+
+      setRecoveryAttempt(
+        beginApprovalRecoveryAttempt(
+          action
+        )
+      );
+
+      try {
+        if (
+          action ===
+          "recover-local"
+        ) {
+          await recoverApprovalStorePersistence();
+        } else {
+          await hydrateApprovalStore();
+        }
+
+        const resultingLifecycle =
+          getApprovalStoreLifecycle();
+
+        const resultingDiagnostic =
+          getApprovalRecoveryDiagnostic();
+
+        if (
+          resultingLifecycle.status ===
+          "ready"
+        ) {
+          setRecoveryAttempt(
+            completeApprovalRecoveryAttempt(
+              action
+            )
+          );
+
+          return true;
+        }
+
+        setRecoveryAttempt(
+          failApprovalRecoveryAttempt(
+            action,
+            resultingDiagnostic?.code ??
+              null
+          )
+        );
+
+        return false;
+      } catch {
+        const resultingDiagnostic =
+          getApprovalRecoveryDiagnostic();
+
+        setRecoveryAttempt(
+          failApprovalRecoveryAttempt(
+            action,
+            resultingDiagnostic?.code ??
+              "unknown"
+          )
+        );
+
+        return false;
+      } finally {
+        recoveryAttemptInFlight.current =
+          false;
+      }
+    };
 
   return {
     state,
