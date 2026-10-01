@@ -193,3 +193,29 @@ export {
   persistRuntimeEvidenceReconciliationHistory,
   waitForRuntimeEvidenceReconciliationHistoryPersistenceQueue,
 } from "./runtimeEvidenceReconciliationHistoryStore";
+
+export {
+  RUNTIME_EVIDENCE_RECONCILIATION_HISTORY_LOCK_NAME,
+  createBrowserRuntimeEvidenceReconciliationHistoryCoordinator,
+  createLocalRuntimeEvidenceReconciliationHistoryCoordinator,
+} from "./runtimeEvidenceReconciliationHistoryCoordination";
+
+export type {
+  RuntimeEvidenceReconciliationHistoryCoordinator,
+} from "./runtimeEvidenceReconciliationHistoryCoordination";
+
+export {
+  mergeRuntimeEvidenceReconciliationHistories,
+} from "./runtimeEvidenceReconciliationHistoryMerge";
+
+export type {
+  RuntimeEvidenceReconciliationHistoryMergeConflict,
+  RuntimeEvidenceReconciliationHistoryMergeResult,
+  RuntimeEvidenceReconciliationHistoryMergeSuccess,
+} from "./runtimeEvidenceReconciliationHistoryMerge";
+
+export {
+  configureRuntimeEvidenceReconciliationHistoryCoordinator,
+  hasRuntimeEvidenceReconciliationHistoryExternalChange,
+  markRuntimeEvidenceReconciliationHistoryExternalChange,
+} from "./runtimeEvidenceReconciliationHistoryStore";
