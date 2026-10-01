@@ -21,27 +21,68 @@ function source(
 }
 
 test(
-  "terminal indicators are calculated locally",
+  "terminal indicators are calculated by the shared local engine",
   () => {
-    const content =
+    const terminal =
       source(
-        "terminal/indicators.ts"
+        "terminal/TradingTerminal.tsx"
+      );
+
+    const engine =
+      source(
+        "indicators/engine.ts"
+      );
+
+    const ema =
+      source(
+        "indicators/ema.ts"
+      );
+
+    const rsi =
+      source(
+        "indicators/rsi.ts"
       );
 
     assert.match(
-      content,
+      terminal,
+      /indicatorEngine\.snapshot/
+    );
+
+    assert.match(
+      engine,
       /calculateEMA/
     );
 
     assert.match(
-      content,
+      engine,
       /calculateRSI/
     );
 
-    assert.doesNotMatch(
-      content,
-      /fetch\s*\(/
+    assert.match(
+      ema,
+      /calculateEMA/
     );
+
+    assert.match(
+      rsi,
+      /calculateRSI/
+    );
+
+    for (const content of [
+      engine,
+      ema,
+      rsi,
+    ]) {
+      assert.doesNotMatch(
+        content,
+        /fetch\s*\(/
+      );
+
+      assert.doesNotMatch(
+        content,
+        /WebSocket/
+      );
+    }
   }
 );
 
