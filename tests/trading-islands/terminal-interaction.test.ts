@@ -45,7 +45,7 @@ test(
 
     assert.match(
       terminal,
-      /indicatorEngine\.snapshot/
+      /indicatorEngine\.analyze/
     );
 
     assert.match(
