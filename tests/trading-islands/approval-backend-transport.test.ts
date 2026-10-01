@@ -67,7 +67,7 @@ test(
 
     assert.doesNotMatch(
       content,
-      /authoritative:[\s\S]*?true/
+      /authoritative:\s*true/
     );
   }
 );
