@@ -5290,3 +5290,90 @@
     overflow-x: auto;
   }
 }
+
+/* ============================================================
+   PHASE 5C — TERMINAL CROSSHAIR
+   ============================================================ */
+
+.ti-terminal-crosshair {
+  pointer-events: none;
+
+  stroke:
+    rgba(148, 163, 184, 0.28);
+
+  stroke-width: 1;
+
+  stroke-dasharray:
+    4 4;
+}
+
+.ti-terminal-candle--selected
+  rect:not(.ti-terminal-volume) {
+  filter:
+    drop-shadow(
+      0 0 5px
+      rgba(76, 168, 245, 0.25)
+    );
+}
+
+.ti-terminal-candle:focus-visible
+  rect:not(.ti-terminal-volume) {
+  stroke-width: 2.4;
+}
+
+/* ============================================================
+   PHASE 5C — PAPER PREVIEW POLISH
+   ============================================================ */
+
+.ti-terminal__paper-submit:disabled {
+  opacity: 0.42;
+
+  cursor: not-allowed;
+}
+
+.ti-terminal__paper-preview-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 6px;
+
+  margin-top: 8px;
+}
+
+.ti-terminal__paper-preview-grid > span {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+
+  border:
+    1px solid
+    var(--ti-border-subtle);
+
+  border-radius:
+    var(--ti-radius-sm);
+
+  padding:
+    6px;
+
+  color:
+    var(--ti-faint);
+
+  font-size: 7px;
+}
+
+.ti-terminal__paper-preview-grid strong {
+  color:
+    var(--ti-text-2);
+
+  font-size: 8px;
+}
+
+@media (max-width: 520px) {
+  .ti-terminal__paper-preview-grid {
+    grid-template-columns:
+      1fr;
+  }
+}

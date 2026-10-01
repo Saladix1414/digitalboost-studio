@@ -237,6 +237,9 @@ export function CandlestickChart({
                 ? "positive"
                 : "negative";
 
+            const selected =
+              selectedIndex === index;
+
             return (
               <g
                 key={
@@ -245,7 +248,7 @@ export function CandlestickChart({
                 className={[
                   "ti-terminal-candle",
                   `ti-terminal-candle--${tone}`,
-                  selectedIndex === index
+                  selected
                     ? "ti-terminal-candle--selected"
                     : "",
                 ]
@@ -285,6 +288,26 @@ export function CandlestickChart({
                   }
                 }}
               >
+                {selected ? (
+                  <>
+                    <line
+                      className="ti-terminal-crosshair ti-terminal-crosshair--vertical"
+                      x1={item.x}
+                      x2={item.x}
+                      y1={PAD_Y}
+                      y2={HEIGHT - PAD_Y}
+                    />
+
+                    <line
+                      className="ti-terminal-crosshair ti-terminal-crosshair--horizontal"
+                      x1={PAD_X}
+                      x2={WIDTH - PAD_X}
+                      y1={item.closeY}
+                      y2={item.closeY}
+                    />
+                  </>
+                ) : null}
+
                 <line
                   x1={item.x}
                   x2={item.x}

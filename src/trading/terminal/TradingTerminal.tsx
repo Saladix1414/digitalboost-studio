@@ -71,6 +71,28 @@ export function TradingTerminal() {
     setPaperPreview,
   ] = useState(false);
 
+  const [
+    paperAmount,
+    setPaperAmount,
+  ] = useState("");
+
+  const numericPaperAmount =
+    Number(
+      paperAmount
+    );
+
+  const paperAmountValid =
+    Number.isFinite(
+      numericPaperAmount
+    ) &&
+    numericPaperAmount > 0;
+
+  const paperNotional =
+    paperAmountValid
+      ? numericPaperAmount *
+        market.price
+      : 0;
+
   const market =
     mockMarkets.find(
       (item) =>
@@ -478,7 +500,17 @@ export function TradingTerminal() {
                 type="number"
                 min="0"
                 step="0.001"
+                value={paperAmount}
                 placeholder="0.000"
+                onChange={(event) => {
+                  setPaperAmount(
+                    event.target.value
+                  );
+
+                  setPaperPreview(
+                    false
+                  );
+                }}
               />
             </label>
 
@@ -498,6 +530,9 @@ export function TradingTerminal() {
             <button
               type="button"
               className="ti-terminal__paper-submit"
+              disabled={
+                !paperAmountValid
+              }
               onClick={() =>
                 setPaperPreview(
                   true
@@ -507,7 +542,8 @@ export function TradingTerminal() {
               Preview paper order
             </button>
 
-            {paperPreview ? (
+            {paperPreview &&
+            paperAmountValid ? (
               <div className="ti-terminal__paper-preview">
                 <strong>
                   Paper preview ready
@@ -516,6 +552,41 @@ export function TradingTerminal() {
                 <span>
                   {paperSide.toUpperCase()} · {symbol}/USDT
                 </span>
+
+                <div className="ti-terminal__paper-preview-grid">
+                  <span>
+                    Quantity
+                    <strong>
+                      {numericPaperAmount}
+                    </strong>
+                  </span>
+
+                  <span>
+                    Reference
+                    <strong>
+                      {market.price.toLocaleString(
+                        "en-US",
+                        {
+                          style: "currency",
+                          currency: "USD",
+                        }
+                      )}
+                    </strong>
+                  </span>
+
+                  <span>
+                    Notional
+                    <strong>
+                      {paperNotional.toLocaleString(
+                        "en-US",
+                        {
+                          style: "currency",
+                          currency: "USD",
+                        }
+                      )}
+                    </strong>
+                  </span>
+                </div>
 
                 <button
                   type="button"
