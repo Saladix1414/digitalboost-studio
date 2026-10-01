@@ -33,6 +33,8 @@ import type {
   TradingSection,
 } from "./shell/IslandSidebar";
 
+import TradingOverview from "./overview/TradingOverview";
+
 import "./trading-islands.css";
 
 export type TradingIslandsWorkspaceProps = {
@@ -320,21 +322,26 @@ export function TradingIslandsWorkspace({
           />
 
           <section className="ti-shell-stage">
-            <EmptyState
-              icon={
-                <ActiveIcon
-                  size={21}
-                  strokeWidth={1.5}
-                />
-              }
-              title={`${activeMeta.title} workspace ready`}
-              description={
-                activeWorkspaceTab ===
-                "workspace"
-                  ? "The product shell is active. Functional modules will be introduced in the next vertical slices."
-                  : `${activeWorkspaceTab} is reserved for the upcoming product workflow.`
-              }
-            />
+            {activeSection === "overview" &&
+            activeWorkspaceTab === "workspace" ? (
+              <TradingOverview />
+            ) : (
+              <EmptyState
+                icon={
+                  <ActiveIcon
+                    size={21}
+                    strokeWidth={1.5}
+                  />
+                }
+                title={`${activeMeta.title} workspace ready`}
+                description={
+                  activeWorkspaceTab ===
+                  "workspace"
+                    ? "This workspace is prepared for the next product phase."
+                    : `${activeWorkspaceTab} is reserved for the upcoming product workflow.`
+                }
+              />
+            )}
           </section>
         </div>
       </IslandShell>
