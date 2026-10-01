@@ -11,17 +11,33 @@ import {
   getApprovalStoreLifecycle,
   getApprovalStoreSnapshot,
   hydrateApprovalStore,
+  markApprovalStoreStale,
   persistApprovalStore,
   recoverApprovalStorePersistence,
   subscribeApprovalStore,
 } from "./approvalStore";
 
 import {
+  APPROVAL_STORAGE_KEY,
   createBrowserApprovalPersistence,
 } from "./localApprovalPersistence";
 
 let browserPersistenceStarted =
   false;
+
+function handleApprovalStorageChange(
+  event:
+    StorageEvent
+): void {
+  if (
+    event.key !==
+    APPROVAL_STORAGE_KEY
+  ) {
+    return;
+  }
+
+  markApprovalStoreStale();
+}
 
 function startBrowserApprovalPersistence():
   void {
@@ -59,6 +75,25 @@ export function useApprovalRepositoryStore() {
   useEffect(
     () => {
       startBrowserApprovalPersistence();
+
+      if (
+        typeof window ===
+        "undefined"
+      ) {
+        return;
+      }
+
+      window.addEventListener(
+        "storage",
+        handleApprovalStorageChange
+      );
+
+      return () => {
+        window.removeEventListener(
+          "storage",
+          handleApprovalStorageChange
+        );
+      };
     },
     []
   );

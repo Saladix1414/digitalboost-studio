@@ -98,6 +98,7 @@ export {
   subscribeApprovalStore,
   configureApprovalStorePersistence,
   hydrateApprovalStore,
+  markApprovalStoreStale,
   persistApprovalStore,
   waitForApprovalPersistenceQueue,
   getApprovalPersistenceWriteState,

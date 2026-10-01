@@ -137,6 +137,28 @@ export function configureApprovalStorePersistence(
     null;
 }
 
+
+export function markApprovalStoreStale():
+  void {
+  if (
+    lifecycle.status ===
+    "hydrating"
+  ) {
+    return;
+  }
+
+  setLifecycle({
+    status:
+      "stale",
+
+    error:
+      "Approval state changed in another browser context. Rehydration is required.",
+
+    authoritative:
+      false,
+  });
+}
+
 export async function hydrateApprovalStore():
   Promise<ApprovalRepositoryState> {
   await waitForApprovalPersistenceQueue();

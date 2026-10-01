@@ -48,6 +48,7 @@ export type ApprovalStoreLifecycleStatus =
   | "idle"
   | "hydrating"
   | "ready"
+  | "stale"
   | "error";
 
 export type ApprovalStoreLifecycle = {
