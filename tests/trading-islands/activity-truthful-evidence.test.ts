@@ -36,8 +36,6 @@ test(
       "mockTradingBots",
       "mockStrategies",
       "activityFromRiskReview",
-      "activityFromRuntimeAudit",
-      "activityFromRuntimeAuditSummary",
       "activityFromPaperLedger",
     ];
 
