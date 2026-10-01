@@ -7230,3 +7230,180 @@
       var(--ti-border-subtle);
   }
 }
+
+/* ============================================================
+   PHASE 13E — BOT RUNTIME ACTIVITY
+   ============================================================ */
+
+.ti-bot-forge__runtime-controls {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding: 12px;
+
+  border-bottom:
+    1px solid
+    var(--ti-border-subtle);
+}
+
+.ti-bot-forge__runtime-controls button {
+  border:
+    1px solid
+    rgba(76, 168, 245, 0.24);
+
+  border-radius:
+    var(--ti-radius-sm);
+
+  padding:
+    8px 10px;
+
+  color:
+    var(--ti-cyan);
+
+  background:
+    rgba(76, 168, 245, 0.05);
+
+  font: inherit;
+  font-size: 8px;
+
+  cursor: pointer;
+}
+
+.ti-bot-forge__runtime-controls button:disabled {
+  opacity:
+    0.35;
+
+  cursor:
+    not-allowed;
+}
+
+.ti-bot-forge__runtime-controls span {
+  color:
+    var(--ti-faint);
+
+  font-size: 7px;
+
+  text-align: right;
+}
+
+.ti-bot-forge__runtime-decision {
+  padding:
+    4px 7px;
+
+  border:
+    1px solid
+    var(--ti-border-subtle);
+
+  border-radius:
+    999px;
+
+  color:
+    var(--ti-cyan);
+
+  font-size: 7px;
+}
+
+.ti-bot-forge__runtime-events {
+  display: grid;
+}
+
+.ti-bot-forge__runtime-events article {
+  display: grid;
+
+  grid-template-columns:
+    28px minmax(0, 1fr);
+
+  gap: 10px;
+
+  padding:
+    10px 12px;
+
+  border-bottom:
+    1px solid
+    var(--ti-border-subtle);
+}
+
+.ti-bot-forge__event-sequence {
+  display: grid;
+  place-items: center;
+
+  width: 24px;
+  height: 24px;
+
+  border:
+    1px solid
+    var(--ti-border-subtle);
+
+  border-radius:
+    50%;
+
+  color:
+    var(--ti-faint);
+
+  font-size: 7px;
+}
+
+.ti-bot-forge__runtime-events article > div {
+  display: grid;
+
+  gap: 3px;
+}
+
+.ti-bot-forge__runtime-events strong {
+  color:
+    var(--ti-text);
+
+  font-size: 7px;
+
+  letter-spacing:
+    0.05em;
+}
+
+.ti-bot-forge__runtime-events p {
+  margin: 0;
+
+  color:
+    var(--ti-faint);
+
+  font-size: 8px;
+}
+
+.ti-bot-forge__runtime-footer {
+  display: flex;
+
+  justify-content:
+    space-between;
+
+  gap: 10px;
+
+  padding:
+    9px 12px;
+
+  color:
+    var(--ti-faint);
+
+  background:
+    rgba(255, 255, 255, 0.01);
+
+  font-size: 7px;
+}
+
+@media (max-width: 620px) {
+  .ti-bot-forge__runtime-controls,
+  .ti-bot-forge__runtime-footer {
+    align-items:
+      flex-start;
+
+    flex-direction:
+      column;
+  }
+
+  .ti-bot-forge__runtime-controls span {
+    text-align:
+      left;
+  }
+}

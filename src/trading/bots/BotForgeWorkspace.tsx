@@ -14,6 +14,27 @@ import type {
   TradingBotStatus,
 } from "./types";
 
+import {
+  createPaperAccount,
+} from "../paper";
+
+import {
+  indicatorEngine,
+} from "../indicators";
+
+import {
+  evaluateStrategy,
+  mockStrategies,
+} from "../strategy";
+
+import {
+  runBotRuntimeSession,
+} from "../runtime";
+
+import {
+  useMarketData,
+} from "../market-data";
+
 const lifecycleLabels:
   Readonly<
     Record<
@@ -38,6 +59,9 @@ const lifecycleLabels:
   };
 
 export function BotForgeWorkspace() {
+  const marketData =
+    useMarketData();
+
   const [
     bots,
     setBots,
@@ -78,6 +102,101 @@ export function BotForgeWorkspace() {
         selectedBot,
       ]
     );
+
+  const selectedStrategy =
+    useMemo(
+      () =>
+        selectedBot
+          ? mockStrategies.find(
+              (
+                strategy
+              ) =>
+                strategy.id ===
+                selectedBot.strategyId
+            ) ??
+            null
+          : null,
+      [
+        selectedBot,
+      ]
+    );
+
+  const [
+    runtimeSession,
+    setRuntimeSession,
+  ] = useState<
+    ReturnType<
+      typeof runBotRuntimeSession
+    > | null
+  >(
+    null
+  );
+
+  const runLocalSession =
+    () => {
+      if (
+        !selectedBot ||
+        !selectedStrategy
+      ) {
+        return;
+      }
+
+      const market =
+        marketData.getMarket(
+          selectedBot.symbol
+        );
+
+      if (
+        !market
+      ) {
+        return;
+      }
+
+      const indicatorSnapshot =
+        indicatorEngine.snapshot(
+          marketData.getCandles(
+            selectedBot.symbol,
+            selectedBot.timeframe
+          )
+        );
+
+      const evaluation =
+        evaluateStrategy(
+          selectedStrategy,
+          {
+            current:
+              indicatorSnapshot,
+          }
+        );
+
+      const session =
+        runBotRuntimeSession({
+          bot:
+            selectedBot,
+
+          strategy:
+            selectedStrategy,
+
+          account:
+            createPaperAccount(
+              10_000
+            ),
+
+          evaluation,
+
+          market: {
+            marketPrice:
+              market.price,
+
+            quantity:
+              0.01,
+          },
+        });
+
+      setRuntimeSession(
+        session
+      );
+    };
 
   const updateBotStatus =
     (
@@ -164,11 +283,15 @@ export function BotForgeWorkspace() {
                       ? "ti-bot-forge__bot ti-bot-forge__bot--active"
                       : "ti-bot-forge__bot"
                   }
-                  onClick={() =>
+                  onClick={() => {
                     setSelectedBotId(
                       bot.id
-                    )
-                  }
+                    );
+
+                    setRuntimeSession(
+                      null
+                    );
+                  }}
                 >
                   <div>
                     <strong>
@@ -375,6 +498,110 @@ export function BotForgeWorkspace() {
                   <div className="ti-bot-forge__valid">
                     Bot definition passed local validation.
                   </div>
+                )}
+              </section>
+
+              <section className="ti-bot-forge__panel">
+                <header>
+                  <div>
+                    <span className="ti-label">
+                      Runtime Activity
+                    </span>
+
+                    <strong>
+                      Observational paper session
+                    </strong>
+                  </div>
+
+                  {runtimeSession && (
+                    <span className="ti-bot-forge__runtime-decision">
+                      {
+                        runtimeSession.runtime
+                          .decision
+                      }
+                    </span>
+                  )}
+                </header>
+
+                <div className="ti-bot-forge__runtime-controls">
+                  <button
+                    type="button"
+                    disabled={
+                      selectedBot.status !==
+                        "paper-running" ||
+                      !selectedStrategy
+                    }
+                    onClick={
+                      runLocalSession
+                    }
+                  >
+                    Run local paper step
+                  </button>
+
+                  <span>
+                    Telemetry records outcomes.
+                    It does not authorize execution.
+                  </span>
+                </div>
+
+                {!runtimeSession ? (
+                  <div className="ti-bot-forge__empty">
+                    No runtime session recorded for this bot.
+                  </div>
+                ) : (
+                  <div className="ti-bot-forge__runtime-events">
+                    {runtimeSession.session.events.map(
+                      (
+                        event
+                      ) => (
+                        <article
+                          key={
+                            event.id
+                          }
+                        >
+                          <span className="ti-bot-forge__event-sequence">
+                            {String(
+                              event.sequence
+                            ).padStart(
+                              2,
+                              "0"
+                            )}
+                          </span>
+
+                          <div>
+                            <strong>
+                              {event.type
+                                .replaceAll(
+                                  "_",
+                                  " "
+                                )
+                                .toUpperCase()}
+                            </strong>
+
+                            <p>
+                              {event.message}
+                            </p>
+                          </div>
+                        </article>
+                      )
+                    )}
+                  </div>
+                )}
+
+                {runtimeSession && (
+                  <footer className="ti-bot-forge__runtime-footer">
+                    <span>
+                      Session{" "}
+                      {
+                        runtimeSession.session
+                          .id
+                      }
+                    </span>
+
+                    <span>
+                      authoritative = false
+                    </span>
+                  </footer>
                 )}
               </section>
 
