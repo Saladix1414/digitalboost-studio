@@ -65,3 +65,17 @@ export {
   getRuntimeSessionSequenceForDiagnostics,
   resetRuntimeSessionIdentityForTests,
 } from "./sessionIdentity";
+
+export {
+  RUNTIME_EVIDENCE_HISTORY_LIMIT,
+  createRuntimeEvidenceBundle,
+  getRuntimeEvidenceHistory,
+  recordRuntimeSessionEvidence,
+  resetRuntimeEvidenceHistoryForTests,
+  subscribeRuntimeEvidenceHistory,
+} from "./runtimeEvidenceStore";
+
+export type {
+  RuntimeEvidenceBundle,
+  RuntimeEvidenceHistory,
+} from "./runtimeEvidenceStore";

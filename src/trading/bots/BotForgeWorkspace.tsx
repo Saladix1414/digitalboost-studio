@@ -25,7 +25,6 @@ import type {
 
 import {
   createPaperAccount,
-  recordPaperLedgerEvidence,
 } from "../paper";
 
 import {
@@ -39,7 +38,7 @@ import {
 
 import {
   createRuntimeAuditRecord,
-  recordRuntimeAuditEvidence,
+  recordRuntimeSessionEvidence,
   runBotRuntimeSession,
 } from "../runtime";
 
@@ -444,23 +443,9 @@ export function BotForgeWorkspace() {
           session
         );
 
-      recordRuntimeAuditEvidence(
-        audit
+      recordRuntimeSessionEvidence(
+        session
       );
-
-      recordPaperLedgerEvidence({
-        sessionId:
-          session.session.id,
-
-        botId:
-          session.session.botId,
-
-        strategyId:
-          session.session.strategyId,
-
-        entries:
-          session.runtime.account.ledger,
-      });
 
       setRuntimeSession(
         session

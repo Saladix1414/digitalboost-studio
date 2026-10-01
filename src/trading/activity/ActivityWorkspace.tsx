@@ -4,15 +4,9 @@ import {
 } from "react";
 
 import {
-  getRuntimeAuditHistory,
-  subscribeRuntimeAuditHistory,
+  getRuntimeEvidenceHistory,
+  subscribeRuntimeEvidenceHistory,
 } from "../runtime";
-
-import {
-  getPaperLedgerEvidence,
-  subscribePaperLedgerEvidence,
-} from "../paper";
-
 
 import {
   useApprovalRepositoryStore,
@@ -43,18 +37,11 @@ export function ActivityWorkspace() {
   } =
     useApprovalRepositoryStore();
 
-  const runtimeAuditHistory =
+  const runtimeEvidenceHistory =
     useSyncExternalStore(
-      subscribeRuntimeAuditHistory,
-      getRuntimeAuditHistory,
-      getRuntimeAuditHistory
-    );
-
-  const paperLedgerEvidence =
-    useSyncExternalStore(
-      subscribePaperLedgerEvidence,
-      getPaperLedgerEvidence,
-      getPaperLedgerEvidence
+      subscribeRuntimeEvidenceHistory,
+      getRuntimeEvidenceHistory,
+      getRuntimeEvidenceHistory
     );
 
 
@@ -146,35 +133,16 @@ export function ActivityWorkspace() {
         }
 
         /*
-         * Paper ledger entries are captured from completed real paper
-         * runtime sessions. Activity only projects correlated evidence.
+         * Each completed paper runtime is consumed as one correlated
+         * evidence bundle. Activity never joins independent stores.
          */
         for (
-          const evidence of
-          paperLedgerEvidence.entries
-        ) {
-          items.push(
-            activityFromPaperLedgerEvidence(
-              evidence,
-              sequence
-            )
-          );
-
-          sequence +=
-            1;
-        }
-
-        /*
-         * Runtime audits are recorded by Bot Forge when real paper
-         * runtime sessions occur. Activity only projects that evidence.
-         */
-        for (
-          const audit of
-          runtimeAuditHistory.entries
+          const bundle of
+          runtimeEvidenceHistory.entries
         ) {
           const runtimeItems =
             activityFromRuntimeAudit(
-              audit,
+              bundle.audit,
               sequence
             );
 
@@ -185,9 +153,24 @@ export function ActivityWorkspace() {
           sequence +=
             runtimeItems.length;
 
+          for (
+            const evidence of
+            bundle.ledger
+          ) {
+            items.push(
+              activityFromPaperLedgerEvidence(
+                evidence,
+                sequence
+              )
+            );
+
+            sequence +=
+              1;
+          }
+
           items.push(
             activityFromRuntimeAuditSummary(
-              audit,
+              bundle.audit,
               sequence
             )
           );
@@ -202,8 +185,7 @@ export function ActivityWorkspace() {
         approvalRepository.history,
         recoveryAttemptHistory,
         remoteRetryHistory,
-        paperLedgerEvidence,
-        runtimeAuditHistory,
+        runtimeEvidenceHistory,
       ]
     );
 
