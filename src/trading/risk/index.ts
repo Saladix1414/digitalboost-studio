@@ -79,3 +79,15 @@ export type {
   RiskReviewChainIntegrityIssue,
   RiskReviewChainIntegrityIssueCode,
 } from "./reviewChainValidation";
+
+export {
+  createEmptyApprovalRepositoryState,
+  createApprovalRepositoryState,
+  acceptRiskReview,
+  getActiveRiskReview,
+} from "./reviewRepository";
+
+export type {
+  ApprovalRepositoryState,
+  AcceptRiskReviewInput,
+} from "./reviewRepository";
