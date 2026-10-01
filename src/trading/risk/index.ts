@@ -320,3 +320,14 @@ export type {
   ApprovalRecoveryAttemptHistoryEntry,
   ApprovalRecoveryAttemptHistoryStatus,
 } from "./approvalRecoveryAttemptHistory";
+
+
+export {
+  APPROVAL_REMOTE_MUTATION_MAX_ATTEMPTS,
+  resolveApprovalRemoteRetryDecision,
+  runApprovalRemoteMutationWithRetry,
+} from "./approvalRemoteRetry";
+
+export type {
+  ApprovalRemoteRetryDecision,
+} from "./approvalRemoteRetry";

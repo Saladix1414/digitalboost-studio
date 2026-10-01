@@ -19,6 +19,11 @@ import type {
 } from "./reviewRepository";
 
 
+import {
+  runApprovalRemoteMutationWithRetry,
+} from "./approvalRemoteRetry";
+
+
 export type ApprovalBackendReadResult = {
   readonly state:
     ApprovalRepositoryState | null;
@@ -130,22 +135,30 @@ export function createRemoteApprovalPersistence(
       Promise<
         ApprovalPersistenceSaveResult
       > {
+      const idempotencyKey =
+        mutation
+          ? createApprovalBackendIdempotencyKey({
+              operation:
+                "write",
+
+              expectedRevision,
+
+              mutationId:
+                mutation.mutationId,
+            })
+          : null;
+
       const result =
-        await client.write({
-          state,
-          expectedRevision,
-          idempotencyKey:
-            mutation
-              ? createApprovalBackendIdempotencyKey({
-                  operation:
-                    "write",
+        await runApprovalRemoteMutationWithRetry({
+          idempotencyKey,
 
-                  expectedRevision,
-
-                  mutationId:
-                    mutation.mutationId,
-                })
-              : null,
+          execute:
+            async () =>
+              client.write({
+                state,
+                expectedRevision,
+                idempotencyKey,
+              }),
         });
 
       return {
@@ -165,20 +178,28 @@ export function createRemoteApprovalPersistence(
         ApprovalPersistenceMutationContext
     ):
       Promise<void> {
-      await client.clear({
-        expectedRevision,
-        idempotencyKey:
-          mutation
-            ? createApprovalBackendIdempotencyKey({
-                operation:
-                  "clear",
+      const idempotencyKey =
+        mutation
+          ? createApprovalBackendIdempotencyKey({
+              operation:
+                "clear",
 
-                expectedRevision,
+              expectedRevision,
 
-                mutationId:
-                  mutation.mutationId,
-              })
-            : null,
+              mutationId:
+                mutation.mutationId,
+            })
+          : null;
+
+      await runApprovalRemoteMutationWithRetry({
+        idempotencyKey,
+
+        execute:
+          async () =>
+            client.clear({
+              expectedRevision,
+              idempotencyKey,
+            }),
       });
     },
   };
