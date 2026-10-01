@@ -1,4 +1,9 @@
 import {
+  createDefaultApprovalPersistenceConfig,
+  selectApprovalPersistence,
+} from "./approvalPersistenceMode";
+
+import {
   createBrowserApprovalPersistenceCoordinator,
 } from "./approvalCoordination";
 
@@ -25,7 +30,6 @@ import {
 
 import {
   APPROVAL_STORAGE_KEY,
-  createBrowserApprovalPersistence,
 } from "./localApprovalPersistence";
 
 let browserPersistenceStarted =
@@ -60,8 +64,13 @@ function startBrowserApprovalPersistence():
     createBrowserApprovalPersistenceCoordinator()
   );
 
+  const persistenceSelection =
+    selectApprovalPersistence(
+      createDefaultApprovalPersistenceConfig()
+    );
+
   configureApprovalStorePersistence(
-    createBrowserApprovalPersistence()
+    persistenceSelection.persistence
   );
 
   void hydrateApprovalStore();

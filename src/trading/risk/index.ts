@@ -236,3 +236,16 @@ export type {
   ApprovalRemoteComposition,
   ApprovalRemoteCompositionConfig,
 } from "./approvalRemoteComposition";
+
+export {
+  createDefaultApprovalPersistenceConfig,
+  selectApprovalPersistence,
+} from "./approvalPersistenceMode";
+
+export type {
+  ApprovalLocalPersistenceConfig,
+  ApprovalPersistenceConfig,
+  ApprovalPersistenceMode,
+  ApprovalPersistenceSelection,
+  ApprovalRemotePersistenceConfig,
+} from "./approvalPersistenceMode";
