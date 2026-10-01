@@ -3240,3 +3240,640 @@
       auto;
   }
 }
+
+/* ============================================================
+   PHASE 3A — ISLAND SHELL
+   ============================================================ */
+
+.ti-shell {
+  width: 100%;
+  height: 100vh;
+
+  display: grid;
+
+  grid-template-columns:
+    212px
+    minmax(0, 1fr);
+
+  grid-template-rows:
+    54px
+    minmax(0, 1fr)
+    auto;
+
+  overflow: hidden;
+}
+
+.ti-shell--sidebar-collapsed {
+  grid-template-columns:
+    58px
+    minmax(0, 1fr);
+}
+
+/* ------------------------------------------------------------
+   TOPBAR
+   ------------------------------------------------------------ */
+
+.ti-shell-topbar {
+  grid-column: 1 / -1;
+
+  min-width: 0;
+
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto
+    minmax(0, 1fr);
+
+  align-items: center;
+  gap: 12px;
+
+  border-bottom: 1px solid var(--ti-border);
+
+  padding: 0 12px;
+
+  background:
+    rgba(5, 11, 17, 0.96);
+}
+
+.ti-shell-topbar__start,
+.ti-shell-topbar__center,
+.ti-shell-topbar__actions {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.ti-shell-topbar__center {
+  justify-content: center;
+}
+
+.ti-shell-topbar__actions {
+  justify-content: flex-end;
+}
+
+.ti-shell-topbar__identity {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.ti-shell-topbar__identity strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: var(--ti-text);
+
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.ti-shell-topbar__identity span {
+  margin-top: 2px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: var(--ti-faint);
+
+  font-size: 7px;
+}
+
+.ti-shell-topbar__sidebar-toggle,
+.ti-shell-topbar__mobile-menu {
+  width: 30px;
+  height: 30px;
+
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 auto;
+
+  border: 1px solid transparent;
+  border-radius: var(--ti-radius-sm);
+
+  color: var(--ti-muted);
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.ti-shell-topbar__sidebar-toggle:hover,
+.ti-shell-topbar__mobile-menu:hover {
+  color: var(--ti-text);
+
+  border-color: var(--ti-border);
+
+  background: var(--ti-surface-interactive);
+}
+
+.ti-shell-topbar__mobile-menu {
+  display: none;
+}
+
+/* ------------------------------------------------------------
+   WORKSPACE FRAME
+   ------------------------------------------------------------ */
+
+.ti-shell__workspace {
+  grid-column: 1 / -1;
+
+  min-width: 0;
+  min-height: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    subgrid;
+
+  overflow: hidden;
+}
+
+.ti-shell__main {
+  min-width: 0;
+  min-height: 0;
+
+  overflow-y: auto;
+
+  background:
+    linear-gradient(
+      rgba(255, 255, 255, 0.012)
+      1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.012)
+      1px,
+      transparent 1px
+    ),
+    var(--ti-bg-workspace);
+
+  background-size:
+    38px 38px,
+    38px 38px,
+    auto;
+}
+
+/* ------------------------------------------------------------
+   SIDEBAR
+   ------------------------------------------------------------ */
+
+.ti-shell-sidebar {
+  min-width: 0;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  border-right:
+    1px solid
+    var(--ti-border);
+
+  background:
+    linear-gradient(
+      180deg,
+      #09131c,
+      #060c12
+    );
+}
+
+.ti-shell-sidebar__brand {
+  min-height: 58px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding: 0 11px;
+
+  border-bottom:
+    1px solid
+    var(--ti-border-subtle);
+}
+
+.ti-shell-sidebar__mark {
+  width: 30px;
+  height: 30px;
+
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 auto;
+
+  border:
+    1px solid
+    rgba(50, 200, 244, 0.24);
+
+  border-radius:
+    var(--ti-radius-md);
+
+  color: var(--ti-cyan);
+
+  background:
+    rgba(50, 200, 244, 0.045);
+
+  font-size: 8px;
+  font-weight: 760;
+
+  letter-spacing: 0.08em;
+}
+
+.ti-shell-sidebar__identity {
+  min-width: 0;
+}
+
+.ti-shell-sidebar__identity strong,
+.ti-shell-sidebar__identity span {
+  display: block;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ti-shell-sidebar__identity strong {
+  color: var(--ti-text);
+
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.ti-shell-sidebar__identity span {
+  margin-top: 2px;
+
+  color: var(--ti-faint);
+
+  font-size: 7px;
+}
+
+.ti-shell-sidebar__nav {
+  min-height: 0;
+
+  flex: 1 1 auto;
+
+  overflow-y: auto;
+
+  padding:
+    10px
+    7px;
+}
+
+.ti-shell-sidebar__group + .ti-shell-sidebar__group {
+  margin-top: 13px;
+}
+
+.ti-shell-sidebar__group-label {
+  padding:
+    0
+    8px
+    6px;
+
+  color: var(--ti-faint);
+
+  font-size: 7px;
+  font-weight: 720;
+
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ti-shell-sidebar__item {
+  width: 100%;
+  min-height: 33px;
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  position: relative;
+
+  border: 1px solid transparent;
+  border-radius: var(--ti-radius-sm);
+
+  padding: 0 9px;
+
+  color: var(--ti-muted);
+  background: transparent;
+
+  font: inherit;
+  font-size: 9px;
+  font-weight: 540;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    color var(--ti-motion-fast) ease,
+    border-color var(--ti-motion-fast) ease,
+    background var(--ti-motion-fast) ease;
+}
+
+.ti-shell-sidebar__item:hover {
+  color: var(--ti-text-2);
+
+  background:
+    rgba(255, 255, 255, 0.02);
+}
+
+.ti-shell-sidebar__item--active {
+  color: var(--ti-text);
+
+  border-color:
+    rgba(50, 200, 244, 0.13);
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(24, 124, 173, 0.18),
+      rgba(24, 124, 173, 0.025)
+    );
+}
+
+.ti-shell-sidebar__item--active::before {
+  content: "";
+
+  width: 2px;
+
+  position: absolute;
+  left: -1px;
+  top: 7px;
+  bottom: 7px;
+
+  border-radius: 999px;
+
+  background: var(--ti-cyan);
+}
+
+.ti-shell-sidebar__item--active svg {
+  color: var(--ti-cyan);
+}
+
+.ti-shell-sidebar--collapsed
+  .ti-shell-sidebar__brand {
+  justify-content: center;
+
+  padding-inline: 6px;
+}
+
+.ti-shell-sidebar--collapsed
+  .ti-shell-sidebar__item {
+  justify-content: center;
+
+  padding-inline: 0;
+}
+
+.ti-shell-sidebar__footer {
+  min-height: 48px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 12px;
+
+  border-top:
+    1px solid
+    var(--ti-border-subtle);
+}
+
+.ti-shell-sidebar__status-dot {
+  width: 6px;
+  height: 6px;
+
+  flex: 0 0 auto;
+
+  border-radius: 50%;
+
+  background:
+    var(--ti-positive);
+}
+
+.ti-shell-sidebar__footer strong,
+.ti-shell-sidebar__footer span {
+  display: block;
+}
+
+.ti-shell-sidebar__footer strong {
+  color: var(--ti-text-2);
+
+  font-size: 8px;
+  font-weight: 620;
+}
+
+.ti-shell-sidebar__footer div > span {
+  margin-top: 2px;
+
+  color: var(--ti-faint);
+
+  font-size: 7px;
+}
+
+/* ------------------------------------------------------------
+   PAGE
+   ------------------------------------------------------------ */
+
+.ti-shell-page {
+  width: min(
+    100%,
+    1480px
+  );
+
+  margin-inline: auto;
+
+  padding:
+    24px
+    26px
+    40px;
+}
+
+.ti-shell-page__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 20px;
+}
+
+.ti-shell-page__subtitle {
+  max-width: 620px;
+
+  margin:
+    7px
+    0
+    0;
+
+  color: var(--ti-muted);
+
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.ti-shell-stage {
+  min-height: 420px;
+
+  margin-top: 14px;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    var(--ti-border);
+
+  border-radius:
+    var(--ti-radius-lg);
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(35, 128, 180, 0.055),
+      transparent 36%
+    ),
+    rgba(7, 15, 23, 0.86);
+}
+
+.ti-shell-console-placeholder {
+  color: var(--ti-muted);
+}
+
+/* ------------------------------------------------------------
+   BOTTOM CONSOLE PLACEMENT
+   ------------------------------------------------------------ */
+
+.ti-shell > .ti-bottom-console {
+  grid-column: 1 / -1;
+}
+
+/* ------------------------------------------------------------
+   RESPONSIVE
+   ------------------------------------------------------------ */
+
+@media (max-width: 900px) {
+  .ti-shell {
+    grid-template-columns:
+      58px
+      minmax(0, 1fr);
+  }
+
+  .ti-shell-sidebar {
+    width: 58px;
+  }
+
+  .ti-shell-sidebar__identity,
+  .ti-shell-sidebar__group-label,
+  .ti-shell-sidebar__item span,
+  .ti-shell-sidebar__footer div {
+    display: none;
+  }
+
+  .ti-shell-sidebar__brand,
+  .ti-shell-sidebar__item {
+    justify-content: center;
+  }
+
+  .ti-shell-sidebar__item {
+    padding-inline: 0;
+  }
+
+  .ti-shell-topbar__center {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .ti-shell {
+    grid-template-columns:
+      1fr;
+
+    grid-template-rows:
+      52px
+      minmax(0, 1fr)
+      auto;
+  }
+
+  .ti-shell__workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .ti-shell-sidebar {
+    width:
+      min(280px, 86vw);
+
+    position: fixed;
+    z-index: 80;
+    top: 52px;
+    left: 0;
+    bottom: 38px;
+
+    transform:
+      translateX(-100%);
+
+    box-shadow:
+      24px 0 55px
+      rgba(0, 0, 0, 0.42);
+
+    transition:
+      transform
+      var(--ti-motion-standard)
+      ease;
+  }
+
+  .ti-shell:not(
+    .ti-shell--sidebar-collapsed
+  )
+    .ti-shell-sidebar {
+    transform:
+      translateX(0);
+  }
+
+  .ti-shell-sidebar__identity,
+  .ti-shell-sidebar__group-label,
+  .ti-shell-sidebar__item span,
+  .ti-shell-sidebar__footer div {
+    display: block;
+  }
+
+  .ti-shell-sidebar__brand,
+  .ti-shell-sidebar__item {
+    justify-content:
+      flex-start;
+  }
+
+  .ti-shell-sidebar__item {
+    padding-inline: 9px;
+  }
+
+  .ti-shell-topbar {
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
+  }
+
+  .ti-shell-topbar__center,
+  .ti-shell-topbar__sidebar-toggle {
+    display: none;
+  }
+
+  .ti-shell-topbar__mobile-menu {
+    display: grid;
+  }
+
+  .ti-shell-page {
+    padding:
+      18px
+      12px
+      30px;
+  }
+
+  .ti-shell-stage {
+    min-height: 340px;
+  }
+}
