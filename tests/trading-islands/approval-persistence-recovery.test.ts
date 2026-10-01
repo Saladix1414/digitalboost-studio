@@ -100,7 +100,17 @@ test(
 
     assert.match(
       content,
-      /RESET APPROVAL STORAGE/
+      /approvalRecoveryPresentation\.label/
+    );
+
+    assert.match(
+      content,
+      /handleApprovalPersistenceRecovery/
+    );
+
+    assert.match(
+      content,
+      /approvalLifecycle\.status\s*!==[\s\S]*?"error"/
     );
 
     assert.match(
@@ -125,7 +135,17 @@ test(
 
     assert.match(
       content,
-      /RESET APPROVAL STORAGE/
+      /approvalRecoveryPresentation\.label/
+    );
+
+    assert.match(
+      content,
+      /handleApprovalPersistenceRecovery/
+    );
+
+    assert.match(
+      content,
+      /approvalLifecycle\.status\s*!==[\s\S]*?"error"/
     );
 
     assert.match(
