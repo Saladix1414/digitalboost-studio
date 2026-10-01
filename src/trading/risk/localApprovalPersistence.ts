@@ -477,22 +477,23 @@ export function createLocalApprovalPersistence(
         return;
       }
 
+      let current:
+        ApprovalPersistenceEnvelope;
+
       try {
-        const current =
+        current =
           parseEnvelope(
             serialized
           );
-
-        assertExpectedRevision(
-          expectedRevision,
-          current.revision
-        );
       } catch (
         error
       ) {
         /*
          * Explicit corruption recovery is allowed only when
          * the caller has no trusted persisted revision.
+         *
+         * Revision conflicts are intentionally not handled here:
+         * they are checked only after a valid envelope has parsed.
          */
         if (
           expectedRevision !==
@@ -500,7 +501,18 @@ export function createLocalApprovalPersistence(
         ) {
           throw error;
         }
+
+        storage.removeItem(
+          APPROVAL_STORAGE_KEY
+        );
+
+        return;
       }
+
+      assertExpectedRevision(
+        expectedRevision,
+        current.revision
+      );
 
       storage.removeItem(
         APPROVAL_STORAGE_KEY
