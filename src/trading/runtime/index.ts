@@ -130,3 +130,23 @@ export type {
 export {
   RUNTIME_EVIDENCE_HISTORY_LIMIT,
 } from "./runtimeEvidenceConstants";
+
+export {
+  RUNTIME_EVIDENCE_RECONCILIATION_HISTORY_LIMIT,
+  appendRuntimeEvidenceReconciliationAttempt,
+  createRuntimeEvidenceReconciliationAttemptHistory,
+} from "./runtimeEvidenceReconciliationHistory";
+
+export type {
+  RuntimeEvidenceReconciliationAttemptEntry,
+  RuntimeEvidenceReconciliationAttemptHistory,
+  RuntimeEvidenceReconciliationAttemptInput,
+  RuntimeEvidenceReconciliationAttemptStatus,
+} from "./runtimeEvidenceReconciliationHistory";
+
+export {
+  getRuntimeEvidenceReconciliationHistory,
+  recordRuntimeEvidenceReconciliationAttempt,
+  resetRuntimeEvidenceReconciliationHistoryForTests,
+  subscribeRuntimeEvidenceReconciliationHistory,
+} from "./runtimeEvidenceReconciliationHistoryStore";

@@ -8,6 +8,10 @@ import {
 } from "./RuntimeEvidenceDiagnostics";
 
 import {
+  RuntimeEvidenceReconciliationHistory,
+} from "./RuntimeEvidenceReconciliationHistory";
+
+import {
   getRuntimeEvidenceHistory,
   subscribeRuntimeEvidenceHistory,
 } from "../runtime";
@@ -196,6 +200,7 @@ export function ActivityWorkspace() {
   return (
     <section className="ti-activity">
       <RuntimeEvidenceDiagnostics />
+      <RuntimeEvidenceReconciliationHistory />
       <header className="ti-activity__header">
         <div>
           <span className="ti-label">

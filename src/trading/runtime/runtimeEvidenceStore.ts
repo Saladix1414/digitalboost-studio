@@ -1,4 +1,8 @@
 import {
+  recordRuntimeEvidenceReconciliationAttempt,
+} from "./runtimeEvidenceReconciliationHistoryStore";
+
+import {
   RUNTIME_EVIDENCE_HISTORY_LIMIT,
 } from "./runtimeEvidenceConstants";
 
@@ -523,6 +527,11 @@ export async function reconcileStaleRuntimeEvidence():
     lifecycle.status !==
     "stale"
   ) {
+    recordRuntimeEvidenceReconciliationAttempt({
+      status:
+        "not-stale",
+    });
+
     return {
       status:
         "not-stale",
@@ -538,6 +547,11 @@ export async function reconcileStaleRuntimeEvidence():
   if (
     !adapter
   ) {
+    recordRuntimeEvidenceReconciliationAttempt({
+      status:
+        "unavailable",
+    });
+
     return {
       status:
         "unavailable",
@@ -596,6 +610,14 @@ export async function reconcileStaleRuntimeEvidence():
 
         authoritative:
           false,
+      });
+
+      recordRuntimeEvidenceReconciliationAttempt({
+        status:
+          "conflict",
+
+        conflictSessionId:
+          reconciliation.conflict.sessionId,
       });
 
       return {
@@ -660,6 +682,14 @@ export async function reconcileStaleRuntimeEvidence():
         false,
     });
 
+    recordRuntimeEvidenceReconciliationAttempt({
+      status:
+        "merged",
+
+      duplicateSessionIds:
+        reconciliation.duplicateSessionIds,
+    });
+
     return {
       status:
         "merged",
@@ -688,6 +718,14 @@ export async function reconcileStaleRuntimeEvidence():
 
       authoritative:
         false,
+    });
+
+    recordRuntimeEvidenceReconciliationAttempt({
+      status:
+        "error",
+
+      error:
+        message,
     });
 
     return {
