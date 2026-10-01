@@ -80,53 +80,43 @@ test(
 
 
 test(
-  "Bot Forge records ledger from completed runtime session",
+  "runtime evidence bundle captures ledger from completed runtime session",
   () => {
     const content =
       source(
-        "bots/BotForgeWorkspace.tsx"
+        "runtime/runtimeEvidenceStore.ts"
       );
 
     assert.match(
       content,
-      /recordPaperLedgerEvidence/
+      /createRuntimeEvidenceBundle/
     );
 
     assert.match(
       content,
-      /session\.runtime\.account\.ledger/
+      /result\.runtime\.account\.ledger/
     );
 
     assert.match(
       content,
-      /session\.session\.id/
+      /result\.session\.id/
     );
 
-    const runtimeIndex =
-      content.indexOf(
-        "runBotRuntimeSession("
-      );
-
-    const ledgerIndex =
-      content.indexOf(
-        "recordPaperLedgerEvidence(",
-        runtimeIndex
-      );
-
-    assert.ok(
-      runtimeIndex >= 0
+    assert.match(
+      content,
+      /recordRuntimeSessionEvidence/
     );
 
-    assert.ok(
-      ledgerIndex >
-        runtimeIndex
+    assert.match(
+      content,
+      /ledger/
     );
   }
 );
 
 
 test(
-  "Activity consumes shared ledger evidence without executing paper orders",
+  "Activity consumes ledger through unified runtime evidence without executing paper orders",
   () => {
     const content =
       source(
@@ -135,17 +125,17 @@ test(
 
     assert.match(
       content,
-      /subscribePaperLedgerEvidence/
+      /subscribeRuntimeEvidenceHistory/
     );
 
     assert.match(
       content,
-      /getPaperLedgerEvidence/
+      /getRuntimeEvidenceHistory/
     );
 
     assert.match(
       content,
-      /paperLedgerEvidence\.entries/
+      /runtimeEvidenceHistory\.entries/
     );
 
     assert.match(

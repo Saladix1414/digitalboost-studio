@@ -56,7 +56,7 @@ test(
 
 
 test(
-  "Bot Forge records evidence after real runtime session creation",
+  "Bot Forge publishes unified evidence after real runtime session creation",
   () => {
     const content =
       source(
@@ -75,7 +75,7 @@ test(
 
     assert.match(
       content,
-      /recordRuntimeAuditEvidence/
+      /recordRuntimeSessionEvidence/
     );
 
     const runIndex =
@@ -91,7 +91,7 @@ test(
 
     const recordIndex =
       content.indexOf(
-        "recordRuntimeAuditEvidence(",
+        "recordRuntimeSessionEvidence(",
         auditIndex
       );
 
@@ -125,17 +125,17 @@ test(
 
     assert.match(
       content,
-      /subscribeRuntimeAuditHistory/
+      /subscribeRuntimeEvidenceHistory/
     );
 
     assert.match(
       content,
-      /getRuntimeAuditHistory/
+      /getRuntimeEvidenceHistory/
     );
 
     assert.match(
       content,
-      /runtimeAuditHistory\.entries/
+      /runtimeEvidenceHistory\.entries/
     );
 
     assert.match(
