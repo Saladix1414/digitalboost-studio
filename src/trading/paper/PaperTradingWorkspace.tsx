@@ -16,6 +16,11 @@ import {
   fillPaperMarketOrder,
 } from "./engine";
 
+import {
+  defaultPaperRiskLimits,
+  evaluatePaperRisk,
+} from "../risk";
+
 import type {
   PaperAccountState,
   PaperOrderSide,
@@ -134,6 +139,35 @@ export function PaperTradingWorkspace() {
       ) {
         setMessage(
           "Enter a valid paper quantity."
+        );
+
+        return;
+      }
+
+      const riskDecision =
+        evaluatePaperRisk({
+          account,
+
+          intent: {
+            symbol,
+            side,
+
+            quantity:
+              numericQuantity,
+
+            marketPrice:
+              market.price,
+          },
+
+          limits:
+            defaultPaperRiskLimits,
+        });
+
+      if (
+        !riskDecision.approved
+      ) {
+        setMessage(
+          riskDecision.reason
         );
 
         return;
