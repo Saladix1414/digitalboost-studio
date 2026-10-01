@@ -209,3 +209,12 @@ export type {
   ApprovalHttpRequest,
   ApprovalHttpResponse,
 } from "./approvalHttpClient";
+
+export {
+  APPROVAL_HTTP_PATH,
+  createApprovalHttpBackendClient,
+} from "./approvalHttpBackendClient";
+
+export type {
+  ApprovalHttpBackendClientOptions,
+} from "./approvalHttpBackendClient";
