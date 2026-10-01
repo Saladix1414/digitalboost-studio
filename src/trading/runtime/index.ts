@@ -150,3 +150,46 @@ export {
   resetRuntimeEvidenceReconciliationHistoryForTests,
   subscribeRuntimeEvidenceReconciliationHistory,
 } from "./runtimeEvidenceReconciliationHistoryStore";
+
+export {
+  RUNTIME_EVIDENCE_RECONCILIATION_HISTORY_SNAPSHOT_VERSION,
+  createRuntimeEvidenceReconciliationHistorySnapshot,
+} from "./runtimeEvidenceReconciliationHistoryPersistence";
+
+export type {
+  RuntimeEvidenceReconciliationHistoryPersistence,
+  RuntimeEvidenceReconciliationHistoryPersistenceLoadResult,
+  RuntimeEvidenceReconciliationHistorySnapshot,
+} from "./runtimeEvidenceReconciliationHistoryPersistence";
+
+export {
+  deserializeRuntimeEvidenceReconciliationHistorySnapshot,
+  serializeRuntimeEvidenceReconciliationHistorySnapshot,
+  validateRuntimeEvidenceReconciliationHistorySnapshot,
+} from "./runtimeEvidenceReconciliationHistoryPersistenceValidation";
+
+export {
+  LOCAL_RUNTIME_EVIDENCE_RECONCILIATION_HISTORY_STORAGE_KEY,
+  createBrowserRuntimeEvidenceReconciliationHistoryPersistence,
+  createLocalRuntimeEvidenceReconciliationHistoryPersistence,
+} from "./localRuntimeEvidenceReconciliationHistoryPersistence";
+
+export type {
+  RuntimeEvidenceReconciliationHistoryStorage,
+} from "./localRuntimeEvidenceReconciliationHistoryPersistence";
+
+export {
+  bootstrapRuntimeEvidenceReconciliationHistoryBrowserPersistence,
+  resetRuntimeEvidenceReconciliationHistoryBrowserBootstrapForTests,
+} from "./runtimeEvidenceReconciliationHistoryBrowserBootstrap";
+
+export {
+  useRuntimeEvidenceReconciliationHistoryBrowserBootstrap,
+} from "./useRuntimeEvidenceReconciliationHistoryBrowserBootstrap";
+
+export {
+  configureRuntimeEvidenceReconciliationHistoryPersistence,
+  hydrateRuntimeEvidenceReconciliationHistory,
+  persistRuntimeEvidenceReconciliationHistory,
+  waitForRuntimeEvidenceReconciliationHistoryPersistenceQueue,
+} from "./runtimeEvidenceReconciliationHistoryStore";

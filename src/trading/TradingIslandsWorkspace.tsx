@@ -4,6 +4,10 @@ import {
 } from "react";
 
 import {
+  useRuntimeEvidenceReconciliationHistoryBrowserBootstrap,
+} from "./runtime/useRuntimeEvidenceReconciliationHistoryBrowserBootstrap";
+
+import {
   Activity,
   BarChart3,
   Bot,
@@ -184,6 +188,8 @@ export function TradingIslandsWorkspace({
   onBack,
 }: TradingIslandsWorkspaceProps) {
   useRuntimeEvidenceBrowserBootstrap();
+
+  useRuntimeEvidenceReconciliationHistoryBrowserBootstrap();
 
   const [
     activeSection,
