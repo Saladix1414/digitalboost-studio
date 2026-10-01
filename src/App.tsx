@@ -1,7 +1,9 @@
 import DigitalBoostMainPage from './DigitalBoostMainPage';
 import IAForgePage from './IAForgePage';
+import DigitalBoostMarketplacePanel from './commerce/DigitalBoostMarketplacePanel';
 import StoreBuilderWorkspace from './StoreBuilderWorkspace';
 import WebsitesBuilderWorkspace from './WebsitesBuilderWorkspace';
+import TradingIslandsWorkspace from './trading/TradingIslandsWorkspace';
 import { useState, useEffect } from 'react';
 import { 
 
@@ -902,6 +904,7 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
 // =========================================================================
 const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onBack: () => void }) => {
   const [activeTab, setActiveTab] = useState<ToolMode>(initialMode);
+
   const [userPrompt, setUserPrompt] = useState('');
   const [activeRole, setActiveRole] = useState<CopilotRole>('designer');
   const [viewport, setViewport] = useState<ViewportMode>('desktop');
@@ -1070,6 +1073,14 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
       </div>
     );
   }
+  if (activeTab === 'islands') {
+    return (
+      <TradingIslandsWorkspace
+        onBack={onBack}
+      />
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-[#030308] text-white flex flex-col">
