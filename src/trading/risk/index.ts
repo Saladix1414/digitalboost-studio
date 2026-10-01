@@ -218,3 +218,11 @@ export {
 export type {
   ApprovalHttpBackendClientOptions,
 } from "./approvalHttpBackendClient";
+
+export {
+  createApprovalFetchHttpClient,
+} from "./approvalFetchHttpClient";
+
+export type {
+  ApprovalFetchHttpClientOptions,
+} from "./approvalFetchHttpClient";
