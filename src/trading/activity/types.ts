@@ -2,7 +2,8 @@ export type TradingActivitySource =
   | "strategy"
   | "risk-review"
   | "runtime"
-  | "paper-ledger";
+  | "paper-ledger"
+  | "recovery";
 
 export type TradingActivityAuthority =
   | "none"

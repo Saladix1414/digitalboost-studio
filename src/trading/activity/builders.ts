@@ -1,4 +1,8 @@
 import type {
+  ApprovalRecoveryAttemptHistoryEntry,
+} from "../risk/approvalRecoveryAttemptHistory";
+
+import type {
   PaperLedgerEntry,
 } from "../paper";
 
@@ -340,5 +344,47 @@ export function activityFromReviewChainIntegrity(
 
     referenceId:
       "risk-review-chain",
+  };
+}
+
+export function activityFromRecoveryAttemptHistoryEntry(
+  entry:
+    ApprovalRecoveryAttemptHistoryEntry,
+
+  sequence:
+    number
+):
+  TradingActivityItem {
+  const succeeded =
+    entry.status ===
+    "succeeded";
+
+  return {
+    id:
+      `activity-recovery-${entry.sequence}-${entry.action}-${entry.status}`,
+
+    sequence,
+
+    source:
+      "recovery",
+
+    authority:
+      "none",
+
+    severity:
+      succeeded
+        ? "success"
+        : "warning",
+
+    title:
+      succeeded
+        ? "Approval recovery succeeded"
+        : "Approval recovery failed",
+
+    detail:
+      `Action ${entry.action}. Diagnostic ${entry.diagnosticCode ?? "none"}.`,
+
+    referenceId:
+      `recovery-attempt-${entry.sequence}`,
   };
 }

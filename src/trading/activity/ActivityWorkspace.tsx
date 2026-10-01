@@ -1,7 +1,4 @@
-import {  activityFromReviewChainIntegrity,
-  appendRiskReviewHistory,
-  createRiskReviewHistory,
-
+import {
   useMemo,
 } from "react";
 
@@ -22,11 +19,12 @@ import {
 } from "../paper";
 
 import {
-  createInitialVersionedReview,
-  createNextVersionedReview,
-  createRiskReviewProvenance,
   reviewPaperRisk,
 } from "../risk";
+
+import {
+  useApprovalRepositoryStore,
+} from "../risk/useApprovalRepositoryStore";
 
 import {
   createRuntimeAuditRecord,
@@ -40,6 +38,8 @@ import {
 
 import {
   activityFromPaperLedger,
+  activityFromRecoveryAttemptHistoryEntry,
+  activityFromReviewChainIntegrity,
   activityFromReviewHistoryEntry,
   activityFromRiskReview,
   activityFromRuntimeAudit,
@@ -51,6 +51,15 @@ import type {
 } from "./types";
 
 export function ActivityWorkspace() {
+  const {
+    state:
+      approvalRepository,
+
+    recoveryAttemptHistory,
+  } =
+    useApprovalRepositoryStore();
+
+
   const activity =
     useMemo<
       readonly TradingActivityItem[]
@@ -99,32 +108,57 @@ export function ActivityWorkspace() {
         sequence +=
           1;
 
-        const initialVersion =
-          createInitialVersionedReview(
-            reviewDecision.review
+        /*
+         * Project only review evidence that already exists.
+         * Activity does not manufacture review history.
+         */
+        if (
+          approvalRepository.history
+        ) {
+          for (
+            const entry of
+            approvalRepository.history.entries
+          ) {
+            items.push(
+              activityFromReviewHistoryEntry(
+                entry,
+                sequence
+              )
+            );
+
+            sequence +=
+              1;
+          }
+
+          items.push(
+            activityFromReviewChainIntegrity(
+              approvalRepository.history,
+              sequence
+            )
           );
 
-        const initialHistoryEntry = {
-          versionedReview:
-            initialVersion,
+          sequence +=
+            1;
+        }
 
-          provenance:
-            createRiskReviewProvenance(
-              initialVersion,
-              "risk-review-workspace",
-              "initial-review"
-            ),
-        };
+        /*
+         * Recovery attempts are observational evidence only.
+         */
+        for (
+          const entry of
+          recoveryAttemptHistory.entries
+        ) {
+          items.push(
+            activityFromRecoveryAttemptHistoryEntry(
+              entry,
+              sequence
+            )
+          );
 
-        items.push(
-          activityFromReviewHistoryEntry(
-            initialHistoryEntry,
-            sequence
-          )
-        );
+          sequence +=
+            1;
+        }
 
-        sequence +=
-          1;
 
         const historical =
           localHistoricalData.getSeries({
@@ -205,52 +239,6 @@ export function ActivityWorkspace() {
               },
             });
 
-          const replacementVersion =
-            createNextVersionedReview(
-              initialVersion,
-              reviewDecision.review
-            );
-
-          const replacementHistoryEntry = {
-            versionedReview:
-              replacementVersion,
-
-            provenance:
-              createRiskReviewProvenance(
-                replacementVersion,
-                "bot-forge",
-                "explicit-rereview"
-              ),
-          };
-
-          items.push(
-            activityFromReviewHistoryEntry(
-              replacementHistoryEntry,
-              sequence
-            )
-          );
-
-          sequence +=
-            1;
-
-          const reviewHistory =
-            appendRiskReviewHistory(
-              createRiskReviewHistory(
-                initialHistoryEntry
-              ),
-              replacementHistoryEntry
-            );
-
-          items.push(
-            activityFromReviewChainIntegrity(
-              reviewHistory,
-              sequence
-            )
-          );
-
-          sequence +=
-            1;
-
           const audit =
             createRuntimeAuditRecord(
               session
@@ -298,7 +286,10 @@ export function ActivityWorkspace() {
 
         return items;
       },
-      []
+      [
+        approvalRepository.history,
+        recoveryAttemptHistory,
+      ]
     );
 
   return (

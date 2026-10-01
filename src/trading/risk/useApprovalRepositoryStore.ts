@@ -1,7 +1,8 @@
 import {
-  appendApprovalRecoveryAttemptHistory,
-  createApprovalRecoveryAttemptHistory,
-} from "./approvalRecoveryAttemptHistory";
+  getApprovalRecoveryAttemptHistory,
+  recordApprovalRecoveryAttemptHistory,
+  subscribeApprovalRecoveryAttemptHistory,
+} from "./approvalRecoveryAttemptHistoryStore";
 
 import {
   beginApprovalRecoveryAttempt,
@@ -142,12 +143,12 @@ export function useApprovalRepositoryStore() {
   );
 
 
-  const [
-    recoveryAttemptHistory,
-    setRecoveryAttemptHistory,
-  ] = useState(
-    createApprovalRecoveryAttemptHistory
-  );
+  const recoveryAttemptHistory =
+    useSyncExternalStore(
+      subscribeApprovalRecoveryAttemptHistory,
+      getApprovalRecoveryAttemptHistory,
+      getApprovalRecoveryAttemptHistory
+    );
 
   const state =
     useSyncExternalStore(
@@ -251,22 +252,16 @@ export function useApprovalRepositoryStore() {
             )
           );
 
-          setRecoveryAttemptHistory(
-            (
-              current
-            ) =>
-              appendApprovalRecoveryAttemptHistory(
-                current,
-                {
-                  action,
+          recordApprovalRecoveryAttemptHistory(
+            {
+              action,
 
-                  status:
-                    "succeeded",
+              status:
+                "succeeded",
 
-                  diagnosticCode:
-                    null,
-                }
-              )
+              diagnosticCode:
+                null,
+            }
           );
 
           return true;
@@ -280,23 +275,17 @@ export function useApprovalRepositoryStore() {
           )
         );
 
-        setRecoveryAttemptHistory(
-          (
-            current
-          ) =>
-            appendApprovalRecoveryAttemptHistory(
-              current,
-              {
-                action,
+        recordApprovalRecoveryAttemptHistory(
+          {
+            action,
 
-                status:
-                  "failed",
+            status:
+              "failed",
 
-                diagnosticCode:
-                  resultingDiagnostic?.code ??
-                  null,
-              }
-            )
+            diagnosticCode:
+              resultingDiagnostic?.code ??
+              null,
+          }
         );
 
         return false;
@@ -315,21 +304,15 @@ export function useApprovalRepositoryStore() {
           )
         );
 
-        setRecoveryAttemptHistory(
-          (
-            current
-          ) =>
-            appendApprovalRecoveryAttemptHistory(
-              current,
-              {
-                action,
+        recordApprovalRecoveryAttemptHistory(
+          {
+            action,
 
-                status:
-                  "failed",
+            status:
+              "failed",
 
-                diagnosticCode,
-              }
-            )
+            diagnosticCode,
+          }
         );
 
         return false;
@@ -347,6 +330,12 @@ export function useApprovalRepositoryStore() {
     persistenceDiagnostics,
 
     recoveryDiagnostic,
+
+    recoveryAttempt,
+
+    recoveryAttemptHistory,
+
+    runRecoveryAttempt,
 
     persistenceMode:
       browserPersistenceMode,

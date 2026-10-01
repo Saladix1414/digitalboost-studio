@@ -13,3 +13,7 @@ export type {
   TradingActivitySeverity,
   TradingActivityItem,
 } from "./types";
+
+export {
+  activityFromRecoveryAttemptHistoryEntry,
+} from "./builders";
