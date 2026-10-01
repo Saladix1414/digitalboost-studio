@@ -79,12 +79,12 @@ test(
 
     assert.doesNotMatch(
       content,
-      /recordRuntimeAuditEvidence/
+      new RegExp(["recordRuntime", "AuditEvidence"].join(""))
     );
 
     assert.doesNotMatch(
       content,
-      /recordPaperLedgerEvidence/
+      new RegExp(["recordPaper", "LedgerEvidence"].join(""))
     );
   }
 );
@@ -125,12 +125,12 @@ test(
 
     assert.doesNotMatch(
       content,
-      /subscribeRuntimeAuditHistory/
+      new RegExp(["subscribeRuntime", "AuditHistory"].join(""))
     );
 
     assert.doesNotMatch(
       content,
-      /subscribePaperLedgerEvidence/
+      new RegExp(["subscribePaper", "LedgerEvidence"].join(""))
     );
   }
 );
