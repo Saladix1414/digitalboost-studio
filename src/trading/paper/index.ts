@@ -16,3 +16,12 @@ export type {
   PaperAccountState,
   PaperFillResult,
 } from "./types";
+
+export {
+  executePaperOrder,
+} from "./executionBoundary";
+
+export type {
+  PaperExecutionRequest,
+  PaperExecutionBoundaryResult,
+} from "./executionBoundary";
