@@ -259,3 +259,12 @@ export {
 export type {
   ApprovalEnvironmentValues,
 } from "./approvalEnvironmentConfig";
+
+export {
+  createApprovalBootstrapFailurePolicy,
+} from "./approvalBootstrapFailurePolicy";
+
+export type {
+  ApprovalBootstrapFailurePolicy,
+  ApprovalBootstrapRecovery,
+} from "./approvalBootstrapFailurePolicy";

@@ -1,4 +1,16 @@
 import {
+  createApprovalBootstrapFailurePolicy,
+} from "./approvalBootstrapFailurePolicy";
+
+import type {
+  ApprovalBootstrapFailurePolicy,
+} from "./approvalBootstrapFailurePolicy";
+
+import type {
+  ApprovalPersistenceMode,
+} from "./approvalPersistenceMode";
+
+import {
   readApprovalEnvironmentConfig,
 } from "./approvalEnvironmentConfig";
 
@@ -38,6 +50,16 @@ import {
 let browserPersistenceStarted =
   false;
 
+let browserPersistenceMode:
+  ApprovalPersistenceMode =
+    "local";
+
+let browserBootstrapFailurePolicy:
+  ApprovalBootstrapFailurePolicy =
+    createApprovalBootstrapFailurePolicy(
+      "local"
+    );
+
 function handleApprovalStorageChange(
   event:
     StorageEvent
@@ -70,6 +92,14 @@ function startBrowserApprovalPersistence():
   const persistenceSelection =
     selectApprovalPersistence(
       readApprovalEnvironmentConfig()
+    );
+
+  browserPersistenceMode =
+    persistenceSelection.mode;
+
+  browserBootstrapFailurePolicy =
+    createApprovalBootstrapFailurePolicy(
+      persistenceSelection.mode
     );
 
   configureApprovalStorePersistence(
@@ -133,6 +163,12 @@ export function useApprovalRepositoryStore() {
     lifecycle,
 
     persistenceDiagnostics,
+
+    persistenceMode:
+      browserPersistenceMode,
+
+    bootstrapFailurePolicy:
+      browserBootstrapFailurePolicy,
 
     activeReview:
       getApprovalStoreActiveReview(),
