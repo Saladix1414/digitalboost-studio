@@ -56,14 +56,14 @@ export {
 } from "./sessionIdentity";
 
 export {
-  RUNTIME_EVIDENCE_HISTORY_LIMIT,
   configureRuntimeEvidencePersistence,
   createRuntimeEvidenceBundle,
   getRuntimeEvidenceHistory,
   getRuntimeEvidenceLifecycle,
   hydrateRuntimeEvidence,
   markRuntimeEvidenceStale,
-  persistRuntimeEvidenceHistory,
+
+  reconcileStaleRuntimeEvidence,persistRuntimeEvidenceHistory,
   recordRuntimeSessionEvidence,
   resetRuntimeEvidenceHistoryForTests,
   subscribeRuntimeEvidenceHistory,
@@ -73,6 +73,7 @@ export {
 export type {
   RuntimeEvidenceBundle,
   RuntimeEvidenceHistory,
+  RuntimeEvidenceControlledReconciliationResult,
   RuntimeEvidenceLifecycle,
   RuntimeEvidenceLifecycleStatus,
   RuntimeLedgerEvidenceEntry,
@@ -124,3 +125,8 @@ export type {
   RuntimeEvidenceReconciliationResult,
   RuntimeEvidenceReconciliationSuccess,
 } from "./runtimeEvidenceReconciliation";
+
+
+export {
+  RUNTIME_EVIDENCE_HISTORY_LIMIT,
+} from "./runtimeEvidenceConstants";

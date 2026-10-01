@@ -1,6 +1,6 @@
 import {
   RUNTIME_EVIDENCE_HISTORY_LIMIT,
-} from "./runtimeEvidenceStore";
+} from "./runtimeEvidenceConstants";
 
 import type {
   RuntimeEvidenceBundle,

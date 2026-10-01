@@ -1,4 +1,12 @@
 import {
+  RUNTIME_EVIDENCE_HISTORY_LIMIT,
+} from "./runtimeEvidenceConstants";
+
+
+import {
+  reconcileRuntimeEvidenceHistories,
+} from "./runtimeEvidenceReconciliation";
+import {
   createRuntimeAuditRecord,
 } from "./audit";
 
@@ -21,10 +29,6 @@ import {
 import type {
   RuntimeEvidencePersistence,
 } from "./runtimeEvidencePersistence";
-
-
-export const RUNTIME_EVIDENCE_HISTORY_LIMIT =
-  24;
 
 
 export type RuntimeLedgerEvidenceEntry = {
@@ -80,6 +84,7 @@ export type RuntimeEvidenceLifecycleStatus =
   | "hydrating"
   | "ready"
   | "stale"
+  | "reconciling"
   | "error";
 
 
@@ -93,6 +98,53 @@ export type RuntimeEvidenceLifecycle = {
   readonly authoritative:
     false;
 };
+
+export type RuntimeEvidenceControlledReconciliationResult =
+  | {
+      readonly status:
+        "merged";
+
+      readonly duplicateSessionIds:
+        readonly string[];
+
+      readonly authoritative:
+        false;
+    }
+  | {
+      readonly status:
+        "conflict";
+
+      readonly sessionId:
+        string;
+
+      readonly authoritative:
+        false;
+    }
+  | {
+      readonly status:
+        "not-stale";
+
+      readonly authoritative:
+        false;
+    }
+  | {
+      readonly status:
+        "unavailable";
+
+      readonly authoritative:
+        false;
+    }
+  | {
+      readonly status:
+        "error";
+
+      readonly error:
+        string;
+
+      readonly authoritative:
+        false;
+    };
+
 
 
 type RuntimeEvidenceListener =
@@ -136,6 +188,16 @@ let persistence:
 let persistenceQueue:
   Promise<void> =
     Promise.resolve();
+
+/*
+ * Monotonic in-memory mutation generation.
+ *
+ * Controlled reconciliation uses this to detect runtime evidence
+ * recorded while an asynchronous persistence write is in flight.
+ */
+let historyGeneration =
+  0;
+
 
 
 const listeners =
@@ -334,6 +396,9 @@ export async function hydrateRuntimeEvidence():
       history =
         result.snapshot.history;
 
+      historyGeneration +=
+        1;
+
       emitRuntimeEvidenceChange();
     }
 
@@ -385,6 +450,20 @@ export async function persistRuntimeEvidenceHistory():
     return;
   }
 
+  /*
+   * While evidence is stale or being reconciled, runtime recording
+   * remains memory-first but ordinary persistence is suspended.
+   */
+  if (
+    lifecycle.status ===
+      "stale" ||
+    lifecycle.status ===
+      "reconciling"
+  ) {
+    return;
+  }
+
+
   const snapshot =
     createRuntimeEvidenceSnapshot(
       history
@@ -434,6 +513,193 @@ export async function persistRuntimeEvidenceHistory():
       authoritative:
         false,
     });
+  }
+}
+
+
+export async function reconcileStaleRuntimeEvidence():
+  Promise<RuntimeEvidenceControlledReconciliationResult> {
+  if (
+    lifecycle.status !==
+    "stale"
+  ) {
+    return {
+      status:
+        "not-stale",
+
+      authoritative:
+        false,
+    };
+  }
+
+  const adapter =
+    persistence;
+
+  if (
+    !adapter
+  ) {
+    return {
+      status:
+        "unavailable",
+
+      authoritative:
+        false,
+    };
+  }
+
+  setLifecycle({
+    status:
+      "reconciling",
+
+    error:
+      null,
+
+    authoritative:
+      false,
+  });
+
+  await waitForRuntimeEvidencePersistenceQueue();
+
+  try {
+    const loaded =
+      await adapter.load();
+
+    const persistedHistory =
+      loaded.snapshot?.history ?? {
+        entries:
+          [],
+
+        authoritative:
+          false as const,
+      };
+
+    /*
+     * Read current memory after load so sessions recorded while load
+     * was pending participate in reconciliation.
+     */
+    const reconciliation =
+      reconcileRuntimeEvidenceHistories(
+        history,
+        persistedHistory
+      );
+
+    if (
+      reconciliation.status ===
+      "conflict"
+    ) {
+      setLifecycle({
+        status:
+          "stale",
+
+        error:
+          `Runtime evidence conflict for session ${reconciliation.conflict.sessionId}.`,
+
+        authoritative:
+          false,
+      });
+
+      return {
+        status:
+          "conflict",
+
+        sessionId:
+          reconciliation.conflict.sessionId,
+
+        authoritative:
+          false,
+      };
+    }
+
+    history =
+      reconciliation.history;
+
+    historyGeneration +=
+      1;
+
+    emitRuntimeEvidenceChange();
+
+    /*
+     * Runtime recording is not blocked while persistence is in flight.
+     * Repeat until storage contains the newest observed generation.
+     */
+    while (
+      true
+    ) {
+      const generation =
+        historyGeneration;
+
+      const snapshot =
+        createRuntimeEvidenceSnapshot(
+          history
+        );
+
+      await enqueuePersistence(
+        async () => {
+          await adapter.save(
+            snapshot
+          );
+        }
+      );
+
+      if (
+        generation ===
+        historyGeneration
+      ) {
+        break;
+      }
+    }
+
+    setLifecycle({
+      status:
+        "ready",
+
+      error:
+        null,
+
+      authoritative:
+        false,
+    });
+
+    return {
+      status:
+        "merged",
+
+      duplicateSessionIds:
+        reconciliation.duplicateSessionIds,
+
+      authoritative:
+        false,
+    };
+  } catch (
+    error
+  ) {
+    const message =
+      errorMessage(
+        error,
+        "Runtime evidence reconciliation failed."
+      );
+
+    setLifecycle({
+      status:
+        "error",
+
+      error:
+        message,
+
+      authoritative:
+        false,
+    });
+
+    return {
+      status:
+        "error",
+
+      error:
+        message,
+
+      authoritative:
+        false,
+    };
   }
 }
 
@@ -509,6 +775,9 @@ export function recordRuntimeSessionEvidence(
       false,
   };
 
+  historyGeneration +=
+    1;
+
   /*
    * Memory is updated first.
    *
@@ -550,6 +819,9 @@ export function resetRuntimeEvidenceHistoryForTests():
 
   persistenceQueue =
     Promise.resolve();
+
+  historyGeneration =
+    0;
 
   emitRuntimeEvidenceChange();
 }
