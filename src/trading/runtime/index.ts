@@ -113,3 +113,14 @@ export {
 export {
   useRuntimeEvidenceBrowserBootstrap,
 } from "./useRuntimeEvidenceBrowserBootstrap";
+
+export {
+  reconcileRuntimeEvidenceHistories,
+} from "./runtimeEvidenceReconciliation";
+
+export type {
+  RuntimeEvidenceReconciliationConflict,
+  RuntimeEvidenceReconciliationFailure,
+  RuntimeEvidenceReconciliationResult,
+  RuntimeEvidenceReconciliationSuccess,
+} from "./runtimeEvidenceReconciliation";
