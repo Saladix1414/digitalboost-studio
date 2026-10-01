@@ -125,6 +125,8 @@ export function RiskReviewWorkspace() {
 
     recoveryAttemptHistory,
 
+    remoteRetryHistory,
+
     runRecoveryAttempt,
 
     persistenceMode,
@@ -319,6 +321,13 @@ export function RiskReviewWorkspace() {
         "recover-local"
       );
     };
+
+  const latestRemoteRetryEvent =
+    remoteRetryHistory.entries.at(
+      -1
+    ) ??
+    null;
+
 
   const approvalRecoveryDiagnosticLabel =
     recoveryDiagnostic
@@ -640,7 +649,62 @@ export function RiskReviewWorkspace() {
                         {approvalLifecycle.status.toUpperCase()}
                       </dd>
                     </div>
-                  </dl>
+                                      <div>
+                      <dt>
+                        Retry events
+                      </dt>
+
+                      <dd>
+                        {remoteRetryHistory.entries.length}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>
+                        Last remote operation
+                      </dt>
+
+                      <dd>
+                        {latestRemoteRetryEvent?.operation.toUpperCase() ?? "NONE"}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>
+                        Last retry state
+                      </dt>
+
+                      <dd>
+                        {latestRemoteRetryEvent
+                          ? `#${latestRemoteRetryEvent.attempt} · ${latestRemoteRetryEvent.status.toUpperCase()}`
+                          : "NONE"}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>
+                        Retry reason
+                      </dt>
+
+                      <dd>
+                        {latestRemoteRetryEvent?.reason ?? "NONE"}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>
+                        Idempotency
+                      </dt>
+
+                      <dd>
+                        {latestRemoteRetryEvent
+                          ? latestRemoteRetryEvent.idempotencyProtected
+                            ? "PROTECTED"
+                            : "UNPROTECTED"
+                          : "NONE"}
+                      </dd>
+                    </div>
+</dl>
 
                   {(
                     approvalLifecycle.status === "stale" ||
