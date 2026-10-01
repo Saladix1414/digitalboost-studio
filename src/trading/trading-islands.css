@@ -1,0 +1,1164 @@
+/* ============================================================
+   DIGITALBOOST STUDIO
+   TRADING ISLANDS — VISUAL DNA V1
+
+   Precision / Control / Speed / Depth / Premium / Technology
+
+   RULES
+   - no decorative neon
+   - no excessive glow
+   - no excessive glassmorphism
+   - no generic exchange clone aesthetic
+   - semantic colors keep their meaning
+   ============================================================ */
+
+[data-trading-islands="true"] {
+  --ti-bg-void: #030609;
+  --ti-bg: #05090e;
+  --ti-bg-workspace: #07101a;
+
+  --ti-surface-1: #0a131d;
+  --ti-surface-2: #0d1823;
+  --ti-surface-3: #101d29;
+  --ti-surface-interactive: #122230;
+  --ti-surface-hover: #152938;
+  --ti-surface-selected: #102b3b;
+
+  --ti-border-subtle: rgba(143, 174, 199, 0.10);
+  --ti-border: rgba(143, 174, 199, 0.16);
+  --ti-border-strong: rgba(102, 173, 219, 0.28);
+  --ti-border-active: rgba(48, 191, 255, 0.48);
+
+  --ti-text: #f1f6fa;
+  --ti-text-2: #afbfca;
+  --ti-muted: #718493;
+  --ti-faint: #50616d;
+
+  --ti-blue: #278ef5;
+  --ti-blue-strong: #1477df;
+  --ti-cyan: #32c8f4;
+  --ti-cyan-soft: #7bdcf5;
+
+  --ti-positive: #26c281;
+  --ti-negative: #ef5b68;
+  --ti-warning: #e5b84b;
+  --ti-info: #4ca8f5;
+
+  --ti-chart-grid: rgba(139, 166, 184, 0.08);
+  --ti-chart-axis: #607482;
+  --ti-chart-crosshair: rgba(183, 204, 218, 0.42);
+
+  --ti-radius-xs: 4px;
+  --ti-radius-sm: 6px;
+  --ti-radius-md: 8px;
+  --ti-radius-lg: 10px;
+  --ti-radius-xl: 12px;
+
+  --ti-motion-fast: 110ms;
+  --ti-motion-standard: 160ms;
+  --ti-motion-deliberate: 220ms;
+
+  min-height: 100vh;
+
+  color: var(--ti-text);
+
+  background:
+    radial-gradient(
+      circle at 64% -18%,
+      rgba(25, 106, 170, 0.13),
+      transparent 33%
+    ),
+    linear-gradient(
+      180deg,
+      #071019 0%,
+      var(--ti-bg) 42%,
+      var(--ti-bg-void) 100%
+    );
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  color-scheme: dark;
+}
+
+[data-trading-islands="true"],
+[data-trading-islands="true"] *,
+[data-trading-islands="true"] *::before,
+[data-trading-islands="true"] *::after {
+  box-sizing: border-box;
+}
+
+/* ------------------------------------------------------------
+   TYPOGRAPHY
+   ------------------------------------------------------------ */
+
+.ti-title {
+  margin: 0;
+
+  color: var(--ti-text);
+
+  font-size: clamp(20px, 2vw, 26px);
+  line-height: 1.15;
+  font-weight: 620;
+  letter-spacing: -0.025em;
+}
+
+.ti-heading {
+  margin: 0;
+
+  color: var(--ti-text);
+
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 620;
+}
+
+.ti-label {
+  color: var(--ti-muted);
+
+  font-size: 9px;
+  line-height: 1.3;
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ti-copy {
+  color: var(--ti-text-2);
+
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.ti-number {
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    Menlo,
+    monospace;
+
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* ------------------------------------------------------------
+   SURFACE HIERARCHY
+   ------------------------------------------------------------ */
+
+.ti-surface {
+  border: 1px solid var(--ti-border);
+  border-radius: var(--ti-radius-lg);
+
+  background: var(--ti-surface-1);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.018),
+    0 12px 35px rgba(0, 0, 0, 0.18);
+}
+
+.ti-surface--secondary {
+  background: var(--ti-surface-2);
+}
+
+.ti-surface--elevated {
+  border-color: var(--ti-border-strong);
+
+  background: var(--ti-surface-3);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.022),
+    0 20px 50px rgba(0, 0, 0, 0.22);
+}
+
+/* ------------------------------------------------------------
+   INTERACTIVE SURFACES
+   ------------------------------------------------------------ */
+
+.ti-interactive {
+  border: 1px solid transparent;
+
+  color: var(--ti-text-2);
+  background: transparent;
+
+  transition:
+    color var(--ti-motion-fast) ease,
+    border-color var(--ti-motion-fast) ease,
+    background var(--ti-motion-fast) ease,
+    transform var(--ti-motion-fast) ease;
+}
+
+.ti-interactive:hover {
+  color: var(--ti-text);
+
+  border-color: var(--ti-border);
+
+  background: var(--ti-surface-hover);
+}
+
+.ti-interactive:active {
+  transform: translateY(1px);
+}
+
+.ti-interactive[aria-selected="true"],
+.ti-interactive[data-selected="true"] {
+  color: var(--ti-text);
+
+  border-color: rgba(50, 200, 244, 0.22);
+
+  background: var(--ti-surface-selected);
+}
+
+/* ------------------------------------------------------------
+   FOCUS
+   ------------------------------------------------------------ */
+
+[data-trading-islands="true"]
+  :where(
+    button,
+    input,
+    select,
+    textarea,
+    [tabindex]
+  ):focus-visible {
+  outline: none;
+
+  box-shadow:
+    0 0 0 1px var(--ti-bg-void),
+    0 0 0 3px rgba(50, 200, 244, 0.55);
+}
+
+/* ------------------------------------------------------------
+   BUTTON FOUNDATION
+   ------------------------------------------------------------ */
+
+.ti-button {
+  min-height: 32px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  border: 1px solid var(--ti-border);
+  border-radius: var(--ti-radius-sm);
+
+  padding: 0 11px;
+
+  color: var(--ti-text-2);
+  background: var(--ti-surface-2);
+
+  font: inherit;
+  font-size: 10px;
+  font-weight: 620;
+
+  cursor: pointer;
+
+  transition:
+    color var(--ti-motion-fast) ease,
+    background var(--ti-motion-fast) ease,
+    border-color var(--ti-motion-fast) ease,
+    transform var(--ti-motion-fast) ease;
+}
+
+.ti-button:hover {
+  color: var(--ti-text);
+  border-color: var(--ti-border-strong);
+  background: var(--ti-surface-interactive);
+}
+
+.ti-button:active {
+  transform: translateY(1px);
+}
+
+.ti-button--primary {
+  color: #f5fbff;
+
+  border-color: rgba(50, 200, 244, 0.32);
+
+  background: #106ca8;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 6px 20px rgba(11, 92, 145, 0.16);
+}
+
+.ti-button--primary:hover {
+  border-color: rgba(76, 208, 247, 0.48);
+  background: #127ab8;
+}
+
+.ti-button:disabled,
+.ti-button[aria-disabled="true"] {
+  opacity: 0.38;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+/* ------------------------------------------------------------
+   STATUS LANGUAGE
+   ------------------------------------------------------------ */
+
+.ti-status {
+  min-height: 21px;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  border: 1px solid var(--ti-border);
+  border-radius: 999px;
+
+  padding: 0 8px;
+
+  color: var(--ti-muted);
+  background: rgba(255, 255, 255, 0.018);
+
+  font-size: 8px;
+  font-weight: 650;
+
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ti-status::before {
+  content: "";
+
+  width: 5px;
+  height: 5px;
+
+  flex: 0 0 auto;
+
+  border-radius: 50%;
+
+  background: currentColor;
+}
+
+.ti-status--positive,
+.ti-status--running {
+  color: var(--ti-positive);
+
+  border-color: rgba(38, 194, 129, 0.2);
+  background: rgba(38, 194, 129, 0.045);
+}
+
+.ti-status--negative,
+.ti-status--error,
+.ti-status--stopped {
+  color: var(--ti-negative);
+
+  border-color: rgba(239, 91, 104, 0.2);
+  background: rgba(239, 91, 104, 0.045);
+}
+
+.ti-status--warning,
+.ti-status--paused {
+  color: var(--ti-warning);
+
+  border-color: rgba(229, 184, 75, 0.2);
+  background: rgba(229, 184, 75, 0.045);
+}
+
+.ti-status--info,
+.ti-status--active {
+  color: var(--ti-info);
+
+  border-color: rgba(76, 168, 245, 0.2);
+  background: rgba(76, 168, 245, 0.045);
+}
+
+/* ------------------------------------------------------------
+   POSITIVE / NEGATIVE VALUES
+
+   These colors are semantic and MUST NOT be used simply
+   as decorative accents.
+   ------------------------------------------------------------ */
+
+.ti-positive {
+  color: var(--ti-positive);
+}
+
+.ti-negative {
+  color: var(--ti-negative);
+}
+
+.ti-warning {
+  color: var(--ti-warning);
+}
+
+/* ------------------------------------------------------------
+   INPUT FOUNDATION
+   ------------------------------------------------------------ */
+
+.ti-input {
+  min-height: 32px;
+
+  border: 1px solid var(--ti-border);
+  border-radius: var(--ti-radius-sm);
+
+  padding: 0 10px;
+
+  color: var(--ti-text);
+
+  background: rgba(3, 8, 13, 0.72);
+
+  font: inherit;
+  font-size: 10px;
+
+  transition:
+    border-color var(--ti-motion-fast) ease,
+    box-shadow var(--ti-motion-fast) ease;
+}
+
+.ti-input::placeholder {
+  color: var(--ti-faint);
+}
+
+.ti-input:hover {
+  border-color: var(--ti-border-strong);
+}
+
+/* ------------------------------------------------------------
+   DATA / TABLE FOUNDATION
+   ------------------------------------------------------------ */
+
+.ti-data-row {
+  min-height: 30px;
+
+  display: grid;
+  align-items: center;
+
+  border-bottom: 1px solid var(--ti-border-subtle);
+
+  color: var(--ti-text-2);
+
+  font-size: 10px;
+
+  transition:
+    color var(--ti-motion-fast) ease,
+    background var(--ti-motion-fast) ease;
+}
+
+.ti-data-row:hover {
+  color: var(--ti-text);
+
+  background: rgba(255, 255, 255, 0.018);
+}
+
+/* ------------------------------------------------------------
+   CHART LANGUAGE
+   ------------------------------------------------------------ */
+
+.ti-chart-surface {
+  position: relative;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      var(--ti-chart-grid) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      var(--ti-chart-grid) 1px,
+      transparent 1px
+    ),
+    #071019;
+
+  background-size:
+    56px 42px,
+    56px 42px;
+}
+
+.ti-chart-surface::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.012),
+      transparent 22%
+    );
+}
+
+/* ------------------------------------------------------------
+   SCROLLBARS
+   ------------------------------------------------------------ */
+
+[data-trading-islands="true"] ::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+[data-trading-islands="true"] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-trading-islands="true"] ::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+
+  background: #1b2d3b;
+}
+
+[data-trading-islands="true"] ::-webkit-scrollbar-thumb:hover {
+  background: #294355;
+}
+
+/* ------------------------------------------------------------
+   MOTION
+   ------------------------------------------------------------ */
+
+@keyframes ti-running-pulse {
+  0%,
+  100% {
+    opacity: 0.52;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.ti-status--running::before {
+  animation:
+    ti-running-pulse
+    1.7s ease-in-out
+    infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-trading-islands="true"] *,
+  [data-trading-islands="true"] *::before,
+  [data-trading-islands="true"] *::after {
+    scroll-behavior: auto !important;
+
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ------------------------------------------------------------
+   RESPONSIVE FOUNDATION
+   ------------------------------------------------------------ */
+
+@media (max-width: 900px) {
+  [data-trading-islands="true"] {
+    --ti-workspace-density: comfortable;
+  }
+}
+
+@media (max-width: 640px) {
+  .ti-title {
+    font-size: 19px;
+  }
+
+  .ti-button {
+    min-height: 36px;
+  }
+
+  .ti-data-row {
+    min-height: 36px;
+  }
+}
+
+/* ============================================================
+   PHASE 2A — CORE DESIGN SYSTEM
+   ============================================================ */
+
+.ti-button--compact {
+  min-height: 28px;
+  padding-inline: 9px;
+  font-size: 9px;
+}
+
+.ti-button--comfortable {
+  min-height: 36px;
+  padding-inline: 14px;
+}
+
+.ti-button--ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.ti-button--ghost:hover {
+  border-color: var(--ti-border);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.ti-button--danger {
+  color: #ffdce0;
+  border-color: rgba(239, 91, 104, 0.28);
+  background: rgba(143, 34, 47, 0.32);
+}
+
+.ti-button--danger:hover {
+  border-color: rgba(239, 91, 104, 0.46);
+  background: rgba(160, 39, 54, 0.42);
+}
+
+.ti-button__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ti-button__spinner {
+  width: 11px;
+  height: 11px;
+
+  flex: 0 0 auto;
+
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+
+  animation:
+    ti-spin
+    700ms linear
+    infinite;
+}
+
+@keyframes ti-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ti-status--neutral {
+  color: var(--ti-muted);
+}
+
+.ti-status--pulse::before {
+  animation:
+    ti-running-pulse
+    1.7s ease-in-out
+    infinite;
+}
+
+.ti-metric-card {
+  min-width: 0;
+
+  border: 1px solid var(--ti-border);
+  border-radius: var(--ti-radius-lg);
+
+  padding: 14px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(14, 26, 37, 0.94),
+      rgba(9, 18, 27, 0.96)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.018),
+    0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.ti-metric-card__head {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ti-metric-card__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: var(--ti-muted);
+
+  font-size: 9px;
+  font-weight: 650;
+
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ti-metric-card__icon {
+  display: grid;
+  place-items: center;
+  color: var(--ti-faint);
+}
+
+.ti-metric-card__body {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.ti-metric-card__value {
+  color: var(--ti-text);
+
+  font-size: clamp(17px, 2vw, 22px);
+  line-height: 1;
+  font-weight: 650;
+}
+
+.ti-metric-card__trend {
+  color: var(--ti-muted);
+
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.ti-metric-card--positive
+  .ti-metric-card__trend {
+  color: var(--ti-positive);
+}
+
+.ti-metric-card--negative
+  .ti-metric-card__trend {
+  color: var(--ti-negative);
+}
+
+.ti-metric-card--warning
+  .ti-metric-card__trend {
+  color: var(--ti-warning);
+}
+
+.ti-metric-card--info
+  .ti-metric-card__trend {
+  color: var(--ti-info);
+}
+
+.ti-metric-card__secondary {
+  margin-top: 7px;
+
+  color: var(--ti-muted);
+
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.ti-metric-card__footer {
+  margin-top: 12px;
+  padding-top: 10px;
+
+  border-top: 1px solid var(--ti-border-subtle);
+
+  color: var(--ti-muted);
+
+  font-size: 9px;
+}
+
+.ti-data-table {
+  min-width: 0;
+  overflow: hidden;
+
+  border: 1px solid var(--ti-border);
+  border-radius: var(--ti-radius-lg);
+
+  background: var(--ti-surface-1);
+}
+
+.ti-data-table__header,
+.ti-data-table__row {
+  min-width: 0;
+
+  display: grid;
+  align-items: center;
+}
+
+.ti-data-table__header {
+  min-height: 34px;
+
+  border-bottom: 1px solid var(--ti-border);
+
+  color: var(--ti-muted);
+  background: rgba(255, 255, 255, 0.018);
+
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.ti-data-table__row {
+  min-height: 38px;
+
+  border-bottom: 1px solid var(--ti-border-subtle);
+
+  color: var(--ti-text-2);
+
+  font-size: 10px;
+
+  transition:
+    color var(--ti-motion-fast) ease,
+    background var(--ti-motion-fast) ease;
+}
+
+.ti-data-table--dense
+  .ti-data-table__row {
+  min-height: 32px;
+}
+
+.ti-data-table__row:last-child {
+  border-bottom: 0;
+}
+
+.ti-data-table__row:hover {
+  color: var(--ti-text);
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.ti-data-table__row--clickable {
+  cursor: pointer;
+}
+
+.ti-data-table__cell {
+  min-width: 0;
+
+  padding: 0 11px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ti-data-table__cell--left {
+  text-align: left;
+}
+
+.ti-data-table__cell--center {
+  text-align: center;
+}
+
+.ti-data-table__cell--right {
+  text-align: right;
+}
+
+.ti-data-table__empty {
+  min-height: 110px;
+
+  display: grid;
+  place-items: center;
+
+  padding: 20px;
+
+  color: var(--ti-faint);
+
+  font-size: 10px;
+}
+
+.ti-chart-panel {
+  min-width: 0;
+
+  overflow: hidden;
+
+  border: 1px solid var(--ti-border);
+  border-radius: var(--ti-radius-lg);
+
+  background: var(--ti-surface-1);
+
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.14);
+}
+
+.ti-chart-panel__header {
+  min-height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+
+  padding: 8px 12px;
+
+  border-bottom: 1px solid var(--ti-border);
+}
+
+.ti-chart-panel__identity h2 {
+  margin: 0;
+
+  color: var(--ti-text);
+
+  font-size: 11px;
+  font-weight: 620;
+}
+
+.ti-chart-panel__subtitle {
+  margin-top: 3px;
+
+  color: var(--ti-muted);
+
+  font-size: 8px;
+}
+
+.ti-chart-panel__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ti-chart-panel__legend {
+  min-height: 29px;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 0 12px;
+
+  border-bottom: 1px solid var(--ti-border-subtle);
+
+  color: var(--ti-muted);
+
+  font-size: 8px;
+}
+
+.ti-chart-panel__canvas {
+  min-height: 260px;
+}
+
+.ti-chart-panel__footer {
+  min-height: 32px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 12px;
+
+  border-top: 1px solid var(--ti-border-subtle);
+
+  color: var(--ti-muted);
+
+  font-size: 8px;
+}
+
+.ti-toolbar {
+  min-width: 0;
+  min-height: 42px;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto
+    minmax(0, 1fr);
+
+  align-items: center;
+  gap: 10px;
+
+  padding: 5px 8px;
+
+  border: 1px solid var(--ti-border);
+  border-radius: var(--ti-radius-md);
+
+  background: rgba(8, 16, 25, 0.88);
+}
+
+.ti-toolbar__start,
+.ti-toolbar__center,
+.ti-toolbar__end {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ti-toolbar__center {
+  justify-content: center;
+}
+
+.ti-toolbar__end {
+  justify-content: flex-end;
+}
+
+.ti-filter-bar {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 7px 9px;
+
+  border: 1px solid var(--ti-border-subtle);
+  border-radius: var(--ti-radius-md);
+
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.ti-filter-bar__label {
+  flex: 0 0 auto;
+
+  color: var(--ti-muted);
+
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ti-filter-bar__controls {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ti-filter-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-left: auto;
+}
+
+.ti-empty-state {
+  min-height: 220px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px;
+
+  color: var(--ti-muted);
+
+  text-align: center;
+}
+
+.ti-empty-state--compact {
+  min-height: 130px;
+  padding: 20px;
+}
+
+.ti-empty-state__icon {
+  width: 38px;
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
+  margin-bottom: 12px;
+
+  border: 1px solid var(--ti-border);
+  border-radius: var(--ti-radius-md);
+
+  color: var(--ti-cyan);
+
+  background: rgba(50, 200, 244, 0.04);
+}
+
+.ti-empty-state__title {
+  color: var(--ti-text-2);
+
+  font-size: 11px;
+  font-weight: 620;
+}
+
+.ti-empty-state__description {
+  max-width: 420px;
+
+  margin: 7px 0 0;
+
+  color: var(--ti-muted);
+
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.ti-empty-state__action {
+  margin-top: 15px;
+}
+
+.ti-skeleton {
+  display: inline-block;
+
+  overflow: hidden;
+
+  border-radius: var(--ti-radius-sm);
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.075),
+      rgba(255, 255, 255, 0.035)
+    );
+
+  background-size: 220% 100%;
+
+  animation:
+    ti-skeleton-shimmer
+    1.45s ease-in-out
+    infinite;
+}
+
+@keyframes ti-skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .ti-toolbar {
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
+  }
+
+  .ti-toolbar__center {
+    display: none;
+  }
+
+  .ti-filter-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ti-filter-bar__actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .ti-chart-panel__header {
+    align-items: flex-start;
+  }
+
+  .ti-data-table {
+    overflow-x: auto;
+  }
+
+  .ti-data-table__header,
+  .ti-data-table__row {
+    min-width: 620px;
+  }
+}
