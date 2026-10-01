@@ -31,3 +31,12 @@ export type {
   RiskReviewFreshness,
   RiskReviewFreshnessResult,
 } from "./reviewStatus";
+
+export {
+  createInitialVersionedReview,
+  createNextVersionedReview,
+} from "./reviewVersion";
+
+export type {
+  VersionedRiskReview,
+} from "./reviewVersion";

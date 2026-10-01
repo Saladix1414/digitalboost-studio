@@ -19,6 +19,11 @@ import {
   evaluateRiskReviewFreshness,
 } from "./reviewStatus";
 
+import {
+  createInitialVersionedReview,
+  createNextVersionedReview,
+} from "./reviewVersion";
+
 export function RiskReviewWorkspace() {
   const [
     selectedBotId,
@@ -64,8 +69,8 @@ export function RiskReviewWorkspace() {
     );
 
   const [
-    activeReview,
-    setActiveReview,
+    activeReviewVersion,
+    setActiveReviewVersion,
   ] = useState(
     () => {
       const initialBot =
@@ -84,16 +89,22 @@ export function RiskReviewWorkspace() {
 
       return initialBot &&
         initialStrategy
-        ? reviewPaperRisk({
-            bot:
-              initialBot,
+        ? createInitialVersionedReview(
+            reviewPaperRisk({
+              bot:
+                initialBot,
 
-            strategy:
-              initialStrategy,
-          }).review
+              strategy:
+                initialStrategy,
+            }).review
+          )
         : null;
     }
   );
+
+  const activeReview =
+    activeReviewVersion?.review ??
+    null;
 
   const candidateDecision =
     useMemo(
@@ -138,8 +149,18 @@ export function RiskReviewWorkspace() {
         return;
       }
 
-      setActiveReview(
-        candidateDecision.review
+      setActiveReviewVersion(
+        (
+          current
+        ) =>
+          current
+            ? createNextVersionedReview(
+                current,
+                candidateDecision.review
+              )
+            : createInitialVersionedReview(
+                candidateDecision.review
+              )
       );
     };
 
@@ -311,6 +332,29 @@ export function RiskReviewWorkspace() {
 
                     <dd>
                       {activeReview?.approvedFor ?? "none"}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Review version
+                    </dt>
+
+                    <dd>
+                      {activeReviewVersion
+                        ? `v${activeReviewVersion.version}`
+                        : "NONE"}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Previous review
+                    </dt>
+
+                    <dd>
+                      {activeReviewVersion?.previousReviewId ??
+                        "NONE"}
                     </dd>
                   </div>
 

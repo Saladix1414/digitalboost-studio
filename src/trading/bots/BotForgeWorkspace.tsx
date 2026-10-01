@@ -33,6 +33,8 @@ import {
 } from "../runtime";
 
 import {
+  createInitialVersionedReview,
+  createNextVersionedReview,
   evaluateRiskReviewFreshness,
   reviewPaperRisk,
 } from "../risk";
@@ -152,8 +154,8 @@ export function BotForgeWorkspace() {
     );
 
   const [
-    activeReview,
-    setActiveReview,
+    activeReviewVersion,
+    setActiveReviewVersion,
   ] = useState(
     () => {
       const initialBot =
@@ -172,16 +174,22 @@ export function BotForgeWorkspace() {
 
       return initialBot &&
         initialStrategy
-        ? reviewPaperRisk({
-            bot:
-              initialBot,
+        ? createInitialVersionedReview(
+            reviewPaperRisk({
+              bot:
+                initialBot,
 
-            strategy:
-              initialStrategy,
-          }).review
+              strategy:
+                initialStrategy,
+            }).review
+          )
         : null;
     }
   );
+
+  const activeReview =
+    activeReviewVersion?.review ??
+    null;
 
   const candidateReview =
     useMemo(
@@ -229,8 +237,18 @@ export function BotForgeWorkspace() {
         return;
       }
 
-      setActiveReview(
-        candidateReview.review
+      setActiveReviewVersion(
+        (
+          current
+        ) =>
+          current
+            ? createNextVersionedReview(
+                current,
+                candidateReview.review
+              )
+            : createInitialVersionedReview(
+                candidateReview.review
+              )
       );
 
       setRuntimeSession(
@@ -710,6 +728,29 @@ export function BotForgeWorkspace() {
 
                     <strong>
                       {activeReview?.id ??
+                        "NONE"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Review version
+                    </span>
+
+                    <strong>
+                      {activeReviewVersion
+                        ? `v${activeReviewVersion.version}`
+                        : "NONE"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Previous review
+                    </span>
+
+                    <strong>
+                      {activeReviewVersion?.previousReviewId ??
                         "NONE"}
                     </strong>
                   </div>
