@@ -50,6 +50,7 @@ export type {
 
 export {
   createRuntimeSessionId,
+  getRuntimeSessionOriginForDiagnostics,
   getRuntimeSessionSequenceForDiagnostics,
   resetRuntimeSessionIdentityForTests,
 } from "./sessionIdentity";
