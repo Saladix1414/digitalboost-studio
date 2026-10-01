@@ -2,9 +2,21 @@ import type {
   VersionedRiskReview,
 } from "./reviewVersion";
 
+import type {
+  RiskReviewProvenance,
+} from "./reviewProvenance";
+
+export type RiskReviewHistoryEntry = {
+  readonly versionedReview:
+    VersionedRiskReview;
+
+  readonly provenance:
+    RiskReviewProvenance;
+};
+
 export type RiskReviewHistory = {
   readonly entries:
-    readonly VersionedRiskReview[];
+    readonly RiskReviewHistoryEntry[];
 
   readonly authoritative:
     false;
@@ -12,7 +24,7 @@ export type RiskReviewHistory = {
 
 export function createRiskReviewHistory(
   initial:
-    VersionedRiskReview
+    RiskReviewHistoryEntry
 ): RiskReviewHistory {
   return {
     entries: [
@@ -29,7 +41,7 @@ export function appendRiskReviewHistory(
     RiskReviewHistory,
 
   next:
-    VersionedRiskReview
+    RiskReviewHistoryEntry
 ): RiskReviewHistory {
   return {
     entries: [
@@ -45,7 +57,7 @@ export function appendRiskReviewHistory(
 export function getLatestRiskReviewHistoryEntry(
   history:
     RiskReviewHistory
-): VersionedRiskReview | null {
+): RiskReviewHistoryEntry | null {
   return (
     history.entries[
       history.entries.length -

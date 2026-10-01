@@ -37,6 +37,7 @@ import {
   createInitialVersionedReview,
   createNextVersionedReview,
   createRiskReviewHistory,
+  createRiskReviewProvenance,
   evaluateRiskReviewFreshness,
   reviewPaperRisk,
 } from "../risk";
@@ -199,9 +200,17 @@ export function BotForgeWorkspace() {
   ] = useState(
     () =>
       activeReviewVersion
-        ? createRiskReviewHistory(
-            activeReviewVersion
-          )
+        ? createRiskReviewHistory({
+            versionedReview:
+              activeReviewVersion,
+
+            provenance:
+              createRiskReviewProvenance(
+                activeReviewVersion,
+                "bot-forge",
+                "initial-review"
+              ),
+          })
         : null
   );
 
@@ -272,11 +281,29 @@ export function BotForgeWorkspace() {
               history
                 ? appendRiskReviewHistory(
                     history,
-                    next
+                    {
+                      versionedReview:
+                        next,
+
+                      provenance:
+                        createRiskReviewProvenance(
+                          next,
+                          "bot-forge",
+                          "explicit-rereview"
+                        ),
+                    }
                   )
-                : createRiskReviewHistory(
-                    next
-                  )
+                : createRiskReviewHistory({
+                    versionedReview:
+                      next,
+
+                    provenance:
+                      createRiskReviewProvenance(
+                        next,
+                        "bot-forge",
+                        "explicit-rereview"
+                      ),
+                  })
           );
 
           return next;
@@ -841,19 +868,19 @@ export function BotForgeWorkspace() {
                     ) => (
                       <article
                         key={
-                          `${item.review.id}-${item.version}`
+                          `${item.versionedReview.review.id}-${item.versionedReview.version}`
                         }
                       >
                         <strong>
-                          v{item.version}
+                          v{item.versionedReview.version}
                         </strong>
 
                         <span>
-                          {item.review.id}
+                          {item.versionedReview.review.id}
                         </span>
 
                         <span>
-                          PREV · {item.previousReviewId ?? "ROOT"}
+                          PREV · {item.versionedReview.previousReviewId ?? "ROOT"}
                         </span>
                       </article>
                     )

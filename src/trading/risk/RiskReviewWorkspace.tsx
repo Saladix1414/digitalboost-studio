@@ -29,6 +29,10 @@ import {
   createRiskReviewHistory,
 } from "./reviewHistory";
 
+import {
+  createRiskReviewProvenance,
+} from "./reviewProvenance";
+
 export function RiskReviewWorkspace() {
   const [
     selectedBotId,
@@ -117,9 +121,17 @@ export function RiskReviewWorkspace() {
   ] = useState(
     () =>
       activeReviewVersion
-        ? createRiskReviewHistory(
-            activeReviewVersion
-          )
+        ? createRiskReviewHistory({
+            versionedReview:
+              activeReviewVersion,
+
+            provenance:
+              createRiskReviewProvenance(
+                activeReviewVersion,
+                "risk-review-workspace",
+                "initial-review"
+              ),
+          })
         : null
   );
 
@@ -187,11 +199,29 @@ export function RiskReviewWorkspace() {
               history
                 ? appendRiskReviewHistory(
                     history,
-                    next
+                    {
+                      versionedReview:
+                        next,
+
+                      provenance:
+                        createRiskReviewProvenance(
+                          next,
+                          "risk-review-workspace",
+                          "explicit-rereview"
+                        ),
+                    }
                   )
-                : createRiskReviewHistory(
-                    next
-                  )
+                : createRiskReviewHistory({
+                    versionedReview:
+                      next,
+
+                    provenance:
+                      createRiskReviewProvenance(
+                        next,
+                        "risk-review-workspace",
+                        "explicit-rereview"
+                      ),
+                  })
           );
 
           return next;
@@ -669,25 +699,25 @@ export function RiskReviewWorkspace() {
                     ) => (
                       <article
                         key={
-                          `${item.review.id}-${item.version}`
+                          `${item.versionedReview.review.id}-${item.versionedReview.version}`
                         }
                       >
                         <div>
                           <strong>
-                            v{item.version}
+                            v{item.versionedReview.version}
                           </strong>
 
                           <span>
-                            {item.review.id}
+                            {item.versionedReview.review.id}
                           </span>
                         </div>
 
                         <span>
-                          PREV · {item.previousReviewId ?? "ROOT"}
+                          PREV · {item.versionedReview.previousReviewId ?? "ROOT"}
                         </span>
 
                         <span>
-                          {item.review.status.toUpperCase()}
+                          {item.versionedReview.review.status.toUpperCase()}
                         </span>
                       </article>
                     )

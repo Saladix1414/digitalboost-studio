@@ -50,3 +50,13 @@ export {
 export type {
   RiskReviewHistory,
 } from "./reviewHistory";
+
+export {
+  createRiskReviewProvenance,
+} from "./reviewProvenance";
+
+export type {
+  RiskReviewProvenanceSource,
+  RiskReviewCreationReason,
+  RiskReviewProvenance,
+} from "./reviewProvenance";
