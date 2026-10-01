@@ -8799,3 +8799,38 @@
   font-size: 8px;
   line-height: 1.45;
 }
+
+/* ============================================================
+   PHASE 18F — PERSISTENCE RECOVERY
+   ============================================================ */
+
+.ti-hydration-recovery {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--ti-border-subtle);
+}
+
+.ti-hydration-recovery__button {
+  width: fit-content;
+  min-height: 28px;
+  padding: 6px 10px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: var(--ti-negative);
+  font: inherit;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.ti-hydration-recovery__button:hover {
+  opacity: 0.82;
+}
+
+.ti-hydration-recovery__button:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 2px;
+}

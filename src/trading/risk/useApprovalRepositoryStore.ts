@@ -12,6 +12,7 @@ import {
   getApprovalStoreSnapshot,
   hydrateApprovalStore,
   persistApprovalStore,
+  recoverApprovalStorePersistence,
   subscribeApprovalStore,
 } from "./approvalStore";
 
@@ -81,5 +82,8 @@ export function useApprovalRepositoryStore() {
 
     persist:
       persistApprovalStore,
+
+    recoverPersistence:
+      recoverApprovalStorePersistence,
   } as const;
 }

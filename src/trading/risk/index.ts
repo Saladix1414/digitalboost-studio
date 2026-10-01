@@ -102,6 +102,7 @@ export {
   bootstrapApprovalStore,
   acceptApprovalStoreReview,
   clearApprovalStorePersistence,
+  recoverApprovalStorePersistence,
   getApprovalStoreActiveReview,
 } from "./approvalStore";
 

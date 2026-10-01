@@ -103,8 +103,15 @@ export function RiskReviewWorkspace() {
       bootstrapApproval,
 
     acceptReview,
-  } =
+
+    recoverPersistence,
+} =
     useApprovalRepositoryStore();
+
+  const recoverApprovalPersistence =
+    async () => {
+      await recoverPersistence();
+    };
 
   const approvalStoreReady =
     approvalLifecycle.status ===
@@ -352,6 +359,23 @@ export function RiskReviewWorkspace() {
                   <p className="ti-hydration-state__error">
                     {approvalLifecycle.error}
                   </p>
+                ) : null}
+
+                {approvalLifecycle.status === "error" ? (
+                  <div className="ti-hydration-recovery">
+                    <p className="ti-risk-review__boundary-note">
+                      Persisted approval state could not be loaded safely.
+                      Runtime governance remains locked until recovery succeeds.
+                    </p>
+
+                    <button
+                      type="button"
+                      className="ti-hydration-recovery__button"
+                      onClick={recoverApprovalPersistence}
+                    >
+                      RESET APPROVAL STORAGE
+                    </button>
+                  </div>
                 ) : null}
 
                 <p className="ti-risk-review__boundary-note">

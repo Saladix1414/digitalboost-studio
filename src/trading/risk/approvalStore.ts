@@ -284,6 +284,26 @@ export async function clearApprovalStorePersistence():
   emit();
 }
 
+
+export async function recoverApprovalStorePersistence():
+  Promise<boolean> {
+  await clearApprovalStorePersistence();
+
+  if (
+    lifecycle.status ===
+    "error"
+  ) {
+    return false;
+  }
+
+  await hydrateApprovalStore();
+
+  return (
+    lifecycle.status ===
+    "ready"
+  );
+}
+
 export function getApprovalStoreActiveReview():
   RiskReview | null {
   return getActiveRiskReview(
