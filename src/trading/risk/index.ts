@@ -175,3 +175,21 @@ export type {
   ApprovalBackendOperation,
   ApprovalBackendTransactionMetadata,
 } from "./approvalBackendTransactions";
+
+export {
+  deserializeApprovalBackendReadResponse,
+  deserializeApprovalRepositoryState,
+  mapApprovalBackendErrorDto,
+  serializeApprovalBackendClearRequest,
+  serializeApprovalBackendWriteRequest,
+  serializeApprovalRepositoryState,
+} from "./approvalBackendTransport";
+
+export type {
+  ApprovalBackendClearRequestDto,
+  ApprovalBackendErrorDto,
+  ApprovalBackendReadResponseDto,
+  ApprovalBackendStateDto,
+  ApprovalBackendWriteRequestDto,
+  ApprovalBackendWriteResponseDto,
+} from "./approvalBackendTransport";
