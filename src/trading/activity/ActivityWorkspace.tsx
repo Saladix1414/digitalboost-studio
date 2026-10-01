@@ -4,6 +4,10 @@ import {
 } from "react";
 
 import {
+  RuntimeEvidenceDiagnostics,
+} from "./RuntimeEvidenceDiagnostics";
+
+import {
   getRuntimeEvidenceHistory,
   subscribeRuntimeEvidenceHistory,
 } from "../runtime";
@@ -191,6 +195,7 @@ export function ActivityWorkspace() {
 
   return (
     <section className="ti-activity">
+      <RuntimeEvidenceDiagnostics />
       <header className="ti-activity__header">
         <div>
           <span className="ti-label">
