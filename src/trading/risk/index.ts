@@ -277,3 +277,12 @@ export type {
   ApprovalRecoveryAction,
   ApprovalRecoveryPresentation,
 } from "./approvalRecoveryAction";
+
+export {
+  classifyApprovalRecoveryFailure,
+} from "./approvalRecoveryDiagnostics";
+
+export type {
+  ApprovalRecoveryDiagnostic,
+  ApprovalRecoveryDiagnosticCode,
+} from "./approvalRecoveryDiagnostics";

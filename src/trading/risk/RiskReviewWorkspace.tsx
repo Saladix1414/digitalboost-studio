@@ -115,6 +115,8 @@ export function RiskReviewWorkspace() {
 
     persistenceDiagnostics,
 
+    recoveryDiagnostic,
+
     persistenceMode,
 
     bootstrapFailurePolicy,
@@ -290,10 +292,47 @@ export function RiskReviewWorkspace() {
       await recoverPersistence();
     };
 
+  const approvalRecoveryDiagnosticLabel =
+    recoveryDiagnostic
+      ? `${recoveryDiagnostic.code} · ${
+          recoveryDiagnostic.retryable
+            ? "retryable"
+            : "non-retryable"
+        }`
+      : "none";
+
+
+
 
 
   return (
     <section className="ti-risk-review">
+
+      {approvalLifecycle.status === "error" &&
+        recoveryDiagnostic ? (
+          <div className="ti-approval-recovery-diagnostic">
+            <span className="ti-label">
+              RECOVERY DIAGNOSTIC
+            </span>
+
+            <strong>
+              {approvalRecoveryDiagnosticLabel}
+            </strong>
+
+            <span>
+              SOURCE · {recoveryDiagnostic.source}
+            </span>
+
+            <span>
+              {recoveryDiagnostic.message}
+            </span>
+
+            <small>
+              EVIDENCE ONLY · NOT AUTHORITY
+            </small>
+          </div>
+        ) : null}
+
       <header className="ti-risk-review__header">
         <div>
           <span className="ti-label">

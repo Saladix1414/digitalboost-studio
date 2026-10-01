@@ -188,6 +188,8 @@ export function BotForgeWorkspace() {
 
     persistenceDiagnostics,
 
+    recoveryDiagnostic,
+
     persistenceMode,
 
     bootstrapFailurePolicy,
@@ -483,10 +485,47 @@ export function BotForgeWorkspace() {
       await recoverPersistence();
     };
 
+  const approvalRecoveryDiagnosticLabel =
+    recoveryDiagnostic
+      ? `${recoveryDiagnostic.code} · ${
+          recoveryDiagnostic.retryable
+            ? "retryable"
+            : "non-retryable"
+        }`
+      : "none";
+
+
+
 
 
   return (
     <section className="ti-bot-forge">
+
+      {approvalLifecycle.status === "error" &&
+        recoveryDiagnostic ? (
+          <div className="ti-approval-recovery-diagnostic">
+            <span className="ti-label">
+              RECOVERY DIAGNOSTIC
+            </span>
+
+            <strong>
+              {approvalRecoveryDiagnosticLabel}
+            </strong>
+
+            <span>
+              SOURCE · {recoveryDiagnostic.source}
+            </span>
+
+            <span>
+              {recoveryDiagnostic.message}
+            </span>
+
+            <small>
+              EVIDENCE ONLY · NOT AUTHORITY
+            </small>
+          </div>
+        ) : null}
+
       <header className="ti-bot-forge__header">
         <div>
           <span className="ti-label">

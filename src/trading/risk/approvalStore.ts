@@ -1,4 +1,12 @@
 import {
+  classifyApprovalRecoveryFailure,
+} from "./approvalRecoveryDiagnostics";
+
+import type {
+  ApprovalRecoveryDiagnostic,
+} from "./approvalRecoveryDiagnostics";
+
+import {
   createLocalApprovalPersistenceCoordinator,
   type ApprovalPersistenceCoordinator,
 } from "./approvalCoordination";
@@ -59,6 +67,11 @@ let state:
 let lifecycle:
   ApprovalStoreLifecycle =
     createApprovalStoreLifecycle();
+
+let approvalRecoveryDiagnostic:
+  ApprovalRecoveryDiagnostic | null =
+    null;
+
 
 let persistence:
   ApprovalRepositoryPersistence | null =
@@ -182,6 +195,12 @@ export function getApprovalStoreLifecycle():
   return lifecycle;
 }
 
+export function getApprovalRecoveryDiagnostic():
+  ApprovalRecoveryDiagnostic | null {
+  return approvalRecoveryDiagnostic;
+}
+
+
 export function subscribeApprovalStore(
   listener:
     ApprovalStoreListener
@@ -246,6 +265,9 @@ export function markApprovalStoreStale():
 
 export async function hydrateApprovalStore():
   Promise<ApprovalRepositoryState> {
+  approvalRecoveryDiagnostic =
+    null;
+
   await waitForApprovalPersistenceQueue();
 
   if (
@@ -314,6 +336,11 @@ export async function hydrateApprovalStore():
   } catch (
     error
   ) {
+    approvalRecoveryDiagnostic =
+      classifyApprovalRecoveryFailure(
+        error
+      );
+
     persistenceRevision =
       null;
 

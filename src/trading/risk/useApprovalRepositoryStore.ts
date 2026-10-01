@@ -34,6 +34,7 @@ import {
   configureApprovalStorePersistence,
   getApprovalStoreActiveReview,
   getApprovalPersistenceWriteState,
+  getApprovalRecoveryDiagnostic,
   getApprovalStoreLifecycle,
   getApprovalStoreSnapshot,
   hydrateApprovalStore,
@@ -131,6 +132,14 @@ export function useApprovalRepositoryStore() {
       getApprovalPersistenceWriteState
     );
 
+
+  const recoveryDiagnostic =
+    useSyncExternalStore(
+      subscribeApprovalStore,
+      getApprovalRecoveryDiagnostic,
+      getApprovalRecoveryDiagnostic
+    );
+
   useEffect(
     () => {
       startBrowserApprovalPersistence();
@@ -163,6 +172,8 @@ export function useApprovalRepositoryStore() {
     lifecycle,
 
     persistenceDiagnostics,
+
+    recoveryDiagnostic,
 
     persistenceMode:
       browserPersistenceMode,
