@@ -9,6 +9,11 @@ import type {
 } from "../types/trading";
 
 import {
+  localHistoricalData,
+  type HistoricalWindow,
+} from "../historical-data";
+
+import {
   useMarketData,
 } from "../market-data";
 
@@ -33,6 +38,13 @@ const timeframes: readonly TradingTimeframe[] = [
   "1d",
 ];
 
+const historicalWindows: readonly HistoricalWindow[] = [
+  20,
+  50,
+  100,
+  200,
+];
+
 export function TradingTerminal() {
   const marketData =
     useMarketData();
@@ -54,6 +66,13 @@ export function TradingTerminal() {
     setTimeframe,
   ] = useState<TradingTimeframe>(
     "1h"
+  );
+
+  const [
+    historicalWindow,
+    setHistoricalWindow,
+  ] = useState<HistoricalWindow>(
+    50
   );
 
   const [
@@ -105,14 +124,16 @@ export function TradingTerminal() {
   const candles =
     useMemo(
       () =>
-        marketData.getCandles(
+        localHistoricalData.getSeries({
           symbol,
-          timeframe
-        ),
+          timeframe,
+          window:
+            historicalWindow,
+        }).candles,
       [
         symbol,
         timeframe,
-        marketData,
+        historicalWindow,
       ]
     );
 
@@ -196,6 +217,37 @@ export function TradingTerminal() {
                 }
               >
                 {item}
+              </button>
+            )
+          )}
+        </div>
+
+        <div className="ti-terminal__windows">
+          {historicalWindows.map(
+            (window) => (
+              <button
+                key={window}
+                type="button"
+                aria-pressed={
+                  historicalWindow ===
+                  window
+                }
+                className={[
+                  "ti-terminal__window",
+                  historicalWindow ===
+                  window
+                    ? "ti-terminal__window--active"
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={() =>
+                  setHistoricalWindow(
+                    window
+                  )
+                }
+              >
+                {window}
               </button>
             )
           )}
