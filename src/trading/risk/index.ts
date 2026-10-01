@@ -9,3 +9,16 @@ export type {
   PaperRiskDecision,
   PaperRiskContext,
 } from "./types";
+
+export {
+  reviewPaperRisk,
+} from "./review";
+
+export type {
+  RiskReviewStatus,
+  RiskReviewCheckId,
+  RiskReviewCheck,
+  RiskReview,
+  RiskReviewInput,
+  RiskReviewDecision,
+} from "./reviewTypes";
