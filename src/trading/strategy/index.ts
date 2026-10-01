@@ -15,6 +15,7 @@ export type {
   StrategyIndicator,
   StrategyComparator,
   StrategyOperand,
+  StrategyLogicOperator,
   StrategyCondition,
   StrategyRiskIntent,
   TradingStrategy,

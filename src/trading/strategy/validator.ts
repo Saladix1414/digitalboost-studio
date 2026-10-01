@@ -43,6 +43,17 @@ export function validateStrategy(
   }
 
   if (
+    strategy.invalidationConditions.length === 0
+  ) {
+    issues.push(
+      issue(
+        "invalidationConditions",
+        "At least one invalidation condition is required."
+      )
+    );
+  }
+
+  if (
     strategy.risk.maxPositionPercent <= 0 ||
     strategy.risk.maxPositionPercent > 100
   ) {

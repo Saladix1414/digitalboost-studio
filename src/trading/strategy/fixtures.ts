@@ -20,6 +20,9 @@ export const mockStrategies:
       side:
         "long",
 
+      entryLogic:
+        "and",
+
       entryConditions: [
         {
           id:
@@ -69,6 +72,9 @@ export const mockStrategies:
           },
         },
       ],
+
+      invalidationLogic:
+        "or",
 
       invalidationConditions: [
         {

@@ -31,6 +31,10 @@ export type StrategyOperand =
       readonly value: number;
     };
 
+export type StrategyLogicOperator =
+  | "and"
+  | "or";
+
 export type StrategyCondition = {
   readonly id: string;
 
@@ -69,8 +73,14 @@ export type TradingStrategy = {
   readonly side:
     StrategySide;
 
+  readonly entryLogic:
+    StrategyLogicOperator;
+
   readonly entryConditions:
     readonly StrategyCondition[];
+
+  readonly invalidationLogic:
+    StrategyLogicOperator;
 
   readonly invalidationConditions:
     readonly StrategyCondition[];
