@@ -49,3 +49,34 @@ export type OverviewActivity = {
     | "warning"
     | "negative";
 };
+
+export type TradingTimeframe =
+  | "1m"
+  | "5m"
+  | "15m"
+  | "1h"
+  | "4h"
+  | "1d";
+
+export type Candle = {
+  readonly time: string;
+  readonly open: number;
+  readonly high: number;
+  readonly low: number;
+  readonly close: number;
+  readonly volume: number;
+};
+
+export type MarketCandleSeries = {
+  readonly symbol: MarketSymbol;
+  readonly timeframe: TradingTimeframe;
+  readonly candles: readonly Candle[];
+};
+
+export type PaperOrderSide =
+  | "buy"
+  | "sell";
+
+export type PaperOrderType =
+  | "market"
+  | "limit";

@@ -34,6 +34,7 @@ import type {
 } from "./shell/IslandSidebar";
 
 import TradingOverview from "./overview/TradingOverview";
+import TradingTerminal from "./terminal/TradingTerminal";
 
 import "./trading-islands.css";
 
@@ -327,6 +328,9 @@ export function TradingIslandsWorkspace({
               <TradingOverview
                 onNavigate={setActiveSection}
               />
+            ) : activeSection === "terminal" &&
+              activeWorkspaceTab === "workspace" ? (
+              <TradingTerminal />
             ) : (
               <EmptyState
                 icon={
