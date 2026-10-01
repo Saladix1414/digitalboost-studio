@@ -1,4 +1,8 @@
 import type {
+  ApprovalBackendIdempotencyKey,
+} from "./approvalBackendTransactions";
+
+import type {
   ApprovalPersistenceLoadResult,
   ApprovalPersistenceRevision,
   ApprovalPersistenceSaveResult,
@@ -28,6 +32,9 @@ export type ApprovalBackendWriteInput = {
 
   readonly expectedRevision:
     ApprovalPersistenceRevision | null;
+
+  readonly idempotencyKey:
+    ApprovalBackendIdempotencyKey | null;
 };
 
 
@@ -43,6 +50,9 @@ export type ApprovalBackendWriteResult = {
 export type ApprovalBackendClearInput = {
   readonly expectedRevision:
     ApprovalPersistenceRevision | null;
+
+  readonly idempotencyKey:
+    ApprovalBackendIdempotencyKey | null;
 };
 
 
@@ -116,6 +126,8 @@ export function createRemoteApprovalPersistence(
         await client.write({
           state,
           expectedRevision,
+          idempotencyKey:
+            null,
         });
 
       return {
@@ -134,6 +146,8 @@ export function createRemoteApprovalPersistence(
       Promise<void> {
       await client.clear({
         expectedRevision,
+        idempotencyKey:
+          null,
       });
     },
   };

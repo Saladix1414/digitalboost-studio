@@ -158,3 +158,20 @@ export type {
   ApprovalBackendWriteInput,
   ApprovalBackendWriteResult,
 } from "./remoteApprovalPersistence";
+
+export {
+  ApprovalBackendError,
+  ApprovalBackendIdempotencyConflictError,
+  ApprovalBackendRevisionConflictError,
+  createApprovalBackendIdempotencyKey,
+  isApprovalBackendConflict,
+  isRetryableApprovalBackendError,
+} from "./approvalBackendTransactions";
+
+export type {
+  ApprovalBackendConflictCode,
+  ApprovalBackendFailureCode,
+  ApprovalBackendIdempotencyKey,
+  ApprovalBackendOperation,
+  ApprovalBackendTransactionMetadata,
+} from "./approvalBackendTransactions";
