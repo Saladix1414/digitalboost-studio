@@ -35,6 +35,7 @@ import type {
 
 import TradingOverview from "./overview/TradingOverview";
 import TradingTerminal from "./terminal/TradingTerminal";
+import StrategyBuilder from "./strategy/StrategyBuilder";
 
 import {
   MarketDataProvider,
@@ -336,6 +337,9 @@ export function TradingIslandsWorkspace({
             ) : activeSection === "terminal" &&
               activeWorkspaceTab === "workspace" ? (
               <TradingTerminal />
+            ) : activeSection === "strategies" &&
+              activeWorkspaceTab === "workspace" ? (
+              <StrategyBuilder />
             ) : (
               <EmptyState
                 icon={
