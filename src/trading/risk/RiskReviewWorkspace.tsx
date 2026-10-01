@@ -1,4 +1,8 @@
 import {
+  resolveApprovalRecoveryPresentation,
+} from "./approvalRecoveryAction";
+
+import {
   useEffect,
   useMemo,
   useState,
@@ -110,6 +114,10 @@ export function RiskReviewWorkspace() {
       rehydrateApprovalStore,
 
     persistenceDiagnostics,
+
+    persistenceMode,
+
+    bootstrapFailurePolicy,
 } =
     useApprovalRepositoryStore();
 
@@ -256,6 +264,33 @@ export function RiskReviewWorkspace() {
         "risk-review-workspace"
       );
     };
+
+  const approvalRecoveryPresentation =
+    resolveApprovalRecoveryPresentation(
+      bootstrapFailurePolicy
+    );
+
+  const handleApprovalPersistenceRecovery =
+    async () => {
+      if (
+        approvalLifecycle.status !==
+        "error"
+      ) {
+        return;
+      }
+
+      if (
+        persistenceMode ===
+          "remote"
+      ) {
+        await rehydrateApprovalStore();
+        return;
+      }
+
+      await recoverPersistence();
+    };
+
+
 
   return (
     <section className="ti-risk-review">
@@ -495,9 +530,9 @@ export function RiskReviewWorkspace() {
                     <button
                       type="button"
                       className="ti-hydration-recovery__button"
-                      onClick={recoverApprovalPersistence}
+                      onClick={handleApprovalPersistenceRecovery}
                     >
-                      RESET APPROVAL STORAGE
+                      {approvalRecoveryPresentation.label}
                     </button>
                   </div>
                 ) : null}

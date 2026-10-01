@@ -1,4 +1,8 @@
 import {
+  resolveApprovalRecoveryPresentation,
+} from "../risk/approvalRecoveryAction";
+
+import {
   useEffect,
   useMemo,
   useState,
@@ -183,6 +187,10 @@ export function BotForgeWorkspace() {
       rehydrateApprovalStore,
 
     persistenceDiagnostics,
+
+    persistenceMode,
+
+    bootstrapFailurePolicy,
 } =
     useApprovalRepositoryStore();
 
@@ -450,6 +458,33 @@ export function BotForgeWorkspace() {
       );
     };
 
+  const approvalRecoveryPresentation =
+    resolveApprovalRecoveryPresentation(
+      bootstrapFailurePolicy
+    );
+
+  const handleApprovalPersistenceRecovery =
+    async () => {
+      if (
+        approvalLifecycle.status !==
+        "error"
+      ) {
+        return;
+      }
+
+      if (
+        persistenceMode ===
+          "remote"
+      ) {
+        await rehydrateApprovalStore();
+        return;
+      }
+
+      await recoverPersistence();
+    };
+
+
+
   return (
     <section className="ti-bot-forge">
       <header className="ti-bot-forge__header">
@@ -698,9 +733,9 @@ export function BotForgeWorkspace() {
                     <button
                       type="button"
                       className="ti-hydration-recovery__button"
-                      onClick={recoverApprovalPersistence}
+                      onClick={handleApprovalPersistenceRecovery}
                     >
-                      RESET APPROVAL STORAGE
+                      {approvalRecoveryPresentation.label}
                     </button>
                   </div>
                 ) : null}

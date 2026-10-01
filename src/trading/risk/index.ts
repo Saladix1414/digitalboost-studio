@@ -268,3 +268,12 @@ export type {
   ApprovalBootstrapFailurePolicy,
   ApprovalBootstrapRecovery,
 } from "./approvalBootstrapFailurePolicy";
+
+export {
+  resolveApprovalRecoveryPresentation,
+} from "./approvalRecoveryAction";
+
+export type {
+  ApprovalRecoveryAction,
+  ApprovalRecoveryPresentation,
+} from "./approvalRecoveryAction";
