@@ -14,6 +14,14 @@ import type {
   PaperLedgerEntry,
 } from "../paper";
 
+import {
+  createRuntimeEvidenceSnapshot,
+} from "./runtimeEvidencePersistence";
+
+import type {
+  RuntimeEvidencePersistence,
+} from "./runtimeEvidencePersistence";
+
 
 export const RUNTIME_EVIDENCE_HISTORY_LIMIT =
   24;
@@ -67,6 +75,25 @@ export type RuntimeEvidenceHistory = {
 };
 
 
+export type RuntimeEvidenceLifecycleStatus =
+  | "idle"
+  | "hydrating"
+  | "ready"
+  | "error";
+
+
+export type RuntimeEvidenceLifecycle = {
+  readonly status:
+    RuntimeEvidenceLifecycleStatus;
+
+  readonly error:
+    string | null;
+
+  readonly authoritative:
+    false;
+};
+
+
 type RuntimeEvidenceListener =
   () => void;
 
@@ -79,6 +106,35 @@ let history:
     authoritative:
       false,
   };
+
+
+let lifecycle:
+  RuntimeEvidenceLifecycle = {
+    status:
+      "idle",
+
+    error:
+      null,
+
+    authoritative:
+      false,
+  };
+
+
+let persistence:
+  RuntimeEvidencePersistence | null =
+    null;
+
+
+/*
+ * Persistence is intentionally serialized so rapid runtime sessions
+ * cannot complete storage writes out of order.
+ *
+ * This queue is observational infrastructure only.
+ */
+let persistenceQueue:
+  Promise<void> =
+    Promise.resolve();
 
 
 const listeners =
@@ -95,6 +151,54 @@ function emitRuntimeEvidenceChange():
   ) {
     listener();
   }
+}
+
+
+function setLifecycle(
+  next:
+    RuntimeEvidenceLifecycle
+):
+  void {
+  lifecycle =
+    next;
+
+  emitRuntimeEvidenceChange();
+}
+
+
+function errorMessage(
+  error:
+    unknown,
+
+  fallback:
+    string
+):
+  string {
+  return (
+    error instanceof Error
+      ? error.message
+      : fallback
+  );
+}
+
+
+function enqueuePersistence(
+  operation:
+    () => Promise<void>
+):
+  Promise<void> {
+  const run =
+    persistenceQueue.then(
+      operation,
+      operation
+    );
+
+  persistenceQueue =
+    run.catch(
+      () => undefined
+    );
+
+  return run;
 }
 
 
@@ -118,6 +222,190 @@ export function subscribeRuntimeEvidenceHistory(
 export function getRuntimeEvidenceHistory():
   RuntimeEvidenceHistory {
   return history;
+}
+
+
+export function getRuntimeEvidenceLifecycle():
+  RuntimeEvidenceLifecycle {
+  return lifecycle;
+}
+
+
+export function configureRuntimeEvidencePersistence(
+  adapter:
+    RuntimeEvidencePersistence | null
+):
+  void {
+  persistence =
+    adapter;
+
+  lifecycle = {
+    status:
+      "idle",
+
+    error:
+      null,
+
+    authoritative:
+      false,
+  };
+
+  emitRuntimeEvidenceChange();
+}
+
+
+export async function waitForRuntimeEvidencePersistenceQueue():
+  Promise<void> {
+  await persistenceQueue;
+}
+
+
+export async function hydrateRuntimeEvidence():
+  Promise<RuntimeEvidenceHistory> {
+  await waitForRuntimeEvidencePersistenceQueue();
+
+  const adapter =
+    persistence;
+
+  if (
+    !adapter
+  ) {
+    setLifecycle({
+      status:
+        "ready",
+
+      error:
+        null,
+
+      authoritative:
+        false,
+    });
+
+    return history;
+  }
+
+  setLifecycle({
+    status:
+      "hydrating",
+
+    error:
+      null,
+
+    authoritative:
+      false,
+  });
+
+  try {
+    const result =
+      await adapter.load();
+
+    if (
+      result.snapshot
+    ) {
+      history =
+        result.snapshot.history;
+
+      emitRuntimeEvidenceChange();
+    }
+
+    setLifecycle({
+      status:
+        "ready",
+
+      error:
+        null,
+
+      authoritative:
+        false,
+    });
+  } catch (
+    error
+  ) {
+    /*
+     * Evidence hydration is observational only.
+     * Existing in-memory history remains usable and runtime execution
+     * must never depend on this lifecycle.
+     */
+    setLifecycle({
+      status:
+        "error",
+
+      error:
+        errorMessage(
+          error,
+          "Runtime evidence hydration failed."
+        ),
+
+      authoritative:
+        false,
+    });
+  }
+
+  return history;
+}
+
+
+export async function persistRuntimeEvidenceHistory():
+  Promise<void> {
+  const adapter =
+    persistence;
+
+  if (
+    !adapter
+  ) {
+    return;
+  }
+
+  const snapshot =
+    createRuntimeEvidenceSnapshot(
+      history
+    );
+
+  try {
+    await enqueuePersistence(
+      async () => {
+        await adapter.save(
+          snapshot
+        );
+      }
+    );
+
+    /*
+     * Successful evidence persistence restores observability health.
+     * It does not affect approval or runtime authority.
+     */
+    if (
+      lifecycle.status !==
+      "hydrating"
+    ) {
+      setLifecycle({
+        status:
+          "ready",
+
+        error:
+          null,
+
+        authoritative:
+          false,
+      });
+    }
+  } catch (
+    error
+  ) {
+    setLifecycle({
+      status:
+        "error",
+
+      error:
+        errorMessage(
+          error,
+          "Runtime evidence persistence failed."
+        ),
+
+      authoritative:
+        false,
+    });
+  }
 }
 
 
@@ -193,10 +481,15 @@ export function recordRuntimeSessionEvidence(
   };
 
   /*
-   * One completed runtime session produces one store mutation
-   * and one subscriber notification.
+   * Memory is updated first.
+   *
+   * Persistence is deliberately best-effort and asynchronous:
+   * evidence durability can degrade, but runtime recording itself
+   * must not become storage-gated.
    */
   emitRuntimeEvidenceChange();
+
+  void persistRuntimeEvidenceHistory();
 
   return history;
 }
@@ -211,6 +504,23 @@ export function resetRuntimeEvidenceHistoryForTests():
     authoritative:
       false,
   };
+
+  lifecycle = {
+    status:
+      "idle",
+
+    error:
+      null,
+
+    authoritative:
+      false,
+  };
+
+  persistence =
+    null;
+
+  persistenceQueue =
+    Promise.resolve();
 
   emitRuntimeEvidenceChange();
 }

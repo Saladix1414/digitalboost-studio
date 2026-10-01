@@ -57,16 +57,23 @@ export {
 
 export {
   RUNTIME_EVIDENCE_HISTORY_LIMIT,
+  configureRuntimeEvidencePersistence,
   createRuntimeEvidenceBundle,
   getRuntimeEvidenceHistory,
+  getRuntimeEvidenceLifecycle,
+  hydrateRuntimeEvidence,
+  persistRuntimeEvidenceHistory,
   recordRuntimeSessionEvidence,
   resetRuntimeEvidenceHistoryForTests,
   subscribeRuntimeEvidenceHistory,
+  waitForRuntimeEvidencePersistenceQueue,
 } from "./runtimeEvidenceStore";
 
 export type {
   RuntimeEvidenceBundle,
   RuntimeEvidenceHistory,
+  RuntimeEvidenceLifecycle,
+  RuntimeEvidenceLifecycleStatus,
   RuntimeLedgerEvidenceEntry,
 } from "./runtimeEvidenceStore";
 
