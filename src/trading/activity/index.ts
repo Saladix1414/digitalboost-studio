@@ -1,6 +1,7 @@
 export {
   activityFromRiskReview,
   activityFromRuntimeAudit,
+  activityFromRuntimeAuditSummary,
   activityFromPaperLedger,
 } from "./builders";
 

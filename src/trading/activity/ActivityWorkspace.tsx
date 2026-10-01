@@ -7,6 +7,14 @@ import {
 } from "../bots";
 
 import {
+  indicatorEngine,
+} from "../indicators";
+
+import {
+  localHistoricalData,
+} from "../historical-data";
+
+import {
   createPaperAccount,
 } from "../paper";
 
@@ -15,12 +23,20 @@ import {
 } from "../risk";
 
 import {
+  createRuntimeAuditRecord,
+  runBotRuntimeSession,
+} from "../runtime";
+
+import {
+  evaluateStrategy,
   mockStrategies,
 } from "../strategy";
 
 import {
   activityFromPaperLedger,
   activityFromRiskReview,
+  activityFromRuntimeAudit,
+  activityFromRuntimeAuditSummary,
 } from "./builders";
 
 import type {
@@ -47,51 +63,157 @@ export function ActivityWorkspace() {
               ) ?? null
             : null;
 
+        if (
+          !bot ||
+          !strategy
+        ) {
+          return [];
+        }
+
+        const reviewDecision =
+          reviewPaperRisk({
+            bot,
+            strategy,
+          });
+
         const items:
           TradingActivityItem[] = [];
 
         let sequence =
           1;
 
+        items.push(
+          activityFromRiskReview(
+            reviewDecision.review,
+            sequence
+          )
+        );
+
+        sequence +=
+          1;
+
+        const historical =
+          localHistoricalData.getSeries({
+            symbol:
+              strategy.symbol,
+
+            timeframe:
+              strategy.timeframe,
+
+            window:
+              50,
+          });
+
+        const candles =
+          historical.candles;
+
         if (
-          bot &&
-          strategy
+          candles.length > 0 &&
+          reviewDecision.approved
         ) {
-          const review =
-            reviewPaperRisk({
-              bot,
+          const current =
+            indicatorEngine.snapshot(
+              candles
+            );
+
+          const previous =
+            candles.length > 1
+              ? indicatorEngine.snapshot(
+                  candles.slice(
+                    0,
+                    -1
+                  )
+                )
+              : undefined;
+
+          const evaluation =
+            evaluateStrategy(
               strategy,
+              {
+                current,
+                previous,
+              }
+            );
+
+          const paperRunningBot = {
+            ...bot,
+
+            status:
+              "paper-running" as const,
+          };
+
+          const session =
+            runBotRuntimeSession({
+              bot:
+                paperRunningBot,
+
+              strategy,
+
+              account:
+                createPaperAccount(
+                  10_000
+                ),
+
+              evaluation,
+
+              approval:
+                reviewDecision.review,
+
+              market: {
+                marketPrice:
+                  candles[
+                    candles.length -
+                    1
+                  ].close,
+
+                quantity:
+                  0.01,
+              },
             });
 
+          const audit =
+            createRuntimeAuditRecord(
+              session
+            );
+
+          const runtimeItems =
+            activityFromRuntimeAudit(
+              audit,
+              sequence
+            );
+
           items.push(
-            activityFromRiskReview(
-              review.review,
+            ...runtimeItems
+          );
+
+          sequence +=
+            runtimeItems.length;
+
+          items.push(
+            activityFromRuntimeAuditSummary(
+              audit,
               sequence
             )
           );
 
           sequence +=
             1;
-        }
 
-        const paperAccount =
-          createPaperAccount(
-            10_000
-          );
+          for (
+            const entry of
+            session.runtime.account
+              .ledger
+          ) {
+            items.push(
+              activityFromPaperLedger(
+                entry,
+                sequence
+              )
+            );
 
-        for (
-          const entry of
-          paperAccount.ledger
-        ) {
-          items.push(
-            activityFromPaperLedger(
-              entry,
-              sequence
-            )
-          );
-
-          sequence +=
-            1;
+            sequence +=
+              1;
+          }
         }
 
         return items;
@@ -112,13 +234,13 @@ export function ActivityWorkspace() {
           </h2>
 
           <p>
-            Activity merges observations and approvals into one readable
-            timeline without merging their authority.
+            Risk approval, runtime events, audit evidence and paper ledger
+            are projected into one timeline without merging their authority.
           </p>
         </div>
 
         <div className="ti-activity__mode">
-          OBSERVATION + APPROVAL
+          READ-ONLY PROJECTION
         </div>
       </header>
 
@@ -208,9 +330,9 @@ export function ActivityWorkspace() {
       </section>
 
       <footer className="ti-activity__notice">
-        Activity is a projection of domain events. Only items explicitly
-        marked as approval authority may represent an approval decision.
-        Timeline presence alone never authorizes execution.
+        Activity is read-only projection. Risk Review remains the approval
+        authority; runtime, audit and ledger events remain evidence and
+        observation only. Timeline presence never authorizes execution.
       </footer>
     </section>
   );

@@ -173,3 +173,52 @@ export function activityFromPaperLedger(
       entry.id,
   };
 }
+
+export function activityFromRuntimeAuditSummary(
+  audit:
+    RuntimeAuditRecord,
+
+  sequence:
+    number
+): TradingActivityItem {
+  return {
+    id:
+      `activity-audit-${audit.sessionId}`,
+
+    sequence,
+
+    source:
+      "runtime",
+
+    authority:
+      "none",
+
+    severity:
+      audit.decision ===
+      "paper-filled"
+        ? "success"
+        : audit.decision ===
+          "approval-rejected" ||
+          audit.decision ===
+          "risk-rejected" ||
+          audit.decision ===
+          "paper-rejected"
+          ? "danger"
+          : "info",
+
+    title:
+      "Runtime audit recorded",
+
+    message:
+      `Decision ${audit.decision}. Approval evidence ${audit.approval.riskReviewId}.`,
+
+    botId:
+      audit.botId,
+
+    strategyId:
+      audit.strategyId,
+
+    referenceId:
+      audit.sessionId,
+  };
+}
