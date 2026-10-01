@@ -35,7 +35,7 @@ test(
 
     assert.match(
       content,
-      /VersionedRiskReview/
+      /RiskReviewHistoryEntry/
     );
 
     assert.match(
