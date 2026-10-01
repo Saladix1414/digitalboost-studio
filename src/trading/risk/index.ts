@@ -193,3 +193,19 @@ export type {
   ApprovalBackendWriteRequestDto,
   ApprovalBackendWriteResponseDto,
 } from "./approvalBackendTransport";
+
+export {
+  ApprovalHttpClientError,
+  createApprovalHttpRequest,
+  isApprovalHttpRetryableStatus,
+  isApprovalHttpSuccess,
+} from "./approvalHttpClient";
+
+export type {
+  ApprovalHttpClient,
+  ApprovalHttpFailureCode,
+  ApprovalHttpHeaders,
+  ApprovalHttpMethod,
+  ApprovalHttpRequest,
+  ApprovalHttpResponse,
+} from "./approvalHttpClient";
