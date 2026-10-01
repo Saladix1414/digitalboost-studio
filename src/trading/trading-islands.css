@@ -8764,3 +8764,38 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================================
+   PHASE 18D — APPROVAL HYDRATION GATE
+   ============================================================ */
+
+.ti-hydration-state {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  min-height: 20px;
+  padding: 3px 7px;
+  border: 1px solid var(--ti-border-subtle);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.ti-hydration-state--ready {
+  color: var(--ti-positive);
+}
+
+.ti-hydration-state--pending {
+  color: var(--ti-warning);
+}
+
+.ti-hydration-state--error {
+  color: var(--ti-negative);
+}
+
+.ti-hydration-state__error {
+  margin: 8px 0 0;
+  color: var(--ti-negative);
+  font-size: 8px;
+  line-height: 1.45;
+}

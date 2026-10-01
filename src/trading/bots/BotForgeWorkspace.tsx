@@ -167,6 +167,9 @@ export function BotForgeWorkspace() {
     state:
       approvalRepository,
 
+    lifecycle:
+      approvalLifecycle,
+
     activeReview,
 
     bootstrap:
@@ -175,6 +178,11 @@ export function BotForgeWorkspace() {
     acceptReview,
   } =
     useApprovalRepositoryStore();
+
+  const approvalStoreReady =
+    approvalLifecycle.status ===
+    "ready";
+
 
   const activeReviewVersion =
     approvalRepository.active;
@@ -282,6 +290,12 @@ export function BotForgeWorkspace() {
   const acceptCandidateReview =
     () => {
       if (
+        !approvalStoreReady
+      ) {
+        return;
+      }
+
+      if (
         !candidateReview?.approved
       ) {
         return;
@@ -299,6 +313,12 @@ export function BotForgeWorkspace() {
 
   const runLocalSession =
     () => {
+      if (
+        !approvalStoreReady
+      ) {
+        return;
+      }
+
       if (
         !selectedBot ||
         !selectedStrategy
@@ -502,6 +522,45 @@ export function BotForgeWorkspace() {
             </div>
           ) : (
             <>
+              <section className="ti-bot-forge__panel">
+                <header>
+                  <div>
+                    <span className="ti-label">
+                      Approval Store Lifecycle
+                    </span>
+
+                    <strong>
+                      {approvalLifecycle.status.toUpperCase()}
+                    </strong>
+                  </div>
+
+                  <span
+                    className={
+                      approvalStoreReady
+                        ? "ti-hydration-state ti-hydration-state--ready"
+                        : approvalLifecycle.status === "error"
+                          ? "ti-hydration-state ti-hydration-state--error"
+                          : "ti-hydration-state ti-hydration-state--pending"
+                    }
+                  >
+                    {approvalStoreReady
+                      ? "GOVERNANCE READY"
+                      : "GOVERNANCE LOCKED"}
+                  </span>
+                </header>
+
+                {approvalLifecycle.error ? (
+                  <p className="ti-hydration-state__error">
+                    {approvalLifecycle.error}
+                  </p>
+                ) : null}
+
+                <p className="ti-bot-forge__approval-note">
+                  Review acceptance and paper runtime remain locked while
+                  approval state is hydrating.
+                </p>
+              </section>
+
               <section className="ti-bot-forge__panel">
                 <header>
                   <div>
