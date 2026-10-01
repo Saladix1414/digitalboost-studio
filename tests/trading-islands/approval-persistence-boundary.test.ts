@@ -156,7 +156,22 @@ test(
 
     assert.match(
       content,
-      /await persistence\.save/
+      /const adapter =/
+    );
+
+    assert.match(
+      content,
+      /enqueueApprovalPersistenceOperation/
+    );
+
+    assert.match(
+      content,
+      /await adapter\.save/
+    );
+
+    assert.match(
+      content,
+      /snapshot/
     );
   }
 );
