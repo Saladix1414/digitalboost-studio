@@ -49,18 +49,6 @@ export type {
 } from "./binding";
 
 export {
-  RUNTIME_AUDIT_HISTORY_LIMIT,
-  getRuntimeAuditHistory,
-  recordRuntimeAuditEvidence,
-  resetRuntimeAuditHistoryForTests,
-  subscribeRuntimeAuditHistory,
-} from "./runtimeAuditStore";
-
-export type {
-  RuntimeAuditEvidenceHistory,
-} from "./runtimeAuditStore";
-
-export {
   createRuntimeSessionId,
   getRuntimeSessionSequenceForDiagnostics,
   resetRuntimeSessionIdentityForTests,
@@ -78,4 +66,5 @@ export {
 export type {
   RuntimeEvidenceBundle,
   RuntimeEvidenceHistory,
+  RuntimeLedgerEvidenceEntry,
 } from "./runtimeEvidenceStore";

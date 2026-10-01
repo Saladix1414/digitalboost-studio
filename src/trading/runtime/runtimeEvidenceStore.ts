@@ -11,12 +11,30 @@ import type {
 } from "./session";
 
 import type {
-  PaperLedgerEvidenceEntry,
-} from "../paper/paperLedgerEvidenceStore";
+  PaperLedgerEntry,
+} from "../paper";
 
 
 export const RUNTIME_EVIDENCE_HISTORY_LIMIT =
   24;
+
+
+export type RuntimeLedgerEvidenceEntry = {
+  readonly sessionId:
+    string;
+
+  readonly botId:
+    string;
+
+  readonly strategyId:
+    string;
+
+  readonly entry:
+    PaperLedgerEntry;
+
+  readonly authoritative:
+    false;
+};
 
 
 export type RuntimeEvidenceBundle = {
@@ -33,7 +51,7 @@ export type RuntimeEvidenceBundle = {
     RuntimeAuditRecord;
 
   readonly ledger:
-    readonly PaperLedgerEvidenceEntry[];
+    readonly RuntimeLedgerEvidenceEntry[];
 
   readonly authoritative:
     false;

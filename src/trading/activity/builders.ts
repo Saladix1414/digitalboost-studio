@@ -9,7 +9,6 @@ import type {
 
 import type {
   PaperLedgerEntry,
-  PaperLedgerEvidenceEntry,
 } from "../paper";
 
 import {
@@ -26,6 +25,7 @@ import type {
 import type {
   BotRuntimeEvent,
   RuntimeAuditRecord,
+  RuntimeLedgerEvidenceEntry,
 } from "../runtime";
 
 import type {
@@ -193,7 +193,7 @@ export function activityFromPaperLedger(
 
 export function activityFromPaperLedgerEvidence(
   evidence:
-    PaperLedgerEvidenceEntry,
+    RuntimeLedgerEvidenceEntry,
 
   sequence:
     number
