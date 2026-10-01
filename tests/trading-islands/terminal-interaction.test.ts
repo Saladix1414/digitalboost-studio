@@ -119,3 +119,28 @@ test(
     );
   }
 );
+
+test(
+  "candlestick renderer binds the map index used by selection",
+  () => {
+    const content =
+      source(
+        "terminal/CandlestickChart.tsx"
+      );
+
+    assert.match(
+      content,
+      /geometry\.items\.map\(\s*\(item,\s*index\)\s*=>/
+    );
+
+    assert.match(
+      content,
+      /selectedIndex === index/
+    );
+
+    assert.match(
+      content,
+      /onSelectCandle\?\.\(\s*index\s*\)/
+    );
+  }
+);

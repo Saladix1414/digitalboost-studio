@@ -231,7 +231,7 @@ export function CandlestickChart({
         </g>
 
         {geometry.items.map(
-          (item) => {
+          (item, index) => {
             const tone =
               item.positive
                 ? "positive"
