@@ -144,3 +144,53 @@ test(
     );
   }
 );
+
+test(
+  "terminal renders a selected candle crosshair",
+  () => {
+    const content =
+      source(
+        "terminal/CandlestickChart.tsx"
+      );
+
+    assert.match(
+      content,
+      /ti-terminal-crosshair--vertical/
+    );
+
+    assert.match(
+      content,
+      /ti-terminal-crosshair--horizontal/
+    );
+  }
+);
+
+test(
+  "paper order preview validates amount and calculates notional locally",
+  () => {
+    const content =
+      source(
+        "terminal/TradingTerminal.tsx"
+      );
+
+    assert.match(
+      content,
+      /paperAmountValid/
+    );
+
+    assert.match(
+      content,
+      /paperNotional/
+    );
+
+    assert.match(
+      content,
+      /disabled=\{\s*!paperAmountValid\s*\}/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /fetch\s*\(/
+    );
+  }
+);
