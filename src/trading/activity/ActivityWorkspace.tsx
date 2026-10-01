@@ -1,6 +1,12 @@
 import {
   useMemo,
+  useSyncExternalStore,
 } from "react";
+
+import {
+  getRuntimeAuditHistory,
+  subscribeRuntimeAuditHistory,
+} from "../runtime";
 
 import {
   useApprovalRepositoryStore,
@@ -11,6 +17,8 @@ import {
   activityFromRemoteRetryHistoryEntry,
   activityFromReviewChainIntegrity,
   activityFromReviewHistoryEntry,
+  activityFromRuntimeAudit,
+  activityFromRuntimeAuditSummary,
 } from "./builders";
 
 import type {
@@ -27,6 +35,13 @@ export function ActivityWorkspace() {
     remoteRetryHistory,
   } =
     useApprovalRepositoryStore();
+
+  const runtimeAuditHistory =
+    useSyncExternalStore(
+      subscribeRuntimeAuditHistory,
+      getRuntimeAuditHistory,
+      getRuntimeAuditHistory
+    );
 
 
   const activity =
@@ -116,12 +131,45 @@ export function ActivityWorkspace() {
             1;
         }
 
+        /*
+         * Runtime audits are recorded by Bot Forge when real paper
+         * runtime sessions occur. Activity only projects that evidence.
+         */
+        for (
+          const audit of
+          runtimeAuditHistory.entries
+        ) {
+          const runtimeItems =
+            activityFromRuntimeAudit(
+              audit,
+              sequence
+            );
+
+          items.push(
+            ...runtimeItems
+          );
+
+          sequence +=
+            runtimeItems.length;
+
+          items.push(
+            activityFromRuntimeAuditSummary(
+              audit,
+              sequence
+            )
+          );
+
+          sequence +=
+            1;
+        }
+
         return items;
       },
       [
         approvalRepository.history,
         recoveryAttemptHistory,
         remoteRetryHistory,
+        runtimeAuditHistory,
       ]
     );
 

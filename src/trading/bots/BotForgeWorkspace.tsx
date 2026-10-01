@@ -38,6 +38,7 @@ import {
 
 import {
   createRuntimeAuditRecord,
+  recordRuntimeAuditEvidence,
   runBotRuntimeSession,
 } from "../runtime";
 
@@ -436,6 +437,15 @@ export function BotForgeWorkspace() {
               0.01,
           },
         });
+
+      const audit =
+        createRuntimeAuditRecord(
+          session
+        );
+
+      recordRuntimeAuditEvidence(
+        audit
+      );
 
       setRuntimeSession(
         session

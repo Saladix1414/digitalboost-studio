@@ -47,3 +47,15 @@ export {
 export type {
   RuntimeBindingFingerprint,
 } from "./binding";
+
+export {
+  RUNTIME_AUDIT_HISTORY_LIMIT,
+  getRuntimeAuditHistory,
+  recordRuntimeAuditEvidence,
+  resetRuntimeAuditHistoryForTests,
+  subscribeRuntimeAuditHistory,
+} from "./runtimeAuditStore";
+
+export type {
+  RuntimeAuditEvidenceHistory,
+} from "./runtimeAuditStore";
