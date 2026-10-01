@@ -95,7 +95,7 @@ test(
 
     assert.match(
       content,
-      /createRiskReviewProvenance/
+      /useApprovalRepositoryStore/
     );
 
     assert.match(
@@ -105,7 +105,7 @@ test(
 
     assert.match(
       content,
-      /"explicit-rereview"/
+      /acceptReview/
     );
   }
 );
@@ -120,7 +120,7 @@ test(
 
     assert.match(
       content,
-      /createRiskReviewProvenance/
+      /useApprovalRepositoryStore/
     );
 
     assert.match(
@@ -130,7 +130,7 @@ test(
 
     assert.match(
       content,
-      /"explicit-rereview"/
+      /acceptReview/
     );
   }
 );

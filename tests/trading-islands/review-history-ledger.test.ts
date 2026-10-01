@@ -70,12 +70,12 @@ test(
 
     assert.match(
       content,
-      /createRiskReviewHistory/
+      /useApprovalRepositoryStore/
     );
 
     assert.match(
       content,
-      /appendRiskReviewHistory/
+      /approvalRepository\.history/
     );
 
     assert.match(

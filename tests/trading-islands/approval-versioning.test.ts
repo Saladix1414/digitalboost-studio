@@ -75,12 +75,12 @@ test(
 
     assert.match(
       content,
-      /createInitialVersionedReview/
+      /useApprovalRepositoryStore/
     );
 
     assert.match(
       content,
-      /createNextVersionedReview/
+      /approvalRepository\.active/
     );
 
     assert.match(
