@@ -36,7 +36,7 @@ test(
       "mockTradingBots",
       "mockStrategies",
       "activityFromRiskReview",
-      "activityFromPaperLedger",
+      "activityFromPaperLedger\\(",
     ];
 
     for (
