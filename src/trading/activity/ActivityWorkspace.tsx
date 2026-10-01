@@ -9,10 +9,17 @@ import {
 } from "../runtime";
 
 import {
+  getPaperLedgerEvidence,
+  subscribePaperLedgerEvidence,
+} from "../paper";
+
+
+import {
   useApprovalRepositoryStore,
 } from "../risk/useApprovalRepositoryStore";
 
 import {
+  activityFromPaperLedgerEvidence,
   activityFromRecoveryAttemptHistoryEntry,
   activityFromRemoteRetryHistoryEntry,
   activityFromReviewChainIntegrity,
@@ -41,6 +48,13 @@ export function ActivityWorkspace() {
       subscribeRuntimeAuditHistory,
       getRuntimeAuditHistory,
       getRuntimeAuditHistory
+    );
+
+  const paperLedgerEvidence =
+    useSyncExternalStore(
+      subscribePaperLedgerEvidence,
+      getPaperLedgerEvidence,
+      getPaperLedgerEvidence
     );
 
 
@@ -132,6 +146,25 @@ export function ActivityWorkspace() {
         }
 
         /*
+         * Paper ledger entries are captured from completed real paper
+         * runtime sessions. Activity only projects correlated evidence.
+         */
+        for (
+          const evidence of
+          paperLedgerEvidence.entries
+        ) {
+          items.push(
+            activityFromPaperLedgerEvidence(
+              evidence,
+              sequence
+            )
+          );
+
+          sequence +=
+            1;
+        }
+
+        /*
          * Runtime audits are recorded by Bot Forge when real paper
          * runtime sessions occur. Activity only projects that evidence.
          */
@@ -169,6 +202,7 @@ export function ActivityWorkspace() {
         approvalRepository.history,
         recoveryAttemptHistory,
         remoteRetryHistory,
+        paperLedgerEvidence,
         runtimeAuditHistory,
       ]
     );

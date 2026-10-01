@@ -25,3 +25,16 @@ export type {
   PaperExecutionRequest,
   PaperExecutionBoundaryResult,
 } from "./executionBoundary";
+
+export {
+  PAPER_LEDGER_EVIDENCE_LIMIT,
+  getPaperLedgerEvidence,
+  recordPaperLedgerEvidence,
+  resetPaperLedgerEvidenceForTests,
+  subscribePaperLedgerEvidence,
+} from "./paperLedgerEvidenceStore";
+
+export type {
+  PaperLedgerEvidenceEntry,
+  PaperLedgerEvidenceHistory,
+} from "./paperLedgerEvidenceStore";

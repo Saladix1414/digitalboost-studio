@@ -9,6 +9,7 @@ import type {
 
 import type {
   PaperLedgerEntry,
+  PaperLedgerEvidenceEntry,
 } from "../paper";
 
 import {
@@ -189,6 +190,56 @@ export function activityFromPaperLedger(
       entry.id,
   };
 }
+
+export function activityFromPaperLedgerEvidence(
+  evidence:
+    PaperLedgerEvidenceEntry,
+
+  sequence:
+    number
+):
+  TradingActivityItem {
+  const entry =
+    evidence.entry;
+
+  return {
+    id:
+      `activity-${evidence.sessionId}-${entry.id}`,
+
+    sequence,
+
+    source:
+      "paper-ledger",
+
+    authority:
+      "none",
+
+    severity:
+      entry.kind ===
+      "fee"
+        ? "warning"
+        : entry.kind ===
+          "trade"
+          ? "success"
+          : "info",
+
+    title:
+      `Paper ${entry.kind}`,
+
+    message:
+      entry.note,
+
+    botId:
+      evidence.botId,
+
+    strategyId:
+      evidence.strategyId,
+
+    referenceId:
+      `${evidence.sessionId}:${entry.id}`,
+  };
+}
+
 
 export function activityFromRuntimeAuditSummary(
   audit:
