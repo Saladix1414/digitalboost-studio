@@ -222,6 +222,8 @@ export function bootstrapApprovalStore(
 
   emit();
 
+  void persistApprovalStore();
+
   return true;
 }
 
@@ -242,6 +244,8 @@ export function acceptApprovalStoreReview(
     );
 
   emit();
+
+  void persistApprovalStore();
 }
 
 export async function clearApprovalStorePersistence():

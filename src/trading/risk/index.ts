@@ -115,3 +115,14 @@ export type {
   ApprovalStoreLifecycle,
   ApprovalStoreLifecycleStatus,
 } from "./approvalPersistence";
+
+export {
+  APPROVAL_STORAGE_SCHEMA_VERSION,
+  APPROVAL_STORAGE_KEY,
+  createLocalApprovalPersistence,
+  createBrowserApprovalPersistence,
+} from "./localApprovalPersistence";
+
+export type {
+  ApprovalKeyValueStorage,
+} from "./localApprovalPersistence";

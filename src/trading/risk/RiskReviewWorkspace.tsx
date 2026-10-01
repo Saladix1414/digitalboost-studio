@@ -120,6 +120,7 @@ export function RiskReviewWorkspace() {
   useEffect(
     () => {
       if (
+        !approvalStoreReady ||
         approvalRepository.active
       ) {
         return;
@@ -159,6 +160,7 @@ export function RiskReviewWorkspace() {
     },
     [
       approvalRepository.active,
+      approvalStoreReady,
       bootstrapApproval,
     ]
   );

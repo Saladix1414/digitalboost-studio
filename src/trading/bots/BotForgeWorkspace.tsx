@@ -193,6 +193,7 @@ export function BotForgeWorkspace() {
   useEffect(
     () => {
       if (
+        !approvalStoreReady ||
         approvalRepository.active
       ) {
         return;
@@ -232,6 +233,7 @@ export function BotForgeWorkspace() {
     },
     [
       approvalRepository.active,
+      approvalStoreReady,
       bootstrapApproval,
     ]
   );

@@ -1,10 +1,12 @@
 import {
+  useEffect,
   useSyncExternalStore,
 } from "react";
 
 import {
   acceptApprovalStoreReview,
   bootstrapApprovalStore,
+  configureApprovalStorePersistence,
   getApprovalStoreActiveReview,
   getApprovalStoreLifecycle,
   getApprovalStoreSnapshot,
@@ -12,6 +14,31 @@ import {
   persistApprovalStore,
   subscribeApprovalStore,
 } from "./approvalStore";
+
+import {
+  createBrowserApprovalPersistence,
+} from "./localApprovalPersistence";
+
+let browserPersistenceStarted =
+  false;
+
+function startBrowserApprovalPersistence():
+  void {
+  if (
+    browserPersistenceStarted
+  ) {
+    return;
+  }
+
+  browserPersistenceStarted =
+    true;
+
+  configureApprovalStorePersistence(
+    createBrowserApprovalPersistence()
+  );
+
+  void hydrateApprovalStore();
+}
 
 export function useApprovalRepositoryStore() {
   const state =
@@ -27,6 +54,13 @@ export function useApprovalRepositoryStore() {
       getApprovalStoreLifecycle,
       getApprovalStoreLifecycle
     );
+
+  useEffect(
+    () => {
+      startBrowserApprovalPersistence();
+    },
+    []
+  );
 
   return {
     state,
