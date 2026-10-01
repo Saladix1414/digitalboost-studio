@@ -19,6 +19,8 @@ import {
 } from "../paper";
 
 import {
+  createInitialVersionedReview,
+  createNextVersionedReview,
   reviewPaperRisk,
 } from "../risk";
 
@@ -34,6 +36,7 @@ import {
 
 import {
   activityFromPaperLedger,
+  activityFromReviewHistoryEntry,
   activityFromRiskReview,
   activityFromRuntimeAudit,
   activityFromRuntimeAuditSummary,
@@ -85,6 +88,21 @@ export function ActivityWorkspace() {
         items.push(
           activityFromRiskReview(
             reviewDecision.review,
+            sequence
+          )
+        );
+
+        sequence +=
+          1;
+
+        const initialVersion =
+          createInitialVersionedReview(
+            reviewDecision.review
+          );
+
+        items.push(
+          activityFromReviewHistoryEntry(
+            initialVersion,
             sequence
           )
         );
@@ -170,6 +188,22 @@ export function ActivityWorkspace() {
                   0.01,
               },
             });
+
+          const replacementVersion =
+            createNextVersionedReview(
+              initialVersion,
+              reviewDecision.review
+            );
+
+          items.push(
+            activityFromReviewHistoryEntry(
+              replacementVersion,
+              sequence
+            )
+          );
+
+          sequence +=
+            1;
 
           const audit =
             createRuntimeAuditRecord(

@@ -1,5 +1,6 @@
 export {
   activityFromRiskReview,
+  activityFromReviewHistoryEntry,
   activityFromRuntimeAudit,
   activityFromRuntimeAuditSummary,
   activityFromPaperLedger,

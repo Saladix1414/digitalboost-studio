@@ -4,6 +4,7 @@ import type {
 
 import type {
   RiskReview,
+  VersionedRiskReview,
 } from "../risk";
 
 import type {
@@ -220,5 +221,49 @@ export function activityFromRuntimeAuditSummary(
 
     referenceId:
       audit.sessionId,
+  };
+}
+
+export function activityFromReviewHistoryEntry(
+  entry:
+    VersionedRiskReview,
+
+  sequence:
+    number
+): TradingActivityItem {
+  return {
+    id:
+      `activity-review-history-${entry.review.id}-v${entry.version}`,
+
+    sequence,
+
+    source:
+      "risk-review",
+
+    authority:
+      "none",
+
+    severity:
+      entry.review.status ===
+      "approved"
+        ? "info"
+        : "warning",
+
+    title:
+      `Risk review v${entry.version} recorded`,
+
+    message:
+      entry.previousReviewId
+        ? `Accepted review ${entry.review.id} replaced ${entry.previousReviewId}.`
+        : `Initial accepted review ${entry.review.id} recorded.`,
+
+    botId:
+      entry.review.botId,
+
+    strategyId:
+      entry.review.strategyId,
+
+    referenceId:
+      entry.review.id,
   };
 }
