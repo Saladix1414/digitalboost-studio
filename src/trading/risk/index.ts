@@ -94,8 +94,24 @@ export type {
 
 export {
   getApprovalStoreSnapshot,
+  getApprovalStoreLifecycle,
   subscribeApprovalStore,
+  configureApprovalStorePersistence,
+  hydrateApprovalStore,
+  persistApprovalStore,
   bootstrapApprovalStore,
   acceptApprovalStoreReview,
+  clearApprovalStorePersistence,
   getApprovalStoreActiveReview,
 } from "./approvalStore";
+
+export {
+  createApprovalStoreLifecycle,
+} from "./approvalPersistence";
+
+export type {
+  ApprovalPersistenceLoadResult,
+  ApprovalRepositoryPersistence,
+  ApprovalStoreLifecycle,
+  ApprovalStoreLifecycleStatus,
+} from "./approvalPersistence";

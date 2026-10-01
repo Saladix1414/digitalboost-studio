@@ -6,7 +6,10 @@ import {
   acceptApprovalStoreReview,
   bootstrapApprovalStore,
   getApprovalStoreActiveReview,
+  getApprovalStoreLifecycle,
   getApprovalStoreSnapshot,
+  hydrateApprovalStore,
+  persistApprovalStore,
   subscribeApprovalStore,
 } from "./approvalStore";
 
@@ -18,8 +21,17 @@ export function useApprovalRepositoryStore() {
       getApprovalStoreSnapshot
     );
 
+  const lifecycle =
+    useSyncExternalStore(
+      subscribeApprovalStore,
+      getApprovalStoreLifecycle,
+      getApprovalStoreLifecycle
+    );
+
   return {
     state,
+
+    lifecycle,
 
     activeReview:
       getApprovalStoreActiveReview(),
@@ -29,5 +41,11 @@ export function useApprovalRepositoryStore() {
 
     acceptReview:
       acceptApprovalStoreReview,
+
+    hydrate:
+      hydrateApprovalStore,
+
+    persist:
+      persistApprovalStore,
   } as const;
 }
