@@ -149,14 +149,20 @@ export function TradingTerminal() {
           selectedCandleIndex
         ];
 
-  const indicators =
+  const indicatorAnalysis =
     useMemo(
       () =>
-        indicatorEngine.snapshot(
+        indicatorEngine.analyze(
           candles
         ),
       [candles]
     );
+
+  const indicators =
+    indicatorAnalysis.snapshot;
+
+  const indicatorSeries =
+    indicatorAnalysis.series;
 
   return (
     <div className="ti-terminal">
@@ -314,8 +320,18 @@ export function TradingTerminal() {
           <CandlestickChart
             candles={candles}
             label={`${symbol} ${timeframe} deterministic candlestick chart`}
-            selectedIndex={selectedCandleIndex}
-            onSelectCandle={setSelectedCandleIndex}
+            ema20={
+              indicatorSeries.ema20
+            }
+            ema50={
+              indicatorSeries.ema50
+            }
+            selectedIndex={
+              selectedCandleIndex
+            }
+            onSelectCandle={
+              setSelectedCandleIndex
+            }
           />
 
           {selectedCandle ? (

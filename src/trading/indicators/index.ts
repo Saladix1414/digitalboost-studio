@@ -12,6 +12,8 @@ export {
 
 export type {
   IndicatorPoint,
+  IndicatorSeries,
   IndicatorSnapshot,
+  IndicatorAnalysis,
   IndicatorEngine,
 } from "./types";

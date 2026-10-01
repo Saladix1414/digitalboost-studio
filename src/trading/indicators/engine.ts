@@ -7,9 +7,22 @@ import {
 } from "./rsi";
 
 import type {
+  IndicatorAnalysis,
   IndicatorEngine,
+  IndicatorSeries,
   IndicatorSnapshot,
 } from "./types";
+
+function toSeries(
+  values: readonly number[]
+) {
+  return values.map(
+    (value, index) => ({
+      index,
+      value,
+    })
+  );
+}
 
 export const indicatorEngine:
   IndicatorEngine = {
@@ -55,6 +68,50 @@ export const indicatorEngine:
           candles[
             candles.length - 1
           ]?.volume ?? 0,
+      };
+    },
+
+    series(
+      candles
+    ): IndicatorSeries {
+      const closes =
+        candles.map(
+          (candle) =>
+            candle.close
+        );
+
+      return {
+        ema20:
+          toSeries(
+            calculateEMA(
+              closes,
+              20
+            )
+          ),
+
+        ema50:
+          toSeries(
+            calculateEMA(
+              closes,
+              50
+            )
+          ),
+      };
+    },
+
+    analyze(
+      candles
+    ): IndicatorAnalysis {
+      return {
+        snapshot:
+          this.snapshot(
+            candles
+          ),
+
+        series:
+          this.series(
+            candles
+          ),
       };
     },
   };

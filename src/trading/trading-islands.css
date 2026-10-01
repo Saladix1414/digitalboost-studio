@@ -5449,3 +5449,26 @@
     overflow-x: auto;
   }
 }
+
+/* ============================================================
+   PHASE 8B — INDICATOR OVERLAYS
+   ============================================================ */
+
+.ti-terminal-indicator-line {
+  pointer-events: none;
+
+  stroke-width: 1.55;
+
+  vector-effect:
+    non-scaling-stroke;
+}
+
+.ti-terminal-indicator-line--ema20 {
+  stroke:
+    rgba(76, 168, 245, 0.92);
+}
+
+.ti-terminal-indicator-line--ema50 {
+  stroke:
+    rgba(229, 184, 75, 0.86);
+}

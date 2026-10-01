@@ -6,9 +6,16 @@ import type {
   Candle,
 } from "../types/trading";
 
+import type {
+  IndicatorPoint,
+} from "../indicators";
+
+
 export type CandlestickChartProps = {
   readonly candles: readonly Candle[];
   readonly label: string;
+  readonly ema20?: readonly IndicatorPoint[];
+  readonly ema50?: readonly IndicatorPoint[];
   readonly selectedIndex?: number | null;
   readonly onSelectCandle?: (
     index: number
@@ -24,6 +31,8 @@ const VOLUME_HEIGHT = 70;
 export function CandlestickChart({
   candles,
   label,
+  ema20 = [],
+  ema50 = [],
   selectedIndex = null,
   onSelectCandle,
 }: CandlestickChartProps) {
@@ -182,6 +191,7 @@ export function CandlestickChart({
           max,
           items,
           chartBottom,
+          priceY,
         };
       },
       [candles]
@@ -194,6 +204,52 @@ export function CandlestickChart({
       </div>
     );
   }
+
+  const buildIndicatorPath = (
+    points: readonly IndicatorPoint[]
+  ) =>
+    points
+      .filter(
+        (point) =>
+          point.index >= 0 &&
+          point.index <
+            geometry.items.length
+      )
+      .map(
+        (
+          point,
+          pathIndex
+        ) => {
+          const item =
+            geometry.items[
+              point.index
+            ];
+
+          const command =
+            pathIndex === 0
+              ? "M"
+              : "L";
+
+          return [
+            command,
+            item.x,
+            geometry.priceY(
+              point.value
+            ),
+          ].join(" ");
+        }
+      )
+      .join(" ");
+
+  const ema20Path =
+    buildIndicatorPath(
+      ema20
+    );
+
+  const ema50Path =
+    buildIndicatorPath(
+      ema50
+    );
 
   return (
     <div className="ti-terminal-chart">
@@ -229,6 +285,22 @@ export function CandlestickChart({
             }
           )}
         </g>
+
+        {ema50Path ? (
+          <path
+            className="ti-terminal-indicator-line ti-terminal-indicator-line--ema50"
+            d={ema50Path}
+            fill="none"
+          />
+        ) : null}
+
+        {ema20Path ? (
+          <path
+            className="ti-terminal-indicator-line ti-terminal-indicator-line--ema20"
+            d={ema20Path}
+            fill="none"
+          />
+        ) : null}
 
         {geometry.items.map(
           (item, index) => {
