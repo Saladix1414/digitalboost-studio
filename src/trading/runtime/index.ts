@@ -8,3 +8,17 @@ export type {
   BotRuntimeDecision,
   BotRuntimeResult,
 } from "./types";
+
+export {
+  runBotRuntimeSession,
+} from "./session";
+
+export type {
+  BotRuntimeSessionResult,
+} from "./session";
+
+export type {
+  BotRuntimeEventType,
+  BotRuntimeEvent,
+  BotRuntimeSession,
+} from "./activityTypes";
