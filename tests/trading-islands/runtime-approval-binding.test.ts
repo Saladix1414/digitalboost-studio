@@ -152,7 +152,12 @@ test(
 
     assert.match(
       content,
-      /setActiveReview\(/
+      /setActiveReviewVersion\(/
+    );
+
+    assert.match(
+      content,
+      /createNextVersionedReview/
     );
 
     assert.match(
