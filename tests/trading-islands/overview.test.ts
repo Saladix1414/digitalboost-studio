@@ -33,11 +33,19 @@ test(
       true
     );
 
-    assert.match(
+    const workspace =
       source(
         "TradingIslandsWorkspace.tsx"
-      ),
-      /<TradingOverview \/>/
+      );
+
+    assert.match(
+      workspace,
+      /<TradingOverview/
+    );
+
+    assert.match(
+      workspace,
+      /onNavigate=\{setActiveSection\}/
     );
   }
 );
@@ -143,7 +151,7 @@ test(
     ]) {
       assert.doesNotMatch(
         source(file),
-        /DigitalBoostPulse|from\s+["'][^"']*Pulse/i
+        /DigitalBoostPulse|from\s+["'][^"']*\/pulse(?:\/|["'])|data-pulse|\.pulse-/i
       );
     }
   }
