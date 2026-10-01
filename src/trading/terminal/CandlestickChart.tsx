@@ -9,6 +9,10 @@ import type {
 export type CandlestickChartProps = {
   readonly candles: readonly Candle[];
   readonly label: string;
+  readonly selectedIndex?: number | null;
+  readonly onSelectCandle?: (
+    index: number
+  ) => void;
 };
 
 const WIDTH = 860;
@@ -20,6 +24,8 @@ const VOLUME_HEIGHT = 70;
 export function CandlestickChart({
   candles,
   label,
+  selectedIndex = null,
+  onSelectCandle,
 }: CandlestickChartProps) {
   const geometry =
     useMemo(
@@ -236,7 +242,48 @@ export function CandlestickChart({
                 key={
                   item.candle.time
                 }
-                className={`ti-terminal-candle ti-terminal-candle--${tone}`}
+                className={[
+                  "ti-terminal-candle",
+                  `ti-terminal-candle--${tone}`,
+                  selectedIndex === index
+                    ? "ti-terminal-candle--selected"
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                role={
+                  onSelectCandle
+                    ? "button"
+                    : undefined
+                }
+                tabIndex={
+                  onSelectCandle
+                    ? 0
+                    : undefined
+                }
+                onClick={() =>
+                  onSelectCandle?.(
+                    index
+                  )
+                }
+                onKeyDown={(event) => {
+                  if (
+                    !onSelectCandle
+                  ) {
+                    return;
+                  }
+
+                  if (
+                    event.key === "Enter" ||
+                    event.key === " "
+                  ) {
+                    event.preventDefault();
+
+                    onSelectCandle(
+                      index
+                    );
+                  }
+                }}
               >
                 <line
                   x1={item.x}

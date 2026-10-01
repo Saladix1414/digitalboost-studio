@@ -22,6 +22,12 @@ import {
 
 import CandlestickChart from "./CandlestickChart";
 
+import {
+  getTerminalIndicators,
+} from "./indicators";
+
+import TerminalActivityPanel from "./TerminalActivityPanel";
+
 const timeframes: readonly TradingTimeframe[] = [
   "1m",
   "5m",
@@ -46,6 +52,25 @@ export function TradingTerminal() {
     "1h"
   );
 
+  const [
+    selectedCandleIndex,
+    setSelectedCandleIndex,
+  ] = useState<number | null>(
+    null
+  );
+
+  const [
+    paperSide,
+    setPaperSide,
+  ] = useState<"buy" | "sell">(
+    "buy"
+  );
+
+  const [
+    paperPreview,
+    setPaperPreview,
+  ] = useState(false);
+
   const market =
     mockMarkets.find(
       (item) =>
@@ -69,6 +94,22 @@ export function TradingTerminal() {
     candles[
       candles.length - 1
     ];
+
+  const selectedCandle =
+    selectedCandleIndex === null
+      ? latest
+      : candles[
+          selectedCandleIndex
+        ];
+
+  const indicators =
+    useMemo(
+      () =>
+        getTerminalIndicators(
+          candles
+        ),
+      [candles]
+    );
 
   return (
     <div className="ti-terminal">
@@ -185,44 +226,88 @@ export function TradingTerminal() {
           <CandlestickChart
             candles={candles}
             label={`${symbol} ${timeframe} deterministic candlestick chart`}
+            selectedIndex={selectedCandleIndex}
+            onSelectCandle={setSelectedCandleIndex}
           />
+
+          {selectedCandle ? (
+            <div className="ti-terminal__selected-candle">
+              <span>
+                Candle
+                <strong>
+                  {selectedCandle.time}
+                </strong>
+              </span>
+
+              <span>
+                O
+                <strong>
+                  {selectedCandle.open}
+                </strong>
+              </span>
+
+              <span>
+                H
+                <strong>
+                  {selectedCandle.high}
+                </strong>
+              </span>
+
+              <span>
+                L
+                <strong>
+                  {selectedCandle.low}
+                </strong>
+              </span>
+
+              <span>
+                C
+                <strong>
+                  {selectedCandle.close}
+                </strong>
+              </span>
+
+              <span>
+                Vol
+                <strong>
+                  {selectedCandle.volume}
+                </strong>
+              </span>
+            </div>
+          ) : null}
 
           <div className="ti-terminal__indicators">
             <span>
               EMA 20
               <strong>
-                {latest
-                  ? (latest.close * 0.994).toFixed(2)
-                  : "—"}
+                {indicators.ema20.toFixed(
+                  2
+                )}
               </strong>
             </span>
 
             <span>
               EMA 50
               <strong>
-                {latest
-                  ? (latest.close * 0.982).toFixed(2)
-                  : "—"}
+                {indicators.ema50.toFixed(
+                  2
+                )}
               </strong>
             </span>
 
             <span>
               RSI
               <strong>
-                {symbol === "SOL"
-                  ? "47.8"
-                  : symbol === "ETH"
-                    ? "58.2"
-                    : "61.4"}
+                {indicators.rsi.toFixed(
+                  1
+                )}
               </strong>
             </span>
 
             <span>
               Volume
               <strong>
-                {latest
-                  ? latest.volume.toLocaleString()
-                  : "—"}
+                {indicators.volume.toLocaleString()}
               </strong>
             </span>
           </div>
@@ -321,14 +406,48 @@ export function TradingTerminal() {
             <div className="ti-terminal__ticket-tabs">
               <button
                 type="button"
-                className="ti-terminal__ticket-tab ti-terminal__ticket-tab--active"
+                aria-pressed={
+                  paperSide ===
+                  "buy"
+                }
+                className={[
+                  "ti-terminal__ticket-tab",
+                  paperSide ===
+                  "buy"
+                    ? "ti-terminal__ticket-tab--active"
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={() =>
+                  setPaperSide(
+                    "buy"
+                  )
+                }
               >
                 Buy
               </button>
 
               <button
                 type="button"
-                className="ti-terminal__ticket-tab"
+                aria-pressed={
+                  paperSide ===
+                  "sell"
+                }
+                className={[
+                  "ti-terminal__ticket-tab",
+                  paperSide ===
+                  "sell"
+                    ? "ti-terminal__ticket-tab--sell-active"
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={() =>
+                  setPaperSide(
+                    "sell"
+                  )
+                }
               >
                 Sell
               </button>
@@ -379,9 +498,37 @@ export function TradingTerminal() {
             <button
               type="button"
               className="ti-terminal__paper-submit"
+              onClick={() =>
+                setPaperPreview(
+                  true
+                )
+              }
             >
               Preview paper order
             </button>
+
+            {paperPreview ? (
+              <div className="ti-terminal__paper-preview">
+                <strong>
+                  Paper preview ready
+                </strong>
+
+                <span>
+                  {paperSide.toUpperCase()} · {symbol}/USDT
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPaperPreview(
+                      false
+                    )
+                  }
+                >
+                  Clear preview
+                </button>
+              </div>
+            ) : null}
 
             <p>
               This ticket is intentionally non-executing.
@@ -390,6 +537,8 @@ export function TradingTerminal() {
           </section>
         </aside>
       </div>
+
+      <TerminalActivityPanel />
     </div>
   );
 }

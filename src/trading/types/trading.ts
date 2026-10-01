@@ -80,3 +80,26 @@ export type PaperOrderSide =
 export type PaperOrderType =
   | "market"
   | "limit";
+
+export type PaperPosition = {
+  readonly id: string;
+  readonly symbol: MarketSymbol;
+  readonly side: PaperOrderSide;
+  readonly quantity: number;
+  readonly entryPrice: number;
+  readonly markPrice: number;
+  readonly pnl: number;
+};
+
+export type PaperOrder = {
+  readonly id: string;
+  readonly symbol: MarketSymbol;
+  readonly side: PaperOrderSide;
+  readonly type: PaperOrderType;
+  readonly quantity: number;
+  readonly price: number;
+  readonly status:
+    | "preview"
+    | "open"
+    | "cancelled";
+};
