@@ -1,4 +1,8 @@
 import {
+  resolveApprovalRecoveryEligibility,
+} from "./approvalRecoveryEligibility";
+
+import {
   resolveApprovalRecoveryPresentation,
 } from "./approvalRecoveryAction";
 
@@ -272,11 +276,24 @@ export function RiskReviewWorkspace() {
       bootstrapFailurePolicy
     );
 
+  const approvalRecoveryEligibility =
+    resolveApprovalRecoveryEligibility(
+      persistenceMode,
+      recoveryDiagnostic
+    );
+
   const handleApprovalPersistenceRecovery =
     async () => {
       if (
         approvalLifecycle.status !==
         "error"
+      ) {
+        return;
+      }
+
+
+      if (
+        !approvalRecoveryEligibility.allowed
       ) {
         return;
       }
@@ -330,6 +347,14 @@ export function RiskReviewWorkspace() {
             <small>
               EVIDENCE ONLY · NOT AUTHORITY
             </small>
+
+
+            {persistenceMode === "remote" &&
+              !approvalRecoveryEligibility.allowed ? (
+                <small>
+                  RETRY BLOCKED · {approvalRecoveryEligibility.reason}
+                </small>
+              ) : null}
           </div>
         ) : null}
 
@@ -570,6 +595,7 @@ export function RiskReviewWorkspace() {
                       type="button"
                       className="ti-hydration-recovery__button"
                       onClick={handleApprovalPersistenceRecovery}
+                  disabled={!approvalRecoveryEligibility.allowed}
                     >
                       {approvalRecoveryPresentation.label}
                     </button>

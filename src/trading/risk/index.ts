@@ -286,3 +286,12 @@ export type {
   ApprovalRecoveryDiagnostic,
   ApprovalRecoveryDiagnosticCode,
 } from "./approvalRecoveryDiagnostics";
+
+export {
+  resolveApprovalRecoveryEligibility,
+} from "./approvalRecoveryEligibility";
+
+export type {
+  ApprovalRecoveryEligibility,
+  ApprovalRecoveryEligibilityReason,
+} from "./approvalRecoveryEligibility";

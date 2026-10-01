@@ -1,4 +1,8 @@
 import {
+  resolveApprovalRecoveryEligibility,
+} from "../risk/approvalRecoveryEligibility";
+
+import {
   resolveApprovalRecoveryPresentation,
 } from "../risk/approvalRecoveryAction";
 
@@ -465,11 +469,24 @@ export function BotForgeWorkspace() {
       bootstrapFailurePolicy
     );
 
+  const approvalRecoveryEligibility =
+    resolveApprovalRecoveryEligibility(
+      persistenceMode,
+      recoveryDiagnostic
+    );
+
   const handleApprovalPersistenceRecovery =
     async () => {
       if (
         approvalLifecycle.status !==
         "error"
+      ) {
+        return;
+      }
+
+
+      if (
+        !approvalRecoveryEligibility.allowed
       ) {
         return;
       }
@@ -523,6 +540,14 @@ export function BotForgeWorkspace() {
             <small>
               EVIDENCE ONLY · NOT AUTHORITY
             </small>
+
+
+            {persistenceMode === "remote" &&
+              !approvalRecoveryEligibility.allowed ? (
+                <small>
+                  RETRY BLOCKED · {approvalRecoveryEligibility.reason}
+                </small>
+              ) : null}
           </div>
         ) : null}
 
@@ -773,6 +798,7 @@ export function BotForgeWorkspace() {
                       type="button"
                       className="ti-hydration-recovery__button"
                       onClick={handleApprovalPersistenceRecovery}
+                  disabled={!approvalRecoveryEligibility.allowed}
                     >
                       {approvalRecoveryPresentation.label}
                     </button>
