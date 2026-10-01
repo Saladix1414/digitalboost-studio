@@ -144,6 +144,7 @@ test(
     for (
       const decision of [
         "inactive",
+        "approval-rejected",
         "no-signal",
         "risk-rejected",
         "paper-filled",
