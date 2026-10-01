@@ -33,8 +33,10 @@ import {
 } from "../runtime";
 
 import {
+  appendRiskReviewHistory,
   createInitialVersionedReview,
   createNextVersionedReview,
+  createRiskReviewHistory,
   evaluateRiskReviewFreshness,
   reviewPaperRisk,
 } from "../risk";
@@ -191,6 +193,18 @@ export function BotForgeWorkspace() {
     activeReviewVersion?.review ??
     null;
 
+  const [
+    reviewHistory,
+    setReviewHistory,
+  ] = useState(
+    () =>
+      activeReviewVersion
+        ? createRiskReviewHistory(
+            activeReviewVersion
+          )
+        : null
+  );
+
   const candidateReview =
     useMemo(
       () =>
@@ -240,15 +254,33 @@ export function BotForgeWorkspace() {
       setActiveReviewVersion(
         (
           current
-        ) =>
-          current
-            ? createNextVersionedReview(
-                current,
-                candidateReview.review
-              )
-            : createInitialVersionedReview(
-                candidateReview.review
-              )
+        ) => {
+          const next =
+            current
+              ? createNextVersionedReview(
+                  current,
+                  candidateReview.review
+                )
+              : createInitialVersionedReview(
+                  candidateReview.review
+                );
+
+          setReviewHistory(
+            (
+              history
+            ) =>
+              history
+                ? appendRiskReviewHistory(
+                    history,
+                    next
+                  )
+                : createRiskReviewHistory(
+                    next
+                  )
+          );
+
+          return next;
+        }
       );
 
       setRuntimeSession(
@@ -782,6 +814,55 @@ export function BotForgeWorkspace() {
                 <p className="ti-bot-forge__approval-note">
                   A configuration change requires an explicit new review
                   before the bot can regain paper runtime eligibility.
+                </p>
+              </section>
+
+              <section className="ti-bot-forge__panel">
+                <header>
+                  <div>
+                    <span className="ti-label">
+                      Review History
+                    </span>
+
+                    <strong>
+                      Accepted approval chain
+                    </strong>
+                  </div>
+
+                  <span className="ti-bot-forge__audit-mode">
+                    EVIDENCE ONLY
+                  </span>
+                </header>
+
+                <div className="ti-bot-forge__review-history">
+                  {(reviewHistory?.entries ?? []).map(
+                    (
+                      item
+                    ) => (
+                      <article
+                        key={
+                          `${item.review.id}-${item.version}`
+                        }
+                      >
+                        <strong>
+                          v{item.version}
+                        </strong>
+
+                        <span>
+                          {item.review.id}
+                        </span>
+
+                        <span>
+                          PREV · {item.previousReviewId ?? "ROOT"}
+                        </span>
+                      </article>
+                    )
+                  )}
+                </div>
+
+                <p className="ti-bot-forge__approval-note">
+                  Historical reviews are retained for evidence only.
+                  Runtime consumes the current active review, never history.
                 </p>
               </section>
 

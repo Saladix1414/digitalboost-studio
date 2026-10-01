@@ -24,6 +24,11 @@ import {
   createNextVersionedReview,
 } from "./reviewVersion";
 
+import {
+  appendRiskReviewHistory,
+  createRiskReviewHistory,
+} from "./reviewHistory";
+
 export function RiskReviewWorkspace() {
   const [
     selectedBotId,
@@ -106,6 +111,18 @@ export function RiskReviewWorkspace() {
     activeReviewVersion?.review ??
     null;
 
+  const [
+    reviewHistory,
+    setReviewHistory,
+  ] = useState(
+    () =>
+      activeReviewVersion
+        ? createRiskReviewHistory(
+            activeReviewVersion
+          )
+        : null
+  );
+
   const candidateDecision =
     useMemo(
       () =>
@@ -152,15 +169,33 @@ export function RiskReviewWorkspace() {
       setActiveReviewVersion(
         (
           current
-        ) =>
-          current
-            ? createNextVersionedReview(
-                current,
-                candidateDecision.review
-              )
-            : createInitialVersionedReview(
-                candidateDecision.review
-              )
+        ) => {
+          const next =
+            current
+              ? createNextVersionedReview(
+                  current,
+                  candidateDecision.review
+                )
+              : createInitialVersionedReview(
+                  candidateDecision.review
+                );
+
+          setReviewHistory(
+            (
+              history
+            ) =>
+              history
+                ? appendRiskReviewHistory(
+                    history,
+                    next
+                  )
+                : createRiskReviewHistory(
+                    next
+                  )
+          );
+
+          return next;
+        }
       );
     };
 
@@ -610,6 +645,59 @@ export function RiskReviewWorkspace() {
                     Accept new review
                   </button>
                 </div>
+              </section>
+
+              <section className="ti-risk-review__panel">
+                <header>
+                  <div>
+                    <span className="ti-label">
+                      Review History
+                    </span>
+
+                    <strong>
+                      {reviewHistory?.entries.length ?? 0}
+                      {" "}
+                      accepted reviews
+                    </strong>
+                  </div>
+                </header>
+
+                <div className="ti-risk-review__history">
+                  {(reviewHistory?.entries ?? []).map(
+                    (
+                      item
+                    ) => (
+                      <article
+                        key={
+                          `${item.review.id}-${item.version}`
+                        }
+                      >
+                        <div>
+                          <strong>
+                            v{item.version}
+                          </strong>
+
+                          <span>
+                            {item.review.id}
+                          </span>
+                        </div>
+
+                        <span>
+                          PREV · {item.previousReviewId ?? "ROOT"}
+                        </span>
+
+                        <span>
+                          {item.review.status.toUpperCase()}
+                        </span>
+                      </article>
+                    )
+                  )}
+                </div>
+
+                <p className="ti-risk-review__boundary-note">
+                  Review history is evidence only. Historical reviews do not
+                  authorize runtime execution.
+                </p>
               </section>
 
               <section className="ti-risk-review__panel">

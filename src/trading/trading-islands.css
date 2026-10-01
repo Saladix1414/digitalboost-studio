@@ -8539,3 +8539,68 @@
       column;
   }
 }
+
+/* ============================================================
+   PHASE 16E — REVIEW HISTORY LEDGER
+   ============================================================ */
+
+.ti-risk-review__history,
+.ti-bot-forge__review-history {
+  display: grid;
+}
+
+.ti-risk-review__history article,
+.ti-bot-forge__review-history article {
+  display: grid;
+
+  grid-template-columns:
+    minmax(70px, 0.4fr)
+    minmax(0, 1.4fr)
+    minmax(90px, 0.7fr);
+
+  gap: 10px;
+
+  align-items:
+    center;
+
+  padding:
+    10px 12px;
+
+  border-bottom:
+    1px solid
+    var(--ti-border-subtle);
+}
+
+.ti-risk-review__history article > div {
+  display: grid;
+  gap: 3px;
+}
+
+.ti-risk-review__history strong,
+.ti-bot-forge__review-history strong {
+  font-size: 8px;
+}
+
+.ti-risk-review__history span,
+.ti-bot-forge__review-history span {
+  overflow: hidden;
+
+  color:
+    var(--ti-faint);
+
+  font-size: 7px;
+
+  text-overflow:
+    ellipsis;
+
+  white-space:
+    nowrap;
+}
+
+@media (max-width: 620px) {
+  .ti-risk-review__history article,
+  .ti-bot-forge__review-history article {
+    grid-template-columns:
+      1fr;
+  }
+}

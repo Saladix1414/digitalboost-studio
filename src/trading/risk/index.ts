@@ -40,3 +40,13 @@ export {
 export type {
   VersionedRiskReview,
 } from "./reviewVersion";
+
+export {
+  createRiskReviewHistory,
+  appendRiskReviewHistory,
+  getLatestRiskReviewHistoryEntry,
+} from "./reviewHistory";
+
+export type {
+  RiskReviewHistory,
+} from "./reviewHistory";
