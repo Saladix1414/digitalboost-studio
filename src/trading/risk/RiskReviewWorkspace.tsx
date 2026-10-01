@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -40,6 +41,10 @@ import {
 import {
   validateRiskReviewChain,
 } from "./reviewChainValidation";
+
+import {
+  useApprovalRepositoryStore,
+} from "./useApprovalRepositoryStore";
 
 export function RiskReviewWorkspace() {
   const [
@@ -85,11 +90,33 @@ export function RiskReviewWorkspace() {
       ]
     );
 
-  const [
-    activeReviewVersion,
-    setActiveReviewVersion,
-  ] = useState(
+  const {
+    state:
+      approvalRepository,
+
+    activeReview,
+
+    bootstrap:
+      bootstrapApproval,
+
+    acceptReview,
+  } =
+    useApprovalRepositoryStore();
+
+  const activeReviewVersion =
+    approvalRepository.active;
+
+  const reviewHistory =
+    approvalRepository.history;
+
+  useEffect(
     () => {
+      if (
+        approvalRepository.active
+      ) {
+        return;
+      }
+
       const initialBot =
         mockTradingBots[0];
 
@@ -104,43 +131,28 @@ export function RiskReviewWorkspace() {
             ) ?? null
           : null;
 
-      return initialBot &&
-        initialStrategy
-        ? createInitialVersionedReview(
-            reviewPaperRisk({
-              bot:
-                initialBot,
+      if (
+        !initialBot ||
+        !initialStrategy
+      ) {
+        return;
+      }
 
-              strategy:
-                initialStrategy,
-            }).review
-          )
-        : null;
-    }
-  );
+      bootstrapApproval(
+        reviewPaperRisk({
+          bot:
+            initialBot,
 
-  const activeReview =
-    activeReviewVersion?.review ??
-    null;
-
-  const [
-    reviewHistory,
-    setReviewHistory,
-  ] = useState(
-    () =>
-      activeReviewVersion
-        ? createRiskReviewHistory({
-            versionedReview:
-              activeReviewVersion,
-
-            provenance:
-              createRiskReviewProvenance(
-                activeReviewVersion,
-                "risk-review-workspace",
-                "initial-review"
-              ),
-          })
-        : null
+          strategy:
+            initialStrategy,
+        }).review,
+        "risk-review-workspace"
+      );
+    },
+    [
+      approvalRepository.active,
+      bootstrapApproval,
+    ]
   );
 
   const candidateDecision =
@@ -194,59 +206,14 @@ export function RiskReviewWorkspace() {
   const acceptCandidateReview =
     () => {
       if (
-        !candidateDecision
+        !candidateDecision?.approved
       ) {
         return;
       }
 
-      setActiveReviewVersion(
-        (
-          current
-        ) => {
-          const next =
-            current
-              ? createNextVersionedReview(
-                  current,
-                  candidateDecision.review
-                )
-              : createInitialVersionedReview(
-                  candidateDecision.review
-                );
-
-          setReviewHistory(
-            (
-              history
-            ) =>
-              history
-                ? appendRiskReviewHistory(
-                    history,
-                    {
-                      versionedReview:
-                        next,
-
-                      provenance:
-                        createRiskReviewProvenance(
-                          next,
-                          "risk-review-workspace",
-                          "explicit-rereview"
-                        ),
-                    }
-                  )
-                : createRiskReviewHistory({
-                    versionedReview:
-                      next,
-
-                    provenance:
-                      createRiskReviewProvenance(
-                        next,
-                        "risk-review-workspace",
-                        "explicit-rereview"
-                      ),
-                  })
-          );
-
-          return next;
-        }
+      acceptReview(
+        candidateDecision.review,
+        "risk-review-workspace"
       );
     };
 

@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -47,6 +48,10 @@ import {
 import {
   useMarketData,
 } from "../market-data";
+
+import {
+  useApprovalRepositoryStore,
+} from "../risk/useApprovalRepositoryStore";
 
 const lifecycleLabels:
   Readonly<
@@ -158,11 +163,33 @@ export function BotForgeWorkspace() {
       ]
     );
 
-  const [
-    activeReviewVersion,
-    setActiveReviewVersion,
-  ] = useState(
+  const {
+    state:
+      approvalRepository,
+
+    activeReview,
+
+    bootstrap:
+      bootstrapApproval,
+
+    acceptReview,
+  } =
+    useApprovalRepositoryStore();
+
+  const activeReviewVersion =
+    approvalRepository.active;
+
+  const reviewHistory =
+    approvalRepository.history;
+
+  useEffect(
     () => {
+      if (
+        approvalRepository.active
+      ) {
+        return;
+      }
+
       const initialBot =
         mockTradingBots[0];
 
@@ -177,43 +204,28 @@ export function BotForgeWorkspace() {
             ) ?? null
           : null;
 
-      return initialBot &&
-        initialStrategy
-        ? createInitialVersionedReview(
-            reviewPaperRisk({
-              bot:
-                initialBot,
+      if (
+        !initialBot ||
+        !initialStrategy
+      ) {
+        return;
+      }
 
-              strategy:
-                initialStrategy,
-            }).review
-          )
-        : null;
-    }
-  );
+      bootstrapApproval(
+        reviewPaperRisk({
+          bot:
+            initialBot,
 
-  const activeReview =
-    activeReviewVersion?.review ??
-    null;
-
-  const [
-    reviewHistory,
-    setReviewHistory,
-  ] = useState(
-    () =>
-      activeReviewVersion
-        ? createRiskReviewHistory({
-            versionedReview:
-              activeReviewVersion,
-
-            provenance:
-              createRiskReviewProvenance(
-                activeReviewVersion,
-                "bot-forge",
-                "initial-review"
-              ),
-          })
-        : null
+          strategy:
+            initialStrategy,
+        }).review,
+        "bot-forge"
+      );
+    },
+    [
+      approvalRepository.active,
+      bootstrapApproval,
+    ]
   );
 
   const chainIntegrity =
@@ -275,54 +287,9 @@ export function BotForgeWorkspace() {
         return;
       }
 
-      setActiveReviewVersion(
-        (
-          current
-        ) => {
-          const next =
-            current
-              ? createNextVersionedReview(
-                  current,
-                  candidateReview.review
-                )
-              : createInitialVersionedReview(
-                  candidateReview.review
-                );
-
-          setReviewHistory(
-            (
-              history
-            ) =>
-              history
-                ? appendRiskReviewHistory(
-                    history,
-                    {
-                      versionedReview:
-                        next,
-
-                      provenance:
-                        createRiskReviewProvenance(
-                          next,
-                          "bot-forge",
-                          "explicit-rereview"
-                        ),
-                    }
-                  )
-                : createRiskReviewHistory({
-                    versionedReview:
-                      next,
-
-                    provenance:
-                      createRiskReviewProvenance(
-                        next,
-                        "bot-forge",
-                        "explicit-rereview"
-                      ),
-                  })
-          );
-
-          return next;
-        }
+      acceptReview(
+        candidateReview.review,
+        "bot-forge"
       );
 
       setRuntimeSession(

@@ -91,3 +91,11 @@ export type {
   ApprovalRepositoryState,
   AcceptRiskReviewInput,
 } from "./reviewRepository";
+
+export {
+  getApprovalStoreSnapshot,
+  subscribeApprovalStore,
+  bootstrapApprovalStore,
+  acceptApprovalStoreReview,
+  getApprovalStoreActiveReview,
+} from "./approvalStore";
