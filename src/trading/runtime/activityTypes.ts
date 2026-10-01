@@ -5,6 +5,8 @@ import type {
 export type BotRuntimeEventType =
   | "session_started"
   | "signal_seen"
+  | "approval_checked"
+  | "approval_rejected"
   | "no_signal"
   | "risk_checked"
   | "order_accepted"

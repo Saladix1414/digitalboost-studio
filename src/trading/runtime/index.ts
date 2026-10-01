@@ -22,3 +22,11 @@ export type {
   BotRuntimeEvent,
   BotRuntimeSession,
 } from "./activityTypes";
+
+export {
+  verifyRuntimeApproval,
+} from "./approval";
+
+export type {
+  RuntimeApprovalBindingResult,
+} from "./approval";

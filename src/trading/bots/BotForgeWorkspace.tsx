@@ -32,6 +32,10 @@ import {
 } from "../runtime";
 
 import {
+  reviewPaperRisk,
+} from "../risk";
+
+import {
   useMarketData,
 } from "../market-data";
 
@@ -169,6 +173,21 @@ export function BotForgeWorkspace() {
           }
         );
 
+      const approvalDecision =
+        reviewPaperRisk({
+          bot:
+            selectedBot,
+
+          strategy:
+            selectedStrategy,
+        });
+
+      if (
+        !approvalDecision.approved
+      ) {
+        return;
+      }
+
       const session =
         runBotRuntimeSession({
           bot:
@@ -183,6 +202,9 @@ export function BotForgeWorkspace() {
             ),
 
           evaluation,
+
+          approval:
+            approvalDecision.review,
 
           market: {
             marketPrice:

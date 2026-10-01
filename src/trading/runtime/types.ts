@@ -11,6 +11,10 @@ import type {
   TradingStrategy,
 } from "../strategy";
 
+import type {
+  RiskReview,
+} from "../risk";
+
 export type BotRuntimeMarketInput = {
   readonly marketPrice:
     number;
@@ -32,12 +36,16 @@ export type BotRuntimeContext = {
   readonly evaluation:
     StrategyEvaluation;
 
+  readonly approval:
+    RiskReview;
+
   readonly market:
     BotRuntimeMarketInput;
 };
 
 export type BotRuntimeDecision =
   | "inactive"
+  | "approval-rejected"
   | "no-signal"
   | "risk-rejected"
   | "paper-filled"

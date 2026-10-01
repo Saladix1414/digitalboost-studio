@@ -113,6 +113,19 @@ export function runBotRuntimeSession(
 
   if (
     runtime.decision ===
+    "approval-rejected"
+  ) {
+    pushEvent(
+      "approval_checked",
+      "Paper runtime approval binding was checked."
+    );
+
+    pushEvent(
+      "approval_rejected",
+      runtime.reason
+    );
+  } else if (
+    runtime.decision ===
     "risk-rejected"
   ) {
     pushEvent(

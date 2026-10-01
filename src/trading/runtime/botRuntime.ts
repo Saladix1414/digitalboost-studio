@@ -2,6 +2,10 @@ import {
   executePaperOrder,
 } from "../paper";
 
+import {
+  verifyRuntimeApproval,
+} from "./approval";
+
 import type {
   PaperOrderSide,
 } from "../paper";
@@ -63,6 +67,34 @@ export function runBotRuntimeStep(
 
       reason:
         "Bot execution mode is not paper-only.",
+
+      liveExecution:
+        false,
+    };
+  }
+
+  const approval =
+    verifyRuntimeApproval(
+      context.bot,
+      context.strategy,
+      context.approval
+    );
+
+  if (
+    !approval.valid
+  ) {
+    return {
+      botId:
+        context.bot.id,
+
+      decision:
+        "approval-rejected",
+
+      account:
+        context.account,
+
+      reason:
+        approval.reason,
 
       liveExecution:
         false,
