@@ -355,3 +355,10 @@ export {
   resetApprovalRemoteRetryHistoryForTests,
   subscribeApprovalRemoteRetryHistory,
 } from "./approvalRemoteRetryHistoryStore";
+
+
+export {
+  ApprovalBackendStateValidationError,
+  parseApprovalBackendRepositoryState,
+  parseApprovalBackendRevision,
+} from "./approvalBackendStateValidation";

@@ -18,7 +18,6 @@ import {
 
 import type {
   ApprovalBackendErrorDto,
-  ApprovalBackendReadResponseDto,
   ApprovalBackendWriteResponseDto,
 } from "./approvalBackendTransport";
 
@@ -47,11 +46,11 @@ export type ApprovalHttpBackendClientOptions = {
 };
 
 
-function parseJsonBody<T>(
+function parseJsonBody(
   response:
     ApprovalHttpResponse
 ):
-  T {
+  unknown {
   if (
     response.body ===
     null
@@ -74,7 +73,7 @@ function parseJsonBody<T>(
   try {
     return JSON.parse(
       response.body
-    ) as T;
+    ) as unknown;
   } catch {
     throw new ApprovalHttpClientError({
       message:
@@ -200,15 +199,33 @@ export function createApprovalHttpBackendClient(
       }
 
       const dto =
-        parseJsonBody<
-          ApprovalBackendReadResponseDto
-        >(
+        parseJsonBody(
           response
         );
 
-      return deserializeApprovalBackendReadResponse(
-        dto
-      );
+      try {
+        return deserializeApprovalBackendReadResponse(
+          dto
+        );
+      } catch (
+        error
+      ) {
+        throw new ApprovalHttpClientError({
+          message:
+            error instanceof Error
+              ? `Approval backend returned invalid approval state: ${error.message}`
+              : "Approval backend returned invalid approval state.",
+
+          code:
+            "invalid-response",
+
+          retryable:
+            false,
+
+          status:
+            response.status,
+        });
+      }
     },
 
 

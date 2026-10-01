@@ -19,6 +19,12 @@ import type {
 } from "./reviewRepository";
 
 
+import {
+  parseApprovalBackendRepositoryState,
+  parseApprovalBackendRevision,
+} from "./approvalBackendStateValidation";
+
+
 export type ApprovalBackendStateDto = {
   readonly active:
     ApprovalRepositoryState["active"];
@@ -111,28 +117,12 @@ export function serializeApprovalRepositoryState(
 
 export function deserializeApprovalRepositoryState(
   dto:
-    ApprovalBackendStateDto
+    unknown
 ):
   ApprovalRepositoryState {
-  if (
-    dto.authoritative !==
-    false
-  ) {
-    throw new Error(
-      "Approval backend state DTO cannot be authoritative."
-    );
-  }
-
-  return {
-    active:
-      dto.active,
-
-    history:
-      dto.history,
-
-    authoritative:
-      false,
-  };
+  return parseApprovalBackendRepositoryState(
+    dto
+  );
 }
 
 
@@ -186,7 +176,7 @@ export function serializeApprovalBackendClearRequest(
 
 export function deserializeApprovalBackendReadResponse(
   dto:
-    ApprovalBackendReadResponseDto
+    unknown
 ): {
   readonly state:
     ApprovalRepositoryState | null;
@@ -197,23 +187,63 @@ export function deserializeApprovalBackendReadResponse(
   readonly authoritative:
     false;
 } {
-  return {
-    state:
-      dto.state ===
-      null
-        ? null
-        : deserializeApprovalRepositoryState(
-            dto.state
-          ),
+  if (
+    typeof dto !==
+      "object" ||
+    dto ===
+      null ||
+    Array.isArray(
+      dto
+    )
+  ) {
+    throw new Error(
+      "Approval backend read response must be an object."
+    );
+  }
 
-    revision:
-      dto.revision,
+  const record =
+    dto as Record<
+      string,
+      unknown
+    >;
+
+  const state =
+    record.state ===
+      null
+      ? null
+      : deserializeApprovalRepositoryState(
+          record.state
+        );
+
+  const revision =
+    parseApprovalBackendRevision(
+      record.revision,
+      {
+        nullable:
+          true,
+      }
+    );
+
+  if (
+    state ===
+      null &&
+    revision !==
+      null
+  ) {
+    throw new Error(
+      "Empty approval backend state cannot carry a revision."
+    );
+  }
+
+  return {
+    state,
+
+    revision,
 
     authoritative:
       false,
   };
 }
-
 
 export function mapApprovalBackendErrorDto(
   dto:
