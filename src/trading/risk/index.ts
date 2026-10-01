@@ -331,3 +331,27 @@ export {
 export type {
   ApprovalRemoteRetryDecision,
 } from "./approvalRemoteRetry";
+
+
+export {
+  APPROVAL_REMOTE_RETRY_HISTORY_LIMIT,
+  appendApprovalRemoteRetryHistory,
+  createApprovalRemoteRetryHistory,
+} from "./approvalRemoteRetryHistory";
+
+export type {
+  ApprovalRemoteRetryAttemptEvent,
+  ApprovalRemoteRetryAttemptStatus,
+  ApprovalRemoteRetryHistory,
+  ApprovalRemoteRetryHistoryEntry,
+  ApprovalRemoteRetryOperation,
+} from "./approvalRemoteRetryHistory";
+
+
+
+export {
+  getApprovalRemoteRetryHistory,
+  recordApprovalRemoteRetryAttempt,
+  resetApprovalRemoteRetryHistoryForTests,
+  subscribeApprovalRemoteRetryHistory,
+} from "./approvalRemoteRetryHistoryStore";

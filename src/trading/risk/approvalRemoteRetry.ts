@@ -27,6 +27,31 @@ export type ApprovalRemoteRetryDecision = {
 };
 
 
+export type ApprovalRemoteRetryObserverEvent = {
+  readonly attempt:
+    number;
+
+  readonly status:
+    | "attempt"
+    | "retry"
+    | "succeeded"
+    | "failed";
+
+  readonly reason:
+    ApprovalRemoteRetryDecision["reason"] | null;
+
+  readonly authoritative:
+    false;
+};
+
+
+export type ApprovalRemoteRetryObserver =
+  (
+    event:
+      ApprovalRemoteRetryObserverEvent
+  ) => void;
+
+
 export function resolveApprovalRemoteRetryDecision(
   input: {
     readonly error:
@@ -130,6 +155,9 @@ export async function runApprovalRemoteMutationWithRetry<
         attempt:
           number
       ) => Promise<Result>;
+
+    readonly onEvent?:
+      ApprovalRemoteRetryObserver;
   }
 ):
   Promise<Result> {
@@ -139,10 +167,39 @@ export async function runApprovalRemoteMutationWithRetry<
   while (
     true
   ) {
+    input.onEvent?.({
+      attempt,
+
+      status:
+        "attempt",
+
+      reason:
+        null,
+
+      authoritative:
+        false,
+    });
+
     try {
-      return await input.execute(
-        attempt
-      );
+      const result =
+        await input.execute(
+          attempt
+        );
+
+      input.onEvent?.({
+        attempt,
+
+        status:
+          "succeeded",
+
+        reason:
+          null,
+
+        authoritative:
+          false,
+      });
+
+      return result;
     } catch (
       error
     ) {
@@ -160,8 +217,34 @@ export async function runApprovalRemoteMutationWithRetry<
       if (
         !decision.retry
       ) {
+        input.onEvent?.({
+          attempt,
+
+          status:
+            "failed",
+
+          reason:
+            decision.reason,
+
+          authoritative:
+            false,
+        });
+
         throw error;
       }
+
+      input.onEvent?.({
+        attempt,
+
+        status:
+          "retry",
+
+        reason:
+          decision.reason,
+
+        authoritative:
+          false,
+      });
 
       attempt +=
         1;

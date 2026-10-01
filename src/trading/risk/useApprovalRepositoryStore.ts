@@ -4,6 +4,12 @@ import {
   subscribeApprovalRecoveryAttemptHistory,
 } from "./approvalRecoveryAttemptHistoryStore";
 
+
+import {
+  getApprovalRemoteRetryHistory,
+  subscribeApprovalRemoteRetryHistory,
+} from "./approvalRemoteRetryHistoryStore";
+
 import {
   beginApprovalRecoveryAttempt,
   completeApprovalRecoveryAttempt,
@@ -148,6 +154,14 @@ export function useApprovalRepositoryStore() {
       subscribeApprovalRecoveryAttemptHistory,
       getApprovalRecoveryAttemptHistory,
       getApprovalRecoveryAttemptHistory
+    );
+
+
+  const remoteRetryHistory =
+    useSyncExternalStore(
+      subscribeApprovalRemoteRetryHistory,
+      getApprovalRemoteRetryHistory,
+      getApprovalRemoteRetryHistory
     );
 
   const state =
@@ -334,6 +348,8 @@ export function useApprovalRepositoryStore() {
     recoveryAttempt,
 
     recoveryAttemptHistory,
+
+    remoteRetryHistory,
 
     runRecoveryAttempt,
 

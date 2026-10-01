@@ -24,6 +24,11 @@ import {
 } from "./approvalRemoteRetry";
 
 
+import {
+  recordApprovalRemoteRetryAttempt,
+} from "./approvalRemoteRetryHistoryStore";
+
+
 export type ApprovalBackendReadResult = {
   readonly state:
     ApprovalRepositoryState | null;
@@ -159,6 +164,14 @@ export function createRemoteApprovalPersistence(
                 expectedRevision,
                 idempotencyKey,
               }),
+
+          onEvent:
+            event =>
+              recordApprovalRemoteRetryAttempt(
+                "write",
+                idempotencyKey !== null,
+                event
+              ),
         });
 
       return {
@@ -200,6 +213,14 @@ export function createRemoteApprovalPersistence(
               expectedRevision,
               idempotencyKey,
             }),
+
+        onEvent:
+          event =>
+            recordApprovalRemoteRetryAttempt(
+              "clear",
+              idempotencyKey !== null,
+              event
+            ),
       });
     },
   };
