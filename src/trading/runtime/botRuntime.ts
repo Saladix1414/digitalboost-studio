@@ -46,6 +46,15 @@ export function runBotRuntimeStep(
       reason:
         "Bot is not in paper-running state.",
 
+      approvalReviewId:
+        context.approval.id,
+
+      approvalBotId:
+        context.approval.botId,
+
+      approvalStrategyId:
+        context.approval.strategyId,
+
       liveExecution:
         false,
     };
@@ -67,6 +76,15 @@ export function runBotRuntimeStep(
 
       reason:
         "Bot execution mode is not paper-only.",
+
+      approvalReviewId:
+        context.approval.id,
+
+      approvalBotId:
+        context.approval.botId,
+
+      approvalStrategyId:
+        context.approval.strategyId,
 
       liveExecution:
         false,
@@ -96,6 +114,15 @@ export function runBotRuntimeStep(
       reason:
         approval.reason,
 
+      approvalReviewId:
+        context.approval.id,
+
+      approvalBotId:
+        context.approval.botId,
+
+      approvalStrategyId:
+        context.approval.strategyId,
+
       liveExecution:
         false,
     };
@@ -119,6 +146,15 @@ export function runBotRuntimeStep(
 
       reason:
         "Strategy evaluation does not authorize a paper action.",
+
+      approvalReviewId:
+        context.approval.id,
+
+      approvalBotId:
+        context.approval.botId,
+
+      approvalStrategyId:
+        context.approval.strategyId,
 
       liveExecution:
         false,
@@ -173,6 +209,15 @@ export function runBotRuntimeStep(
 
       orderId,
 
+      approvalReviewId:
+        context.approval.id,
+
+      approvalBotId:
+        context.approval.botId,
+
+      approvalStrategyId:
+        context.approval.strategyId,
+
       liveExecution:
         false,
     };
@@ -196,6 +241,15 @@ export function runBotRuntimeStep(
         execution.reason,
 
       orderId,
+
+      approvalReviewId:
+        context.approval.id,
+
+      approvalBotId:
+        context.approval.botId,
+
+      approvalStrategyId:
+        context.approval.strategyId,
 
       liveExecution:
         false,

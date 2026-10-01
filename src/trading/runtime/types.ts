@@ -67,6 +67,15 @@ export type BotRuntimeResult = {
   readonly orderId?:
     string;
 
+  readonly approvalReviewId:
+    string;
+
+  readonly approvalBotId:
+    string;
+
+  readonly approvalStrategyId:
+    string;
+
   readonly liveExecution:
     false;
 };

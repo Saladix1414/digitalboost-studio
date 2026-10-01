@@ -30,3 +30,12 @@ export {
 export type {
   RuntimeApprovalBindingResult,
 } from "./approval";
+
+export {
+  createRuntimeAuditRecord,
+} from "./audit";
+
+export type {
+  RuntimeApprovalEvidence,
+  RuntimeAuditRecord,
+} from "./auditTypes";
