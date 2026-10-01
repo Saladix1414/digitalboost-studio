@@ -38,6 +38,7 @@ import TradingTerminal from "./terminal/TradingTerminal";
 import StrategyBuilder from "./strategy/StrategyBuilder";
 import BacktestWorkspace from "./backtest/BacktestWorkspace";
 import PaperTradingWorkspace from "./paper/PaperTradingWorkspace";
+import BotForgeWorkspace from "./bots/BotForgeWorkspace";
 
 import {
   MarketDataProvider,
@@ -348,6 +349,9 @@ export function TradingIslandsWorkspace({
             ) : activeSection === "paper" &&
               activeWorkspaceTab === "workspace" ? (
               <PaperTradingWorkspace />
+            ) : activeSection === "bot-forge" &&
+              activeWorkspaceTab === "workspace" ? (
+              <BotForgeWorkspace />
             ) : (
               <EmptyState
                 icon={
