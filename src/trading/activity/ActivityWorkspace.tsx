@@ -3,48 +3,14 @@ import {
 } from "react";
 
 import {
-  mockTradingBots,
-} from "../bots";
-
-import {
-  indicatorEngine,
-} from "../indicators";
-
-import {
-  localHistoricalData,
-} from "../historical-data";
-
-import {
-  createPaperAccount,
-} from "../paper";
-
-import {
-  reviewPaperRisk,
-} from "../risk";
-
-import {
   useApprovalRepositoryStore,
 } from "../risk/useApprovalRepositoryStore";
 
 import {
-  createRuntimeAuditRecord,
-  runBotRuntimeSession,
-} from "../runtime";
-
-import {
-  evaluateStrategy,
-  mockStrategies,
-} from "../strategy";
-
-import {
-  activityFromPaperLedger,
   activityFromRecoveryAttemptHistoryEntry,
   activityFromRemoteRetryHistoryEntry,
   activityFromReviewChainIntegrity,
   activityFromReviewHistoryEntry,
-  activityFromRiskReview,
-  activityFromRuntimeAudit,
-  activityFromRuntimeAuditSummary,
 } from "./builders";
 
 import type {
@@ -68,52 +34,16 @@ export function ActivityWorkspace() {
       readonly TradingActivityItem[]
     >(
       () => {
-        const bot =
-          mockTradingBots[0];
-
-        const strategy =
-          bot
-            ? mockStrategies.find(
-                (
-                  item
-                ) =>
-                  item.id ===
-                  bot.strategyId
-              ) ?? null
-            : null;
-
-        if (
-          !bot ||
-          !strategy
-        ) {
-          return [];
-        }
-
-        const reviewDecision =
-          reviewPaperRisk({
-            bot,
-            strategy,
-          });
-
         const items:
-          TradingActivityItem[] = [];
+          TradingActivityItem[] =
+            [];
 
         let sequence =
           1;
 
-        items.push(
-          activityFromRiskReview(
-            reviewDecision.review,
-            sequence
-          )
-        );
-
-        sequence +=
-          1;
-
         /*
-         * Project only review evidence that already exists.
-         * Activity does not manufacture review history.
+         * Approval activity must come only from repository evidence
+         * that already exists. Activity never creates a review.
          */
         if (
           approvalRepository.history
@@ -133,6 +63,11 @@ export function ActivityWorkspace() {
               1;
           }
 
+          /*
+           * Chain integrity is derived from the persisted review
+           * history itself. It is evidence about that history and
+           * cannot create approval authority.
+           */
           items.push(
             activityFromReviewChainIntegrity(
               approvalRepository.history,
@@ -145,7 +80,7 @@ export function ActivityWorkspace() {
         }
 
         /*
-         * Recovery attempts are observational evidence only.
+         * Recovery attempts are shared observational evidence only.
          */
         for (
           const entry of
@@ -161,7 +96,6 @@ export function ActivityWorkspace() {
           sequence +=
             1;
         }
-
 
         /*
          * Remote retry attempts are shared observational evidence.
@@ -182,137 +116,12 @@ export function ActivityWorkspace() {
             1;
         }
 
-
-        const historical =
-          localHistoricalData.getSeries({
-            symbol:
-              strategy.symbol,
-
-            timeframe:
-              strategy.timeframe,
-
-            window:
-              50,
-          });
-
-        const candles =
-          historical.candles;
-
-        if (
-          candles.length > 0 &&
-          reviewDecision.approved
-        ) {
-          const current =
-            indicatorEngine.snapshot(
-              candles
-            );
-
-          const previous =
-            candles.length > 1
-              ? indicatorEngine.snapshot(
-                  candles.slice(
-                    0,
-                    -1
-                  )
-                )
-              : undefined;
-
-          const evaluation =
-            evaluateStrategy(
-              strategy,
-              {
-                current,
-                previous,
-              }
-            );
-
-          const paperRunningBot = {
-            ...bot,
-
-            status:
-              "paper-running" as const,
-          };
-
-          const session =
-            runBotRuntimeSession({
-              bot:
-                paperRunningBot,
-
-              strategy,
-
-              account:
-                createPaperAccount(
-                  10_000
-                ),
-
-              evaluation,
-
-              approval:
-                reviewDecision.review,
-
-              market: {
-                marketPrice:
-                  candles[
-                    candles.length -
-                    1
-                  ].close,
-
-                quantity:
-                  0.01,
-              },
-            });
-
-          const audit =
-            createRuntimeAuditRecord(
-              session
-            );
-
-          const runtimeItems =
-            activityFromRuntimeAudit(
-              audit,
-              sequence
-            );
-
-          items.push(
-            ...runtimeItems
-          );
-
-          sequence +=
-            runtimeItems.length;
-
-          items.push(
-            activityFromRuntimeAuditSummary(
-              audit,
-              sequence
-            )
-          );
-
-          sequence +=
-            1;
-
-          for (
-            const entry of
-            session.runtime.account
-              .ledger
-          ) {
-            items.push(
-              activityFromPaperLedger(
-                entry,
-                sequence
-              )
-            );
-
-            sequence +=
-              1;
-          }
-        }
-
         return items;
       },
       [
         approvalRepository.history,
         recoveryAttemptHistory,
-    remoteRetryHistory,
+        remoteRetryHistory,
       ]
     );
 
@@ -329,8 +138,8 @@ export function ActivityWorkspace() {
           </h2>
 
           <p>
-            Risk approval, runtime events, audit evidence and paper ledger
-            are projected into one timeline without merging their authority.
+            Recorded approval, recovery and persistence evidence are projected
+            into one timeline without manufacturing operational events.
           </p>
         </div>
 
