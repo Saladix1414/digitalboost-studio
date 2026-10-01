@@ -226,3 +226,13 @@ export {
 export type {
   ApprovalFetchHttpClientOptions,
 } from "./approvalFetchHttpClient";
+
+export {
+  createApprovalRemoteComposition,
+  installApprovalRemotePersistence,
+} from "./approvalRemoteComposition";
+
+export type {
+  ApprovalRemoteComposition,
+  ApprovalRemoteCompositionConfig,
+} from "./approvalRemoteComposition";
