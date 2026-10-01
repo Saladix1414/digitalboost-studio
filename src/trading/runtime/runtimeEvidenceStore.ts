@@ -79,6 +79,7 @@ export type RuntimeEvidenceLifecycleStatus =
   | "idle"
   | "hydrating"
   | "ready"
+  | "stale"
   | "error";
 
 
@@ -228,6 +229,34 @@ export function getRuntimeEvidenceHistory():
 export function getRuntimeEvidenceLifecycle():
   RuntimeEvidenceLifecycle {
   return lifecycle;
+}
+
+
+export function markRuntimeEvidenceStale():
+  void {
+  /*
+   * Stale means another browser context changed persisted evidence.
+   *
+   * Existing in-memory evidence remains readable.
+   * This state is observational only and must never gate runtime.
+   */
+  if (
+    lifecycle.status ===
+    "hydrating"
+  ) {
+    return;
+  }
+
+  setLifecycle({
+    status:
+      "stale",
+
+    error:
+      "Runtime evidence changed in another browser context.",
+
+    authoritative:
+      false,
+  });
 }
 
 

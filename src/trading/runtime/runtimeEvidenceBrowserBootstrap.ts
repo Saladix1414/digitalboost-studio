@@ -1,16 +1,71 @@
 import {
+  LOCAL_RUNTIME_EVIDENCE_STORAGE_KEY,
   createBrowserRuntimeEvidencePersistence,
 } from "./localRuntimeEvidencePersistence";
 
 import {
   configureRuntimeEvidencePersistence,
   hydrateRuntimeEvidence,
+  markRuntimeEvidenceStale,
 } from "./runtimeEvidenceStore";
 
 
 let runtimeEvidenceBrowserBootstrap:
   Promise<void> | null =
     null;
+
+
+let runtimeEvidenceStorageListenerInstalled =
+  false;
+
+
+function handleRuntimeEvidenceStorageChange(
+  event:
+    StorageEvent
+):
+  void {
+  /*
+   * Browser storage events are emitted in other documents,
+   * not the document that performed the write.
+   *
+   * Only the canonical runtime evidence key is relevant.
+   */
+  if (
+    event.key !==
+    LOCAL_RUNTIME_EVIDENCE_STORAGE_KEY
+  ) {
+    return;
+  }
+
+  markRuntimeEvidenceStale();
+}
+
+
+function installRuntimeEvidenceStorageListener():
+  void {
+  if (
+    runtimeEvidenceStorageListenerInstalled
+  ) {
+    return;
+  }
+
+  if (
+    typeof window ===
+      "undefined" ||
+    typeof window.addEventListener !==
+      "function"
+  ) {
+    return;
+  }
+
+  window.addEventListener(
+    "storage",
+    handleRuntimeEvidenceStorageChange
+  );
+
+  runtimeEvidenceStorageListenerInstalled =
+    true;
+}
 
 
 /*
@@ -42,6 +97,8 @@ export function bootstrapRuntimeEvidenceBrowserPersistence():
           persistence
         );
 
+        installRuntimeEvidenceStorageListener();
+
         await hydrateRuntimeEvidence();
       }
     )();
@@ -53,11 +110,30 @@ export function bootstrapRuntimeEvidenceBrowserPersistence():
 /*
  * Test-only reset of bootstrap ownership.
  *
+ * Browser listener ownership is reset as well so runtime scenarios
+ * can install an isolated test window.
+ *
  * This does not clear persisted browser evidence and grants no
  * runtime authority.
  */
 export function resetRuntimeEvidenceBrowserBootstrapForTests():
   void {
+  if (
+    runtimeEvidenceStorageListenerInstalled &&
+    typeof window !==
+      "undefined" &&
+    typeof window.removeEventListener ===
+      "function"
+  ) {
+    window.removeEventListener(
+      "storage",
+      handleRuntimeEvidenceStorageChange
+    );
+  }
+
+  runtimeEvidenceStorageListenerInstalled =
+    false;
+
   runtimeEvidenceBrowserBootstrap =
     null;
 }

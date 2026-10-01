@@ -62,6 +62,7 @@ export {
   getRuntimeEvidenceHistory,
   getRuntimeEvidenceLifecycle,
   hydrateRuntimeEvidence,
+  markRuntimeEvidenceStale,
   persistRuntimeEvidenceHistory,
   recordRuntimeSessionEvidence,
   resetRuntimeEvidenceHistoryForTests,
