@@ -186,7 +186,7 @@ test(
 
 
 test(
-  "React approval bootstrap uses explicit default mode selection",
+  "React approval bootstrap uses validated environment mode selection",
   () => {
     const content =
       source(
@@ -195,7 +195,7 @@ test(
 
     assert.match(
       content,
-      /createDefaultApprovalPersistenceConfig/
+      /readApprovalEnvironmentConfig/
     );
 
     assert.match(
@@ -206,6 +206,11 @@ test(
     assert.match(
       content,
       /persistenceSelection\.persistence/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /createDefaultApprovalPersistenceConfig/
     );
   }
 );
