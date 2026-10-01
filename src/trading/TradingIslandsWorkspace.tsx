@@ -37,6 +37,7 @@ import TradingOverview from "./overview/TradingOverview";
 import TradingTerminal from "./terminal/TradingTerminal";
 import StrategyBuilder from "./strategy/StrategyBuilder";
 import BacktestWorkspace from "./backtest/BacktestWorkspace";
+import PaperTradingWorkspace from "./paper/PaperTradingWorkspace";
 
 import {
   MarketDataProvider,
@@ -344,6 +345,9 @@ export function TradingIslandsWorkspace({
             ) : activeSection === "backtests" &&
               activeWorkspaceTab === "workspace" ? (
               <BacktestWorkspace />
+            ) : activeSection === "paper" &&
+              activeWorkspaceTab === "workspace" ? (
+              <PaperTradingWorkspace />
             ) : (
               <EmptyState
                 icon={
