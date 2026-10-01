@@ -155,6 +155,12 @@ export function BacktestWorkspace() {
           {
             initialCapital:
               10_000,
+
+            feePercent:
+              0.10,
+
+            slippagePercent:
+              0.05,
           }
         ),
       [
@@ -326,6 +332,46 @@ export function BacktestWorkspace() {
             {metrics.totalTrades}
           </strong>
         </article>
+
+        <article>
+          <span>
+            Profit factor
+          </span>
+
+          <strong>
+            {Number.isFinite(
+              metrics.profitFactor
+            )
+              ? metrics.profitFactor.toFixed(
+                  2
+                )
+              : "∞"}
+          </strong>
+        </article>
+
+        <article>
+          <span>
+            Expectancy
+          </span>
+
+          <strong>
+            {metrics.expectancy.toFixed(
+              2
+            )}
+          </strong>
+        </article>
+
+        <article>
+          <span>
+            Fees
+          </span>
+
+          <strong>
+            {metrics.totalFees.toFixed(
+              2
+            )}
+          </strong>
+        </article>
       </div>
 
       <section className="ti-backtest__panel">
@@ -403,6 +449,10 @@ export function BacktestWorkspace() {
                   <th>
                     Return
                   </th>
+
+                  <th>
+                    Exit
+                  </th>
                 </tr>
               </thead>
 
@@ -453,6 +503,10 @@ export function BacktestWorkspace() {
                           2
                         )}
                         %
+                      </td>
+
+                      <td>
+                        {trade.exitReason}
                       </td>
                     </tr>
                   )

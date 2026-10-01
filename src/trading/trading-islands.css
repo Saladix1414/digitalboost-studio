@@ -6328,3 +6328,19 @@
       1fr;
   }
 }
+
+/* ============================================================
+   PHASE 11C — BACKTEST REALISM
+   ============================================================ */
+
+.ti-backtest__metrics {
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+}
+
+@media (min-width: 1180px) {
+  .ti-backtest__metrics {
+    grid-template-columns:
+      repeat(9, minmax(0, 1fr));
+  }
+}

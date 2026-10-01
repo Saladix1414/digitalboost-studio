@@ -7,6 +7,12 @@ export type BacktestSide =
   | "long"
   | "short";
 
+export type BacktestExitReason =
+  | "invalidation"
+  | "stop-loss"
+  | "take-profit"
+  | "end-of-window";
+
 export type BacktestTrade = {
   readonly id: string;
   readonly side: BacktestSide;
@@ -20,7 +26,13 @@ export type BacktestTrade = {
   readonly quantity: number;
 
   readonly grossPnl: number;
+  readonly fees: number;
+  readonly netPnl: number;
+
   readonly returnPercent: number;
+
+  readonly exitReason:
+    BacktestExitReason;
 };
 
 export type BacktestEquityPoint = {
@@ -41,6 +53,14 @@ export type BacktestMetrics = {
 
   readonly winRatePercent: number;
   readonly maxDrawdownPercent: number;
+
+  readonly grossProfit: number;
+  readonly grossLoss: number;
+
+  readonly profitFactor: number;
+  readonly expectancy: number;
+
+  readonly totalFees: number;
 };
 
 export type BacktestResult = {

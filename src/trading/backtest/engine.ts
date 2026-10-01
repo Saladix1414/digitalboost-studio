@@ -12,6 +12,7 @@ import type {
 
 import type {
   BacktestEquityPoint,
+  BacktestExitReason,
   BacktestMetrics,
   BacktestResult,
   BacktestTrade,
@@ -19,6 +20,26 @@ import type {
 
 export type BacktestOptions = {
   readonly initialCapital:
+    number;
+
+  readonly feePercent?:
+    number;
+
+  readonly slippagePercent?:
+    number;
+};
+
+type OpenPosition = {
+  readonly entryIndex:
+    number;
+
+  readonly entryPrice:
+    number;
+
+  readonly quantity:
+    number;
+
+  readonly allocation:
     number;
 };
 
@@ -71,6 +92,263 @@ function calculateMaxDrawdown(
   return maxDrawdown;
 }
 
+function applySlippage(
+  price: number,
+  side:
+    "entry" | "exit",
+  strategySide:
+    "long" | "short",
+  slippagePercent:
+    number
+): number {
+  const rate =
+    slippagePercent /
+    100;
+
+  if (
+    strategySide ===
+    "long"
+  ) {
+    return side ===
+      "entry"
+      ? price *
+        (1 + rate)
+      : price *
+        (1 - rate);
+  }
+
+  return side ===
+    "entry"
+    ? price *
+      (1 - rate)
+    : price *
+      (1 + rate);
+}
+
+function calculateExitPrice(
+  strategy:
+    TradingStrategy,
+
+  candle:
+    Candle,
+
+  position:
+    OpenPosition,
+
+  invalidated:
+    boolean
+): {
+  readonly price: number;
+  readonly reason:
+    BacktestExitReason;
+} | null {
+  const entry =
+    position.entryPrice;
+
+  if (
+    strategy.side ===
+    "long"
+  ) {
+    const stop =
+      entry *
+      (
+        1 -
+        strategy.risk
+          .stopLossPercent /
+          100
+      );
+
+    const target =
+      entry *
+      (
+        1 +
+        strategy.risk
+          .takeProfitPercent /
+          100
+      );
+
+    if (
+      candle.low <=
+      stop
+    ) {
+      return {
+        price:
+          stop,
+        reason:
+          "stop-loss",
+      };
+    }
+
+    if (
+      candle.high >=
+      target
+    ) {
+      return {
+        price:
+          target,
+        reason:
+          "take-profit",
+      };
+    }
+  } else {
+    const stop =
+      entry *
+      (
+        1 +
+        strategy.risk
+          .stopLossPercent /
+          100
+      );
+
+    const target =
+      entry *
+      (
+        1 -
+        strategy.risk
+          .takeProfitPercent /
+          100
+      );
+
+    if (
+      candle.high >=
+      stop
+    ) {
+      return {
+        price:
+          stop,
+        reason:
+          "stop-loss",
+      };
+    }
+
+    if (
+      candle.low <=
+      target
+    ) {
+      return {
+        price:
+          target,
+        reason:
+          "take-profit",
+      };
+    }
+  }
+
+  if (
+    invalidated
+  ) {
+    return {
+      price:
+        candle.close,
+      reason:
+        "invalidation",
+    };
+  }
+
+  return null;
+}
+
+function closeTrade(
+  strategy:
+    TradingStrategy,
+
+  position:
+    OpenPosition,
+
+  exitIndex:
+    number,
+
+  rawExitPrice:
+    number,
+
+  exitReason:
+    BacktestExitReason,
+
+  feePercent:
+    number,
+
+  slippagePercent:
+    number
+): BacktestTrade {
+  const exitPrice =
+    applySlippage(
+      rawExitPrice,
+      "exit",
+      strategy.side,
+      slippagePercent
+    );
+
+  const direction =
+    strategy.side ===
+    "long"
+      ? 1
+      : -1;
+
+  const grossPnl =
+    (
+      exitPrice -
+      position.entryPrice
+    ) *
+    position.quantity *
+    direction;
+
+  const entryNotional =
+    position.entryPrice *
+    position.quantity;
+
+  const exitNotional =
+    exitPrice *
+    position.quantity;
+
+  const fees =
+    (
+      entryNotional +
+      exitNotional
+    ) *
+    (
+      feePercent /
+      100
+    );
+
+  const netPnl =
+    grossPnl -
+    fees;
+
+  return {
+    id:
+      `${strategy.id}-${exitIndex}-${exitReason}`,
+
+    side:
+      strategy.side,
+
+    entryIndex:
+      position.entryIndex,
+
+    exitIndex,
+
+    entryPrice:
+      position.entryPrice,
+
+    exitPrice,
+
+    quantity:
+      position.quantity,
+
+    grossPnl,
+    fees,
+    netPnl,
+
+    returnPercent:
+      position.allocation > 0
+        ? netPnl /
+          position.allocation *
+          100
+        : 0,
+
+    exitReason,
+  };
+}
+
 export function runBacktest(
   strategy:
     TradingStrategy,
@@ -84,6 +362,20 @@ export function runBacktest(
         10_000,
     }
 ): BacktestResult {
+  const feePercent =
+    Math.max(
+      0,
+      options.feePercent ??
+        0
+    );
+
+  const slippagePercent =
+    Math.max(
+      0,
+      options.slippagePercent ??
+        0
+    );
+
   const history =
     evaluateStrategyHistory(
       strategy,
@@ -99,8 +391,8 @@ export function runBacktest(
   let equity =
     options.initialCapital;
 
-  let openIndex:
-    number | null =
+  let openPosition:
+    OpenPosition | null =
       null;
 
   for (
@@ -108,23 +400,21 @@ export function runBacktest(
     history.points
   ) {
     if (
-      openIndex === null &&
+      openPosition ===
+        null &&
       point.evaluation.signal !==
         "none"
     ) {
-      openIndex =
-        point.index;
-    } else if (
-      openIndex !== null &&
-      point.evaluation.invalidated
-    ) {
-      const entry =
-        candles[
-          openIndex
-        ];
+      const rawEntryPrice =
+        point.candle.close;
 
-      const exit =
-        point.candle;
+      const entryPrice =
+        applySlippage(
+          rawEntryPrice,
+          "entry",
+          strategy.side,
+          slippagePercent
+        );
 
       const allocation =
         equity *
@@ -135,61 +425,56 @@ export function runBacktest(
         );
 
       const quantity =
-        entry.close > 0
+        entryPrice > 0
           ? allocation /
-            entry.close
+            entryPrice
           : 0;
 
-      const direction =
-        strategy.side ===
-        "long"
-          ? 1
-          : -1;
-
-      const grossPnl =
-        (
-          exit.close -
-          entry.close
-        ) *
-        quantity *
-        direction;
-
-      equity +=
-        grossPnl;
-
-      trades.push({
-        id:
-          `${strategy.id}-${trades.length + 1}`,
-
-        side:
-          strategy.side,
-
+      openPosition = {
         entryIndex:
-          openIndex,
-
-        exitIndex:
           point.index,
 
-        entryPrice:
-          entry.close,
-
-        exitPrice:
-          exit.close,
-
+        entryPrice,
         quantity,
+        allocation,
+      };
+    } else if (
+      openPosition !==
+      null
+    ) {
+      const exit =
+        calculateExitPrice(
+          strategy,
+          point.candle,
+          openPosition,
+          point.evaluation
+            .invalidated
+        );
 
-        grossPnl,
+      if (
+        exit
+      ) {
+        const trade =
+          closeTrade(
+            strategy,
+            openPosition,
+            point.index,
+            exit.price,
+            exit.reason,
+            feePercent,
+            slippagePercent
+          );
 
-        returnPercent:
-          allocation > 0
-            ? grossPnl /
-              allocation *
-              100
-            : 0,
-      });
+        equity +=
+          trade.netPnl;
 
-      openIndex =
-        null;
+        trades.push(
+          trade
+        );
+
+        openPosition =
+          null;
+      }
     }
 
     equityCurve.push({
@@ -200,21 +485,98 @@ export function runBacktest(
     });
   }
 
+  if (
+    openPosition !==
+      null &&
+    candles.length > 0
+  ) {
+    const finalIndex =
+      candles.length - 1;
+
+    const trade =
+      closeTrade(
+        strategy,
+        openPosition,
+        finalIndex,
+        candles[
+          finalIndex
+        ].close,
+        "end-of-window",
+        feePercent,
+        slippagePercent
+      );
+
+    equity +=
+      trade.netPnl;
+
+    trades.push(
+      trade
+    );
+
+    if (
+      equityCurve.length > 0
+    ) {
+      equityCurve[
+        equityCurve.length -
+        1
+      ] = {
+        index:
+          finalIndex,
+        equity,
+      };
+    }
+  }
+
   const winningTrades =
     trades.filter(
       (
         trade
       ) =>
-        trade.grossPnl > 0
-    ).length;
+        trade.netPnl > 0
+    );
 
   const losingTrades =
     trades.filter(
       (
         trade
       ) =>
-        trade.grossPnl < 0
-    ).length;
+        trade.netPnl < 0
+    );
+
+  const grossProfit =
+    winningTrades.reduce(
+      (
+        total,
+        trade
+      ) =>
+        total +
+        trade.netPnl,
+      0
+    );
+
+  const grossLoss =
+    Math.abs(
+      losingTrades.reduce(
+        (
+          total,
+          trade
+        ) =>
+          total +
+          trade.netPnl,
+        0
+      )
+    );
+
+  const totalFees =
+    trades.reduce(
+      (
+        total,
+        trade
+      ) =>
+        total +
+        trade.fees,
+      0
+    );
 
   const metrics:
     BacktestMetrics = {
@@ -229,7 +591,8 @@ export function runBacktest(
         options.initialCapital,
 
       returnPercent:
-        options.initialCapital > 0
+        options.initialCapital >
+        0
           ? (
               equity -
               options.initialCapital
@@ -241,12 +604,15 @@ export function runBacktest(
       totalTrades:
         trades.length,
 
-      winningTrades,
-      losingTrades,
+      winningTrades:
+        winningTrades.length,
+
+      losingTrades:
+        losingTrades.length,
 
       winRatePercent:
         trades.length > 0
-          ? winningTrades /
+          ? winningTrades.length /
             trades.length *
             100
           : 0,
@@ -255,6 +621,33 @@ export function runBacktest(
         calculateMaxDrawdown(
           equityCurve
         ),
+
+      grossProfit,
+      grossLoss,
+
+      profitFactor:
+        grossLoss > 0
+          ? grossProfit /
+            grossLoss
+          : grossProfit > 0
+            ? Number.POSITIVE_INFINITY
+            : 0,
+
+      expectancy:
+        trades.length > 0
+          ? trades.reduce(
+              (
+                total,
+                trade
+              ) =>
+                total +
+                trade.netPnl,
+              0
+            ) /
+            trades.length
+          : 0,
+
+      totalFees,
     };
 
   return {
