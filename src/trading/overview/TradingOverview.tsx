@@ -1,7 +1,10 @@
 import {
   Activity,
+  ArrowRight,
+  BarChart3,
   Bot,
   BriefcaseBusiness,
+  CandlestickChart,
   TrendingUp,
 } from "lucide-react";
 
@@ -29,14 +32,27 @@ import type {
   PortfolioPosition,
 } from "../types/trading";
 
-const currency = new Intl.NumberFormat(
-  "en-US",
-  {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 2,
-  }
-);
+import type {
+  TradingSection,
+} from "../shell/IslandSidebar";
+
+import MarketPulseChart from "./MarketPulseChart";
+
+export type TradingOverviewProps = {
+  readonly onNavigate: (
+    section: TradingSection
+  ) => void;
+};
+
+const currency =
+  new Intl.NumberFormat(
+    "en-US",
+    {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 2,
+    }
+  );
 
 const compactCurrency =
   new Intl.NumberFormat(
@@ -56,8 +72,13 @@ const marketColumns: readonly DataColumn<MarketAsset>[] = [
     width: "1.2fr",
     render: (market) => (
       <div className="ti-overview-market">
-        <strong>{market.symbol}</strong>
-        <span>{market.pair}</span>
+        <strong>
+          {market.symbol}
+        </strong>
+
+        <span>
+          {market.pair}
+        </span>
       </div>
     ),
   },
@@ -88,7 +109,10 @@ const marketColumns: readonly DataColumn<MarketAsset>[] = [
         {market.change24h >= 0
           ? "+"
           : ""}
-        {market.change24h.toFixed(2)}%
+        {market.change24h.toFixed(
+          2
+        )}
+        %
       </span>
     ),
   },
@@ -156,7 +180,8 @@ const portfolioColumns: readonly DataColumn<PortfolioPosition>[] = [
         {position.pnl >= 0
           ? "+"
           : ""}
-        {position.pnl.toFixed(2)}%
+        {position.pnl.toFixed(2)}
+        %
       </span>
     ),
   },
@@ -169,8 +194,13 @@ const botColumns: readonly DataColumn<PaperBotSummary>[] = [
     width: "1.4fr",
     render: (bot) => (
       <div className="ti-overview-market">
-        <strong>{bot.name}</strong>
-        <span>{bot.strategy}</span>
+        <strong>
+          {bot.name}
+        </strong>
+
+        <span>
+          {bot.strategy}
+        </span>
       </div>
     ),
   },
@@ -212,13 +242,40 @@ const botColumns: readonly DataColumn<PaperBotSummary>[] = [
         {bot.pnl >= 0
           ? "+"
           : ""}
-        {bot.pnl.toFixed(2)}%
+        {bot.pnl.toFixed(2)}
+        %
       </span>
     ),
   },
 ];
 
-export function TradingOverview() {
+const quickActions = [
+  {
+    id: "terminal" as const,
+    label: "Open Terminal",
+    description:
+      "Inspect market structure and prepare analysis.",
+    icon: CandlestickChart,
+  },
+  {
+    id: "markets" as const,
+    label: "Explore Markets",
+    description:
+      "Review the deterministic BTC, ETH and SOL universe.",
+    icon: BarChart3,
+  },
+  {
+    id: "bot-forge" as const,
+    label: "Open Bot Forge",
+    description:
+      "Continue toward simulated strategy automation.",
+    icon: Bot,
+  },
+];
+
+export function TradingOverview({
+  onNavigate,
+}: TradingOverviewProps) {
   const portfolioValue =
     mockPortfolio.reduce(
       (total, position) =>
@@ -299,13 +356,62 @@ export function TradingOverview() {
         />
       </section>
 
+      <section className="ti-overview__quick-actions">
+        {quickActions.map(
+          (action) => {
+            const Icon =
+              action.icon;
+
+            return (
+              <button
+                key={action.id}
+                type="button"
+                className="ti-overview__quick-action"
+                onClick={() =>
+                  onNavigate(
+                    action.id
+                  )
+                }
+              >
+                <span className="ti-overview__quick-action-icon">
+                  <Icon
+                    size={16}
+                    strokeWidth={1.7}
+                  />
+                </span>
+
+                <span className="ti-overview__quick-action-copy">
+                  <strong>
+                    {action.label}
+                  </strong>
+
+                  <span>
+                    {
+                      action.description
+                    }
+                  </span>
+                </span>
+
+                <ArrowRight
+                  size={14}
+                  strokeWidth={1.7}
+                />
+              </button>
+            );
+          }
+        )}
+      </section>
+
+      <MarketPulseChart />
+
       <section className="ti-overview__grid">
         <div className="ti-overview__panel ti-overview__panel--markets">
           <div className="ti-overview__panel-head">
             <div>
               <span className="ti-label">
-                Market pulse
+                Market universe
               </span>
+
               <h2>
                 Core markets
               </h2>
@@ -331,6 +437,7 @@ export function TradingOverview() {
               <span className="ti-label">
                 Portfolio
               </span>
+
               <h2>
                 Paper allocation
               </h2>
@@ -354,6 +461,7 @@ export function TradingOverview() {
               <span className="ti-label">
                 Automation
               </span>
+
               <h2>
                 Paper bots
               </h2>
@@ -379,6 +487,7 @@ export function TradingOverview() {
               <span className="ti-label">
                 Activity
               </span>
+
               <h2>
                 Recent events
               </h2>

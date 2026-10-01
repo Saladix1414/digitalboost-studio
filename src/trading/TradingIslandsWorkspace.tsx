@@ -324,7 +324,9 @@ export function TradingIslandsWorkspace({
           <section className="ti-shell-stage">
             {activeSection === "overview" &&
             activeWorkspaceTab === "workspace" ? (
-              <TradingOverview />
+              <TradingOverview
+                onNavigate={setActiveSection}
+              />
             ) : (
               <EmptyState
                 icon={

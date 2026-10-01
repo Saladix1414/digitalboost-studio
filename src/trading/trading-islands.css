@@ -4133,3 +4133,314 @@
     left: 0;
   }
 }
+
+/* ============================================================
+   PHASE 4B — MARKET PULSE + QUICK NAV
+   ============================================================ */
+
+.ti-overview__quick-actions {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 9px;
+}
+
+.ti-overview__quick-action {
+  min-width: 0;
+  min-height: 72px;
+
+  display: grid;
+
+  grid-template-columns:
+    auto
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+
+  gap: 10px;
+
+  border:
+    1px solid
+    var(--ti-border);
+
+  border-radius:
+    var(--ti-radius-md);
+
+  padding:
+    10px
+    11px;
+
+  color:
+    var(--ti-text-2);
+
+  background:
+    rgba(10, 21, 31, 0.78);
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    border-color
+      var(--ti-motion-fast)
+      ease,
+    background
+      var(--ti-motion-fast)
+      ease,
+    transform
+      var(--ti-motion-fast)
+      ease;
+}
+
+.ti-overview__quick-action:hover {
+  border-color:
+    var(--ti-border-strong);
+
+  background:
+    rgba(14, 29, 42, 0.96);
+
+  transform:
+    translateY(-1px);
+}
+
+.ti-overview__quick-action:focus-visible {
+  outline:
+    2px solid
+    var(--ti-cyan);
+
+  outline-offset:
+    2px;
+}
+
+.ti-overview__quick-action-icon {
+  width: 30px;
+  height: 30px;
+
+  display: grid;
+  place-items: center;
+
+  border:
+    1px solid
+    rgba(50, 200, 244, 0.15);
+
+  border-radius:
+    var(--ti-radius-sm);
+
+  color:
+    var(--ti-cyan);
+
+  background:
+    rgba(50, 200, 244, 0.045);
+}
+
+.ti-overview__quick-action-copy {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.ti-overview__quick-action-copy strong {
+  color:
+    var(--ti-text);
+
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.ti-overview__quick-action-copy span {
+  overflow: hidden;
+
+  color:
+    var(--ti-muted);
+
+  font-size: 7px;
+  line-height: 1.45;
+}
+
+/* ------------------------------------------------------------
+   Market Pulse
+   ------------------------------------------------------------ */
+
+.ti-market-pulse {
+  min-width: 0;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    var(--ti-border);
+
+  border-radius:
+    var(--ti-radius-lg);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 22, 32, 0.97),
+      rgba(6, 14, 21, 0.98)
+    );
+}
+
+.ti-market-pulse__head {
+  min-height: 57px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding:
+    10px
+    13px;
+
+  border-bottom:
+    1px solid
+    var(--ti-border-subtle);
+}
+
+.ti-market-pulse__head h2 {
+  margin:
+    3px
+    0
+    0;
+
+  color:
+    var(--ti-text);
+
+  font-size: 11px;
+  font-weight: 630;
+}
+
+.ti-market-pulse__toolbar {
+  display: flex;
+
+  gap: 5px;
+
+  padding:
+    8px
+    10px
+    4px;
+}
+
+.ti-market-pulse__market {
+  min-width: 88px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+
+  border:
+    1px solid
+    transparent;
+
+  border-radius:
+    var(--ti-radius-sm);
+
+  padding:
+    6px
+    8px;
+
+  color:
+    var(--ti-muted);
+
+  background:
+    transparent;
+
+  cursor: pointer;
+}
+
+.ti-market-pulse__market:hover {
+  color:
+    var(--ti-text);
+
+  background:
+    rgba(255, 255, 255, 0.018);
+}
+
+.ti-market-pulse__market--active {
+  color:
+    var(--ti-text);
+
+  border-color:
+    rgba(50, 200, 244, 0.15);
+
+  background:
+    rgba(50, 200, 244, 0.05);
+}
+
+.ti-market-pulse__market strong {
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.ti-market-pulse__market span {
+  font-size: 7px;
+}
+
+.ti-market-pulse__chart {
+  min-height: 215px;
+
+  padding:
+    2px
+    8px
+    0;
+}
+
+.ti-market-pulse__chart svg {
+  width: 100%;
+  height: 215px;
+
+  display: block;
+}
+
+.ti-market-pulse__footer {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding:
+    5px
+    13px
+    10px;
+
+  color:
+    var(--ti-faint);
+
+  font-size: 7px;
+}
+
+@media (max-width: 900px) {
+  .ti-overview__quick-actions {
+    grid-template-columns:
+      1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .ti-market-pulse__toolbar {
+    overflow-x: auto;
+  }
+
+  .ti-market-pulse__market {
+    flex:
+      0 0 auto;
+  }
+
+  .ti-market-pulse__chart,
+  .ti-market-pulse__chart svg {
+    height: 180px;
+    min-height: 180px;
+  }
+}
