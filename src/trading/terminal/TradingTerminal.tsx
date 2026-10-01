@@ -28,6 +28,7 @@ import {
 } from "../indicators";
 
 import TerminalActivityPanel from "./TerminalActivityPanel";
+import RsiPanel from "./RsiPanel";
 
 const timeframes: readonly TradingTimeframe[] = [
   "1m",
@@ -331,6 +332,12 @@ export function TradingTerminal() {
             }
             onSelectCandle={
               setSelectedCandleIndex
+            }
+          />
+
+          <RsiPanel
+            points={
+              indicatorSeries.rsi14
             }
           />
 

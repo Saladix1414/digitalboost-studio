@@ -5472,3 +5472,93 @@
   stroke:
     rgba(229, 184, 75, 0.86);
 }
+
+/* ============================================================
+   PHASE 8C — RSI PANEL
+   ============================================================ */
+
+.ti-terminal-rsi {
+  margin-top: 8px;
+
+  border:
+    1px solid
+    var(--ti-border-subtle);
+
+  border-radius:
+    var(--ti-radius-sm);
+
+  overflow: hidden;
+
+  background:
+    rgba(255, 255, 255, 0.012);
+}
+
+.ti-terminal-rsi__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding:
+    7px 10px;
+
+  border-bottom:
+    1px solid
+    var(--ti-border-subtle);
+
+  color:
+    var(--ti-faint);
+
+  font-size: 8px;
+}
+
+.ti-terminal-rsi__head strong {
+  color:
+    var(--ti-text);
+}
+
+.ti-terminal-rsi svg {
+  display: block;
+
+  width: 100%;
+  height: 110px;
+}
+
+.ti-terminal-rsi__guide {
+  stroke:
+    rgba(148, 163, 184, 0.15);
+
+  stroke-width: 1;
+
+  stroke-dasharray:
+    4 4;
+
+  vector-effect:
+    non-scaling-stroke;
+}
+
+.ti-terminal-rsi__zone--upper {
+  fill:
+    rgba(239, 91, 104, 0.035);
+}
+
+.ti-terminal-rsi__zone--lower {
+  fill:
+    rgba(38, 194, 129, 0.035);
+}
+
+.ti-terminal-rsi__line {
+  stroke:
+    rgba(151, 115, 255, 0.9);
+
+  stroke-width: 1.5;
+
+  vector-effect:
+    non-scaling-stroke;
+}
+
+.ti-terminal-rsi__label {
+  fill:
+    rgba(148, 163, 184, 0.55);
+
+  font-size: 7px;
+}

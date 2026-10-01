@@ -10,6 +10,7 @@ export type IndicatorPoint = {
 export type IndicatorSeries = {
   readonly ema20: readonly IndicatorPoint[];
   readonly ema50: readonly IndicatorPoint[];
+  readonly rsi14: readonly IndicatorPoint[];
 };
 
 export type IndicatorSnapshot = {

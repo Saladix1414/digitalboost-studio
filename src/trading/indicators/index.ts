@@ -4,6 +4,7 @@ export {
 
 export {
   calculateRSI,
+  calculateRSISeries,
 } from "./rsi";
 
 export {

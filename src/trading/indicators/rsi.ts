@@ -75,3 +75,24 @@ export function calculateRSI(
       )
   );
 }
+
+
+export function calculateRSISeries(
+  values: readonly number[],
+  period = 14
+): readonly number[] {
+  if (values.length === 0) {
+    return [];
+  }
+
+  return values.map(
+    (_, index) =>
+      calculateRSI(
+        values.slice(
+          0,
+          index + 1
+        ),
+        period
+      )
+  );
+}

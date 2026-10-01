@@ -4,6 +4,7 @@ import {
 
 import {
   calculateRSI,
+  calculateRSISeries,
 } from "./rsi";
 
 import type {
@@ -94,6 +95,14 @@ export const indicatorEngine:
             calculateEMA(
               closes,
               50
+            )
+          ),
+
+        rsi14:
+          toSeries(
+            calculateRSISeries(
+              closes,
+              14
             )
           ),
       };
