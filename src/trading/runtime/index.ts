@@ -69,3 +69,30 @@ export type {
   RuntimeEvidenceHistory,
   RuntimeLedgerEvidenceEntry,
 } from "./runtimeEvidenceStore";
+
+export {
+  RUNTIME_EVIDENCE_SNAPSHOT_VERSION,
+  createRuntimeEvidenceSnapshot,
+} from "./runtimeEvidencePersistence";
+
+export type {
+  RuntimeEvidencePersistence,
+  RuntimeEvidencePersistenceLoadResult,
+  RuntimeEvidenceSnapshot,
+} from "./runtimeEvidencePersistence";
+
+export {
+  deserializeRuntimeEvidenceSnapshot,
+  serializeRuntimeEvidenceSnapshot,
+  validateRuntimeEvidenceSnapshot,
+} from "./runtimeEvidencePersistenceValidation";
+
+export {
+  LOCAL_RUNTIME_EVIDENCE_STORAGE_KEY,
+  createBrowserRuntimeEvidencePersistence,
+  createLocalRuntimeEvidencePersistence,
+} from "./localRuntimeEvidencePersistence";
+
+export type {
+  RuntimeEvidenceStorage,
+} from "./localRuntimeEvidencePersistence";
