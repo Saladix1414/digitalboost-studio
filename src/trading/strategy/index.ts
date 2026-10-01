@@ -40,3 +40,12 @@ export type {
   StrategyEvaluation,
   StrategyEvaluator,
 } from "./evaluation-types";
+
+export {
+  evaluateStrategyHistory,
+} from "./historical-evaluator";
+
+export type {
+  HistoricalStrategyPoint,
+  HistoricalStrategyEvaluation,
+} from "./historical-evaluator";
