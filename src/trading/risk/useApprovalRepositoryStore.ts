@@ -1,4 +1,8 @@
 import {
+  createBrowserApprovalPersistenceCoordinator,
+} from "./approvalCoordination";
+
+import {
   useEffect,
   useSyncExternalStore,
 } from "react";
@@ -6,6 +10,7 @@ import {
 import {
   acceptApprovalStoreReview,
   bootstrapApprovalStore,
+  configureApprovalStoreCoordinator,
   configureApprovalStorePersistence,
   getApprovalStoreActiveReview,
   getApprovalPersistenceWriteState,
@@ -50,6 +55,10 @@ function startBrowserApprovalPersistence():
 
   browserPersistenceStarted =
     true;
+
+  configureApprovalStoreCoordinator(
+    createBrowserApprovalPersistenceCoordinator()
+  );
 
   configureApprovalStorePersistence(
     createBrowserApprovalPersistence()

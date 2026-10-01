@@ -1,4 +1,9 @@
 import {
+  createLocalApprovalPersistenceCoordinator,
+  type ApprovalPersistenceCoordinator,
+} from "./approvalCoordination";
+
+import {
   acceptRiskReview,
   createApprovalRepositoryState,
   createEmptyApprovalRepositoryState,
@@ -59,6 +64,10 @@ let persistence:
   ApprovalRepositoryPersistence | null =
     null;
 
+let persistenceCoordinator:
+  ApprovalPersistenceCoordinator =
+    createLocalApprovalPersistenceCoordinator();
+
 let persistenceRevision:
   ApprovalPersistenceRevision | null =
     null;
@@ -100,10 +109,16 @@ function enqueueApprovalPersistenceOperation(
   operation:
     () => Promise<void>
 ): Promise<void> {
+  const coordinatedOperation =
+    () =>
+      persistenceCoordinator.runExclusive(
+        operation
+      );
+
   const run =
     persistenceOperationQueue.then(
-      operation,
-      operation
+      coordinatedOperation,
+      coordinatedOperation
     );
 
   persistenceOperationQueue =
@@ -180,6 +195,16 @@ export function subscribeApprovalStore(
       listener
     );
   };
+}
+
+export function configureApprovalStoreCoordinator(
+  coordinator:
+    ApprovalPersistenceCoordinator | null
+):
+  void {
+  persistenceCoordinator =
+    coordinator ??
+    createLocalApprovalPersistenceCoordinator();
 }
 
 export function configureApprovalStorePersistence(

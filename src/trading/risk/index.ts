@@ -96,6 +96,7 @@ export {
   getApprovalStoreSnapshot,
   getApprovalStoreLifecycle,
   subscribeApprovalStore,
+  configureApprovalStoreCoordinator,
   configureApprovalStorePersistence,
   hydrateApprovalStore,
   markApprovalStoreStale,
@@ -133,3 +134,13 @@ export {
 export type {
   ApprovalKeyValueStorage,
 } from "./localApprovalPersistence";
+
+export {
+  APPROVAL_PERSISTENCE_LOCK_NAME,
+  createBrowserApprovalPersistenceCoordinator,
+  createLocalApprovalPersistenceCoordinator,
+} from "./approvalCoordination";
+
+export type {
+  ApprovalPersistenceCoordinator,
+} from "./approvalCoordination";
