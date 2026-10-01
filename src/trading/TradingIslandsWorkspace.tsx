@@ -39,6 +39,8 @@ import StrategyBuilder from "./strategy/StrategyBuilder";
 import BacktestWorkspace from "./backtest/BacktestWorkspace";
 import PaperTradingWorkspace from "./paper/PaperTradingWorkspace";
 import BotForgeWorkspace from "./bots/BotForgeWorkspace";
+import RiskReviewWorkspace from "./risk/RiskReviewWorkspace";
+import ActivityWorkspace from "./activity/ActivityWorkspace";
 
 import {
   MarketDataProvider,
@@ -352,6 +354,12 @@ export function TradingIslandsWorkspace({
             ) : activeSection === "bot-forge" &&
               activeWorkspaceTab === "workspace" ? (
               <BotForgeWorkspace />
+            ) : activeSection === "risk" &&
+              activeWorkspaceTab === "workspace" ? (
+              <RiskReviewWorkspace />
+            ) : activeSection === "activity" &&
+              activeWorkspaceTab === "workspace" ? (
+              <ActivityWorkspace />
             ) : (
               <EmptyState
                 icon={
