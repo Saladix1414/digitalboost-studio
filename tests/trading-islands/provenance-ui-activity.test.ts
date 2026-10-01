@@ -63,20 +63,11 @@ test(
         "activity/ActivityWorkspace.tsx"
       );
 
-    assert.match(
-      content,
-      /createRiskReviewProvenance/
-    );
 
-    assert.match(
-      content,
-      /initialHistoryEntry/
-    );
 
-    assert.match(
-      content,
-      /replacementHistoryEntry/
-    );
+
+
+
   }
 );
 
@@ -181,6 +172,62 @@ test(
     assert.doesNotMatch(
       content,
       /DigitalBoostPulse|from\s+["'][^"']*\/pulse(?:\/|["'])|data-pulse|\.pulse-/i
+    );
+  }
+);
+
+
+test(
+  "Activity workspace projects provenance from actual review history",
+  () => {
+    const content =
+      source(
+        "activity/ActivityWorkspace.tsx"
+      );
+
+    const builders =
+      source(
+        "activity/builders.ts"
+      );
+
+    assert.match(
+      content,
+      /approvalRepository\.history/
+    );
+
+    assert.match(
+      content,
+      /approvalRepository\.history\.entries/
+    );
+
+    assert.match(
+      content,
+      /activityFromReviewHistoryEntry/
+    );
+
+    assert.match(
+      builders,
+      /provenance/
+    );
+
+    assert.match(
+      builders,
+      /activityFromReviewHistoryEntry/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /createRiskReviewProvenance/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /createInitialVersionedReview/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /createNextVersionedReview/
     );
   }
 );

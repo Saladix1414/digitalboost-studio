@@ -101,7 +101,17 @@ test(
 
     assert.match(
       content,
-      /appendApprovalRecoveryAttemptHistory/
+      /recordApprovalRecoveryAttemptHistory/
+    );
+
+    assert.match(
+      content,
+      /subscribeApprovalRecoveryAttemptHistory/
+    );
+
+    assert.match(
+      content,
+      /getApprovalRecoveryAttemptHistory/
     );
 
     assert.match(

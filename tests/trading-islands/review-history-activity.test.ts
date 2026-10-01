@@ -82,15 +82,7 @@ test(
         "activity/ActivityWorkspace.tsx"
       );
 
-    assert.match(
-      content,
-      /createInitialVersionedReview/
-    );
 
-    assert.match(
-      content,
-      /createNextVersionedReview/
-    );
 
     assert.match(
       content,
@@ -160,6 +152,51 @@ test(
     assert.doesNotMatch(
       content,
       /DigitalBoostPulse|from\s+["'][^"']*\/pulse(?:\/|["'])|data-pulse|\.pulse-/i
+    );
+  }
+);
+
+test(
+  "Activity workspace projects actual repository review history",
+  () => {
+    const content =
+      source(
+        "activity/ActivityWorkspace.tsx"
+      );
+
+    assert.match(
+      content,
+      /approvalRepository\.history/
+    );
+
+    assert.match(
+      content,
+      /approvalRepository\.history\.entries/
+    );
+
+    assert.match(
+      content,
+      /activityFromReviewHistoryEntry/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /createInitialVersionedReview/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /createNextVersionedReview/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /initialHistoryEntry/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /replacementHistoryEntry/
     );
   }
 );

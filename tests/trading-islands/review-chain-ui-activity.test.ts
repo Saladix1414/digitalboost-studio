@@ -123,15 +123,7 @@ test(
         "activity/ActivityWorkspace.tsx"
       );
 
-    assert.match(
-      content,
-      /createRiskReviewHistory/
-    );
 
-    assert.match(
-      content,
-      /appendRiskReviewHistory/
-    );
 
     assert.match(
       content,
@@ -191,6 +183,46 @@ test(
     assert.doesNotMatch(
       content,
       /WebSocket/
+    );
+  }
+);
+
+test(
+  "Activity workspace projects chain integrity from actual repository history",
+  () => {
+    const content =
+      source(
+        "activity/ActivityWorkspace.tsx"
+      );
+
+    assert.match(
+      content,
+      /approvalRepository\.history/
+    );
+
+    assert.match(
+      content,
+      /activityFromReviewChainIntegrity/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /createRiskReviewHistory/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /appendRiskReviewHistory/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /createInitialVersionedReview/
+    );
+
+    assert.doesNotMatch(
+      content,
+      /createNextVersionedReview/
     );
   }
 );
