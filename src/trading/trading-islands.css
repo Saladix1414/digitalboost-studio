@@ -8663,3 +8663,47 @@
       1fr;
   }
 }
+
+/* ============================================================
+   PHASE 17C — PROVENANCE INTEGRITY
+   ============================================================ */
+
+.ti-provenance-integrity {
+  display:
+    inline-flex;
+
+  width:
+    fit-content;
+
+  align-items:
+    center;
+
+  min-height:
+    18px;
+
+  padding:
+    2px 6px;
+
+  border:
+    1px solid
+    var(--ti-border-subtle);
+
+  font-size:
+    7px;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    0.08em;
+}
+
+.ti-provenance-integrity--valid {
+  color:
+    var(--ti-positive);
+}
+
+.ti-provenance-integrity--invalid {
+  color:
+    var(--ti-negative);
+}

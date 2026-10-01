@@ -60,3 +60,12 @@ export type {
   RiskReviewCreationReason,
   RiskReviewProvenance,
 } from "./reviewProvenance";
+
+export {
+  validateRiskReviewProvenance,
+} from "./reviewProvenanceValidation";
+
+export type {
+  RiskReviewProvenanceIntegrity,
+  RiskReviewProvenanceIntegrityIssue,
+} from "./reviewProvenanceValidation";

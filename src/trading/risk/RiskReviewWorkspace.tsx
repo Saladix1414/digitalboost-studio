@@ -33,6 +33,10 @@ import {
   createRiskReviewProvenance,
 } from "./reviewProvenance";
 
+import {
+  validateRiskReviewProvenance,
+} from "./reviewProvenanceValidation";
+
 export function RiskReviewWorkspace() {
   const [
     selectedBotId,
@@ -582,26 +586,21 @@ export function RiskReviewWorkspace() {
                             : "ti-risk-review__check ti-risk-review__check--failed"
                         }
                       >
-                        <span className="ti-risk-review__check-mark">
-                          {check.passed
-                            ? "✓"
-                            : "×"}
-                        </span>
-
                         <div>
                           <strong>
-                            {check.id
-                              .replaceAll(
-                                "-",
-                                " "
-                              )
-                              .toUpperCase()}
+                            {check.label}
                           </strong>
 
-                          <p>
-                            {check.message}
-                          </p>
+                          <span>
+                            {check.detail}
+                          </span>
                         </div>
+
+                        <span>
+                          {check.passed
+                            ? "PASS"
+                            : "FAIL"}
+                        </span>
                       </article>
                     )
                   )}
@@ -696,54 +695,80 @@ export function RiskReviewWorkspace() {
                   {(reviewHistory?.entries ?? []).map(
                     (
                       item
-                    ) => (
-                      <article
-                        key={
-                          `${item.versionedReview.review.id}-${item.versionedReview.version}`
-                        }
-                      >
-                        <div>
-                          <strong>
-                            v{item.versionedReview.version}
-                          </strong>
+                    ) => {
+                      const integrity =
+                        validateRiskReviewProvenance(
+                          item
+                        );
 
-                          <span>
-                            {item.versionedReview.review.id}
-                          </span>
-                        </div>
-
-                        <span>
-                          PREV · {item.versionedReview.previousReviewId ?? "ROOT"}
-                        </span>
-
-                        <span>
-                          {item.versionedReview.review.status.toUpperCase()}
-                        </span>
-
-                        <span>
-                          SOURCE · {item.provenance.source}
-                        </span>
-
-                        <span>
-                          CREATED · {item.provenance.createdFrom}
-                        </span>
-
-                        <span>
-                          SUPERSEDES · {item.provenance.supersedes ?? "ROOT"}
-                        </span>
-
-                        <code
-                          title={
-                            item.provenance.bindingFingerprint
+                      return (
+                        <article
+                          key={
+                            `${item.versionedReview.review.id}-${item.versionedReview.version}`
                           }
                         >
-                          FP · {item.provenance.bindingFingerprint.slice(
-                            0,
-                            18
-                          )}…
-                        </code>
-                      </article>
-                    )
+                          <div>
+                            <strong>
+                              v{item.versionedReview.version}
+                            </strong>
+
+                            <span>
+                              {item.versionedReview.review.id}
+                            </span>
+                          </div>
+
+                          <span>
+                            PREV · {item.versionedReview.previousReviewId ?? "ROOT"}
+                          </span>
+
+                          <span>
+                            {item.versionedReview.review.status.toUpperCase()}
+                          </span>
+
+                          <span>
+                            SOURCE · {item.provenance.source}
+                          </span>
+
+                          <span>
+                            CREATED · {item.provenance.createdFrom}
+                          </span>
+
+                          <span>
+                            SUPERSEDES · {item.provenance.supersedes ?? "ROOT"}
+                          </span>
+
+                          <code
+                            title={
+                              item.provenance.bindingFingerprint
+                            }
+                          >
+                            FP · {item.provenance.bindingFingerprint.slice(
+                              0,
+                              18
+                            )}…
+                          </code>
+
+                          <span
+                            className={
+                              integrity.valid
+                                ? "ti-provenance-integrity ti-provenance-integrity--valid"
+                                : "ti-provenance-integrity ti-provenance-integrity--invalid"
+                            }
+                            title={
+                              integrity.valid
+                                ? "Provenance matches the associated review."
+                                : integrity.issues.join(
+                                    ", "
+                                  )
+                            }
+                          >
+                            {integrity.valid
+                              ? "INTEGRITY · VALID"
+                              : "INTEGRITY · INVALID"}
+                          </span>
+                        </article>
+                      );
+                    }
                   )}
                 </div>
 

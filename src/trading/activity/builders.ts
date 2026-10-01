@@ -2,6 +2,10 @@ import type {
   PaperLedgerEntry,
 } from "../paper";
 
+import {
+  validateRiskReviewProvenance,
+} from "../risk";
+
 import type {
   RiskReview,
   RiskReviewHistoryEntry,
@@ -236,6 +240,11 @@ export function activityFromReviewHistoryEntry(
     provenance,
   } = entry;
 
+  const integrity =
+    validateRiskReviewProvenance(
+      entry
+    );
+
   return {
     id:
       `activity-review-history-${versionedReview.review.id}-v${versionedReview.version}`,
@@ -249,18 +258,24 @@ export function activityFromReviewHistoryEntry(
       "none",
 
     severity:
-      versionedReview.review.status ===
-      "approved"
-        ? "info"
-        : "warning",
+      !integrity.valid
+        ? "danger"
+        : versionedReview.review.status ===
+          "approved"
+          ? "info"
+          : "warning",
 
     title:
-      `Risk review v${versionedReview.version} recorded`,
+      integrity.valid
+        ? `Risk review v${versionedReview.version} recorded`
+        : `Risk review v${versionedReview.version} invalid provenance`,
 
     message:
-      provenance.supersedes
-        ? `${provenance.source} · ${provenance.createdFrom} · supersedes ${provenance.supersedes}`
-        : `${provenance.source} · ${provenance.createdFrom} · root review`,
+      !integrity.valid
+        ? `INVALID EVIDENCE · ${integrity.issues.join(", ")}`
+        : provenance.supersedes
+          ? `${provenance.source} · ${provenance.createdFrom} · supersedes ${provenance.supersedes}`
+          : `${provenance.source} · ${provenance.createdFrom} · root review`,
 
     botId:
       provenance.botId,
