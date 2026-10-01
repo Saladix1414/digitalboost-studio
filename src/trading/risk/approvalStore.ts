@@ -23,6 +23,7 @@ import {
 } from "./approvalPersistence";
 
 import type {
+  ApprovalPersistenceMutationContext,
   ApprovalPersistenceRevision,
   ApprovalRepositoryPersistence,
   ApprovalStoreLifecycle,
@@ -39,6 +40,58 @@ import type {
 import type {
   RiskReview,
 } from "./reviewTypes";
+
+let approvalPersistenceMutationSequence =
+  0;
+
+
+const approvalPersistenceMutationSessionId =
+  (
+    typeof globalThis.crypto !==
+      "undefined" &&
+    typeof globalThis.crypto.randomUUID ===
+      "function"
+  )
+    ? globalThis.crypto.randomUUID()
+    : [
+        Date.now().toString(
+          36
+        ),
+        Math.random()
+          .toString(
+            36
+          )
+          .slice(
+            2
+          ),
+      ].join(
+        "-"
+      );
+
+
+function createApprovalPersistenceMutationContext(
+  operation:
+    "write" | "clear"
+):
+  ApprovalPersistenceMutationContext {
+  approvalPersistenceMutationSequence +=
+    1;
+
+  return {
+    mutationId:
+      [
+        approvalPersistenceMutationSessionId,
+        operation,
+        approvalPersistenceMutationSequence,
+      ].join(
+        ":"
+      ),
+
+    authoritative:
+      false,
+  };
+}
+
 
 export type ApprovalPersistenceWriteDiagnostics = {
   readonly queued:
@@ -378,6 +431,11 @@ export async function persistApprovalStore():
   const sequence =
     ++persistenceWriteSequence;
 
+  const mutationContext =
+    createApprovalPersistenceMutationContext(
+      "write"
+    );
+
   refreshPersistenceWriteDiagnostics();
   emit();
 
@@ -390,7 +448,8 @@ export async function persistApprovalStore():
         const result =
           await adapter.save(
             snapshot,
-            expectedRevision
+            expectedRevision,
+            mutationContext
           );
 
         persistenceRevision =
@@ -482,10 +541,16 @@ export async function clearApprovalStorePersistence():
       const adapter =
         persistence;
 
+      const mutationContext =
+        createApprovalPersistenceMutationContext(
+          "clear"
+        );
+
       await enqueueApprovalPersistenceOperation(
         async () => {
           await adapter.clear(
-            persistenceRevision
+            persistenceRevision,
+            mutationContext
           );
         }
       );

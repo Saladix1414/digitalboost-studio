@@ -1,9 +1,14 @@
+import {
+  createApprovalBackendIdempotencyKey,
+} from "./approvalBackendTransactions";
+
 import type {
   ApprovalBackendIdempotencyKey,
 } from "./approvalBackendTransactions";
 
 import type {
   ApprovalPersistenceLoadResult,
+  ApprovalPersistenceMutationContext,
   ApprovalPersistenceRevision,
   ApprovalPersistenceSaveResult,
   ApprovalRepositoryPersistence,
@@ -117,7 +122,10 @@ export function createRemoteApprovalPersistence(
         ApprovalRepositoryState,
 
       expectedRevision:
-        ApprovalPersistenceRevision | null
+        ApprovalPersistenceRevision | null,
+
+      mutation?:
+        ApprovalPersistenceMutationContext
     ):
       Promise<
         ApprovalPersistenceSaveResult
@@ -127,7 +135,17 @@ export function createRemoteApprovalPersistence(
           state,
           expectedRevision,
           idempotencyKey:
-            null,
+            mutation
+              ? createApprovalBackendIdempotencyKey({
+                  operation:
+                    "write",
+
+                  expectedRevision,
+
+                  mutationId:
+                    mutation.mutationId,
+                })
+              : null,
         });
 
       return {
@@ -141,13 +159,26 @@ export function createRemoteApprovalPersistence(
 
     async clear(
       expectedRevision:
-        ApprovalPersistenceRevision | null
+        ApprovalPersistenceRevision | null,
+
+      mutation?:
+        ApprovalPersistenceMutationContext
     ):
       Promise<void> {
       await client.clear({
         expectedRevision,
         idempotencyKey:
-          null,
+          mutation
+            ? createApprovalBackendIdempotencyKey({
+                operation:
+                  "clear",
+
+                expectedRevision,
+
+                mutationId:
+                  mutation.mutationId,
+              })
+            : null,
       });
     },
   };

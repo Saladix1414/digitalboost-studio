@@ -5,6 +5,15 @@ import type {
 export type ApprovalPersistenceRevision =
   number;
 
+
+export type ApprovalPersistenceMutationContext = {
+  readonly mutationId:
+    string;
+
+  readonly authoritative:
+    false;
+};
+
 export type ApprovalPersistenceLoadResult = {
   readonly state:
     ApprovalRepositoryState | null;
@@ -33,13 +42,19 @@ export interface ApprovalRepositoryPersistence {
       ApprovalRepositoryState,
 
     expectedRevision:
-      ApprovalPersistenceRevision | null
+      ApprovalPersistenceRevision | null,
+
+    mutation?:
+      ApprovalPersistenceMutationContext
   ):
     Promise<ApprovalPersistenceSaveResult>;
 
   clear(
     expectedRevision:
-      ApprovalPersistenceRevision | null
+      ApprovalPersistenceRevision | null,
+
+    mutation?:
+      ApprovalPersistenceMutationContext
   ):
     Promise<void>;
 }
