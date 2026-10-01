@@ -63,7 +63,39 @@ export function RiskReviewWorkspace() {
       ]
     );
 
-  const decision =
+  const [
+    activeReview,
+    setActiveReview,
+  ] = useState(
+    () => {
+      const initialBot =
+        mockTradingBots[0];
+
+      const initialStrategy =
+        initialBot
+          ? mockStrategies.find(
+              (
+                item
+              ) =>
+                item.id ===
+                initialBot.strategyId
+            ) ?? null
+          : null;
+
+      return initialBot &&
+        initialStrategy
+        ? reviewPaperRisk({
+            bot:
+              initialBot,
+
+            strategy:
+              initialStrategy,
+          }).review
+        : null;
+    }
+  );
+
+  const candidateDecision =
     useMemo(
       () =>
         bot &&
@@ -84,9 +116,9 @@ export function RiskReviewWorkspace() {
       () =>
         bot &&
         strategy &&
-        decision
+        activeReview
           ? evaluateRiskReviewFreshness(
-              decision.review,
+              activeReview,
               bot,
               strategy
             )
@@ -94,9 +126,22 @@ export function RiskReviewWorkspace() {
       [
         bot,
         strategy,
-        decision,
+        activeReview,
       ]
     );
+
+  const acceptCandidateReview =
+    () => {
+      if (
+        !candidateDecision
+      ) {
+        return;
+      }
+
+      setActiveReview(
+        candidateDecision.review
+      );
+    };
 
   return (
     <section className="ti-risk-review">
@@ -119,13 +164,13 @@ export function RiskReviewWorkspace() {
         <div
           className={[
             "ti-risk-review__decision",
-            decision?.approved
+            activeReview?.status === "approved"
               ? "ti-risk-review__decision--approved"
               : "ti-risk-review__decision--rejected",
           ].join(" ")}
         >
-          {decision
-            ? decision.approved
+          {activeReview
+            ? activeReview.status === "approved"
               ? "APPROVED FOR PAPER"
               : "REJECTED"
             : "UNAVAILABLE"}
@@ -207,7 +252,7 @@ export function RiskReviewWorkspace() {
                 Paper approval cannot be granted.
               </div>
             </section>
-          ) : !decision ? (
+          ) : !candidateDecision ? (
             <section className="ti-risk-review__panel">
               <div className="ti-risk-review__empty">
                 Risk review unavailable.
@@ -223,7 +268,7 @@ export function RiskReviewWorkspace() {
                     </span>
 
                     <strong>
-                      {decision.review.id}
+                      {activeReview?.id ?? "NO ACTIVE REVIEW"}
                     </strong>
                   </div>
                 </header>
@@ -265,7 +310,7 @@ export function RiskReviewWorkspace() {
                     </dt>
 
                     <dd>
-                      {decision.review.approvedFor}
+                      {activeReview?.approvedFor ?? "none"}
                     </dd>
                   </div>
 
@@ -399,14 +444,14 @@ export function RiskReviewWorkspace() {
                     </span>
 
                     <strong>
-                      {decision.review.checks.filter(
+                      {activeReview?.checks.filter(
                         (
                           check
                         ) =>
                           check.passed
                       ).length}
                       /
-                      {decision.review.checks.length}
+                      {activeReview?.checks.length ?? 0}
                       {" "}
                       passed
                     </strong>
@@ -414,7 +459,7 @@ export function RiskReviewWorkspace() {
                 </header>
 
                 <div className="ti-risk-review__checks">
-                  {decision.review.checks.map(
+                  {(activeReview?.checks ?? []).map(
                     (
                       check
                     ) => (
@@ -458,6 +503,75 @@ export function RiskReviewWorkspace() {
                 <header>
                   <div>
                     <span className="ti-label">
+                      Re-review workflow
+                    </span>
+
+                    <strong>
+                      Candidate review
+                    </strong>
+                  </div>
+                </header>
+
+                <div className="ti-risk-review__rereview">
+                  <div>
+                    <span>
+                      Active review
+                    </span>
+
+                    <strong>
+                      {activeReview?.id ??
+                        "NONE"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Candidate
+                    </span>
+
+                    <strong>
+                      {candidateDecision.review.id}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Candidate result
+                    </span>
+
+                    <strong>
+                      {candidateDecision.approved
+                        ? "APPROVABLE"
+                        : "REJECTED"}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="ti-risk-review__rereview-action">
+                  <p>
+                    Configuration changes do not silently replace the active
+                    review. Accepting a candidate creates the new active
+                    approval state explicitly.
+                  </p>
+
+                  <button
+                    type="button"
+                    disabled={
+                      !candidateDecision.approved
+                    }
+                    onClick={
+                      acceptCandidateReview
+                    }
+                  >
+                    Accept new review
+                  </button>
+                </div>
+              </section>
+
+              <section className="ti-risk-review__panel">
+                <header>
+                  <div>
+                    <span className="ti-label">
                       Authority boundary
                     </span>
 
@@ -474,7 +588,7 @@ export function RiskReviewWorkspace() {
                     </span>
 
                     <strong>
-                      {decision.review.status}
+                      {activeReview?.status ?? "none"}
                     </strong>
                   </div>
 
@@ -485,7 +599,7 @@ export function RiskReviewWorkspace() {
 
                     <strong>
                       {String(
-                        decision.review.authoritative
+                        activeReview?.authoritative ?? false
                       )}
                     </strong>
                   </div>

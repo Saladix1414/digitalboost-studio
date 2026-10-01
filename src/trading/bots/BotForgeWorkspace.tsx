@@ -151,7 +151,39 @@ export function BotForgeWorkspace() {
       ]
     );
 
-  const currentReview =
+  const [
+    activeReview,
+    setActiveReview,
+  ] = useState(
+    () => {
+      const initialBot =
+        mockTradingBots[0];
+
+      const initialStrategy =
+        initialBot
+          ? mockStrategies.find(
+              (
+                item
+              ) =>
+                item.id ===
+                initialBot.strategyId
+            ) ?? null
+          : null;
+
+      return initialBot &&
+        initialStrategy
+        ? reviewPaperRisk({
+            bot:
+              initialBot,
+
+            strategy:
+              initialStrategy,
+          }).review
+        : null;
+    }
+  );
+
+  const candidateReview =
     useMemo(
       () =>
         selectedBot &&
@@ -175,9 +207,9 @@ export function BotForgeWorkspace() {
       () =>
         selectedBot &&
         selectedStrategy &&
-        currentReview
+        activeReview
           ? evaluateRiskReviewFreshness(
-              currentReview.review,
+              activeReview,
               selectedBot,
               selectedStrategy
             )
@@ -185,9 +217,26 @@ export function BotForgeWorkspace() {
       [
         selectedBot,
         selectedStrategy,
-        currentReview,
+        activeReview,
       ]
     );
+
+  const acceptCandidateReview =
+    () => {
+      if (
+        !candidateReview?.approved
+      ) {
+        return;
+      }
+
+      setActiveReview(
+        candidateReview.review
+      );
+
+      setRuntimeSession(
+        null
+      );
+    };
 
   const runLocalSession =
     () => {
@@ -226,17 +275,10 @@ export function BotForgeWorkspace() {
           }
         );
 
-      const approvalDecision =
-        reviewPaperRisk({
-          bot:
-            selectedBot,
-
-          strategy:
-            selectedStrategy,
-        });
-
       if (
-        !approvalDecision.approved
+        !activeReview ||
+        !reviewFreshness ||
+        reviewFreshness.reviewRequired
       ) {
         return;
       }
@@ -257,7 +299,7 @@ export function BotForgeWorkspace() {
           evaluation,
 
           approval:
-            approvalDecision.review,
+            activeReview,
 
           market: {
             marketPrice:
@@ -610,7 +652,7 @@ export function BotForgeWorkspace() {
                     </span>
 
                     <strong>
-                      {currentReview?.review.id ??
+                      {activeReview?.id ??
                         "UNAVAILABLE"}
                     </strong>
                   </div>
@@ -644,6 +686,61 @@ export function BotForgeWorkspace() {
                 <p className="ti-bot-forge__approval-note">
                   {reviewFreshness?.reason ??
                     "No review is available for the selected bot and strategy."}
+                </p>
+              </section>
+
+              <section className="ti-bot-forge__panel">
+                <header>
+                  <div>
+                    <span className="ti-label">
+                      Re-review
+                    </span>
+
+                    <strong>
+                      Explicit approval refresh
+                    </strong>
+                  </div>
+                </header>
+
+                <div className="ti-bot-forge__rereview">
+                  <div>
+                    <span>
+                      Active review
+                    </span>
+
+                    <strong>
+                      {activeReview?.id ??
+                        "NONE"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Candidate
+                    </span>
+
+                    <strong>
+                      {candidateReview?.review.id ??
+                        "NONE"}
+                    </strong>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={
+                      !candidateReview?.approved
+                    }
+                    onClick={
+                      acceptCandidateReview
+                    }
+                  >
+                    Accept new review
+                  </button>
+                </div>
+
+                <p className="ti-bot-forge__approval-note">
+                  A configuration change requires an explicit new review
+                  before the bot can regain paper runtime eligibility.
                 </p>
               </section>
 
