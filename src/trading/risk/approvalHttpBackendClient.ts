@@ -2,6 +2,10 @@ import {
   ApprovalBackendError,
 } from "./approvalBackendTransactions";
 
+import type {
+  ApprovalBackendOperation,
+} from "./approvalBackendTransactions";
+
 import {
   deserializeApprovalBackendReadResponse,
   mapApprovalBackendErrorDto,
@@ -17,9 +21,6 @@ import {
   isApprovalHttpRetryableStatus,
   isApprovalHttpSuccess,
 } from "./approvalHttpClient";
-
-import type {
-} from "./approvalBackendTransport";
 
 import type {
   ApprovalHttpClient,
@@ -93,7 +94,10 @@ function parseJsonBody(
 
 function throwApprovalHttpBackendError(
   response:
-    ApprovalHttpResponse
+    ApprovalHttpResponse,
+
+  operation:
+    ApprovalBackendOperation
 ):
   never {
   if (
@@ -137,8 +141,7 @@ function throwApprovalHttpBackendError(
         ? "unavailable"
         : "internal",
 
-    operation:
-      "read",
+    operation,
 
     retryable:
       isApprovalHttpRetryableStatus(
@@ -188,7 +191,8 @@ export function createApprovalHttpBackendClient(
         )
       ) {
         throwApprovalHttpBackendError(
-          response
+          response,
+          "read"
         );
       }
 
@@ -263,7 +267,8 @@ export function createApprovalHttpBackendClient(
         )
       ) {
         throwApprovalHttpBackendError(
-          response
+          response,
+          "write"
         );
       }
 
@@ -349,7 +354,8 @@ export function createApprovalHttpBackendClient(
         )
       ) {
         throwApprovalHttpBackendError(
-          response
+          response,
+          "clear"
         );
       }
     },
