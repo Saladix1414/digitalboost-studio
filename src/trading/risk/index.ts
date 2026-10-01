@@ -22,3 +22,12 @@ export type {
   RiskReviewInput,
   RiskReviewDecision,
 } from "./reviewTypes";
+
+export {
+  evaluateRiskReviewFreshness,
+} from "./reviewStatus";
+
+export type {
+  RiskReviewFreshness,
+  RiskReviewFreshnessResult,
+} from "./reviewStatus";

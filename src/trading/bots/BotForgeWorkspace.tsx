@@ -33,6 +33,7 @@ import {
 } from "../runtime";
 
 import {
+  evaluateRiskReviewFreshness,
   reviewPaperRisk,
 } from "../risk";
 
@@ -147,6 +148,44 @@ export function BotForgeWorkspace() {
           : null,
       [
         runtimeSession,
+      ]
+    );
+
+  const currentReview =
+    useMemo(
+      () =>
+        selectedBot &&
+        selectedStrategy
+          ? reviewPaperRisk({
+              bot:
+                selectedBot,
+
+              strategy:
+                selectedStrategy,
+            })
+          : null,
+      [
+        selectedBot,
+        selectedStrategy,
+      ]
+    );
+
+  const reviewFreshness =
+    useMemo(
+      () =>
+        selectedBot &&
+        selectedStrategy &&
+        currentReview
+          ? evaluateRiskReviewFreshness(
+              currentReview.review,
+              selectedBot,
+              selectedStrategy
+            )
+          : null,
+      [
+        selectedBot,
+        selectedStrategy,
+        currentReview,
       ]
     );
 
@@ -535,6 +574,77 @@ export function BotForgeWorkspace() {
                     Bot definition passed local validation.
                   </div>
                 )}
+              </section>
+
+              <section className="ti-bot-forge__panel">
+                <header>
+                  <div>
+                    <span className="ti-label">
+                      Approval Integrity
+                    </span>
+
+                    <strong>
+                      Runtime eligibility
+                    </strong>
+                  </div>
+
+                  <span
+                    className={
+                      reviewFreshness?.freshness ===
+                      "current"
+                        ? "ti-bot-forge__review-state ti-bot-forge__review-state--current"
+                        : "ti-bot-forge__review-state ti-bot-forge__review-state--stale"
+                    }
+                  >
+                    {reviewFreshness?.freshness ===
+                    "current"
+                      ? "CURRENT"
+                      : "STALE"}
+                  </span>
+                </header>
+
+                <div className="ti-bot-forge__approval-integrity">
+                  <div>
+                    <span>
+                      Risk review
+                    </span>
+
+                    <strong>
+                      {currentReview?.review.id ??
+                        "UNAVAILABLE"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Binding
+                    </span>
+
+                    <strong>
+                      {reviewFreshness?.freshness ===
+                      "current"
+                        ? "MATCH"
+                        : "MISMATCH"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Runtime eligibility
+                    </span>
+
+                    <strong>
+                      {reviewFreshness?.reviewRequired
+                        ? "REVIEW REQUIRED"
+                        : "PAPER ELIGIBLE"}
+                    </strong>
+                  </div>
+                </div>
+
+                <p className="ti-bot-forge__approval-note">
+                  {reviewFreshness?.reason ??
+                    "No review is available for the selected bot and strategy."}
+                </p>
               </section>
 
               <section className="ti-bot-forge__panel">
