@@ -249,3 +249,13 @@ export type {
   ApprovalPersistenceSelection,
   ApprovalRemotePersistenceConfig,
 } from "./approvalPersistenceMode";
+
+export {
+  APPROVAL_ENV_KEYS,
+  parseApprovalEnvironmentConfig,
+  readApprovalEnvironmentConfig,
+} from "./approvalEnvironmentConfig";
+
+export type {
+  ApprovalEnvironmentValues,
+} from "./approvalEnvironmentConfig";

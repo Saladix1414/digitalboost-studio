@@ -1,5 +1,8 @@
 import {
-  createDefaultApprovalPersistenceConfig,
+  readApprovalEnvironmentConfig,
+} from "./approvalEnvironmentConfig";
+
+import {
   selectApprovalPersistence,
 } from "./approvalPersistenceMode";
 
@@ -66,7 +69,7 @@ function startBrowserApprovalPersistence():
 
   const persistenceSelection =
     selectApprovalPersistence(
-      createDefaultApprovalPersistenceConfig()
+      readApprovalEnvironmentConfig()
     );
 
   configureApprovalStorePersistence(
