@@ -8834,3 +8834,15 @@
   outline: 1px solid currentColor;
   outline-offset: 2px;
 }
+
+/* ============================================================
+   PHASE 18J — CONTROLLED REHYDRATE UX
+   ============================================================ */
+
+.ti-hydration-recovery--stale {
+  border-style: dashed;
+}
+
+.ti-hydration-recovery__button--reload {
+  color: var(--ti-warning);
+}

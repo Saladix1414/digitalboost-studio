@@ -178,8 +178,23 @@ export function BotForgeWorkspace() {
     acceptReview,
 
     recoverPersistence,
+
+    hydrate:
+      rehydrateApprovalStore,
 } =
     useApprovalRepositoryStore();
+
+  const reloadApprovalState =
+    async () => {
+      if (
+        approvalLifecycle.status !==
+        "stale"
+      ) {
+        return;
+      }
+
+      await rehydrateApprovalStore();
+    };
 
   const recoverApprovalPersistence =
     async () => {
@@ -562,6 +577,24 @@ export function BotForgeWorkspace() {
                   <p className="ti-hydration-state__error">
                     {approvalLifecycle.error}
                   </p>
+                ) : null}
+
+                {approvalLifecycle.status === "stale" ? (
+                  <div className="ti-hydration-recovery ti-hydration-recovery--stale">
+                    <p className="ti-bot-forge__approval-note">
+                      Approval state changed in another browser context.
+                      Reload the persisted approval state before making
+                      another governance decision.
+                    </p>
+
+                    <button
+                      type="button"
+                      className="ti-hydration-recovery__button ti-hydration-recovery__button--reload"
+                      onClick={reloadApprovalState}
+                    >
+                      RELOAD APPROVAL STATE
+                    </button>
+                  </div>
                 ) : null}
 
                 {approvalLifecycle.status === "error" ? (
