@@ -36,6 +36,10 @@ import type {
 import TradingOverview from "./overview/TradingOverview";
 import TradingTerminal from "./terminal/TradingTerminal";
 
+import {
+  MarketDataProvider,
+} from "./market-data";
+
 import "./trading-islands.css";
 
 export type TradingIslandsWorkspaceProps = {
@@ -241,8 +245,9 @@ export function TradingIslandsWorkspace({
     activeMeta.icon;
 
   return (
-    <>
-      <IslandShell
+    <MarketDataProvider>
+      <>
+        <IslandShell
         activeSection={activeSection}
         onSectionChange={
           setActiveSection
@@ -367,7 +372,8 @@ export function TradingIslandsWorkspace({
         }}
         placeholder="Navigate Trading Islands…"
       />
-    </>
+      </>
+    </MarketDataProvider>
   );
 }
 

@@ -17,10 +17,6 @@ import {
 } from "../components";
 
 import {
-  mockMarkets,
-} from "../fixtures/markets";
-
-import {
   mockBots,
   mockOverviewActivity,
   mockPortfolio,
@@ -31,6 +27,10 @@ import type {
   PaperBotSummary,
   PortfolioPosition,
 } from "../types/trading";
+
+import {
+  useMarketData,
+} from "../market-data";
 
 import type {
   TradingSection,
@@ -276,6 +276,11 @@ const quickActions = [
 export function TradingOverview({
   onNavigate,
 }: TradingOverviewProps) {
+  const marketData =
+    useMarketData();
+
+  const mockMarkets =
+    marketData.getMarkets();
   const portfolioValue =
     mockPortfolio.reduce(
       (total, position) =>

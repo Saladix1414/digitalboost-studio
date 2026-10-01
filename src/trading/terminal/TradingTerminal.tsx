@@ -3,18 +3,14 @@ import {
   useState,
 } from "react";
 
-import {
-  mockMarkets,
-} from "../fixtures/markets";
-
-import {
-  getMockCandles,
-} from "../fixtures/candles";
-
 import type {
   MarketSymbol,
   TradingTimeframe,
 } from "../types/trading";
+
+import {
+  useMarketData,
+} from "../market-data";
 
 import {
   StatusBadge,
@@ -38,6 +34,11 @@ const timeframes: readonly TradingTimeframe[] = [
 ];
 
 export function TradingTerminal() {
+  const marketData =
+    useMarketData();
+
+  const mockMarkets =
+    marketData.getMarkets();
   const [
     symbol,
     setSymbol,
@@ -94,21 +95,21 @@ export function TradingTerminal() {
       : 0;
 
   const market =
-    mockMarkets.find(
-      (item) =>
-        item.symbol === symbol
+    marketData.getMarket(
+      symbol
     )!;
 
   const candles =
     useMemo(
       () =>
-        getMockCandles(
+        marketData.getCandles(
           symbol,
           timeframe
         ),
       [
         symbol,
         timeframe,
+        marketData,
       ]
     );
 
