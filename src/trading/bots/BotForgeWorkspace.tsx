@@ -28,6 +28,7 @@ import {
 } from "../strategy";
 
 import {
+  createRuntimeAuditRecord,
   runBotRuntimeSession,
 } from "../runtime";
 
@@ -135,6 +136,19 @@ export function BotForgeWorkspace() {
   >(
     null
   );
+
+  const runtimeAudit =
+    useMemo(
+      () =>
+        runtimeSession
+          ? createRuntimeAuditRecord(
+              runtimeSession
+            )
+          : null,
+      [
+        runtimeSession,
+      ]
+    );
 
   const runLocalSession =
     () => {
@@ -624,6 +638,147 @@ export function BotForgeWorkspace() {
                       authoritative = false
                     </span>
                   </footer>
+                )}
+              </section>
+
+              <section className="ti-bot-forge__panel">
+                <header>
+                  <div>
+                    <span className="ti-label">
+                      Runtime Audit
+                    </span>
+
+                    <strong>
+                      Approval evidence
+                    </strong>
+                  </div>
+
+                  <span className="ti-bot-forge__audit-mode">
+                    EVIDENCE ONLY
+                  </span>
+                </header>
+
+                {!runtimeAudit ? (
+                  <div className="ti-bot-forge__empty">
+                    No runtime audit available until a local paper session is recorded.
+                  </div>
+                ) : (
+                  <>
+                    <dl className="ti-bot-forge__audit-grid">
+                      <div>
+                        <dt>
+                          Session
+                        </dt>
+
+                        <dd>
+                          {runtimeAudit.sessionId}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Risk review
+                        </dt>
+
+                        <dd>
+                          {
+                            runtimeAudit.approval
+                              .riskReviewId
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Bot binding
+                        </dt>
+
+                        <dd>
+                          {
+                            runtimeAudit.approval
+                              .botId
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Strategy binding
+                        </dt>
+
+                        <dd>
+                          {
+                            runtimeAudit.approval
+                              .strategyId
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Approval scope
+                        </dt>
+
+                        <dd>
+                          {
+                            runtimeAudit.approval
+                              .approvalScope
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Approval verified
+                        </dt>
+
+                        <dd>
+                          {String(
+                            runtimeAudit.approval
+                              .approvalVerified
+                          )}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Runtime decision
+                        </dt>
+
+                        <dd>
+                          {runtimeAudit.decision}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Authoritative
+                        </dt>
+
+                        <dd>
+                          {String(
+                            runtimeAudit.authoritative
+                          )}
+                        </dd>
+                      </div>
+                    </dl>
+
+                    <div className="ti-bot-forge__audit-summary">
+                      <span>
+                        {
+                          runtimeAudit.events
+                            .length
+                        }
+                        {" "}
+                        recorded events
+                      </span>
+
+                      <span>
+                        Audit records evidence.
+                        Audit does not authorize execution.
+                      </span>
+                    </div>
+                  </>
                 )}
               </section>
 

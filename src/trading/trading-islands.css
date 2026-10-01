@@ -7407,3 +7407,567 @@
       left;
   }
 }
+
+/* ============================================================
+   PHASE 14B — RISK REVIEW WORKSPACE
+   ============================================================ */
+
+.ti-risk-review {
+  display: grid;
+  gap: 12px;
+}
+
+.ti-risk-review__header,
+.ti-risk-review__selector,
+.ti-risk-review__panel {
+  border:
+    1px solid
+    var(--ti-border-subtle);
+
+  border-radius:
+    var(--ti-radius-md);
+
+  background:
+    rgba(255, 255, 255, 0.012);
+}
+
+.ti-risk-review__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  padding: 18px;
+}
+
+.ti-risk-review__header h2 {
+  margin:
+    5px 0 4px;
+
+  font-size: 18px;
+}
+
+.ti-risk-review__header p {
+  max-width: 650px;
+
+  margin: 0;
+
+  color:
+    var(--ti-faint);
+
+  font-size: 9px;
+}
+
+.ti-risk-review__decision {
+  padding:
+    6px 9px;
+
+  border:
+    1px solid
+    var(--ti-border-subtle);
+
+  border-radius:
+    var(--ti-radius-sm);
+
+  color:
+    var(--ti-faint);
+
+  font-size: 7px;
+
+  letter-spacing:
+    0.07em;
+
+  white-space:
+    nowrap;
+}
+
+.ti-risk-review__decision--approved {
+  color:
+    var(--ti-positive);
+
+  border-color:
+    rgba(38, 194, 129, 0.22);
+
+  background:
+    rgba(38, 194, 129, 0.05);
+}
+
+.ti-risk-review__decision--rejected {
+  color:
+    var(--ti-negative);
+
+  border-color:
+    rgba(239, 91, 104, 0.22);
+
+  background:
+    rgba(239, 91, 104, 0.05);
+}
+
+.ti-risk-review__layout {
+  display: grid;
+
+  grid-template-columns:
+    minmax(210px, 0.58fr)
+    minmax(0, 1.8fr);
+
+  gap: 12px;
+}
+
+.ti-risk-review__selector {
+  align-self: start;
+
+  overflow: hidden;
+}
+
+.ti-risk-review__selector > header,
+.ti-risk-review__panel > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 10px;
+
+  padding:
+    11px 12px;
+
+  border-bottom:
+    1px solid
+    var(--ti-border-subtle);
+}
+
+.ti-risk-review__selector > header {
+  display: grid;
+
+  gap: 3px;
+}
+
+.ti-risk-review__selector header strong,
+.ti-risk-review__panel header strong {
+  font-size: 9px;
+}
+
+.ti-risk-review__bots {
+  display: grid;
+}
+
+.ti-risk-review__bot {
+  display: grid;
+
+  gap: 3px;
+
+  padding:
+    11px 12px;
+
+  border: 0;
+
+  border-bottom:
+    1px solid
+    var(--ti-border-subtle);
+
+  color:
+    var(--ti-text);
+
+  background:
+    transparent;
+
+  font: inherit;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.ti-risk-review__bot:hover,
+.ti-risk-review__bot--active {
+  background:
+    rgba(76, 168, 245, 0.045);
+}
+
+.ti-risk-review__bot strong {
+  font-size: 8px;
+}
+
+.ti-risk-review__bot span {
+  color:
+    var(--ti-faint);
+
+  font-size: 7px;
+}
+
+.ti-risk-review__content {
+  display: grid;
+
+  align-content: start;
+
+  gap: 12px;
+}
+
+.ti-risk-review__panel {
+  overflow: hidden;
+}
+
+.ti-risk-review__identity {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  margin: 0;
+
+  padding: 12px;
+}
+
+.ti-risk-review__identity > div {
+  display: grid;
+
+  gap: 4px;
+
+  padding:
+    4px 10px;
+
+  border-right:
+    1px solid
+    var(--ti-border-subtle);
+}
+
+.ti-risk-review__identity > div:last-child {
+  border-right: 0;
+}
+
+.ti-risk-review__identity dt,
+.ti-risk-review__metrics span,
+.ti-risk-review__authority span {
+  color:
+    var(--ti-faint);
+
+  font-size: 7px;
+}
+
+.ti-risk-review__identity dd {
+  margin: 0;
+
+  font-size: 8px;
+}
+
+.ti-risk-review__metrics {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 8px;
+
+  padding: 12px;
+}
+
+.ti-risk-review__metrics article {
+  display: grid;
+
+  gap: 5px;
+
+  padding: 10px;
+
+  border:
+    1px solid
+    var(--ti-border-subtle);
+
+  border-radius:
+    var(--ti-radius-sm);
+}
+
+.ti-risk-review__metrics strong {
+  font-size: 10px;
+}
+
+.ti-risk-review__checks {
+  display: grid;
+}
+
+.ti-risk-review__check {
+  display: grid;
+
+  grid-template-columns:
+    28px minmax(0, 1fr);
+
+  gap: 10px;
+
+  padding:
+    10px 12px;
+
+  border-bottom:
+    1px solid
+    var(--ti-border-subtle);
+}
+
+.ti-risk-review__check-mark {
+  display: grid;
+  place-items: center;
+
+  width: 24px;
+  height: 24px;
+
+  border:
+    1px solid
+    var(--ti-border-subtle);
+
+  border-radius:
+    50%;
+
+  font-size: 9px;
+}
+
+.ti-risk-review__check--passed
+  .ti-risk-review__check-mark {
+  color:
+    var(--ti-positive);
+
+  border-color:
+    rgba(38, 194, 129, 0.22);
+}
+
+.ti-risk-review__check--failed
+  .ti-risk-review__check-mark {
+  color:
+    var(--ti-negative);
+
+  border-color:
+    rgba(239, 91, 104, 0.22);
+}
+
+.ti-risk-review__check > div {
+  display: grid;
+
+  gap: 3px;
+}
+
+.ti-risk-review__check strong {
+  font-size: 7px;
+
+  letter-spacing:
+    0.05em;
+}
+
+.ti-risk-review__check p {
+  margin: 0;
+
+  color:
+    var(--ti-faint);
+
+  font-size: 8px;
+}
+
+.ti-risk-review__authority {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 8px;
+
+  padding: 12px;
+}
+
+.ti-risk-review__authority > div {
+  display: grid;
+
+  gap: 5px;
+
+  padding: 10px;
+
+  border:
+    1px solid
+    var(--ti-border-subtle);
+
+  border-radius:
+    var(--ti-radius-sm);
+}
+
+.ti-risk-review__authority strong {
+  font-size: 9px;
+}
+
+.ti-risk-review__boundary-note,
+.ti-risk-review__empty,
+.ti-risk-review__failure {
+  margin: 0;
+
+  padding: 12px;
+
+  color:
+    var(--ti-faint);
+
+  font-size: 8px;
+}
+
+.ti-risk-review__boundary-note {
+  border-top:
+    1px solid
+    var(--ti-border-subtle);
+}
+
+.ti-risk-review__failure {
+  color:
+    var(--ti-negative);
+}
+
+@media (max-width: 840px) {
+  .ti-risk-review__layout {
+    grid-template-columns:
+      1fr;
+  }
+
+  .ti-risk-review__identity,
+  .ti-risk-review__metrics,
+  .ti-risk-review__authority {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .ti-risk-review__header {
+    flex-direction:
+      column;
+  }
+
+  .ti-risk-review__identity,
+  .ti-risk-review__metrics,
+  .ti-risk-review__authority {
+    grid-template-columns:
+      1fr;
+  }
+
+  .ti-risk-review__identity > div {
+    border-right: 0;
+
+    border-bottom:
+      1px solid
+      var(--ti-border-subtle);
+  }
+}
+
+/* ============================================================
+   PHASE 14E — RUNTIME AUDIT UI
+   ============================================================ */
+
+.ti-bot-forge__audit-mode {
+  padding:
+    4px 7px;
+
+  border:
+    1px solid
+    var(--ti-border-subtle);
+
+  border-radius:
+    999px;
+
+  color:
+    var(--ti-faint);
+
+  font-size: 7px;
+
+  letter-spacing:
+    0.06em;
+}
+
+.ti-bot-forge__audit-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  margin: 0;
+
+  padding: 12px;
+}
+
+.ti-bot-forge__audit-grid > div {
+  display: grid;
+
+  gap: 4px;
+
+  min-width: 0;
+
+  padding:
+    8px 10px;
+
+  border-right:
+    1px solid
+    var(--ti-border-subtle);
+
+  border-bottom:
+    1px solid
+    var(--ti-border-subtle);
+}
+
+.ti-bot-forge__audit-grid dt {
+  color:
+    var(--ti-faint);
+
+  font-size: 7px;
+}
+
+.ti-bot-forge__audit-grid dd {
+  overflow: hidden;
+
+  margin: 0;
+
+  color:
+    var(--ti-text);
+
+  font-size: 8px;
+
+  text-overflow:
+    ellipsis;
+
+  white-space:
+    nowrap;
+}
+
+.ti-bot-forge__audit-summary {
+  display: flex;
+
+  justify-content:
+    space-between;
+
+  gap: 12px;
+
+  padding:
+    10px 12px;
+
+  border-top:
+    1px solid
+    var(--ti-border-subtle);
+
+  color:
+    var(--ti-faint);
+
+  font-size: 7px;
+}
+
+@media (max-width: 900px) {
+  .ti-bot-forge__audit-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .ti-bot-forge__audit-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+  .ti-bot-forge__audit-grid > div {
+    border-right: 0;
+  }
+
+  .ti-bot-forge__audit-summary {
+    align-items:
+      flex-start;
+
+    flex-direction:
+      column;
+  }
+}
