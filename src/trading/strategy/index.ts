@@ -26,3 +26,17 @@ export type {
 export type {
   StrategyAssessment,
 } from "./engine";
+
+export {
+  evaluateStrategy,
+  strategyEvaluator,
+} from "./evaluator";
+
+export type {
+  StrategySignal,
+  StrategyEvaluationContext,
+  StrategyConditionResult,
+  StrategyRuleGroupResult,
+  StrategyEvaluation,
+  StrategyEvaluator,
+} from "./evaluation-types";
