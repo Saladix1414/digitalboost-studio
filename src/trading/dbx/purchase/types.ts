@@ -400,3 +400,55 @@ export type DbxIssuanceAuthorizationStore = {
   readonly authorizations:
     readonly DbxIssuanceAuthorization[];
 };
+
+export type DbxIssuancePostingStatus =
+  | "POSTED";
+
+export type DbxIssuancePostingRecord = {
+  readonly id:
+    string;
+
+  readonly authorizationId:
+    string;
+
+  readonly purchaseIntentId:
+    string;
+
+  readonly quoteId:
+    string;
+
+  readonly verificationId:
+    string;
+
+  readonly transactionId:
+    string;
+
+  readonly ledgerIdempotencyKey:
+    string;
+
+  readonly issuanceAccountRef:
+    string;
+
+  readonly destinationAccountRef:
+    string;
+
+  readonly dbxAmountMinor:
+    number;
+
+  readonly status:
+    DbxIssuancePostingStatus;
+
+  readonly postedAt:
+    string;
+
+  readonly systemOfRecord:
+    "DBX_LEDGER";
+
+  readonly governanceAuthority:
+    false;
+};
+
+export type DbxIssuancePostingRegistry = {
+  readonly records:
+    readonly DbxIssuancePostingRecord[];
+};
