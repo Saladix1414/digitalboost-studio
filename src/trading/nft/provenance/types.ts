@@ -107,3 +107,80 @@ export type NftProvenanceValidationResult = {
   readonly issues:
     readonly NftProvenanceValidationIssue[];
 };
+
+export type NftProvenanceRevisionReason =
+  | "INITIAL_ASSEMBLY"
+  | "EVIDENCE_ADDED"
+  | "LINK_ADDED"
+  | "EVIDENCE_AND_LINKS_UPDATED"
+  | "ARCHIVED";
+
+export type NftProvenanceSnapshot = {
+  readonly evidenceHash: string;
+
+  readonly linksHash: string;
+
+  readonly recordHash: string;
+
+  readonly authoritative:
+    false;
+};
+
+export type NftProvenanceHistoryEntry = {
+  readonly id: string;
+
+  readonly provenanceId: string;
+
+  readonly version: number;
+
+  readonly previousEntryId:
+    string | null;
+
+  readonly reason:
+    NftProvenanceRevisionReason;
+
+  readonly snapshot:
+    NftProvenanceSnapshot;
+
+  readonly capturedAt: string;
+
+  readonly authoritative:
+    false;
+};
+
+export type NftProvenanceHistory = {
+  readonly provenanceId: string;
+
+  readonly entries:
+    readonly NftProvenanceHistoryEntry[];
+
+  readonly authoritative:
+    false;
+};
+
+export type NftProvenanceHistoryValidationIssueCode =
+  | "EMPTY_HISTORY"
+  | "PROVENANCE_ID_MISMATCH"
+  | "INVALID_HISTORY_VERSION"
+  | "BROKEN_PREVIOUS_ENTRY"
+  | "INVALID_EVIDENCE_HASH"
+  | "INVALID_LINKS_HASH"
+  | "INVALID_RECORD_HASH"
+  | "EMPTY_CAPTURED_AT"
+  | "HISTORY_AUTHORITY_ESCALATION";
+
+export type NftProvenanceHistoryValidationIssue = {
+  readonly code:
+    NftProvenanceHistoryValidationIssueCode;
+
+  readonly message:
+    string;
+};
+
+export type NftProvenanceHistoryValidationResult = {
+  readonly valid:
+    boolean;
+
+  readonly issues:
+    readonly NftProvenanceHistoryValidationIssue[];
+};
