@@ -25,6 +25,8 @@ import type {
   NftForgeSection,
 } from "./types";
 
+import NftMintWorkspace from "./mint/NftMintWorkspace";
+
 import "./nft-forge.css";
 
 const forgeSections: ReadonlyArray<{
@@ -362,6 +364,10 @@ export function NftForgeWorkspace() {
               </article>
             ))}
         </section>
+      ) : null}
+
+      {activeSection === "create" ? (
+        <NftMintWorkspace />
       ) : null}
 
       {[
