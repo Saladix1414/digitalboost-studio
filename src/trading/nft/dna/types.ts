@@ -105,3 +105,74 @@ export type NftDnaValidationResult = {
   readonly issues:
     readonly NftDnaValidationIssue[];
 };
+
+export type NftDnaLineageReason =
+  | "INITIAL"
+  | "IDENTITY_UPDATE"
+  | "INTEGRITY_UPDATE"
+  | "BLOCKCHAIN_PROOF_ATTACHED"
+  | "BLOCKCHAIN_PROOF_UPDATED";
+
+export type NftDnaLineageEntry = {
+  readonly id: string;
+
+  readonly dnaId: string;
+
+  readonly previousEntryId:
+    string | null;
+
+  readonly version: number;
+
+  readonly reason:
+    NftDnaLineageReason;
+
+  readonly identityHash: string;
+
+  readonly integrityHash: string;
+
+  readonly blockchainProofHash:
+    string | null;
+
+  readonly createdAt: string;
+
+  /**
+   * Lineage records history only.
+   * They do not establish provenance,
+   * ownership, authenticity or authority.
+   */
+  readonly authoritative: false;
+};
+
+export type NftDnaLineage = {
+  readonly dnaId: string;
+
+  readonly entries:
+    readonly NftDnaLineageEntry[];
+
+  readonly authoritative: false;
+};
+
+export type NftDnaLineageValidationIssueCode =
+  | "INVALID_LINEAGE_DNA_ID"
+  | "INVALID_LINEAGE_ENTRY_ID"
+  | "INVALID_LINEAGE_VERSION"
+  | "INVALID_LINEAGE_SEQUENCE"
+  | "INVALID_PREVIOUS_ENTRY"
+  | "INVALID_IDENTITY_HASH"
+  | "INVALID_INTEGRITY_HASH"
+  | "INVALID_BLOCKCHAIN_PROOF_HASH"
+  | "INVALID_LINEAGE_TIMESTAMP";
+
+export type NftDnaLineageValidationIssue = {
+  readonly code:
+    NftDnaLineageValidationIssueCode;
+
+  readonly message: string;
+};
+
+export type NftDnaLineageValidationResult = {
+  readonly valid: boolean;
+
+  readonly issues:
+    readonly NftDnaLineageValidationIssue[];
+};
