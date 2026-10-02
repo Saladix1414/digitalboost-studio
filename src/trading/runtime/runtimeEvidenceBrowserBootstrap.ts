@@ -4,6 +4,11 @@ import {
 } from "./localRuntimeEvidencePersistence";
 
 import {
+  createBrowserRuntimeEvidenceCoordinator,
+} from "./runtimeEvidenceCoordination";
+
+import {
+  configureRuntimeEvidenceCoordinator,
   configureRuntimeEvidencePersistence,
   hydrateRuntimeEvidence,
   markRuntimeEvidenceStale,
@@ -93,8 +98,15 @@ export function bootstrapRuntimeEvidenceBrowserPersistence():
         const persistence =
           createBrowserRuntimeEvidencePersistence();
 
+        const coordinator =
+          createBrowserRuntimeEvidenceCoordinator();
+
         configureRuntimeEvidencePersistence(
           persistence
+        );
+
+        configureRuntimeEvidenceCoordinator(
+          coordinator
         );
 
         installRuntimeEvidenceStorageListener();

@@ -30,6 +30,14 @@ import {
   createRuntimeEvidenceSnapshot,
 } from "./runtimeEvidencePersistence";
 
+import {
+  createLocalRuntimeEvidenceCoordinator,
+} from "./runtimeEvidenceCoordination";
+
+import type {
+  RuntimeEvidenceCoordinator,
+} from "./runtimeEvidenceCoordination";
+
 import type {
   RuntimeEvidencePersistence,
 } from "./runtimeEvidencePersistence";
@@ -181,6 +189,11 @@ let lifecycle:
 let persistence:
   RuntimeEvidencePersistence | null =
     null;
+
+
+let coordinator:
+  RuntimeEvidenceCoordinator =
+    createLocalRuntimeEvidenceCoordinator();
 
 
 /*
@@ -338,6 +351,16 @@ export function markRuntimeEvidenceStale():
     authoritative:
       false,
   });
+}
+
+
+export function configureRuntimeEvidenceCoordinator(
+  nextCoordinator:
+    RuntimeEvidenceCoordinator
+):
+  void {
+  coordinator =
+    nextCoordinator;
 }
 
 
@@ -599,14 +622,10 @@ export async function persistRuntimeEvidenceHistory():
   }
 
   /*
-   * While evidence is hydrating, stale, or being reconciled,
-   * runtime recording remains memory-first but ordinary persistence
-   * is suspended.
+   * Runtime evidence remains memory-first.
    *
-   * During startup hydration this is critical: a local runtime record
-   * must not overwrite persisted evidence before the pending load has
-   * incorporated that evidence into memory. hydrateRuntimeEvidence()
-   * performs the persistence catch-up after reconciliation succeeds.
+   * During hydration, stale reconciliation, or controlled
+   * reconciliation, ordinary persistence is suspended.
    */
   if (
     lifecycle.status ===
@@ -619,28 +638,107 @@ export async function persistRuntimeEvidenceHistory():
     return;
   }
 
-
-  const snapshot =
-    createRuntimeEvidenceSnapshot(
-      history
-    );
-
   try {
     await enqueuePersistence(
       async () => {
-        await adapter.save(
-          snapshot
+        await coordinator.runExclusive(
+          async () => {
+            /*
+             * Read current memory only after entering the coordinated
+             * critical section so records created while this write
+             * waited for another tab are included.
+             */
+            const local =
+              history;
+
+            const loaded =
+              await adapter.load();
+
+            const persisted =
+              loaded.snapshot?.history ?? {
+                entries:
+                  [],
+
+                authoritative:
+                  false as const,
+              };
+
+            const reconciliation =
+              reconcileRuntimeEvidenceHistories(
+                local,
+                persisted
+              );
+
+            if (
+              reconciliation.status ===
+              "conflict"
+            ) {
+              /*
+               * Never overwrite conflicting persisted evidence.
+               * Existing memory stays intact and the store becomes stale
+               * so resolution remains explicit.
+               */
+              setLifecycle({
+                status:
+                  "stale",
+
+                error:
+                  `Runtime evidence persistence conflict for session ${reconciliation.conflict.sessionId}.`,
+
+                authoritative:
+                  false,
+              });
+
+              return;
+            }
+
+            const generationBeforeSave =
+              historyGeneration;
+
+            const merged =
+              reconciliation.history;
+
+            await adapter.save(
+              createRuntimeEvidenceSnapshot(
+                merged
+              )
+            );
+
+            /*
+             * If memory did not change while the coordinated I/O was
+             * running, promote the merged view into memory.
+             *
+             * If it did change, preserve newer memory. The record that
+             * changed it already queued another persistence pass.
+             */
+            if (
+              generationBeforeSave ===
+                historyGeneration
+            ) {
+              history =
+                merged;
+
+              historyGeneration +=
+                1;
+
+              emitRuntimeEvidenceChange();
+            }
+          }
         );
       }
     );
 
     /*
-     * Successful evidence persistence restores observability health.
-     * It does not affect approval or runtime authority.
+     * Conflict handling above may intentionally move the lifecycle
+     * to stale. Do not overwrite that state with ready.
      */
     if (
       lifecycle.status !==
-      "hydrating"
+        "hydrating" &&
+      lifecycle.status !==
+        "stale" &&
+      lifecycle.status !==
+        "reconciling"
     ) {
       setLifecycle({
         status:
@@ -671,7 +769,6 @@ export async function persistRuntimeEvidenceHistory():
     });
   }
 }
-
 
 export async function reconcileStaleRuntimeEvidence():
   Promise<RuntimeEvidenceControlledReconciliationResult> {
@@ -1006,6 +1103,9 @@ export function resetRuntimeEvidenceHistoryForTests():
 
   persistence =
     null;
+
+  coordinator =
+    createLocalRuntimeEvidenceCoordinator();
 
   persistenceQueue =
     Promise.resolve();

@@ -235,3 +235,17 @@ export {
 export type {
   RuntimeEvidenceReconciliationHistoryRefreshResult,
 } from "./runtimeEvidenceReconciliationHistoryStore";
+
+export {
+  configureRuntimeEvidenceCoordinator,
+} from "./runtimeEvidenceStore";
+
+export {
+  RUNTIME_EVIDENCE_PERSISTENCE_LOCK_NAME,
+  createBrowserRuntimeEvidenceCoordinator,
+  createLocalRuntimeEvidenceCoordinator,
+} from "./runtimeEvidenceCoordination";
+
+export type {
+  RuntimeEvidenceCoordinator,
+} from "./runtimeEvidenceCoordination";
