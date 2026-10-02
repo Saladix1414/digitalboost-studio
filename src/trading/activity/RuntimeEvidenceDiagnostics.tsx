@@ -8,6 +8,7 @@ import {
   getRuntimeEvidenceLifecycle,
   reconcileStaleRuntimeEvidence,
   subscribeRuntimeEvidenceHistory,
+  getRuntimeEvidenceCoordinationHealth,
 } from "../runtime/runtimeEvidenceStore";
 
 
@@ -79,6 +80,13 @@ export function RuntimeEvidenceDiagnostics() {
       subscribeRuntimeEvidenceHistory,
       getRuntimeEvidenceLifecycle,
       getRuntimeEvidenceLifecycle
+    );
+
+  const coordinationHealth =
+    useSyncExternalStore(
+      subscribeRuntimeEvidence,
+      getRuntimeEvidenceCoordinationHealth,
+      getRuntimeEvidenceCoordinationHealth
     );
 
   const [
@@ -187,6 +195,12 @@ export function RuntimeEvidenceDiagnostics() {
               lifecycle.status
             )}
           </p>
+
+          {!coordinationHealth.crossContextSafe ? (
+            <p className="text-xs text-amber-300">
+              Cross-tab runtime evidence coordination is degraded because browser Web Locks are unavailable. Evidence remains non-authoritative and storage changes still require explicit review when detected.
+            </p>
+          ) : null}
 
           {lifecycle.error ? (
             <p className="mt-2 text-sm text-amber-300/80">

@@ -111,6 +111,15 @@ export type RuntimeEvidenceLifecycle = {
     false;
 };
 
+
+export type RuntimeEvidenceCoordinationHealth = {
+  readonly crossContextSafe:
+    boolean;
+
+  readonly authoritative:
+    false;
+};
+
 export type RuntimeEvidenceControlledReconciliationResult =
   | {
       readonly status:
@@ -354,6 +363,18 @@ export function markRuntimeEvidenceStale():
 }
 
 
+export function getRuntimeEvidenceCoordinationHealth():
+  RuntimeEvidenceCoordinationHealth {
+  return {
+    crossContextSafe:
+      coordinator.crossContextSafe,
+
+    authoritative:
+      false,
+  };
+}
+
+
 export function configureRuntimeEvidenceCoordinator(
   nextCoordinator:
     RuntimeEvidenceCoordinator
@@ -361,6 +382,8 @@ export function configureRuntimeEvidenceCoordinator(
   void {
   coordinator =
     nextCoordinator;
+
+  emitRuntimeEvidenceChange();
 }
 
 
