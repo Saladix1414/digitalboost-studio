@@ -172,3 +172,114 @@ export type NftMarketplaceSaleIntent = {
   readonly authoritative:
     false;
 };
+
+export type NftMarketplaceOrderStatus =
+  | "CREATED"
+  | "MATCHED"
+  | "READY_FOR_SETTLEMENT"
+  | "CANCELLED"
+  | "REJECTED";
+
+export type NftMarketplaceBuyer = {
+  readonly buyerId:
+    string;
+
+  readonly walletRef:
+    string | null;
+
+  readonly authoritative:
+    false;
+};
+
+export type NftMarketplaceOrderIntent = {
+  readonly id:
+    string;
+
+  readonly listingId:
+    string;
+
+  readonly assetId:
+    string;
+
+  readonly buyer:
+    NftMarketplaceBuyer;
+
+  readonly sellerId:
+    string;
+
+  readonly price:
+    NftMarketplacePrice;
+
+  readonly status:
+    NftMarketplaceOrderStatus;
+
+  readonly createdAt:
+    string;
+
+  readonly updatedAt:
+    string;
+
+  readonly authoritative:
+    false;
+};
+
+export type NftMarketplaceOrderIssueCode =
+  | "EMPTY_ORDER_ID"
+  | "EMPTY_LISTING_ID"
+  | "EMPTY_ASSET_ID"
+  | "EMPTY_BUYER_ID"
+  | "EMPTY_SELLER_ID"
+  | "BUYER_EQUALS_SELLER"
+  | "BUYER_WALLET_MISSING"
+  | "PRICE_MISMATCH"
+  | "LISTING_NOT_LISTED"
+  | "ASSET_MISMATCH"
+  | "SELLER_MISMATCH";
+
+export type NftMarketplaceOrderIssue = {
+  readonly code:
+    NftMarketplaceOrderIssueCode;
+
+  readonly message:
+    string;
+};
+
+export type NftMarketplaceOrderValidationResult = {
+  readonly valid:
+    boolean;
+
+  readonly issues:
+    readonly NftMarketplaceOrderIssue[];
+
+  readonly authoritative:
+    false;
+};
+
+export type NftMarketplacePreSettlement = {
+  readonly orderId:
+    string;
+
+  readonly listingId:
+    string;
+
+  readonly assetId:
+    string;
+
+  readonly buyerId:
+    string;
+
+  readonly sellerId:
+    string;
+
+  readonly price:
+    NftMarketplacePrice;
+
+  readonly ready:
+    boolean;
+
+  readonly createdAt:
+    string;
+
+  readonly authoritative:
+    false;
+};
