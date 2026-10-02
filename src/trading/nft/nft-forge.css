@@ -1953,3 +1953,204 @@
   box-shadow:
     inset 0 0 0 1px rgba(72, 177, 226, 0.08);
 }
+
+/* =========================================================
+   PHASE 28B — NFT DETAIL WORKSPACE
+   ========================================================= */
+
+.ti-nft-detail {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(126, 151, 181, 0.12);
+  background: #0a0f15;
+}
+
+.ti-nft-detail__hero {
+  display: grid;
+  gap: 13px;
+}
+
+.ti-nft-detail__back {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  border: 1px solid rgba(126, 151, 181, 0.1);
+  background: #0f151c;
+  color: #8795a3;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.ti-nft-detail__hero-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.ti-nft-detail__hero h3 {
+  margin: 5px 0;
+  color: #e2eaf1;
+  font-size: 17px;
+}
+
+.ti-nft-detail__hero p {
+  margin: 0;
+  color: #758391;
+  font-size: 9px;
+}
+
+.ti-nft-detail__status {
+  padding: 5px 7px;
+  border: 1px solid rgba(73, 206, 157, 0.18);
+  background: rgba(73, 206, 157, 0.05);
+  color: #87d8b9;
+  font-size: 7px;
+}
+
+.ti-nft-detail__media {
+  min-height: 210px;
+  display: flex;
+  align-items: flex-end;
+  padding: 14px;
+  border: 1px solid rgba(126, 151, 181, 0.08);
+  background:
+    radial-gradient(
+      circle at 75% 20%,
+      rgba(51, 163, 219, 0.17),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(89, 89, 148, 0.12),
+      transparent 38%
+    ),
+    linear-gradient(
+      145deg,
+      #111922,
+      #080d12
+    );
+}
+
+.ti-nft-detail__media div {
+  padding: 5px 7px;
+  border: 1px solid rgba(111, 198, 238, 0.17);
+  background: rgba(58, 160, 208, 0.05);
+  color: #91d1ec;
+  font-size: 7px;
+}
+
+.ti-nft-detail__metrics {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ti-nft-detail__metrics article {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid rgba(126, 151, 181, 0.09);
+  background: #0e141b;
+}
+
+.ti-nft-detail__metrics span {
+  color: #647282;
+  font-size: 7px;
+}
+
+.ti-nft-detail__metrics strong {
+  color: #d4dee7;
+  font-size: 9px;
+}
+
+.ti-nft-detail__grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.ti-nft-detail__panel {
+  border: 1px solid rgba(126, 151, 181, 0.09);
+  background: #0d1319;
+}
+
+.ti-nft-detail__panel > header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px;
+  border-bottom: 1px solid rgba(126, 151, 181, 0.07);
+  color: #cbd6df;
+  font-size: 8px;
+}
+
+.ti-nft-detail__panel dl {
+  margin: 0;
+  padding: 10px;
+}
+
+.ti-nft-detail__panel dl div {
+  display: grid;
+  gap: 4px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(126, 151, 181, 0.06);
+}
+
+.ti-nft-detail__panel dt {
+  color: #637180;
+  font-size: 7px;
+}
+
+.ti-nft-detail__panel dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #c6d1db;
+  font-size: 8px;
+}
+
+.ti-nft-detail__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ti-nft-detail__actions button {
+  padding: 8px 12px;
+  border: 1px solid rgba(126, 151, 181, 0.1);
+  background: #10171f;
+  color: #657382;
+  font-size: 8px;
+  cursor: not-allowed;
+}
+
+.ti-nft-detail__boundary {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 11px;
+  border: 1px solid rgba(230, 177, 72, 0.16);
+  background: rgba(230, 177, 72, 0.04);
+  color: #c7aa70;
+  font-size: 8px;
+  line-height: 1.6;
+}
+
+.ti-nft-detail__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: #5f6c79;
+  font-size: 7px;
+}
+
+@media (max-width: 760px) {
+  .ti-nft-detail__metrics,
+  .ti-nft-detail__grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -74,7 +74,7 @@ test(
 );
 
 test(
-  "workspace keeps Phase 28 detail action reserved",
+  "workspace integrates Phase 28 local detail activation",
   () => {
     assert.match(
       workspace,
@@ -83,12 +83,22 @@ test(
 
     assert.match(
       workspace,
-      /disabled/
+      /setDetailListingId/
     );
 
     assert.match(
       workspace,
-      /Phase 28/
+      /findNftAssetDetailByListingId/
+    );
+
+    assert.match(
+      workspace,
+      /NftDetailWorkspace/
+    );
+
+    assert.doesNotMatch(
+      workspace,
+      /title="Asset detail wiring arrives in Phase 28"/
     );
   }
 );

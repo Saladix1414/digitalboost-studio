@@ -75,7 +75,7 @@ test(
 );
 
 test(
-  "Phase 27 UI keeps Phase 28 detail boundary explicit",
+  "Phase 27 discovery remains compatible with Phase 28 detail activation",
   () => {
     assert.match(
       catalogWorkspace,
@@ -84,12 +84,17 @@ test(
 
     assert.match(
       catalogWorkspace,
-      /disabled/
+      /setDetailListingId/
     );
 
     assert.match(
       catalogWorkspace,
-      /Phase 28/
+      /NftDetailWorkspace/
+    );
+
+    assert.doesNotMatch(
+      catalogWorkspace,
+      /title="Asset detail wiring arrives in Phase 28"/
     );
   }
 );

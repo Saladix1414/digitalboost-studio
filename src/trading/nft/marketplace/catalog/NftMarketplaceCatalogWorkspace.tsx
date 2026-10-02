@@ -42,6 +42,12 @@ import {
   selectMarketplaceCatalogItem,
 } from "./selection";
 
+import {
+  findNftAssetDetailByListingId,
+} from "../../detail/lookup";
+
+import NftDetailWorkspace from "../../detail/NftDetailWorkspace";
+
 export function NftMarketplaceCatalogWorkspace() {
   const [
     query,
@@ -85,6 +91,14 @@ export function NftMarketplaceCatalogWorkspace() {
         false as const,
     });
 
+  const [
+    detailListingId,
+    setDetailListingId,
+  ] =
+    useState<string | null>(
+      null
+    );
+
   const result =
     useMemo(
       () => {
@@ -124,6 +138,28 @@ export function NftMarketplaceCatalogWorkspace() {
         quickFilter,
       ]
     );
+
+  const detail =
+    detailListingId
+      ? findNftAssetDetailByListingId(
+          nftMarketplaceCatalogFixture,
+          detailListingId
+        )
+      : null;
+
+  if (detail) {
+    return (
+      <NftDetailWorkspace
+        detail={detail}
+        onBack={
+          () =>
+            setDetailListingId(
+              null
+            )
+        }
+      />
+    );
+  }
 
   return (
     <section
@@ -416,8 +452,15 @@ export function NftMarketplaceCatalogWorkspace() {
 
                     <button
                       type="button"
-                      disabled
-                      title="Asset detail wiring arrives in Phase 28"
+                      onClick={
+                        (event) => {
+                          event.stopPropagation();
+
+                          setDetailListingId(
+                            item.listing.id
+                          );
+                        }
+                      }
                     >
                       View Asset
                     </button>

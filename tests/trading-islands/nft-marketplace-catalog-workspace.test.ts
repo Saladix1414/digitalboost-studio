@@ -135,7 +135,7 @@ test(
 );
 
 test(
-  "asset detail remains intentionally non-executable",
+  "asset detail is activated locally by Phase 28",
   () => {
     assert.match(
       catalogWorkspace,
@@ -144,12 +144,22 @@ test(
 
     assert.match(
       catalogWorkspace,
-      /disabled/
+      /setDetailListingId/
     );
 
     assert.match(
       catalogWorkspace,
-      /Phase 28/
+      /findNftAssetDetailByListingId/
+    );
+
+    assert.match(
+      catalogWorkspace,
+      /NftDetailWorkspace/
+    );
+
+    assert.doesNotMatch(
+      catalogWorkspace,
+      /title="Asset detail wiring arrives in Phase 28"/
     );
   }
 );
