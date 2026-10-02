@@ -1,0 +1,98 @@
+import type {
+  NftMarketplaceBuyer,
+  NftMarketplaceEligibilityResult,
+  NftMarketplaceListing,
+  NftMarketplaceOrderIntent,
+  NftMarketplacePreSettlement,
+  NftMarketplaceSaleIntent,
+} from "../types";
+
+import type {
+  NftAssetDetail,
+} from "../../detail/types";
+
+export type NftMarketplaceEngineStage =
+  | "ELIGIBILITY"
+  | "SALE_INTENT"
+  | "LISTED"
+  | "DETAIL"
+  | "ORDER_INTENT"
+  | "MATCHED"
+  | "PRE_SETTLEMENT_READY";
+
+export type NftMarketplaceEnginePresentation = {
+  readonly title:
+    string;
+
+  readonly subtitle:
+    string;
+
+  readonly imageRef:
+    string | null;
+
+  readonly featured:
+    boolean;
+};
+
+export type NftMarketplaceEngineClock = {
+  readonly saleIntentAt:
+    string;
+
+  readonly listedAt:
+    string;
+
+  readonly orderCreatedAt:
+    string;
+
+  readonly orderMatchedAt:
+    string;
+
+  readonly preSettlementAt:
+    string;
+};
+
+export type NftMarketplaceEngineInput = {
+  readonly listing:
+    NftMarketplaceListing;
+
+  readonly buyer:
+    NftMarketplaceBuyer;
+
+  readonly orderId:
+    string;
+
+  readonly presentation:
+    NftMarketplaceEnginePresentation;
+
+  readonly clock:
+    NftMarketplaceEngineClock;
+};
+
+export type NftMarketplaceEngineSnapshot = {
+  readonly stage:
+    NftMarketplaceEngineStage;
+
+  readonly eligibility:
+    NftMarketplaceEligibilityResult;
+
+  readonly saleIntent:
+    NftMarketplaceSaleIntent;
+
+  readonly listing:
+    NftMarketplaceListing;
+
+  readonly detail:
+    NftAssetDetail;
+
+  readonly order:
+    NftMarketplaceOrderIntent;
+
+  readonly preSettlement:
+    NftMarketplacePreSettlement;
+
+  readonly execution:
+    "NONE";
+
+  readonly authoritative:
+    false;
+};
