@@ -222,3 +222,98 @@ export type NftBlockchainSendPreparation = {
   readonly authoritative:
     false;
 };
+
+export type NftBlockchainSubmissionEvidence = {
+  readonly requestId:
+    string;
+
+  readonly txHash:
+    string;
+
+  readonly chainRef:
+    string;
+
+  readonly submittedAt:
+    string;
+
+  readonly source:
+    "FIXTURE";
+
+  readonly stage:
+    "SUBMITTED";
+
+  readonly authoritative:
+    false;
+};
+
+export type NftBlockchainVerificationCheckCode =
+  | "REQUEST_BINDING"
+  | "CHAIN_BINDING"
+  | "TX_HASH_PRESENT"
+  | "BLOCK_REFERENCE_PRESENT";
+
+export type NftBlockchainVerificationCheck = {
+  readonly code:
+    NftBlockchainVerificationCheckCode;
+
+  readonly passed:
+    boolean;
+
+  readonly message:
+    string;
+
+  readonly authoritative:
+    false;
+};
+
+export type NftBlockchainVerificationEvidence = {
+  readonly requestId:
+    string;
+
+  readonly txHash:
+    string;
+
+  readonly chainRef:
+    string;
+
+  readonly blockRef:
+    string | null;
+
+  readonly checks:
+    readonly NftBlockchainVerificationCheck[];
+
+  readonly verified:
+    boolean;
+
+  readonly stage:
+    "VERIFIED";
+
+  readonly authoritative:
+    false;
+};
+
+export type NftBlockchainIndexEvidence = {
+  readonly requestId:
+    string;
+
+  readonly txHash:
+    string;
+
+  readonly chainRef:
+    string;
+
+  readonly blockRef:
+    string;
+
+  readonly indexRef:
+    string;
+
+  readonly indexedAt:
+    string;
+
+  readonly stage:
+    "INDEXED";
+
+  readonly authoritative:
+    false;
+};
