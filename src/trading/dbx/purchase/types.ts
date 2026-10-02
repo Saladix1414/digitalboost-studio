@@ -99,3 +99,92 @@ export type DbxPurchaseStore = {
   readonly quotes:
     readonly DbxQuote[];
 };
+
+export type DbxPaymentEvidenceKind =
+  | "FIAT"
+  | "USDT";
+
+export type DbxFiatPaymentEvidence = {
+  readonly id:
+    string;
+
+  readonly kind:
+    "FIAT";
+
+  readonly purchaseIntentId:
+    string;
+
+  readonly quoteId:
+    string;
+
+  readonly providerRef:
+    string;
+
+  readonly settlementRef:
+    string;
+
+  readonly externalCurrency:
+    "USD" | "ARS";
+
+  readonly externalAmountMinor:
+    number;
+
+  readonly observedAt:
+    string;
+
+  readonly immutable:
+    true;
+
+  readonly authoritative:
+    false;
+};
+
+export type DbxUsdtPaymentEvidence = {
+  readonly id:
+    string;
+
+  readonly kind:
+    "USDT";
+
+  readonly purchaseIntentId:
+    string;
+
+  readonly quoteId:
+    string;
+
+  readonly chainRef:
+    string;
+
+  readonly tokenRef:
+    string;
+
+  readonly recipientRef:
+    string;
+
+  readonly txHash:
+    string;
+
+  readonly blockRef:
+    string;
+
+  readonly externalAmountMinor:
+    number;
+
+  readonly observedAt:
+    string;
+
+  readonly immutable:
+    true;
+
+  readonly authoritative:
+    false;
+};
+
+export type DbxPaymentEvidence =
+  | DbxFiatPaymentEvidence
+  | DbxUsdtPaymentEvidence;
+
+export type DbxPaymentEvidenceStore = {
+  readonly evidence:
+    readonly DbxPaymentEvidence[];
+};
