@@ -146,3 +146,79 @@ export type NftBlockchainGatewayState = {
   readonly authoritative:
     false;
 };
+
+export type NftBlockchainSimulationStatus =
+  | "PASS"
+  | "FAIL";
+
+export type NftBlockchainSimulationCheckCode =
+  | "CHAIN_REFERENCE"
+  | "CONTRACT_REFERENCE"
+  | "PAYLOAD_REFERENCE"
+  | "EXECUTION_BOUNDARY";
+
+export type NftBlockchainSimulationCheck = {
+  readonly code:
+    NftBlockchainSimulationCheckCode;
+
+  readonly passed:
+    boolean;
+
+  readonly message:
+    string;
+
+  readonly authoritative:
+    false;
+};
+
+export type NftBlockchainSimulationReport = {
+  readonly requestId:
+    string;
+
+  readonly status:
+    NftBlockchainSimulationStatus;
+
+  readonly checks:
+    readonly NftBlockchainSimulationCheck[];
+
+  readonly simulationRef:
+    string;
+
+  readonly executable:
+    false;
+
+  readonly authoritative:
+    false;
+};
+
+export type NftBlockchainSendPreparation = {
+  readonly requestId:
+    string;
+
+  readonly chainRef:
+    string;
+
+  readonly contractRef:
+    string;
+
+  readonly payloadRef:
+    string;
+
+  readonly simulationRef:
+    string;
+
+  readonly stage:
+    "SEND_PREPARED";
+
+  readonly walletSigningRequired:
+    true;
+
+  readonly transactionSubmitted:
+    false;
+
+  readonly executable:
+    false;
+
+  readonly authoritative:
+    false;
+};
