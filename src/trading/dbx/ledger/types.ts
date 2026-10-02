@@ -221,3 +221,83 @@ export type DbxLedgerAccountBalance = {
   readonly governanceAuthority:
     false;
 };
+
+export type DbxHoldStatus =
+  | "ACTIVE"
+  | "CAPTURED"
+  | "RELEASED"
+  | "EXPIRED";
+
+export type DbxHoldPurpose =
+  | "MARKETPLACE"
+  | "BOT_RUNTIME"
+  | "TOOL_USAGE"
+  | "AI_RUNTIME"
+  | "SERVICE"
+  | "OTHER";
+
+export type DbxHold = {
+  readonly id:
+    string;
+
+  readonly idempotencyKey:
+    string;
+
+  readonly accountId:
+    string;
+
+  readonly amountMinor:
+    number;
+
+  readonly purpose:
+    DbxHoldPurpose;
+
+  readonly reference:
+    string;
+
+  readonly status:
+    DbxHoldStatus;
+
+  readonly createdAt:
+    string;
+
+  readonly expiresAt:
+    string | null;
+
+  readonly capturedTransactionId:
+    string | null;
+
+  readonly releasedAt:
+    string | null;
+
+  readonly authoritative:
+    false;
+};
+
+export type DbxHoldStore = {
+  readonly holds:
+    readonly DbxHold[];
+};
+
+export type DbxSpendableBalance = {
+  readonly accountId:
+    string;
+
+  readonly ledgerBalanceMinor:
+    number;
+
+  readonly reservedMinor:
+    number;
+
+  readonly availableMinor:
+    number;
+
+  readonly currency:
+    "DBX";
+
+  readonly derived:
+    true;
+
+  readonly authoritative:
+    false;
+};
