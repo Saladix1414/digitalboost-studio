@@ -1,0 +1,297 @@
+.ti-nft-forge {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.ti-nft-forge__hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 22px;
+  border: 1px solid rgba(126, 151, 181, 0.18);
+  background: #10151c;
+}
+
+.ti-nft-forge__hero h2 {
+  margin: 6px 0 7px;
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.ti-nft-forge__hero p {
+  max-width: 680px;
+  margin: 0;
+  color: #8d9aaa;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.ti-nft-forge__environment {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  color: #8d9aaa;
+  font-size: 11px;
+}
+
+.ti-nft-forge__environment span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3fd4a0;
+}
+
+.ti-nft-forge__metrics {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  border: 1px solid rgba(126, 151, 181, 0.16);
+  background: #0d1218;
+}
+
+.ti-nft-forge__metrics article {
+  display: grid;
+  gap: 5px;
+  padding: 15px 17px;
+  border-right:
+    1px solid rgba(126, 151, 181, 0.12);
+}
+
+.ti-nft-forge__metrics article:last-child {
+  border-right: 0;
+}
+
+.ti-nft-forge__metrics span,
+.ti-nft-forge__metrics small {
+  color: #788697;
+  font-size: 10px;
+}
+
+.ti-nft-forge__metrics strong {
+  color: #e9eef5;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ti-nft-forge__nav {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  overflow-x: auto;
+  border-bottom:
+    1px solid rgba(126, 151, 181, 0.16);
+}
+
+.ti-nft-forge__nav button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #7d8998;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.ti-nft-forge__nav button:hover {
+  color: #c8d5e4;
+}
+
+.ti-nft-forge__nav button.is-active {
+  border-bottom-color: #37b8ff;
+  color: #e8f5ff;
+}
+
+.ti-nft-forge__create {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.7fr)
+    minmax(250px, 0.7fr);
+  gap: 16px;
+}
+
+.ti-nft-forge__primary-panel,
+.ti-nft-forge__side-panel,
+.ti-nft-forge__list,
+.ti-nft-forge__future {
+  border: 1px solid rgba(126, 151, 181, 0.16);
+  background: #0f141b;
+}
+
+.ti-nft-forge__primary-panel,
+.ti-nft-forge__side-panel,
+.ti-nft-forge__list {
+  padding: 18px;
+}
+
+.ti-nft-forge__panel-head,
+.ti-nft-forge__section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ti-nft-forge__panel-head h3,
+.ti-nft-forge__section-head h3,
+.ti-nft-forge__side-panel h3,
+.ti-nft-forge__future h3 {
+  margin: 5px 0 0;
+  color: #e9eef5;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.ti-nft-forge__dropzone {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  min-height: 250px;
+  margin-top: 18px;
+  border:
+    1px dashed rgba(126, 151, 181, 0.24);
+  background: #0b1016;
+  text-align: center;
+}
+
+.ti-nft-forge__dropzone span {
+  max-width: 340px;
+  color: #778495;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.ti-nft-forge button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.ti-nft-forge__dropzone button,
+.ti-nft-forge__section-head button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 11px;
+  border:
+    1px solid rgba(126, 151, 181, 0.2);
+  background: #141c25;
+  color: #cbd5df;
+  font: inherit;
+  font-size: 11px;
+}
+
+.ti-nft-forge__side-panel dl {
+  display: grid;
+  gap: 0;
+  margin: 18px 0 0;
+}
+
+.ti-nft-forge__side-panel dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom:
+    1px solid rgba(126, 151, 181, 0.1);
+  font-size: 11px;
+}
+
+.ti-nft-forge__side-panel dt {
+  color: #748293;
+}
+
+.ti-nft-forge__side-panel dd {
+  margin: 0;
+  color: #cbd5df;
+}
+
+.ti-nft-forge__row {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 2fr)
+    minmax(100px, 0.6fr)
+    minmax(120px, 0.7fr);
+  gap: 18px;
+  padding: 14px 0;
+  border-bottom:
+    1px solid rgba(126, 151, 181, 0.1);
+}
+
+.ti-nft-forge__row > div {
+  display: grid;
+  gap: 4px;
+}
+
+.ti-nft-forge__row strong {
+  color: #dce5ef;
+  font-size: 11px;
+  font-weight: 550;
+}
+
+.ti-nft-forge__row span {
+  color: #738091;
+  font-size: 10px;
+}
+
+.ti-nft-forge__future {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  text-align: center;
+}
+
+.ti-nft-forge__future p {
+  max-width: 480px;
+  color: #7f8c9c;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.ti-nft-forge__activity {
+  display: flex;
+  gap: 16px;
+  padding-top: 4px;
+  color: #637182;
+  font-size: 10px;
+}
+
+@media (max-width: 900px) {
+  .ti-nft-forge__metrics {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .ti-nft-forge__create {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .ti-nft-forge__hero {
+    display: grid;
+  }
+
+  .ti-nft-forge__metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .ti-nft-forge__metrics article {
+    border-right: 0;
+    border-bottom:
+      1px solid rgba(126, 151, 181, 0.12);
+  }
+
+  .ti-nft-forge__row {
+    grid-template-columns: 1fr;
+  }
+}

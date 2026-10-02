@@ -45,6 +45,7 @@ import PaperTradingWorkspace from "./paper/PaperTradingWorkspace";
 import BotForgeWorkspace from "./bots/BotForgeWorkspace";
 import RiskReviewWorkspace from "./risk/RiskReviewWorkspace";
 import ActivityWorkspace from "./activity/ActivityWorkspace";
+import NftForgeWorkspace from "./nft/NftForgeWorkspace";
 
 import {
   MarketDataProvider,
@@ -370,6 +371,9 @@ export function TradingIslandsWorkspace({
             ) : activeSection === "risk" &&
               activeWorkspaceTab === "workspace" ? (
               <RiskReviewWorkspace />
+            ) : activeSection === "nft-forge" &&
+              activeWorkspaceTab === "workspace" ? (
+              <NftForgeWorkspace />
             ) : activeSection === "activity" &&
               activeWorkspaceTab === "workspace" ? (
               <ActivityWorkspace />
