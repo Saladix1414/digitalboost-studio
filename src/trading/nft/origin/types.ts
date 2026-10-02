@@ -99,3 +99,78 @@ export type NftOriginValidationResult = {
   readonly issues:
     readonly NftOriginValidationIssue[];
 };
+
+export type NftOriginRevisionReason =
+  | "INITIAL_CAPTURE"
+  | "CONTEXT_UPDATE"
+  | "SOURCE_UPDATE"
+  | "MODE_UPDATE"
+  | "ARCHIVED";
+
+export type NftOriginSnapshot = {
+  readonly identityHash: string;
+  readonly contextHash: string;
+  readonly recordHash: string;
+
+  readonly authoritative: false;
+};
+
+export type NftOriginHistoryEntry = {
+  readonly id: string;
+
+  readonly originId: string;
+
+  readonly version: number;
+
+  readonly previousEntryId:
+    string | null;
+
+  readonly reason:
+    NftOriginRevisionReason;
+
+  readonly snapshot:
+    NftOriginSnapshot;
+
+  readonly capturedAt: string;
+
+  /**
+   * Origin history records immutable capture state.
+   * It does not establish provenance or ownership.
+   */
+  readonly authoritative: false;
+};
+
+export type NftOriginHistory = {
+  readonly originId: string;
+
+  readonly entries:
+    readonly NftOriginHistoryEntry[];
+
+  readonly authoritative: false;
+};
+
+export type NftOriginHistoryValidationIssueCode =
+  | "INVALID_HISTORY_ORIGIN_ID"
+  | "EMPTY_ORIGIN_HISTORY"
+  | "INVALID_HISTORY_ENTRY_ID"
+  | "INVALID_HISTORY_VERSION"
+  | "INVALID_HISTORY_SEQUENCE"
+  | "INVALID_HISTORY_LINK"
+  | "INVALID_IDENTITY_HASH"
+  | "INVALID_CONTEXT_HASH"
+  | "INVALID_RECORD_HASH"
+  | "INVALID_HISTORY_TIMESTAMP";
+
+export type NftOriginHistoryValidationIssue = {
+  readonly code:
+    NftOriginHistoryValidationIssueCode;
+
+  readonly message: string;
+};
+
+export type NftOriginHistoryValidationResult = {
+  readonly valid: boolean;
+
+  readonly issues:
+    readonly NftOriginHistoryValidationIssue[];
+};
