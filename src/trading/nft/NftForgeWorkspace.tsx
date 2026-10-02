@@ -33,6 +33,8 @@ import NftOriginWorkspace from "./origin/NftOriginWorkspace";
 
 import NftProvenanceWorkspace from "./provenance/NftProvenanceWorkspace";
 
+import NftMarketplaceWorkspace from "./marketplace/NftMarketplaceWorkspace";
+
 import "./nft-forge.css";
 
 const forgeSections: ReadonlyArray<{
@@ -382,6 +384,10 @@ export function NftForgeWorkspace() {
           <NftDnaWorkspace />
           <NftProvenanceWorkspace />
         </>
+      ) : null}
+
+      {activeSection === "assets" ? (
+        <NftMarketplaceWorkspace />
       ) : null}
 
       {[

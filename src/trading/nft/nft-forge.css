@@ -1454,3 +1454,212 @@
     gap: 5px;
   }
 }
+
+/* =========================================================
+   PHASE 26D — NFT MARKETPLACE WORKSPACE
+   ========================================================= */
+
+.ti-marketplace {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(126, 151, 181, 0.14);
+  background: #0d1218;
+}
+
+.ti-marketplace__hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.ti-marketplace__hero h3 {
+  margin: 5px 0 6px;
+  color: #e2eaf2;
+  font-size: 16px;
+}
+
+.ti-marketplace__hero p {
+  max-width: 720px;
+  margin: 0;
+  color: #788695;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.ti-marketplace__metrics {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ti-marketplace__metrics article {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid rgba(126, 151, 181, 0.1);
+  background: #0a0f15;
+}
+
+.ti-marketplace__metrics span {
+  color: #687686;
+  font-size: 8px;
+}
+
+.ti-marketplace__metrics strong {
+  color: #dce6ee;
+  font-size: 10px;
+}
+
+.ti-marketplace__metrics small {
+  color: #5e6b79;
+  font-size: 8px;
+}
+
+.ti-marketplace__grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.ti-marketplace__panel,
+.ti-marketplace__flow,
+.ti-marketplace__intent {
+  border: 1px solid rgba(126, 151, 181, 0.11);
+  background: #0a0f15;
+}
+
+.ti-marketplace__panel > header,
+.ti-marketplace__intent > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(126, 151, 181, 0.08);
+}
+
+.ti-marketplace__panel > header span,
+.ti-marketplace__intent > header span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #d2dce5;
+  font-size: 9px;
+}
+
+.ti-marketplace__panel > header small,
+.ti-marketplace__intent > header small {
+  color: #637180;
+  font-size: 8px;
+}
+
+.ti-marketplace dl {
+  display: grid;
+  margin: 0;
+  padding: 11px;
+}
+
+.ti-marketplace dl div {
+  display: grid;
+  gap: 4px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(126, 151, 181, 0.07);
+}
+
+.ti-marketplace dt {
+  color: #637180;
+  font-size: 8px;
+}
+
+.ti-marketplace dd {
+  overflow-wrap: anywhere;
+  margin: 0;
+  color: #cad5df;
+  font-size: 8px;
+}
+
+.ti-marketplace__flow {
+  display: grid;
+}
+
+.ti-marketplace__flow > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px;
+  border-bottom: 1px solid rgba(126, 151, 181, 0.08);
+}
+
+.ti-marketplace__flow > header strong {
+  color: #86d8bb;
+  font-size: 8px;
+}
+
+.ti-marketplace__flow-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  padding: 11px;
+}
+
+.ti-marketplace__flow-grid > div {
+  display: grid;
+  gap: 4px;
+  padding: 9px;
+  border: 1px solid rgba(126, 151, 181, 0.08);
+  background: #0e141b;
+}
+
+.ti-marketplace__flow-grid span {
+  color: #637180;
+  font-size: 8px;
+}
+
+.ti-marketplace__flow-grid strong {
+  color: #d7e1ea;
+  font-size: 9px;
+}
+
+.ti-marketplace__pass {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 11px 11px;
+  padding: 10px;
+  border: 1px solid rgba(67, 211, 159, 0.18);
+  background: rgba(67, 211, 159, 0.04);
+  color: #85d9b9;
+  font-size: 8px;
+}
+
+.ti-marketplace__boundary {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 11px;
+  border: 1px solid rgba(239, 183, 74, 0.18);
+  background: rgba(239, 183, 74, 0.04);
+  color: #c8aa6d;
+  font-size: 8px;
+  line-height: 1.6;
+}
+
+.ti-marketplace__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 13px;
+  color: #627080;
+  font-size: 8px;
+}
+
+@media (max-width: 900px) {
+  .ti-marketplace__metrics,
+  .ti-marketplace__grid,
+  .ti-marketplace__flow-grid {
+    grid-template-columns: 1fr;
+  }
+}
