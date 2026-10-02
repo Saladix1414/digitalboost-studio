@@ -117,3 +117,58 @@ export type NftMarketplaceValidationResult = {
   readonly issues:
     readonly NftMarketplaceValidationIssue[];
 };
+
+export type NftMarketplaceEligibilityIssueCode =
+  | "LISTING_INVALID"
+  | "PROVENANCE_REFERENCE_MISSING"
+  | "DNA_REFERENCE_MISSING"
+  | "SELLER_REFERENCE_MISSING"
+  | "WALLET_REFERENCE_MISSING"
+  | "LISTING_NOT_READY"
+  | "PRICE_NOT_POSITIVE"
+  | "EXPIRED_LISTING"
+  | "PROVENANCE_CLOSURE_INVALID"
+  | "ASSET_ID_MISMATCH"
+  | "COLLECTION_ID_MISMATCH";
+
+export type NftMarketplaceEligibilityIssue = {
+  readonly code:
+    NftMarketplaceEligibilityIssueCode;
+
+  readonly message:
+    string;
+};
+
+export type NftMarketplaceEligibilityResult = {
+  readonly eligible:
+    boolean;
+
+  readonly issues:
+    readonly NftMarketplaceEligibilityIssue[];
+
+  readonly authoritative:
+    false;
+};
+
+export type NftMarketplaceSaleIntent = {
+  readonly listingId:
+    string;
+
+  readonly assetId:
+    string;
+
+  readonly sellerId:
+    string;
+
+  readonly saleType:
+    NftMarketplaceSaleType;
+
+  readonly price:
+    NftMarketplacePrice;
+
+  readonly createdAt:
+    string;
+
+  readonly authoritative:
+    false;
+};
