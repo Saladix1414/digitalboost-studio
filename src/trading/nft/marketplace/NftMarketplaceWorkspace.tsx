@@ -3,104 +3,71 @@ import {
 } from "react";
 
 import {
+  Activity,
   BadgeDollarSign,
   CheckCircle2,
   CircleDollarSign,
-  ShoppingCart,
+  Route,
   ShieldCheck,
+  ShoppingCart,
   UserRound,
 } from "lucide-react";
 
-import {
-  evaluateFixtureMarketplaceEligibility,
-} from "./eligibilityBridge";
-
-import {
-  createMarketplaceSaleIntent,
-} from "./saleIntent";
-
-import {
-  matchMarketplaceOrder,
-} from "./orderMatch";
-
-import {
-  createMarketplacePreSettlement,
-} from "./preSettlement";
-
-import {
-  nftMarketplaceListedFixture,
-  nftMarketplaceOrderFixture,
-} from "./orderFixtures";
-
-import {
-  nftMarketplaceReadyListingFixture,
-} from "./eligibilityFixtures";
-
 import NftMarketplaceCatalogWorkspace from "./catalog/NftMarketplaceCatalogWorkspace";
 
+import {
+  runMarketplaceEngine,
+} from "./orchestration/engine";
+
+import {
+  runObservableMarketplaceEngine,
+} from "./orchestration/observableEngine";
+
+import {
+  nftMarketplaceEngineInputFixture,
+} from "./orchestration/fixtures";
+
 export function NftMarketplaceWorkspace() {
-  const eligibility =
+  const engine =
     useMemo(
       () =>
-        evaluateFixtureMarketplaceEligibility(
-          nftMarketplaceReadyListingFixture
+        runMarketplaceEngine(
+          nftMarketplaceEngineInputFixture
         ),
       []
     );
 
-  const saleIntent =
+  const observable =
     useMemo(
       () =>
-        createMarketplaceSaleIntent(
-          nftMarketplaceReadyListingFixture,
-          eligibility,
-          "2026-10-14T10:06:00.000Z"
-        ),
-      [eligibility]
-    );
-
-  const matchedOrder =
-    useMemo(
-      () =>
-        matchMarketplaceOrder(
-          nftMarketplaceOrderFixture,
-          nftMarketplaceListedFixture,
-          "2026-10-14T10:13:00.000Z"
+        runObservableMarketplaceEngine(
+          nftMarketplaceEngineInputFixture
         ),
       []
-    );
-
-  const preSettlement =
-    useMemo(
-      () =>
-        createMarketplacePreSettlement(
-          matchedOrder,
-          "2026-10-14T10:14:00.000Z"
-        ),
-      [matchedOrder]
     );
 
   return (
     <section
       className="ti-marketplace"
       data-marketplace-workspace
+      data-marketplace-engine
       data-authority="none"
     >
       <header className="ti-marketplace__hero">
         <div>
           <span className="ti-label">
-            Marketplace
+            Marketplace Engine
           </span>
 
           <h3>
-            Listing, Order Intent & Pre-settlement
+            Discovery, Intent & Pre-settlement
           </h3>
 
           <p>
-            Inspect marketplace readiness,
-            listing eligibility, buyer/seller
-            matching and pre-settlement state
-            without wallet signing or blockchain
+            Inspect the deterministic marketplace
+            lifecycle from eligibility through
+            pre-settlement without payment,
+            wallet signing or blockchain
             execution.
           </p>
         </div>
@@ -120,14 +87,11 @@ export function NftMarketplaceWorkspace() {
           </span>
 
           <strong>
-            {
-              nftMarketplaceReadyListingFixture
-                .status
-            }
+            {engine.listing.status}
           </strong>
 
           <small>
-            local domain state
+            orchestrated state
           </small>
         </article>
 
@@ -137,9 +101,12 @@ export function NftMarketplaceWorkspace() {
           </span>
 
           <strong>
-            {eligibility.eligible
-              ? "PASS"
-              : "FAIL"}
+            {
+              engine.eligibility
+                .eligible
+                ? "PASS"
+                : "FAIL"
+            }
           </strong>
 
           <small>
@@ -153,27 +120,68 @@ export function NftMarketplaceWorkspace() {
           </span>
 
           <strong>
-            {matchedOrder.status}
+            {engine.order.status}
           </strong>
 
           <small>
-            buyer/seller matched
+            matched ≠ paid
           </small>
         </article>
 
         <article>
           <span>
-            Settlement
+            Engine stage
           </span>
 
           <strong>
-            PREPARED
+            {engine.stage}
           </strong>
 
           <small>
-            execution:none
+            execution:{engine.execution}
           </small>
         </article>
+      </section>
+
+      <section className="ti-marketplace__engine-status">
+        <header>
+          <span>
+            <Route
+              size={15}
+            />
+            Engine Lifecycle
+          </span>
+
+          <strong>
+            {observable.lifecycle.status}
+          </strong>
+        </header>
+
+        <div className="ti-marketplace__engine-steps">
+          {
+            observable.lifecycle.events.map(
+              (event) => (
+                <article
+                  key={
+                    `${event.sequence}:${event.to}`
+                  }
+                >
+                  <span>
+                    #{event.sequence}
+                  </span>
+
+                  <strong>
+                    {event.to}
+                  </strong>
+
+                  <small>
+                    {event.reason}
+                  </small>
+                </article>
+              )
+            )
+          }
+        </div>
       </section>
 
       <div className="ti-marketplace__grid">
@@ -187,11 +195,7 @@ export function NftMarketplaceWorkspace() {
             </span>
 
             <small>
-              v
-              {
-                nftMarketplaceReadyListingFixture
-                  .version
-              }
+              v{engine.listing.version}
             </small>
           </header>
 
@@ -203,7 +207,7 @@ export function NftMarketplaceWorkspace() {
 
               <dd>
                 {
-                  nftMarketplaceReadyListingFixture
+                  engine.listing
                     .asset.assetId
                 }
               </dd>
@@ -216,39 +220,8 @@ export function NftMarketplaceWorkspace() {
 
               <dd>
                 {
-                  nftMarketplaceReadyListingFixture
+                  engine.listing
                     .asset.collectionId
-                }
-              </dd>
-            </div>
-
-            <div>
-              <dt>
-                Sale type
-              </dt>
-
-              <dd>
-                {
-                  nftMarketplaceReadyListingFixture
-                    .saleType
-                }
-              </dd>
-            </div>
-
-            <div>
-              <dt>
-                Price
-              </dt>
-
-              <dd>
-                {
-                  nftMarketplaceReadyListingFixture
-                    .price.amount
-                }
-                {" "}
-                {
-                  nftMarketplaceReadyListingFixture
-                    .price.currency
                 }
               </dd>
             </div>
@@ -260,8 +233,26 @@ export function NftMarketplaceWorkspace() {
 
               <dd>
                 {
-                  nftMarketplaceReadyListingFixture
+                  engine.listing
                     .asset.provenanceId
+                }
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Price
+              </dt>
+
+              <dd>
+                {
+                  engine.listing
+                    .price.amount
+                }
+                {" "}
+                {
+                  engine.listing
+                    .price.currency
                 }
               </dd>
             </div>
@@ -290,7 +281,7 @@ export function NftMarketplaceWorkspace() {
 
               <dd>
                 {
-                  nftMarketplaceReadyListingFixture
+                  engine.listing
                     .seller.sellerId
                 }
               </dd>
@@ -303,7 +294,7 @@ export function NftMarketplaceWorkspace() {
 
               <dd>
                 {
-                  nftMarketplaceReadyListingFixture
+                  engine.listing
                     .seller.walletRef
                 }
               </dd>
@@ -316,7 +307,7 @@ export function NftMarketplaceWorkspace() {
 
               <dd>
                 {
-                  matchedOrder
+                  engine.order
                     .buyer.buyerId
                 }
               </dd>
@@ -329,7 +320,7 @@ export function NftMarketplaceWorkspace() {
 
               <dd>
                 {
-                  matchedOrder
+                  engine.order
                     .buyer.walletRef
                 }
               </dd>
@@ -341,7 +332,7 @@ export function NftMarketplaceWorkspace() {
       <section className="ti-marketplace__flow">
         <header>
           <span className="ti-label">
-            Marketplace flow
+            Marketplace Engine Flow
           </span>
 
           <strong>
@@ -356,9 +347,12 @@ export function NftMarketplaceWorkspace() {
             </span>
 
             <strong>
-              {eligibility.eligible
-                ? "ELIGIBLE"
-                : "BLOCKED"}
+              {
+                engine.eligibility
+                  .eligible
+                  ? "ELIGIBLE"
+                  : "BLOCKED"
+              }
             </strong>
           </div>
 
@@ -369,7 +363,7 @@ export function NftMarketplaceWorkspace() {
 
             <strong>
               {
-                saleIntent
+                engine.saleIntent
                   .saleType
               }
             </strong>
@@ -381,7 +375,7 @@ export function NftMarketplaceWorkspace() {
             </span>
 
             <strong>
-              {matchedOrder.status}
+              {engine.order.status}
             </strong>
           </div>
 
@@ -391,27 +385,33 @@ export function NftMarketplaceWorkspace() {
             </span>
 
             <strong>
-              {preSettlement.ready
-                ? "READY"
-                : "BLOCKED"}
+              {
+                engine.preSettlement
+                  .ready
+                  ? "READY"
+                  : "BLOCKED"
+              }
             </strong>
           </div>
         </div>
 
-        {eligibility.eligible &&
-        preSettlement.ready ? (
-          <div className="ti-marketplace__pass">
-            <CheckCircle2
-              size={16}
-            />
+        {
+          engine.eligibility.eligible &&
+          engine.preSettlement.ready
+            ? (
+              <div className="ti-marketplace__pass">
+                <CheckCircle2
+                  size={16}
+                />
 
-            <span>
-              Listing, buyer/seller match and
-              pre-settlement are internally
-              coherent.
-            </span>
-          </div>
-        ) : null}
+                <span>
+                  Marketplace Engine completed
+                  deterministic pre-settlement.
+                </span>
+              </div>
+            )
+            : null
+        }
       </section>
 
       <section className="ti-marketplace__intent">
@@ -435,7 +435,10 @@ export function NftMarketplaceWorkspace() {
             </dt>
 
             <dd>
-              {saleIntent.listingId}
+              {
+                engine.saleIntent
+                  .listingId
+              }
             </dd>
           </div>
 
@@ -445,7 +448,10 @@ export function NftMarketplaceWorkspace() {
             </dt>
 
             <dd>
-              {saleIntent.assetId}
+              {
+                engine.saleIntent
+                  .assetId
+              }
             </dd>
           </div>
 
@@ -455,7 +461,10 @@ export function NftMarketplaceWorkspace() {
             </dt>
 
             <dd>
-              {saleIntent.sellerId}
+              {
+                engine.saleIntent
+                  .sellerId
+              }
             </dd>
           </div>
 
@@ -466,15 +475,70 @@ export function NftMarketplaceWorkspace() {
 
             <dd>
               {
-                saleIntent.price.amount
+                engine.saleIntent
+                  .price.amount
               }
               {" "}
               {
-                saleIntent.price.currency
+                engine.saleIntent
+                  .price.currency
               }
             </dd>
           </div>
         </dl>
+      </section>
+
+      <section className="ti-marketplace__trace">
+        <header>
+          <span>
+            <Activity
+              size={15}
+            />
+            Deterministic Trace
+          </span>
+
+          <strong>
+            {
+              observable.observability
+                .failed
+                ? "FAILED"
+                : "PASS"
+            }
+          </strong>
+        </header>
+
+        <div className="ti-marketplace__trace-list">
+          {
+            observable.observability
+              .trace.map(
+                (entry) => (
+                  <article
+                    key={
+                      `${entry.sequence}:${entry.code}`
+                    }
+                  >
+                    <span>
+                      #{entry.sequence}
+                    </span>
+
+                    <div>
+                      <strong>
+                        {entry.code}
+                      </strong>
+
+                      <small>
+                        {entry.message}
+                      </small>
+                    </div>
+
+                    <em>
+                      {entry.kind}
+                    </em>
+                  </article>
+                )
+              )
+          }
+        </div>
       </section>
 
       <div className="ti-marketplace__boundary">
@@ -483,10 +547,10 @@ export function NftMarketplaceWorkspace() {
         />
 
         <span>
-          Marketplace readiness and
-          pre-settlement do not prove payment,
-          ownership transfer, wallet approval or
-          blockchain settlement.
+          PRE_SETTLEMENT_READY is an internal
+          marketplace state. It does not prove
+          payment, ownership transfer, wallet
+          approval or blockchain settlement.
         </span>
       </div>
 
@@ -501,6 +565,10 @@ export function NftMarketplaceWorkspace() {
 
         <span>
           pre-settlement ≠ settlement
+        </span>
+
+        <span>
+          telemetry ≠ authority
         </span>
 
         <span>

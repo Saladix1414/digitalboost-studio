@@ -30,7 +30,7 @@ test(
 );
 
 test(
-  "Marketplace workspace exposes listing and eligibility",
+  "Marketplace workspace exposes listing and eligibility through canonical engine",
   () => {
     assert.match(
       marketplaceWorkspace,
@@ -44,13 +44,18 @@ test(
 
     assert.match(
       marketplaceWorkspace,
-      /evaluateFixtureMarketplaceEligibility/
+      /runMarketplaceEngine/
+    );
+
+    assert.match(
+      marketplaceWorkspace,
+      /engine\.eligibility/
     );
   }
 );
 
 test(
-  "Marketplace workspace exposes order and pre-settlement flow",
+  "Marketplace workspace exposes order and pre-settlement through engine orchestration",
   () => {
     assert.match(
       marketplaceWorkspace,
@@ -64,12 +69,42 @@ test(
 
     assert.match(
       marketplaceWorkspace,
-      /matchMarketplaceOrder/
+      /engine\.order/
     );
 
     assert.match(
       marketplaceWorkspace,
-      /createMarketplacePreSettlement/
+      /engine\.preSettlement/
+    );
+
+    assert.match(
+      marketplaceWorkspace,
+      /runObservableMarketplaceEngine/
+    );
+  }
+);
+
+test(
+  "Marketplace workspace exposes lifecycle and deterministic trace",
+  () => {
+    assert.match(
+      marketplaceWorkspace,
+      /Engine Lifecycle/
+    );
+
+    assert.match(
+      marketplaceWorkspace,
+      /Deterministic Trace/
+    );
+
+    assert.match(
+      marketplaceWorkspace,
+      /observable\.lifecycle/
+    );
+
+    assert.match(
+      marketplaceWorkspace,
+      /observable\.observability/
     );
   }
 );
@@ -90,6 +125,11 @@ test(
     assert.match(
       marketplaceWorkspace,
       /pre-settlement ≠ settlement/
+    );
+
+    assert.match(
+      marketplaceWorkspace,
+      /telemetry ≠ authority/
     );
 
     assert.match(

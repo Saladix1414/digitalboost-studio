@@ -8,8 +8,14 @@ const marketplaceWorkspace =
     "utf8"
   );
 
+const marketplaceEngine =
+  fs.readFileSync(
+    "src/trading/nft/marketplace/orchestration/engine.ts",
+    "utf8"
+  );
+
 test(
-  "Phase 27 catalog preserves Phase 26 marketplace flow",
+  "Phase 29 engine preserves Phase 26 marketplace flow",
   () => {
     assert.match(
       marketplaceWorkspace,
@@ -28,21 +34,26 @@ test(
 
     assert.match(
       marketplaceWorkspace,
+      /runMarketplaceEngine/
+    );
+
+    assert.match(
+      marketplaceEngine,
       /evaluateFixtureMarketplaceEligibility/
     );
 
     assert.match(
-      marketplaceWorkspace,
+      marketplaceEngine,
       /createMarketplaceSaleIntent/
     );
 
     assert.match(
-      marketplaceWorkspace,
+      marketplaceEngine,
       /matchMarketplaceOrder/
     );
 
     assert.match(
-      marketplaceWorkspace,
+      marketplaceEngine,
       /createMarketplacePreSettlement/
     );
   }
@@ -69,6 +80,31 @@ test(
     assert.match(
       marketplaceWorkspace,
       /RPC:none/
+    );
+  }
+);
+
+test(
+  "Phase 26 responsibilities are delegated instead of duplicated in workspace",
+  () => {
+    assert.doesNotMatch(
+      marketplaceWorkspace,
+      /evaluateFixtureMarketplaceEligibility/
+    );
+
+    assert.doesNotMatch(
+      marketplaceWorkspace,
+      /createMarketplaceSaleIntent/
+    );
+
+    assert.doesNotMatch(
+      marketplaceWorkspace,
+      /matchMarketplaceOrder/
+    );
+
+    assert.doesNotMatch(
+      marketplaceWorkspace,
+      /createMarketplacePreSettlement/
     );
   }
 );

@@ -2257,3 +2257,133 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   PHASE 29D — MARKETPLACE ENGINE CLOSURE
+   ========================================================= */
+
+.ti-marketplace__engine-status,
+.ti-marketplace__trace {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(126, 151, 181, 0.09);
+  background: #0d1319;
+}
+
+.ti-marketplace__engine-status > header,
+.ti-marketplace__trace > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ti-marketplace__engine-status > header span,
+.ti-marketplace__trace > header span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #c9d5df;
+  font-size: 8px;
+}
+
+.ti-marketplace__engine-status > header strong,
+.ti-marketplace__trace > header strong {
+  color: #82cfb0;
+  font-size: 8px;
+}
+
+.ti-marketplace__engine-steps {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.ti-marketplace__engine-steps article {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid rgba(126, 151, 181, 0.07);
+  background: #10161d;
+}
+
+.ti-marketplace__engine-steps span {
+  color: #566574;
+  font-size: 6px;
+}
+
+.ti-marketplace__engine-steps strong {
+  color: #c9d5df;
+  font-size: 7px;
+}
+
+.ti-marketplace__engine-steps small {
+  color: #71808f;
+  font-size: 6px;
+}
+
+.ti-marketplace__trace-list {
+  display: grid;
+  gap: 5px;
+}
+
+.ti-marketplace__trace-list article {
+  display: grid;
+  grid-template-columns:
+    32px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border: 1px solid rgba(126, 151, 181, 0.06);
+  background: #10161d;
+}
+
+.ti-marketplace__trace-list > article > span {
+  color: #596977;
+  font-size: 6px;
+}
+
+.ti-marketplace__trace-list div {
+  display: grid;
+  gap: 2px;
+}
+
+.ti-marketplace__trace-list strong {
+  color: #c8d3dd;
+  font-size: 7px;
+}
+
+.ti-marketplace__trace-list small {
+  color: #687786;
+  font-size: 6px;
+}
+
+.ti-marketplace__trace-list em {
+  color: #6faec6;
+  font-size: 6px;
+  font-style: normal;
+}
+
+@media (max-width: 900px) {
+  .ti-marketplace__engine-steps {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .ti-marketplace__engine-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .ti-marketplace__trace-list article {
+    grid-template-columns:
+      28px 1fr;
+  }
+
+  .ti-marketplace__trace-list em {
+    grid-column: 2;
+  }
+}
