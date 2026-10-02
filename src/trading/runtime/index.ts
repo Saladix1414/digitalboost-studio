@@ -219,3 +219,11 @@ export {
   hasRuntimeEvidenceReconciliationHistoryExternalChange,
   markRuntimeEvidenceReconciliationHistoryExternalChange,
 } from "./runtimeEvidenceReconciliationHistoryStore";
+
+export {
+  getRuntimeEvidenceReconciliationHistoryCoordinationHealth,
+} from "./runtimeEvidenceReconciliationHistoryStore";
+
+export type {
+  RuntimeEvidenceReconciliationHistoryCoordinationHealth,
+} from "./runtimeEvidenceReconciliationHistoryStore";

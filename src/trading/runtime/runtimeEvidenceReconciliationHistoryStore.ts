@@ -145,6 +145,63 @@ export function hasRuntimeEvidenceReconciliationHistoryExternalChange():
 }
 
 
+export type RuntimeEvidenceReconciliationHistoryCoordinationHealth = {
+  readonly crossContextSafe:
+    boolean;
+
+  readonly externalChangeDetected:
+    boolean;
+
+  readonly authoritative:
+    false;
+};
+
+
+let coordinationHealthSnapshot:
+  RuntimeEvidenceReconciliationHistoryCoordinationHealth = {
+    crossContextSafe:
+      coordinator.crossContextSafe,
+
+    externalChangeDetected:
+      false,
+
+    authoritative:
+      false,
+  };
+
+
+function refreshCoordinationHealthSnapshot():
+  void {
+  const nextCrossContextSafe =
+    coordinator.crossContextSafe;
+
+  if (
+    coordinationHealthSnapshot.crossContextSafe ===
+      nextCrossContextSafe &&
+    coordinationHealthSnapshot.externalChangeDetected ===
+      externalChangeDetected
+  ) {
+    return;
+  }
+
+  coordinationHealthSnapshot = {
+    crossContextSafe:
+      nextCrossContextSafe,
+
+    externalChangeDetected,
+
+    authoritative:
+      false,
+  };
+}
+
+
+export function getRuntimeEvidenceReconciliationHistoryCoordinationHealth():
+  RuntimeEvidenceReconciliationHistoryCoordinationHealth {
+  return coordinationHealthSnapshot;
+}
+
+
 export function markRuntimeEvidenceReconciliationHistoryExternalChange():
   void {
   if (
@@ -155,6 +212,8 @@ export function markRuntimeEvidenceReconciliationHistoryExternalChange():
 
   externalChangeDetected =
     true;
+
+  refreshCoordinationHealthSnapshot();
 
   emit();
 }
@@ -177,6 +236,10 @@ export function configureRuntimeEvidenceReconciliationHistoryCoordinator(
   void {
   coordinator =
     nextCoordinator;
+
+  refreshCoordinationHealthSnapshot();
+
+  emit();
 }
 
 
@@ -215,6 +278,8 @@ export async function hydrateRuntimeEvidenceReconciliationHistory():
 
     externalChangeDetected =
       false;
+
+    refreshCoordinationHealthSnapshot();
 
     emit();
   } catch {
@@ -301,6 +366,8 @@ export async function persistRuntimeEvidenceReconciliationHistory():
               externalChangeDetected =
                 false;
 
+              refreshCoordinationHealthSnapshot();
+
               emit();
 
               return;
@@ -316,6 +383,8 @@ export async function persistRuntimeEvidenceReconciliationHistory():
              */
             externalChangeDetected =
               false;
+
+            refreshCoordinationHealthSnapshot();
 
             emit();
           }
@@ -369,6 +438,8 @@ export function resetRuntimeEvidenceReconciliationHistoryForTests():
 
   externalChangeDetected =
     false;
+
+  refreshCoordinationHealthSnapshot();
 
   emit();
 }
