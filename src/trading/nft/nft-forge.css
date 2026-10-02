@@ -727,3 +727,254 @@
     gap: 4px;
   }
 }
+
+/* =========================================================
+   PHASE 23D — NFT ORIGIN
+   ========================================================= */
+
+.ti-origin {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid rgba(126, 151, 181, 0.16);
+  background: #0f141b;
+}
+
+.ti-origin__hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.ti-origin__hero h3 {
+  margin: 5px 0 6px;
+  color: #e8edf4;
+  font-size: 16px;
+}
+
+.ti-origin__hero p {
+  max-width: 700px;
+  margin: 0;
+  color: #7d8998;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.ti-origin__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ti-origin__controls button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(126, 151, 181, 0.18);
+  background: #121922;
+  color: #8794a4;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.ti-origin__controls button.is-active {
+  border-color: rgba(55, 184, 255, 0.55);
+  background: rgba(55, 184, 255, 0.07);
+  color: #e7f5ff;
+}
+
+.ti-origin__summary {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ti-origin__summary > div,
+.ti-origin__bridge-metrics > div {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid rgba(126, 151, 181, 0.12);
+  background: #0b1016;
+}
+
+.ti-origin__summary span,
+.ti-origin__bridge-metrics span {
+  color: #667484;
+  font-size: 9px;
+}
+
+.ti-origin__summary strong,
+.ti-origin__bridge-metrics strong {
+  color: #dce5ee;
+  font-size: 10px;
+}
+
+.ti-origin__grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ti-origin__panel,
+.ti-origin__bridge,
+.ti-origin__history {
+  border: 1px solid rgba(126, 151, 181, 0.13);
+  background: #0b1016;
+}
+
+.ti-origin__panel > header,
+.ti-origin__history > header,
+.ti-origin__bridge > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(126, 151, 181, 0.1);
+}
+
+.ti-origin__panel > header span,
+.ti-origin__history > header span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #dbe4ed;
+  font-size: 10px;
+}
+
+.ti-origin__panel > header small,
+.ti-origin__history > header small {
+  color: #647282;
+  font-size: 8px;
+}
+
+.ti-origin__panel dl {
+  display: grid;
+  margin: 0;
+  padding: 12px;
+}
+
+.ti-origin__panel dl div {
+  display: grid;
+  gap: 4px;
+  padding: 8px 0;
+  border-bottom:
+    1px solid rgba(126, 151, 181, 0.08);
+}
+
+.ti-origin__panel dt {
+  color: #647282;
+  font-size: 8px;
+}
+
+.ti-origin__panel dd {
+  overflow-wrap: anywhere;
+  margin: 0;
+  color: #c9d3dd;
+  font-size: 9px;
+}
+
+.ti-origin__bridge {
+  display: grid;
+}
+
+.ti-origin__bridge > header strong {
+  color: #86d8bb;
+  font-size: 9px;
+}
+
+.ti-origin__bridge-metrics {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px;
+}
+
+.ti-origin__closure-pass {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 12px 12px;
+  padding: 10px 11px;
+  border: 1px solid rgba(63, 212, 160, 0.2);
+  background: rgba(63, 212, 160, 0.05);
+  color: #86d8bb;
+  font-size: 9px;
+}
+
+.ti-origin__history > div {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+}
+
+.ti-origin__history article {
+  display: grid;
+  grid-template-columns:
+    180px 180px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  border: 1px solid rgba(126, 151, 181, 0.09);
+  background: #10161d;
+}
+
+.ti-origin__history article div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ti-origin__history article span {
+  color: #5fbce8;
+  font-size: 9px;
+}
+
+.ti-origin__history article strong {
+  color: #c8d2dc;
+  font-size: 9px;
+}
+
+.ti-origin__history article small,
+.ti-origin__history article code {
+  overflow-wrap: anywhere;
+  color: #6f7d8c;
+  font-size: 8px;
+}
+
+.ti-origin__boundary {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 11px 12px;
+  border: 1px solid rgba(240, 180, 70, 0.18);
+  background: rgba(240, 180, 70, 0.04);
+  color: #c8aa69;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.ti-origin__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  color: #657282;
+  font-size: 9px;
+}
+
+@media (max-width: 900px) {
+  .ti-origin__summary,
+  .ti-origin__grid,
+  .ti-origin__bridge-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .ti-origin__history article {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+}

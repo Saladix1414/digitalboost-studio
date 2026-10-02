@@ -29,6 +29,8 @@ import NftMintWorkspace from "./mint/NftMintWorkspace";
 
 import NftDnaWorkspace from "./dna/NftDnaWorkspace";
 
+import NftOriginWorkspace from "./origin/NftOriginWorkspace";
+
 import "./nft-forge.css";
 
 const forgeSections: ReadonlyArray<{
@@ -373,7 +375,7 @@ export function NftForgeWorkspace() {
       ) : null}
 
       {activeSection === "origin" ? (
-        <NftDnaWorkspace />
+        <NftOriginWorkspace />
       ) : null}
 
       {[
