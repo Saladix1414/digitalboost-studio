@@ -37,33 +37,6 @@ export type RuntimeEvidenceReconciliationHistoryMergeResult =
   | RuntimeEvidenceReconciliationHistoryMergeConflict;
 
 
-function comparableEntry(
-  entry:
-    RuntimeEvidenceReconciliationAttemptEntry
-):
-  Omit<
-    RuntimeEvidenceReconciliationAttemptEntry,
-    "sequence"
-  > {
-  return {
-    status:
-      entry.status,
-
-    duplicateSessionIds:
-      entry.duplicateSessionIds,
-
-    conflictSessionId:
-      entry.conflictSessionId,
-
-    error:
-      entry.error,
-
-    authoritative:
-      false,
-  };
-}
-
-
 function entriesEqual(
   left:
     RuntimeEvidenceReconciliationAttemptEntry,
@@ -72,77 +45,270 @@ function entriesEqual(
     RuntimeEvidenceReconciliationAttemptEntry
 ):
   boolean {
+  const {
+    sequence:
+      _leftSequence,
+
+    ...leftEvidence
+  } =
+    left;
+
+  const {
+    sequence:
+      _rightSequence,
+
+    ...rightEvidence
+  } =
+    right;
+
   return (
     JSON.stringify(
-      comparableEntry(
-        left
-      )
+      leftEvidence
     ) ===
     JSON.stringify(
-      comparableEntry(
-        right
-      )
+      rightEvidence
     )
   );
 }
 
 
-function hasBasePrefix(
+function entryAtSequence(
   history:
     RuntimeEvidenceReconciliationAttemptHistory,
 
-  base:
-    RuntimeEvidenceReconciliationAttemptHistory
+  sequence:
+    number
 ):
-  boolean {
-  if (
-    history.entries.length <
-    base.entries.length
-  ) {
-    return false;
-  }
-
-  return base.entries.every(
-    (
-      entry,
-      index
-    ) =>
-      entriesEqual(
-        entry,
-        history.entries[
-          index
-        ]!
-      )
+  RuntimeEvidenceReconciliationAttemptEntry | undefined {
+  return history.entries.find(
+    entry =>
+      entry.sequence ===
+      sequence
   );
 }
 
 
-function resequence(
+/*
+ * A bounded branch may legitimately trim entries from the
+ * beginning of its previous base.
+ *
+ * Example:
+ *
+ * base   = 1 ... 24
+ * branch = 2 ... 25
+ *
+ * Requiring base to remain a literal array prefix would
+ * incorrectly classify that normal retention rollover as
+ * divergence.
+ *
+ * Instead, validate every sequence still retained by both
+ * histories. If a shared retained sequence changed content,
+ * the branch truly diverged.
+ *
+ * If neither side retains any common base sequence, lineage
+ * cannot be proven without stable attempt IDs, so the merge
+ * remains conservative and reports conflict.
+ */
+function branchMatchesRetainedBase(
+  base:
+    RuntimeEvidenceReconciliationAttemptHistory,
+
+  branch:
+    RuntimeEvidenceReconciliationAttemptHistory
+):
+  boolean {
+  if (
+    base.entries.length ===
+    0
+  ) {
+    return true;
+  }
+
+  const baseFirst =
+    base.entries[0]?.sequence;
+
+  const baseLast =
+    base.entries.at(-1)?.sequence;
+
+  if (
+    baseFirst ===
+      undefined ||
+    baseLast ===
+      undefined
+  ) {
+    return true;
+  }
+
+  const branchFirst =
+    branch.entries[0]?.sequence;
+
+  const branchLast =
+    branch.entries.at(-1)?.sequence;
+
+  if (
+    branchFirst ===
+      undefined ||
+    branchLast ===
+      undefined
+  ) {
+    return false;
+  }
+
+  const overlapStart =
+    Math.max(
+      baseFirst,
+      branchFirst
+    );
+
+  const overlapEnd =
+    Math.min(
+      baseLast,
+      branchLast
+    );
+
+  if (
+    overlapStart >
+    overlapEnd
+  ) {
+    return false;
+  }
+
+  for (
+    let sequence =
+      overlapStart;
+
+    sequence <=
+      overlapEnd;
+
+    sequence +=
+      1
+  ) {
+    const baseEntry =
+      entryAtSequence(
+        base,
+        sequence
+      );
+
+    const branchEntry =
+      entryAtSequence(
+        branch,
+        sequence
+      );
+
+    if (
+      !baseEntry ||
+      !branchEntry ||
+      !entriesEqual(
+        baseEntry,
+        branchEntry
+      )
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+function entriesAfterBase(
+  base:
+    RuntimeEvidenceReconciliationAttemptHistory,
+
+  branch:
+    RuntimeEvidenceReconciliationAttemptHistory
+):
+  readonly RuntimeEvidenceReconciliationAttemptEntry[] {
+  const baseLast =
+    base.entries.at(-1)?.sequence ??
+    0;
+
+  return branch.entries.filter(
+    entry =>
+      entry.sequence >
+      baseLast
+  );
+}
+
+
+function appendWithFreshSequence(
   entries:
+    readonly RuntimeEvidenceReconciliationAttemptEntry[],
+
+  entry:
+    RuntimeEvidenceReconciliationAttemptEntry
+):
+  readonly RuntimeEvidenceReconciliationAttemptEntry[] {
+  const nextSequence =
+    (
+      entries.at(-1)?.sequence ??
+      0
+    ) + 1;
+
+  return [
+    ...entries,
+    {
+      ...entry,
+
+      sequence:
+        nextSequence,
+
+      authoritative:
+        false,
+    },
+  ];
+}
+
+
+function mergeSuffixes(
+  base:
+    RuntimeEvidenceReconciliationAttemptHistory,
+
+  remoteSuffix:
+    readonly RuntimeEvidenceReconciliationAttemptEntry[],
+
+  localSuffix:
     readonly RuntimeEvidenceReconciliationAttemptEntry[]
 ):
   RuntimeEvidenceReconciliationAttemptHistory {
-  const bounded =
-    entries.slice(
-      -RUNTIME_EVIDENCE_RECONCILIATION_HISTORY_LIMIT
-    );
+  let entries:
+    readonly RuntimeEvidenceReconciliationAttemptEntry[] = [
+      ...base.entries,
+    ];
+
+  /*
+   * Deterministic ordering:
+   *
+   * persisted / remote evidence first,
+   * then local evidence.
+   *
+   * Concurrent branches can contain colliding sequence numbers,
+   * so merged suffix entries receive fresh monotonic sequences.
+   */
+  for (
+    const entry of remoteSuffix
+  ) {
+    entries =
+      appendWithFreshSequence(
+        entries,
+        entry
+      );
+  }
+
+  for (
+    const entry of localSuffix
+  ) {
+    entries =
+      appendWithFreshSequence(
+        entries,
+        entry
+      );
+  }
 
   return {
     entries:
-      bounded.map(
-        (
-          entry,
-          index
-        ) => ({
-          ...entry,
-
-          sequence:
-            index +
-            1,
-
-          authoritative:
-            false,
-        })
+      entries.slice(
+        -RUNTIME_EVIDENCE_RECONCILIATION_HISTORY_LIMIT
       ),
 
     authoritative:
@@ -162,15 +328,21 @@ export function mergeRuntimeEvidenceReconciliationHistories(
     RuntimeEvidenceReconciliationAttemptHistory
 ):
   RuntimeEvidenceReconciliationHistoryMergeResult {
+  const localMatchesBase =
+    branchMatchesRetainedBase(
+      base,
+      local
+    );
+
+  const remoteMatchesBase =
+    branchMatchesRetainedBase(
+      base,
+      remote
+    );
+
   if (
-    !hasBasePrefix(
-      local,
-      base
-    ) ||
-    !hasBasePrefix(
-      remote,
-      base
-    )
+    !localMatchesBase ||
+    !remoteMatchesBase
   ) {
     return {
       status:
@@ -184,17 +356,16 @@ export function mergeRuntimeEvidenceReconciliationHistories(
     };
   }
 
-  const baseLength =
-    base.entries.length;
-
   const remoteSuffix =
-    remote.entries.slice(
-      baseLength
+    entriesAfterBase(
+      base,
+      remote
     );
 
   const localSuffix =
-    local.entries.slice(
-      baseLength
+    entriesAfterBase(
+      base,
+      local
     );
 
   return {
@@ -202,11 +373,11 @@ export function mergeRuntimeEvidenceReconciliationHistories(
       "merged",
 
     history:
-      resequence([
-        ...base.entries,
-        ...remoteSuffix,
-        ...localSuffix,
-      ]),
+      mergeSuffixes(
+        base,
+        remoteSuffix,
+        localSuffix
+      ),
 
     authoritative:
       false,
