@@ -296,3 +296,107 @@ export type DbxPaymentVerification = {
   readonly authoritative:
     false;
 };
+
+export type DbxIssuanceAuthorizationStatus =
+  | "AUTHORIZED"
+  | "REJECTED";
+
+export type DbxIssuanceAuthorizationCheckCode =
+  | "PURCHASE_STATUS"
+  | "PURCHASE_BINDING"
+  | "QUOTE_BINDING"
+  | "VERIFICATION_BINDING"
+  | "VERIFICATION_STATUS"
+  | "ACCOUNT_BINDING"
+  | "DBX_AMOUNT_BINDING"
+  | "POLICY_LIMIT"
+  | "POLICY_ENABLED";
+
+export type DbxIssuanceAuthorizationCheck = {
+  readonly code:
+    DbxIssuanceAuthorizationCheckCode;
+
+  readonly passed:
+    boolean;
+
+  readonly message:
+    string;
+
+  readonly authoritative:
+    false;
+};
+
+export type DbxIssuancePolicy = {
+  readonly id:
+    string;
+
+  readonly version:
+    string;
+
+  readonly enabled:
+    boolean;
+
+  readonly minimumDbxMinor:
+    number;
+
+  readonly maximumDbxMinor:
+    number;
+
+  readonly issuanceAccountRef:
+    string;
+
+  readonly authoritative:
+    false;
+};
+
+export type DbxIssuanceAuthorization = {
+  readonly id:
+    string;
+
+  readonly idempotencyKey:
+    string;
+
+  readonly purchaseIntentId:
+    string;
+
+  readonly quoteId:
+    string;
+
+  readonly verificationId:
+    string;
+
+  readonly destinationAccountRef:
+    string;
+
+  readonly issuanceAccountRef:
+    string;
+
+  readonly dbxAmountMinor:
+    number;
+
+  readonly policyId:
+    string;
+
+  readonly policyVersion:
+    string;
+
+  readonly status:
+    DbxIssuanceAuthorizationStatus;
+
+  readonly checks:
+    readonly DbxIssuanceAuthorizationCheck[];
+
+  readonly authorizedAt:
+    string;
+
+  readonly ledgerPosted:
+    false;
+
+  readonly authoritative:
+    false;
+};
+
+export type DbxIssuanceAuthorizationStore = {
+  readonly authorizations:
+    readonly DbxIssuanceAuthorization[];
+};
