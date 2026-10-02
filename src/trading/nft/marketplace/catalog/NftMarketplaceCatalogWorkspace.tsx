@@ -25,6 +25,23 @@ import type {
   NftMarketplaceCatalogSort,
 } from "./types";
 
+import {
+  queryFeaturedMarketplaceItems,
+} from "./featured";
+
+import {
+  applyMarketplaceQuickFilter,
+} from "./quickFilters";
+
+import type {
+  NftMarketplaceQuickFilter,
+} from "./quickFilters";
+
+import {
+  isMarketplaceCatalogItemSelected,
+  selectMarketplaceCatalogItem,
+} from "./selection";
+
 export function NftMarketplaceCatalogWorkspace() {
   const [
     query,
@@ -48,24 +65,63 @@ export function NftMarketplaceCatalogWorkspace() {
       null
     );
 
+  const [
+    quickFilter,
+    setQuickFilter,
+  ] =
+    useState<NftMarketplaceQuickFilter>(
+      "ALL"
+    );
+
+  const [
+    selection,
+    setSelection,
+  ] =
+    useState({
+      selectedListingId:
+        null as string | null,
+
+      authoritative:
+        false as const,
+    });
+
   const result =
     useMemo(
-      () =>
-        queryMarketplaceCatalog(
+      () => {
+        if (
+          quickFilter ===
+            "FEATURED"
+        ) {
+          return queryFeaturedMarketplaceItems(
+            nftMarketplaceCatalogFixture
+          );
+        }
+
+        const quick =
+          applyMarketplaceQuickFilter(
+            quickFilter
+          );
+
+        return queryMarketplaceCatalog(
           nftMarketplaceCatalogFixture,
           {
             ...defaultMarketplaceCatalogFilter,
+            ...quick,
 
             query,
 
-            collectionId,
+            collectionId:
+              quick.collectionId ??
+              collectionId,
           },
           sort
-        ),
+        );
+      },
       [
         query,
         collectionId,
         sort,
+        quickFilter,
       ]
     );
 
@@ -95,6 +151,36 @@ export function NftMarketplaceCatalogWorkspace() {
           strokeWidth={1.4}
         />
       </header>
+
+      <section className="ti-market-catalog__quick-filters">
+        {[
+          ["ALL", "All"],
+          ["FEATURED", "Featured"],
+          ["UNDER_300", "Under 300"],
+          ["ORIGIN_GENESIS", "Origin Genesis"],
+          ["DIGITAL_FORGE", "Digital Forge"],
+        ].map(
+          ([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={
+                quickFilter === value
+                  ? "is-active"
+                  : undefined
+              }
+              onClick={
+                () =>
+                  setQuickFilter(
+                    value as NftMarketplaceQuickFilter
+                  )
+              }
+            >
+              {label}
+            </button>
+          )
+        )}
+      </section>
 
       <section className="ti-market-catalog__controls">
         <label className="ti-market-catalog__search">
@@ -178,6 +264,19 @@ export function NftMarketplaceCatalogWorkspace() {
         </label>
       </section>
 
+      <div className="ti-market-catalog__selection-status">
+        <span>
+          Selected
+        </span>
+
+        <strong>
+          {
+            selection.selectedListingId ??
+            "none"
+          }
+        </strong>
+      </div>
+
       <div className="ti-market-catalog__summary">
         <span>
           {
@@ -200,8 +299,33 @@ export function NftMarketplaceCatalogWorkspace() {
                 key={
                   item.listing.id
                 }
-                className="ti-market-card"
+                className={
+                  isMarketplaceCatalogItemSelected(
+                    selection,
+                    item
+                  )
+                    ? "ti-market-card is-selected"
+                    : "ti-market-card"
+                }
                 data-market-card
+                data-selected={
+                  isMarketplaceCatalogItemSelected(
+                    selection,
+                    item
+                  )
+                    ? "true"
+                    : "false"
+                }
+                onClick={
+                  () =>
+                    setSelection(
+                      (current) =>
+                        selectMarketplaceCatalogItem(
+                          current,
+                          item
+                        )
+                    )
+                }
               >
                 <div className="ti-market-card__media">
                   <div>
