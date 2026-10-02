@@ -96,3 +96,52 @@ export type NftMarketplaceEngineSnapshot = {
   readonly authoritative:
     false;
 };
+
+export type NftMarketplaceEngineLifecycleStatus =
+  | "CREATED"
+  | "ELIGIBILITY_VERIFIED"
+  | "SALE_INTENT_CREATED"
+  | "LISTING_PUBLISHED"
+  | "DETAIL_COMPOSED"
+  | "ORDER_CREATED"
+  | "ORDER_MATCHED"
+  | "PRE_SETTLEMENT_READY"
+  | "REJECTED"
+  | "CANCELLED";
+
+export type NftMarketplaceEngineLifecycleEvent = {
+  readonly sequence:
+    number;
+
+  readonly from:
+    NftMarketplaceEngineLifecycleStatus;
+
+  readonly to:
+    NftMarketplaceEngineLifecycleStatus;
+
+  readonly occurredAt:
+    string;
+
+  readonly reason:
+    string;
+
+  readonly authoritative:
+    false;
+};
+
+export type NftMarketplaceEngineLifecycle = {
+  readonly id:
+    string;
+
+  readonly status:
+    NftMarketplaceEngineLifecycleStatus;
+
+  readonly version:
+    number;
+
+  readonly events:
+    readonly NftMarketplaceEngineLifecycleEvent[];
+
+  readonly authoritative:
+    false;
+};
