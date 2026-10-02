@@ -27,6 +27,8 @@ import type {
 
 import NftMintWorkspace from "./mint/NftMintWorkspace";
 
+import NftDnaWorkspace from "./dna/NftDnaWorkspace";
+
 import "./nft-forge.css";
 
 const forgeSections: ReadonlyArray<{
@@ -370,10 +372,13 @@ export function NftForgeWorkspace() {
         <NftMintWorkspace />
       ) : null}
 
+      {activeSection === "origin" ? (
+        <NftDnaWorkspace />
+      ) : null}
+
       {[
         "generative",
         "living",
-        "origin",
         "certificates",
       ].includes(activeSection) ? (
         <section className="ti-nft-forge__future">

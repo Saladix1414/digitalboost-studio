@@ -507,3 +507,223 @@
 .ti-nft-mint__security svg {
   flex: 0 0 auto;
 }
+
+/* =========================================================
+   PHASE 22B — NFT DNA
+   ========================================================= */
+
+.ti-nft-dna {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid rgba(126, 151, 181, 0.16);
+  background: #0f141b;
+}
+
+.ti-nft-dna__hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.ti-nft-dna__hero h3 {
+  margin: 5px 0 6px;
+  color: #e8edf4;
+  font-size: 16px;
+}
+
+.ti-nft-dna__hero p {
+  max-width: 680px;
+  margin: 0;
+  color: #7d8998;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.ti-nft-dna__controls {
+  display: flex;
+  gap: 8px;
+}
+
+.ti-nft-dna__controls button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(126, 151, 181, 0.18);
+  background: #121922;
+  color: #8794a4;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.ti-nft-dna__controls button.is-active {
+  border-color: rgba(55, 184, 255, 0.55);
+  background: rgba(55, 184, 255, 0.07);
+  color: #e7f5ff;
+}
+
+.ti-nft-dna__summary {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ti-nft-dna__summary > div {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid rgba(126, 151, 181, 0.12);
+  background: #0b1016;
+}
+
+.ti-nft-dna__summary span {
+  color: #677585;
+  font-size: 9px;
+}
+
+.ti-nft-dna__summary strong {
+  overflow: hidden;
+  color: #dbe4ed;
+  font-size: 10px;
+  text-overflow: ellipsis;
+}
+
+.ti-nft-dna__layers {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ti-nft-dna__layer {
+  min-width: 0;
+  border: 1px solid rgba(126, 151, 181, 0.13);
+  background: #0b1016;
+}
+
+.ti-nft-dna__layer > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(126, 151, 181, 0.1);
+}
+
+.ti-nft-dna__layer > header span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #dbe4ed;
+  font-size: 10px;
+}
+
+.ti-nft-dna__layer > header small {
+  color: #637181;
+  font-size: 8px;
+}
+
+.ti-nft-dna__layer > div {
+  padding: 12px;
+}
+
+.ti-nft-dna__layer dl {
+  display: grid;
+  margin: 0;
+}
+
+.ti-nft-dna__layer dl div {
+  display: grid;
+  gap: 4px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(126, 151, 181, 0.08);
+}
+
+.ti-nft-dna__layer dt {
+  color: #647282;
+  font-size: 8px;
+}
+
+.ti-nft-dna__layer dd {
+  overflow-wrap: anywhere;
+  margin: 0;
+  color: #c9d3dd;
+  font-size: 9px;
+}
+
+.ti-nft-dna__proof-empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 110px;
+  color: #718091;
+  font-size: 10px;
+}
+
+.ti-nft-dna__changes {
+  display: grid;
+  gap: 10px;
+}
+
+.ti-nft-dna__changes > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ti-nft-dna__changes > header strong {
+  color: #b9c5d1;
+  font-size: 10px;
+}
+
+.ti-nft-dna__changes > div {
+  display: grid;
+  gap: 6px;
+}
+
+.ti-nft-dna__changes article {
+  display: grid;
+  grid-template-columns:
+    120px 150px minmax(0, 1fr);
+  gap: 12px;
+  padding: 9px 11px;
+  border: 1px solid rgba(126, 151, 181, 0.1);
+  background: #0b1016;
+}
+
+.ti-nft-dna__changes article span {
+  color: #5fbce8;
+  font-size: 8px;
+}
+
+.ti-nft-dna__changes article strong {
+  color: #c9d3dd;
+  font-size: 9px;
+}
+
+.ti-nft-dna__changes article small {
+  overflow-wrap: anywhere;
+  color: #748291;
+  font-size: 8px;
+}
+
+.ti-nft-dna__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  color: #657282;
+  font-size: 9px;
+}
+
+@media (max-width: 900px) {
+  .ti-nft-dna__summary,
+  .ti-nft-dna__layers {
+    grid-template-columns: 1fr;
+  }
+
+  .ti-nft-dna__changes article {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
