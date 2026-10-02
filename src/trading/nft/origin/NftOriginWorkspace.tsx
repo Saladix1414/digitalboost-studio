@@ -38,6 +38,8 @@ import type {
   NftOriginRecord,
 } from "./types";
 
+import NftOriginModesWorkspace from "./NftOriginModesWorkspace";
+
 type OriginView =
   | "CAPTURED"
   | "VALIDATED"
@@ -475,6 +477,8 @@ export function NftOriginWorkspace() {
           authenticity.
         </span>
       </div>
+
+      <NftOriginModesWorkspace />
 
       <footer className="ti-origin__footer">
         <span>

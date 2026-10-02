@@ -978,3 +978,204 @@
     gap: 5px;
   }
 }
+
+/* =========================================================
+   PHASE 24C — ORIGIN MODES WORKSPACE
+   ========================================================= */
+
+.ti-origin-modes {
+  display: grid;
+  gap: 12px;
+  margin-top: 4px;
+  padding: 14px;
+  border: 1px solid rgba(126, 151, 181, 0.12);
+  background: #0b1016;
+}
+
+.ti-origin-modes__hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.ti-origin-modes__hero h3 {
+  margin: 4px 0 5px;
+  color: #dfe8f1;
+  font-size: 14px;
+}
+
+.ti-origin-modes__hero p {
+  max-width: 680px;
+  margin: 0;
+  color: #728091;
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.ti-origin-modes__tabs {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.ti-origin-modes__tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  border: 1px solid rgba(126, 151, 181, 0.12);
+  background: #111820;
+  color: #758393;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.ti-origin-modes__tabs button.is-active {
+  border-color: rgba(55, 184, 255, 0.5);
+  background: rgba(55, 184, 255, 0.06);
+  color: #e5f5ff;
+}
+
+.ti-origin-modes__layout {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+  gap: 8px;
+}
+
+.ti-origin-modes__profile,
+.ti-origin-modes__config,
+.ti-origin-modes__capture {
+  border: 1px solid rgba(126, 151, 181, 0.1);
+  background: #0e141b;
+}
+
+.ti-origin-modes__profile > header,
+.ti-origin-modes__config > header,
+.ti-origin-modes__capture > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px;
+  border-bottom: 1px solid rgba(126, 151, 181, 0.08);
+}
+
+.ti-origin-modes__profile > header div {
+  display: grid;
+  gap: 3px;
+}
+
+.ti-origin-modes__profile header span,
+.ti-origin-modes__config header span,
+.ti-origin-modes__capture header span {
+  color: #708091;
+  font-size: 8px;
+}
+
+.ti-origin-modes__profile header strong,
+.ti-origin-modes__capture header strong {
+  color: #dce6ef;
+  font-size: 9px;
+}
+
+.ti-origin-modes__profile header small,
+.ti-origin-modes__config header small {
+  color: #657282;
+  font-size: 8px;
+}
+
+.ti-origin-modes__profile > p {
+  margin: 0;
+  padding: 10px;
+  color: #8391a0;
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.ti-origin-modes__profile dl {
+  display: grid;
+  margin: 0;
+  padding: 0 10px 10px;
+}
+
+.ti-origin-modes__profile dl div {
+  display: grid;
+  gap: 3px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(126, 151, 181, 0.07);
+}
+
+.ti-origin-modes__profile dt {
+  color: #657282;
+  font-size: 8px;
+}
+
+.ti-origin-modes__profile dd {
+  overflow-wrap: anywhere;
+  margin: 0;
+  color: #cbd5df;
+  font-size: 8px;
+}
+
+.ti-origin-modes__config pre {
+  overflow-x: auto;
+  margin: 0;
+  padding: 12px;
+  color: #85bdda;
+  font-size: 8px;
+  line-height: 1.6;
+}
+
+.ti-origin-modes__capture {
+  display: grid;
+}
+
+.ti-origin-modes__capture > header strong {
+  color: #86d8bb;
+}
+
+.ti-origin-modes__capture-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  padding: 10px;
+}
+
+.ti-origin-modes__capture-grid > div {
+  display: grid;
+  gap: 4px;
+  padding: 9px;
+  border: 1px solid rgba(126, 151, 181, 0.08);
+  background: #0a0f15;
+}
+
+.ti-origin-modes__capture-grid span {
+  color: #647282;
+  font-size: 8px;
+}
+
+.ti-origin-modes__capture-grid strong {
+  color: #d4dee8;
+  font-size: 9px;
+}
+
+.ti-origin-modes__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: #657282;
+  font-size: 8px;
+}
+
+@media (max-width: 900px) {
+  .ti-origin-modes__tabs,
+  .ti-origin-modes__layout,
+  .ti-origin-modes__capture-grid {
+    grid-template-columns: 1fr;
+  }
+}
