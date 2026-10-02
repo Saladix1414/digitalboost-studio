@@ -202,6 +202,18 @@ let persistenceQueue:
 let historyGeneration =
   0;
 
+/*
+ * Storage events received while startup hydration is in flight
+ * cannot immediately replace the hydrating lifecycle.
+ *
+ * The flag is observational only. It prevents hydration from
+ * publishing an obsolete catch-up save and causes the completed
+ * hydration to surface as stale instead of ready.
+ */
+let pendingExternalChangeDuringHydration =
+  false;
+
+
 
 
 const listeners =
@@ -308,8 +320,11 @@ export function markRuntimeEvidenceStale():
    */
   if (
     lifecycle.status ===
-    "hydrating"
+      "hydrating"
   ) {
+    pendingExternalChangeDuringHydration =
+      true;
+
     return;
   }
 
@@ -333,6 +348,9 @@ export function configureRuntimeEvidencePersistence(
   void {
   persistence =
     adapter;
+
+  pendingExternalChangeDuringHydration =
+    false;
 
   lifecycle = {
     status:
@@ -467,6 +485,34 @@ export async function hydrateRuntimeEvidence():
       1;
 
     emitRuntimeEvidenceChange();
+
+    /*
+     * A storage event during hydration means persisted evidence changed
+     * after this hydration cycle began.
+     *
+     * Do not publish a catch-up save from a potentially obsolete view.
+     * Keep reconciled in-memory evidence readable and require the
+     * explicit stale reconciliation path to resolve persistence.
+     */
+    if (
+      pendingExternalChangeDuringHydration
+    ) {
+      pendingExternalChangeDuringHydration =
+        false;
+
+      setLifecycle({
+        status:
+          "stale",
+
+        error:
+          "Runtime evidence changed in another browser context during hydration.",
+
+        authoritative:
+          false,
+      });
+
+      return history;
+    }
 
     /*
      * Persist the reconciled startup view until storage catches the
@@ -966,6 +1012,9 @@ export function resetRuntimeEvidenceHistoryForTests():
 
   historyGeneration =
     0;
+
+  pendingExternalChangeDuringHydration =
+    false;
 
   emitRuntimeEvidenceChange();
 }
