@@ -119,3 +119,47 @@ export type NftDetailSource = {
   readonly catalogItem:
     NftMarketplaceCatalogItem;
 };
+
+export type NftDetailEvidenceKind =
+  | "ORIGIN"
+  | "DNA_IDENTITY"
+  | "DNA_INTEGRITY"
+  | "BLOCKCHAIN_PROOF"
+  | "PROVENANCE_HISTORY";
+
+export type NftDetailEvidenceItem = {
+  readonly id:
+    string;
+
+  readonly kind:
+    NftDetailEvidenceKind;
+
+  readonly label:
+    string;
+
+  readonly reference:
+    string;
+
+  readonly status:
+    "PRESENT" | "ABSENT";
+
+  readonly authoritative:
+    false;
+};
+
+export type NftDetailEvidenceSummary = {
+  readonly items:
+    readonly NftDetailEvidenceItem[];
+
+  readonly total:
+    number;
+
+  readonly present:
+    number;
+
+  readonly complete:
+    boolean;
+
+  readonly authoritative:
+    false;
+};

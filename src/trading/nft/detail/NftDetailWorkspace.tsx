@@ -15,6 +15,14 @@ import {
   validateNftAssetDetail,
 } from "./validation";
 
+import {
+  composeNftDetailEvidence,
+} from "./evidence";
+
+import {
+  evaluateNftDetailConsistency,
+} from "./consistency";
+
 export type NftDetailWorkspaceProps = {
   readonly detail:
     NftAssetDetail;
@@ -29,6 +37,16 @@ export function NftDetailWorkspace({
 }: NftDetailWorkspaceProps) {
   const validation =
     validateNftAssetDetail(
+      detail
+    );
+
+  const evidence =
+    composeNftDetailEvidence(
+      detail
+    );
+
+  const consistency =
+    evaluateNftDetailConsistency(
       detail
     );
 
@@ -323,6 +341,114 @@ export function NftDetailWorkspace({
           </dl>
         </section>
       </div>
+
+      <section className="ti-nft-detail__evidence">
+        <header>
+          <div>
+            <span className="ti-label">
+              Evidence Composition
+            </span>
+
+            <strong>
+              {
+                evidence.present
+              }
+              /
+              {
+                evidence.total
+              }
+              {" "}
+              present
+            </strong>
+          </div>
+
+          <span>
+            {
+              evidence.complete
+                ? "COMPLETE"
+                : "PARTIAL"
+            }
+          </span>
+        </header>
+
+        <div className="ti-nft-detail__evidence-grid">
+          {
+            evidence.items.map(
+              (item) => (
+                <article
+                  key={item.id}
+                >
+                  <span>
+                    {item.kind}
+                  </span>
+
+                  <strong>
+                    {item.label}
+                  </strong>
+
+                  <small>
+                    {item.reference || "none"}
+                  </small>
+
+                  <em>
+                    {item.status}
+                  </em>
+                </article>
+              )
+            )
+          }
+        </div>
+      </section>
+
+      <section className="ti-nft-detail__consistency">
+        <header>
+          <span className="ti-label">
+            Cross-domain Consistency
+          </span>
+        </header>
+
+        <div>
+          <span>
+            Asset match
+          </span>
+
+          <strong>
+            {
+              consistency.assetMatch
+                ? "PASS"
+                : "FAIL"
+            }
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            Collection match
+          </span>
+
+          <strong>
+            {
+              consistency.collectionMatch
+                ? "PASS"
+                : "FAIL"
+            }
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            Provenance closure
+          </span>
+
+          <strong>
+            {
+              consistency.provenanceClosureValid
+                ? "PASS"
+                : "FAIL"
+            }
+          </strong>
+        </div>
+      </section>
 
       <section className="ti-nft-detail__actions">
         <button
