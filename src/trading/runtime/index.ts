@@ -227,3 +227,11 @@ export {
 export type {
   RuntimeEvidenceReconciliationHistoryCoordinationHealth,
 } from "./runtimeEvidenceReconciliationHistoryStore";
+
+export {
+  refreshRuntimeEvidenceReconciliationHistoryFromPersistence,
+} from "./runtimeEvidenceReconciliationHistoryStore";
+
+export type {
+  RuntimeEvidenceReconciliationHistoryRefreshResult,
+} from "./runtimeEvidenceReconciliationHistoryStore";

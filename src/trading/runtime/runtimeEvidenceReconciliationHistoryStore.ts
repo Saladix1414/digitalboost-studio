@@ -145,6 +145,47 @@ export function hasRuntimeEvidenceReconciliationHistoryExternalChange():
 }
 
 
+export type RuntimeEvidenceReconciliationHistoryRefreshResult =
+  | {
+      readonly status:
+        "merged";
+
+      readonly authoritative:
+        false;
+    }
+  | {
+      readonly status:
+        "conflict";
+
+      readonly authoritative:
+        false;
+    }
+  | {
+      readonly status:
+        "not-needed";
+
+      readonly authoritative:
+        false;
+    }
+  | {
+      readonly status:
+        "unavailable";
+
+      readonly authoritative:
+        false;
+    }
+  | {
+      readonly status:
+        "error";
+
+      readonly error:
+        string;
+
+      readonly authoritative:
+        false;
+    };
+
+
 export type RuntimeEvidenceReconciliationHistoryCoordinationHealth = {
   readonly crossContextSafe:
     boolean;
@@ -290,6 +331,116 @@ export async function hydrateRuntimeEvidenceReconciliationHistory():
   }
 
   return history;
+}
+
+
+export async function refreshRuntimeEvidenceReconciliationHistoryFromPersistence():
+  Promise<RuntimeEvidenceReconciliationHistoryRefreshResult> {
+  if (
+    !externalChangeDetected
+  ) {
+    return {
+      status:
+        "not-needed",
+
+      authoritative:
+        false,
+    };
+  }
+
+  const adapter =
+    persistence;
+
+  if (
+    !adapter
+  ) {
+    return {
+      status:
+        "unavailable",
+
+      authoritative:
+        false,
+    };
+  }
+
+  try {
+    return await coordinator.runExclusive(
+      async () => {
+        const memoryBefore =
+          history;
+
+        const baseBefore =
+          persistenceBase;
+
+        const result =
+          await adapter.load();
+
+        const remote =
+          result.snapshot?.history ??
+          createRuntimeEvidenceReconciliationAttemptHistory();
+
+        const reconciliation =
+          mergeRuntimeEvidenceReconciliationHistories(
+            baseBefore,
+            memoryBefore,
+            remote
+          );
+
+        if (
+          reconciliation.status ===
+          "conflict"
+        ) {
+          return {
+            status:
+              "conflict",
+
+            authoritative:
+              false,
+          };
+        }
+
+        /*
+         * Commit only after the merge succeeds.
+         * Conflict/error paths preserve exact in-memory evidence.
+         */
+        history =
+          reconciliation.history;
+
+        persistenceBase =
+          reconciliation.history;
+
+        externalChangeDetected =
+          false;
+
+        refreshCoordinationHealthSnapshot();
+
+        emit();
+
+        return {
+          status:
+            "merged",
+
+          authoritative:
+            false,
+        };
+      }
+    );
+  } catch (
+    error
+  ) {
+    return {
+      status:
+        "error",
+
+      error:
+        error instanceof Error
+          ? error.message
+          : "Runtime evidence reconciliation history refresh failed.",
+
+      authoritative:
+        false,
+    };
+  }
 }
 
 
