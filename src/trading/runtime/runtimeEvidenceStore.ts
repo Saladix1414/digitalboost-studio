@@ -689,6 +689,23 @@ export async function persistRuntimeEvidenceHistory():
                   false,
               });
 
+              /*
+               * Persist the diagnostic conflict in the existing
+               * reconciliation-attempt ledger.
+               *
+               * This is observability only:
+               * it does not reconcile automatically,
+               * mutate approval,
+               * or grant runtime authority.
+               */
+              recordRuntimeEvidenceReconciliationAttempt({
+                status:
+                  "conflict",
+
+                conflictSessionId:
+                  reconciliation.conflict.sessionId,
+              });
+
               return;
             }
 
