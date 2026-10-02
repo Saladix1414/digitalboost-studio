@@ -9,6 +9,7 @@ import {
   LoaderCircle,
   ShieldCheck,
   Sparkles,
+  TriangleAlert,
   XCircle,
 } from "lucide-react";
 
@@ -17,11 +18,18 @@ import {
 } from "./factory";
 
 import {
-  confirmAndVerifyNftMint,
   markNftMintReady,
   prepareNftMint,
   submitNftMintEvidence,
 } from "./engine";
+
+import {
+  createEmptyMintEvidenceRegistry,
+} from "./evidenceRegistryFactory";
+
+import {
+  verifyNftMintWithReplayProtection,
+} from "./hardenedVerification";
 
 import {
   nftAssetsFixture,
@@ -29,35 +37,105 @@ import {
 } from "../fixtures";
 
 import type {
+  NftMintEvidenceRegistry,
   NftMintMode,
   NftMintRecord,
   NftMintTransactionEvidence,
 } from "./types";
 
+type FailureMode =
+  | "NONE"
+  | "FAILED_RECEIPT"
+  | "MISSING_EVENT"
+  | "OWNER_MISMATCH"
+  | "METADATA_MISMATCH";
+
 function deterministicEvidence(
-  record: NftMintRecord
+  record: NftMintRecord,
+  failureMode: FailureMode
 ): NftMintTransactionEvidence {
-  return {
-    chainId: "deterministic-1",
+  const base:
+    NftMintTransactionEvidence = {
+    chainId:
+      "deterministic-1",
+
     contractAddress:
       "contract-local-001",
+
     transactionHash:
       `tx-${record.intent.id}`,
-    blockNumber: 100,
-    receiptStatus: "SUCCESS",
+
+    blockNumber:
+      100,
+
+    receiptStatus:
+      "SUCCESS",
+
     tokenId:
       record.intent.assetId
         .replace(
           /[^0-9]/g,
           ""
         ) || "1",
+
     owner:
       record.intent.expectedOwner,
+
     metadataRef:
       record.intent.expectedMetadataRef,
-    mintEventFound: true,
-    authoritative: false,
+
+    mintEventFound:
+      true,
+
+    authoritative:
+      false,
   };
+
+  if (
+    failureMode ===
+    "FAILED_RECEIPT"
+  ) {
+    return {
+      ...base,
+      receiptStatus:
+        "FAILED",
+    };
+  }
+
+  if (
+    failureMode ===
+    "MISSING_EVENT"
+  ) {
+    return {
+      ...base,
+      mintEventFound:
+        false,
+    };
+  }
+
+  if (
+    failureMode ===
+    "OWNER_MISMATCH"
+  ) {
+    return {
+      ...base,
+      owner:
+        "unexpected-owner",
+    };
+  }
+
+  if (
+    failureMode ===
+    "METADATA_MISMATCH"
+  ) {
+    return {
+      ...base,
+      metadataRef:
+        "metadata://unexpected",
+    };
+  }
+
+  return base;
 }
 
 export function NftMintWorkspace() {
@@ -66,7 +144,8 @@ export function NftMintWorkspace() {
       () =>
         nftAssetsFixture.filter(
           (asset) =>
-            asset.status === "READY"
+            asset.status ===
+            "READY"
         ),
       []
     );
@@ -87,10 +166,35 @@ export function NftMintWorkspace() {
     );
 
   const [
+    failureMode,
+    setFailureMode,
+  ] =
+    useState<FailureMode>(
+      "NONE"
+    );
+
+  const [
     record,
     setRecord,
   ] =
     useState<NftMintRecord | null>(
+      null
+    );
+
+  const [
+    registry,
+    setRegistry,
+  ] =
+    useState<NftMintEvidenceRegistry>(
+      () =>
+        createEmptyMintEvidenceRegistry()
+    );
+
+  const [
+    securityError,
+    setSecurityError,
+  ] =
+    useState<string | null>(
       null
     );
 
@@ -108,6 +212,11 @@ export function NftMintWorkspace() {
         selectedAsset?.collectionId
     );
 
+  function resetFlow() {
+    setRecord(null);
+    setSecurityError(null);
+  }
+
   function createIntent() {
     if (
       !selectedAsset ||
@@ -120,17 +229,23 @@ export function NftMintWorkspace() {
       createNftMintRecord({
         id:
           `mint-${selectedAsset.id}-${mode.toLowerCase()}`,
+
         assetId:
           selectedAsset.id,
+
         collectionId:
           selectedCollection.id,
+
         mode,
+
         expectedOwner:
           "owner-local-001",
+
         expectedMetadataRef:
           `metadata://${selectedAsset.id}`,
+
         requestedAt:
-          "2026-10-02T12:00:00.000Z",
+          "2026-10-03T12:00:00.000Z",
       });
 
     const ready =
@@ -138,9 +253,10 @@ export function NftMintWorkspace() {
         created,
         nftAssetsFixture,
         nftCollectionsFixture,
-        "2026-10-02T12:01:00.000Z"
+        "2026-10-03T12:01:00.000Z"
       );
 
+    setSecurityError(null);
     setRecord(ready);
   }
 
@@ -152,7 +268,7 @@ export function NftMintWorkspace() {
     setRecord(
       prepareNftMint(
         record,
-        "2026-10-02T12:02:00.000Z"
+        "2026-10-03T12:02:00.000Z"
       )
     );
   }
@@ -166,9 +282,10 @@ export function NftMintWorkspace() {
       submitNftMintEvidence(
         record,
         deterministicEvidence(
-          record
+          record,
+          failureMode
         ),
-        "2026-10-02T12:03:00.000Z"
+        "2026-10-03T12:03:00.000Z"
       )
     );
   }
@@ -178,12 +295,30 @@ export function NftMintWorkspace() {
       return;
     }
 
-    setRecord(
-      confirmAndVerifyNftMint(
-        record,
-        "2026-10-02T12:04:00.000Z"
-      )
-    );
+    try {
+      const result =
+        verifyNftMintWithReplayProtection(
+          record,
+          registry,
+          "2026-10-03T12:04:00.000Z"
+        );
+
+      setRecord(
+        result.record
+      );
+
+      setRegistry(
+        result.registry
+      );
+
+      setSecurityError(null);
+    } catch (error) {
+      setSecurityError(
+        error instanceof Error
+          ? error.message
+          : "MINT_SECURITY_REJECTED"
+      );
+    }
   }
 
   return (
@@ -198,13 +333,13 @@ export function NftMintWorkspace() {
           </span>
 
           <h3>
-            Deterministic Mint Lab
+            Verified Mint Lab
           </h3>
 
           <p>
-            Prepare and verify mint evidence
-            without RPC, wallet signing or
-            blockchain execution.
+            Mint lifecycle with deterministic
+            evidence validation, replay protection
+            and explicit failure handling.
           </p>
         </div>
 
@@ -226,7 +361,8 @@ export function NftMintWorkspace() {
               setSelectedAssetId(
                 event.target.value
               );
-              setRecord(null);
+
+              resetFlow();
             }}
           >
             {readyAssets.map(
@@ -255,7 +391,7 @@ export function NftMintWorkspace() {
               }
               onClick={() => {
                 setMode("BASIC");
-                setRecord(null);
+                resetFlow();
               }}
             >
               <CircleDollarSign
@@ -276,7 +412,8 @@ export function NftMintWorkspace() {
                 setMode(
                   "MINT_ON_SALE"
                 );
-                setRecord(null);
+
+                resetFlow();
               }}
             >
               <Sparkles size={15} />
@@ -284,11 +421,48 @@ export function NftMintWorkspace() {
             </button>
           </div>
 
+          <span className="ti-label">
+            Evidence scenario
+          </span>
+
+          <select
+            value={failureMode}
+            onChange={(event) => {
+              setFailureMode(
+                event.target
+                  .value as FailureMode
+              );
+
+              resetFlow();
+            }}
+          >
+            <option value="NONE">
+              Valid evidence
+            </option>
+
+            <option value="FAILED_RECEIPT">
+              Failed receipt
+            </option>
+
+            <option value="MISSING_EVENT">
+              Missing mint event
+            </option>
+
+            <option value="OWNER_MISMATCH">
+              Owner mismatch
+            </option>
+
+            <option value="METADATA_MISMATCH">
+              Metadata mismatch
+            </option>
+          </select>
+
           <dl>
             <div>
               <dt>
                 Collection
               </dt>
+
               <dd>
                 {
                   selectedCollection
@@ -302,6 +476,7 @@ export function NftMintWorkspace() {
               <dt>
                 DBX intent
               </dt>
+
               <dd>
                 {mode === "BASIC"
                   ? "150 DBX"
@@ -311,19 +486,24 @@ export function NftMintWorkspace() {
 
             <div>
               <dt>
-                Gas
+                Evidence claims
               </dt>
+
               <dd>
-                External / deferred
+                {
+                  registry.claims
+                    .length
+                }
               </dd>
             </div>
 
             <div>
               <dt>
-                Chain
+                RPC
               </dt>
+
               <dd>
-                Deterministic
+                None
               </dd>
             </div>
           </dl>
@@ -346,8 +526,8 @@ export function NftMintWorkspace() {
 
           {!record ? (
             <div className="ti-nft-mint__empty">
-              Select an asset and create a
-              mint intent.
+              Select an asset and create
+              a mint intent.
             </div>
           ) : (
             <>
@@ -379,12 +559,12 @@ export function NftMintWorkspace() {
                 </span>
 
                 <span>
-                  Validation complete
+                  Intent validated
                 </span>
 
                 <span>
                   {record.prepared
-                    ? "Prepared"
+                    ? "Preparation complete"
                     : "Preparation pending"}
                 </span>
 
@@ -397,7 +577,7 @@ export function NftMintWorkspace() {
                 <span>
                   {record.verification
                     ?.verified
-                    ? "Verified"
+                    ? "Blockchain evidence verified"
                     : "Verification pending"}
                 </span>
               </div>
@@ -435,6 +615,18 @@ export function NftMintWorkspace() {
                 </button>
               ) : null}
 
+              {securityError ? (
+                <div className="ti-nft-mint__security">
+                  <TriangleAlert
+                    size={16}
+                  />
+
+                  <span>
+                    {securityError}
+                  </span>
+                </div>
+              ) : null}
+
               {record.status ===
               "VERIFIED" ? (
                 <div className="ti-nft-mint__verified">
@@ -446,7 +638,8 @@ export function NftMintWorkspace() {
               {record.status ===
               "FAILED" ? (
                 <div className="ti-nft-mint__failed">
-                  Mint verification failed.
+                  Verification failed. No
+                  evidence claim was created.
                 </div>
               ) : null}
             </>
@@ -461,6 +654,10 @@ export function NftMintWorkspace() {
 
         <span>
           txHash ≠ authority
+        </span>
+
+        <span>
+          replay protection:on
         </span>
 
         <span>
