@@ -145,3 +145,58 @@ export type NftMarketplaceEngineLifecycle = {
   readonly authoritative:
     false;
 };
+
+export type NftMarketplaceEngineTraceKind =
+  | "LIFECYCLE"
+  | "DOMAIN"
+  | "GUARD"
+  | "BOUNDARY";
+
+export type NftMarketplaceEngineTraceLevel =
+  | "INFO"
+  | "WARN"
+  | "ERROR";
+
+export type NftMarketplaceEngineTraceEntry = {
+  readonly sequence:
+    number;
+
+  readonly kind:
+    NftMarketplaceEngineTraceKind;
+
+  readonly level:
+    NftMarketplaceEngineTraceLevel;
+
+  readonly code:
+    string;
+
+  readonly message:
+    string;
+
+  readonly occurredAt:
+    string;
+
+  readonly authoritative:
+    false;
+};
+
+export type NftMarketplaceEngineFailureCode =
+  | "NONE"
+  | "ELIGIBILITY_REJECTED"
+  | "INVALID_LIFECYCLE_TRANSITION"
+  | "ORDER_VALIDATION_FAILED"
+  | "PRE_SETTLEMENT_REJECTED";
+
+export type NftMarketplaceEngineObservability = {
+  readonly trace:
+    readonly NftMarketplaceEngineTraceEntry[];
+
+  readonly failureCode:
+    NftMarketplaceEngineFailureCode;
+
+  readonly failed:
+    boolean;
+
+  readonly authoritative:
+    false;
+};
