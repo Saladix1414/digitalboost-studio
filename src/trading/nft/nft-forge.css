@@ -1179,3 +1179,278 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   PHASE 25D — NFT PROVENANCE WORKSPACE
+   ========================================================= */
+
+.ti-provenance {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(126, 151, 181, 0.14);
+  background: #0c1117;
+}
+
+.ti-provenance__hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.ti-provenance__hero h3 {
+  margin: 5px 0 6px;
+  color: #e1e9f1;
+  font-size: 16px;
+}
+
+.ti-provenance__hero p {
+  max-width: 720px;
+  margin: 0;
+  color: #788695;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.ti-provenance__metrics {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ti-provenance__metrics article {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid rgba(126, 151, 181, 0.1);
+  background: #0a0f15;
+}
+
+.ti-provenance__metrics span {
+  color: #687686;
+  font-size: 8px;
+}
+
+.ti-provenance__metrics strong {
+  color: #dae4ed;
+  font-size: 11px;
+}
+
+.ti-provenance__metrics small {
+  color: #586573;
+  font-size: 8px;
+}
+
+.ti-provenance__grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.ti-provenance__panel,
+.ti-provenance__closure,
+.ti-provenance__history {
+  border: 1px solid rgba(126, 151, 181, 0.11);
+  background: #0a0f15;
+}
+
+.ti-provenance__panel > header,
+.ti-provenance__history > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(126, 151, 181, 0.08);
+}
+
+.ti-provenance__panel > header span,
+.ti-provenance__history > header span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #d1dbe5;
+  font-size: 9px;
+}
+
+.ti-provenance__panel > header small,
+.ti-provenance__history > header small {
+  color: #627080;
+  font-size: 8px;
+}
+
+.ti-provenance__evidence,
+.ti-provenance__links {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+}
+
+.ti-provenance__evidence article,
+.ti-provenance__links article {
+  display: grid;
+  gap: 5px;
+  padding: 9px;
+  border: 1px solid rgba(126, 151, 181, 0.08);
+  background: #10161d;
+}
+
+.ti-provenance__evidence article div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ti-provenance__evidence strong,
+.ti-provenance__links strong {
+  color: #8ccae8;
+  font-size: 8px;
+}
+
+.ti-provenance__evidence span,
+.ti-provenance__evidence small {
+  color: #647281;
+  font-size: 7px;
+}
+
+.ti-provenance__evidence code,
+.ti-provenance__links code {
+  overflow-wrap: anywhere;
+  color: #b8c5d1;
+  font-size: 8px;
+}
+
+.ti-provenance__closure {
+  display: grid;
+}
+
+.ti-provenance__closure > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(126, 151, 181, 0.08);
+}
+
+.ti-provenance__closure > header div {
+  display: grid;
+  gap: 4px;
+}
+
+.ti-provenance__closure > header strong {
+  color: #85d9b9;
+  font-size: 9px;
+}
+
+.ti-provenance__closure-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+  gap: 7px;
+  padding: 11px;
+}
+
+.ti-provenance__closure-grid > div {
+  display: grid;
+  gap: 4px;
+  padding: 9px;
+  border: 1px solid rgba(126, 151, 181, 0.08);
+  background: #0d131a;
+}
+
+.ti-provenance__closure-grid span {
+  color: #647281;
+  font-size: 8px;
+}
+
+.ti-provenance__closure-grid strong {
+  color: #d7e1ea;
+  font-size: 9px;
+}
+
+.ti-provenance__pass {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 11px 11px;
+  padding: 10px;
+  border: 1px solid rgba(67, 211, 159, 0.18);
+  background: rgba(67, 211, 159, 0.04);
+  color: #85d9b9;
+  font-size: 8px;
+}
+
+.ti-provenance__history > div {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+}
+
+.ti-provenance__history article {
+  display: grid;
+  grid-template-columns:
+    190px 190px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 9px;
+  border: 1px solid rgba(126, 151, 181, 0.08);
+  background: #10161d;
+}
+
+.ti-provenance__history article div {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ti-provenance__history article span {
+  color: #5ebeea;
+  font-size: 8px;
+}
+
+.ti-provenance__history article strong {
+  color: #c9d4de;
+  font-size: 8px;
+}
+
+.ti-provenance__history article small,
+.ti-provenance__history article code {
+  overflow-wrap: anywhere;
+  color: #667483;
+  font-size: 7px;
+}
+
+.ti-provenance__boundary {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 11px;
+  border: 1px solid rgba(239, 183, 74, 0.18);
+  background: rgba(239, 183, 74, 0.04);
+  color: #c8aa6d;
+  font-size: 8px;
+  line-height: 1.6;
+}
+
+.ti-provenance__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 13px;
+  color: #627080;
+  font-size: 8px;
+}
+
+@media (max-width: 900px) {
+  .ti-provenance__metrics,
+  .ti-provenance__grid,
+  .ti-provenance__closure-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ti-provenance__history article {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+}

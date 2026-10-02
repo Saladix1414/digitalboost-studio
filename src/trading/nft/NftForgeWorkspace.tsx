@@ -31,6 +31,8 @@ import NftDnaWorkspace from "./dna/NftDnaWorkspace";
 
 import NftOriginWorkspace from "./origin/NftOriginWorkspace";
 
+import NftProvenanceWorkspace from "./provenance/NftProvenanceWorkspace";
+
 import "./nft-forge.css";
 
 const forgeSections: ReadonlyArray<{
@@ -378,6 +380,7 @@ export function NftForgeWorkspace() {
         <>
           <NftOriginWorkspace />
           <NftDnaWorkspace />
+          <NftProvenanceWorkspace />
         </>
       ) : null}
 
