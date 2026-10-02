@@ -771,19 +771,45 @@ export async function persistRuntimeEvidenceHistory():
   } catch (
     error
   ) {
+    const message =
+      errorMessage(
+        error,
+        "Runtime evidence persistence failed."
+      );
+
     setLifecycle({
       status:
         "error",
 
       error:
-        errorMessage(
-          error,
-          "Runtime evidence persistence failed."
-        ),
+        message,
 
       authoritative:
         false,
     });
+
+    /*
+     * Persistence failures belong to the existing reconciliation
+     * diagnostics family.
+     *
+     * Attempt-history recording is deliberately isolated:
+     * observability failure must never mask or replace the original
+     * runtime evidence persistence failure.
+     */
+    try {
+      recordRuntimeEvidenceReconciliationAttempt({
+        status:
+          "error",
+
+        error:
+          message,
+      });
+    } catch {
+      /*
+       * Diagnostic recording is best-effort only.
+       * Runtime evidence remains in memory and authority is unchanged.
+       */
+    }
   }
 }
 
