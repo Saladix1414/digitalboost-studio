@@ -176,3 +176,32 @@ export type NftDnaLineageValidationResult = {
   readonly issues:
     readonly NftDnaLineageValidationIssue[];
 };
+
+export type NftDnaConsistencyIssueCode =
+  | "DNA_ID_MISMATCH"
+  | "LINEAGE_DNA_ID_MISMATCH"
+  | "LINEAGE_EMPTY"
+  | "LINEAGE_LATEST_VERSION_MISMATCH"
+  | "IDENTITY_HASH_MISMATCH"
+  | "INTEGRITY_HASH_MISMATCH"
+  | "BLOCKCHAIN_PROOF_HASH_MISMATCH"
+  | "UNVERIFIED_BLOCKCHAIN_PROOF"
+  | "PROOF_METADATA_MISMATCH"
+  | "PROOF_OWNER_MISSING"
+  | "PROOF_TOKEN_MISSING"
+  | "PROOF_TRANSACTION_MISSING"
+  | "PROOF_EVENT_MISSING";
+
+export type NftDnaConsistencyIssue = {
+  readonly code:
+    NftDnaConsistencyIssueCode;
+
+  readonly message: string;
+};
+
+export type NftDnaConsistencyResult = {
+  readonly consistent: boolean;
+
+  readonly issues:
+    readonly NftDnaConsistencyIssue[];
+};
