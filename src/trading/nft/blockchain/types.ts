@@ -317,3 +317,53 @@ export type NftBlockchainIndexEvidence = {
   readonly authoritative:
     false;
 };
+
+export type NftBlockchainRetryDecision =
+  | "RETRY"
+  | "FALLBACK"
+  | "STOP";
+
+export type NftBlockchainRetryPolicy = {
+  readonly maxAttempts:
+    number;
+
+  readonly fallbackEnabled:
+    boolean;
+
+  readonly authoritative:
+    false;
+};
+
+export type NftBlockchainRetryResult = {
+  readonly attempt:
+    number;
+
+  readonly decision:
+    NftBlockchainRetryDecision;
+
+  readonly reason:
+    string;
+
+  readonly authoritative:
+    false;
+};
+
+export type NftBlockchainFallbackRecord = {
+  readonly requestId:
+    string;
+
+  readonly fromChainRef:
+    string;
+
+  readonly fallbackRef:
+    string;
+
+  readonly reason:
+    string;
+
+  readonly executable:
+    false;
+
+  readonly authoritative:
+    false;
+};
