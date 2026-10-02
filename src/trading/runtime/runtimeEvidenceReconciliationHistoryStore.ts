@@ -59,6 +59,8 @@ let persistenceQueue:
 let externalChangeDetected =
   false;
 
+let historyGeneration = 0;
+
 
 const listeners =
   new Set<
@@ -314,6 +316,9 @@ export async function hydrateRuntimeEvidenceReconciliationHistory():
     history =
       loaded;
 
+
+    historyGeneration +=
+      1;
     persistenceBase =
       loaded;
 
@@ -366,59 +371,85 @@ export async function refreshRuntimeEvidenceReconciliationHistoryFromPersistence
   try {
     return await coordinator.runExclusive(
       async () => {
-        const memoryBefore =
-          history;
-
-        const baseBefore =
-          persistenceBase;
-
-        const result =
-          await adapter.load();
-
-        const remote =
-          result.snapshot?.history ??
-          createRuntimeEvidenceReconciliationAttemptHistory();
-
-        const reconciliation =
-          mergeRuntimeEvidenceReconciliationHistories(
-            baseBefore,
-            memoryBefore,
-            remote
-          );
-
-        if (
-          reconciliation.status ===
-          "conflict"
+        for (
+          let attempt = 0;
+          attempt < 8;
+          attempt += 1
         ) {
+          const generationBefore =
+            historyGeneration;
+
+          const memoryBefore =
+            history;
+
+          const baseBefore =
+            persistenceBase;
+
+          const result =
+            await adapter.load();
+
+          const remote =
+            result.snapshot?.history ??
+            createRuntimeEvidenceReconciliationAttemptHistory();
+
+          if (
+            historyGeneration !==
+              generationBefore
+          ) {
+            continue;
+          }
+
+          const reconciliation =
+            mergeRuntimeEvidenceReconciliationHistories(
+              baseBefore,
+              memoryBefore,
+              remote
+            );
+
+          if (
+            reconciliation.status ===
+            "conflict"
+          ) {
+            return {
+              status:
+                "conflict",
+
+              authoritative:
+                false,
+            };
+          }
+
+          history =
+            reconciliation.history;
+
+          historyGeneration +=
+            1;
+
+          persistenceBase =
+            reconciliation.history;
+
+          externalChangeDetected =
+            false;
+
+          refreshCoordinationHealthSnapshot();
+
+          emit();
+
           return {
             status:
-              "conflict",
+              "merged",
 
             authoritative:
               false,
           };
         }
 
-        /*
-         * Commit only after the merge succeeds.
-         * Conflict/error paths preserve exact in-memory evidence.
-         */
-        history =
-          reconciliation.history;
-
-        persistenceBase =
-          reconciliation.history;
-
-        externalChangeDetected =
-          false;
-
-        refreshCoordinationHealthSnapshot();
-
-        emit();
-
         return {
           status:
-            "merged",
+            "error",
+
+          error:
+            "Reconciliation history changed repeatedly during refresh. Local evidence was preserved.",
 
           authoritative:
             false,
@@ -562,6 +593,9 @@ export function recordRuntimeEvidenceReconciliationAttempt(
       input
     );
 
+  historyGeneration +=
+    1;
+
   emit();
 
   void persistRuntimeEvidenceReconciliationHistory();
@@ -574,6 +608,9 @@ export function resetRuntimeEvidenceReconciliationHistoryForTests():
   void {
   history =
     createRuntimeEvidenceReconciliationAttemptHistory();
+
+  historyGeneration +=
+    1;
 
   persistenceBase =
     createRuntimeEvidenceReconciliationAttemptHistory();
