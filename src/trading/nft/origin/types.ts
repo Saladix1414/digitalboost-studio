@@ -174,3 +174,98 @@ export type NftOriginHistoryValidationResult = {
   readonly issues:
     readonly NftOriginHistoryValidationIssue[];
 };
+
+export type NftOriginClassicConfig = {
+  readonly workflow:
+    "MANUAL" | "FORGE";
+
+  readonly templateRef:
+    string | null;
+};
+
+export type NftOriginGenerativeConfig = {
+  readonly generatorRef: string;
+
+  readonly seed: string;
+
+  readonly deterministic:
+    boolean;
+
+  readonly rulesetVersion:
+    number;
+};
+
+export type NftOriginLivingConfig = {
+  readonly evolutionModel:
+    "STATE_BASED" | "EVENT_DRIVEN";
+
+  readonly initialState: string;
+
+  readonly evolutionSchemaRef:
+    string;
+};
+
+export type NftOriginImportedConfig = {
+  readonly sourceSystem: string;
+
+  readonly externalAssetRef:
+    string;
+
+  readonly importedAt: string;
+};
+
+export type NftOriginModeConfig =
+  | {
+      readonly mode:
+        "CLASSIC";
+
+      readonly config:
+        NftOriginClassicConfig;
+    }
+  | {
+      readonly mode:
+        "GENERATIVE";
+
+      readonly config:
+        NftOriginGenerativeConfig;
+    }
+  | {
+      readonly mode:
+        "LIVING";
+
+      readonly config:
+        NftOriginLivingConfig;
+    }
+  | {
+      readonly mode:
+        "IMPORTED";
+
+      readonly config:
+        NftOriginImportedConfig;
+    };
+
+export type NftOriginModeValidationIssueCode =
+  | "MODE_MISMATCH"
+  | "INVALID_CLASSIC_WORKFLOW"
+  | "INVALID_GENERATOR_REFERENCE"
+  | "INVALID_GENERATIVE_SEED"
+  | "INVALID_GENERATIVE_RULESET_VERSION"
+  | "INVALID_LIVING_INITIAL_STATE"
+  | "INVALID_LIVING_SCHEMA_REFERENCE"
+  | "INVALID_IMPORT_SOURCE_SYSTEM"
+  | "INVALID_IMPORT_ASSET_REFERENCE"
+  | "INVALID_IMPORT_TIMESTAMP";
+
+export type NftOriginModeValidationIssue = {
+  readonly code:
+    NftOriginModeValidationIssueCode;
+
+  readonly message: string;
+};
+
+export type NftOriginModeValidationResult = {
+  readonly valid: boolean;
+
+  readonly issues:
+    readonly NftOriginModeValidationIssue[];
+};

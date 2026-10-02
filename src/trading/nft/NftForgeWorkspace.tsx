@@ -375,7 +375,10 @@ export function NftForgeWorkspace() {
       ) : null}
 
       {activeSection === "origin" ? (
-        <NftOriginWorkspace />
+        <>
+          <NftOriginWorkspace />
+          <NftDnaWorkspace />
+        </>
       ) : null}
 
       {[
