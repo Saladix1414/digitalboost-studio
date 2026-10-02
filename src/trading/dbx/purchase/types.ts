@@ -188,3 +188,111 @@ export type DbxPaymentEvidenceStore = {
   readonly evidence:
     readonly DbxPaymentEvidence[];
 };
+
+export type DbxPaymentVerificationStatus =
+  | "VERIFIED"
+  | "REJECTED";
+
+export type DbxPaymentVerificationCheckCode =
+  | "PURCHASE_BINDING"
+  | "QUOTE_BINDING"
+  | "RAIL_BINDING"
+  | "AMOUNT_BINDING"
+  | "CURRENCY_BINDING"
+  | "PROVIDER_BINDING"
+  | "SETTLEMENT_REFERENCE"
+  | "CHAIN_BINDING"
+  | "TOKEN_BINDING"
+  | "RECIPIENT_BINDING"
+  | "TRANSACTION_HASH"
+  | "BLOCK_REFERENCE"
+  | "CONFIRMATION_POLICY";
+
+export type DbxPaymentVerificationCheck = {
+  readonly code:
+    DbxPaymentVerificationCheckCode;
+
+  readonly passed:
+    boolean;
+
+  readonly message:
+    string;
+
+  readonly authoritative:
+    false;
+};
+
+export type DbxFiatVerificationPolicy = {
+  readonly id:
+    string;
+
+  readonly allowedCurrencies:
+    readonly ("USD" | "ARS")[];
+
+  readonly allowedProviderRefs:
+    readonly string[];
+
+  readonly requireSettlementReference:
+    true;
+
+  readonly version:
+    string;
+
+  readonly authoritative:
+    false;
+};
+
+export type DbxUsdtVerificationPolicy = {
+  readonly id:
+    string;
+
+  readonly chainRef:
+    string;
+
+  readonly tokenRef:
+    string;
+
+  readonly recipientRef:
+    string;
+
+  readonly minimumConfirmations:
+    number;
+
+  readonly version:
+    string;
+
+  readonly authoritative:
+    false;
+};
+
+export type DbxPaymentVerification = {
+  readonly id:
+    string;
+
+  readonly evidenceId:
+    string;
+
+  readonly purchaseIntentId:
+    string;
+
+  readonly quoteId:
+    string;
+
+  readonly status:
+    DbxPaymentVerificationStatus;
+
+  readonly policyId:
+    string;
+
+  readonly policyVersion:
+    string;
+
+  readonly checks:
+    readonly DbxPaymentVerificationCheck[];
+
+  readonly verifiedAt:
+    string;
+
+  readonly authoritative:
+    false;
+};
