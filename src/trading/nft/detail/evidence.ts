@@ -15,6 +15,20 @@ export function composeNftDetailEvidence(
   const fixture =
     nftProvenanceClosureFixture;
 
+  const provenanceLinked =
+    detail.integrity.provenanceId ===
+    fixture.provenance.id;
+
+  const dnaLinked =
+    detail.integrity.dnaId ===
+    fixture.dna.id;
+
+  const originLinked =
+    detail.integrity.originId === null
+      ? provenanceLinked
+      : detail.integrity.originId ===
+        fixture.origin.id;
+
   const items:
     NftDetailEvidenceItem[] = [
       {
@@ -28,10 +42,12 @@ export function composeNftDetailEvidence(
           "Origin record",
 
         reference:
-          fixture.origin.id,
+          originLinked
+            ? fixture.origin.id
+            : "",
 
         status:
-          fixture.origin.id
+          originLinked
             ? "PRESENT"
             : "ABSENT",
 
@@ -50,11 +66,12 @@ export function composeNftDetailEvidence(
           "DNA identity",
 
         reference:
-          detail.integrity.dnaId ??
-          "",
+          dnaLinked
+            ? fixture.dna.id
+            : "",
 
         status:
-          detail.integrity.dnaId
+          dnaLinked
             ? "PRESENT"
             : "ABSENT",
 
@@ -73,10 +90,17 @@ export function composeNftDetailEvidence(
           "DNA integrity",
 
         reference:
-          fixture.dna.integrity.metadataHash,
+          dnaLinked
+            ? fixture.dna.integrity
+                .metadataHash
+            : "",
 
         status:
-          fixture.dna.integrity.metadataHash
+          dnaLinked &&
+          Boolean(
+            fixture.dna.integrity
+              .metadataHash
+          )
             ? "PRESENT"
             : "ABSENT",
 
@@ -95,11 +119,21 @@ export function composeNftDetailEvidence(
           "Blockchain proof",
 
         reference:
-          fixture.dna.blockchainProof?.txHash ??
-          "",
+          dnaLinked
+            ? (
+                fixture.dna
+                  .blockchainProof
+                  ?.txHash ??
+                ""
+              )
+            : "",
 
         status:
-          fixture.dna.blockchainProof
+          dnaLinked &&
+          Boolean(
+            fixture.dna
+              .blockchainProof
+          )
             ? "PRESENT"
             : "ABSENT",
 
@@ -118,10 +152,14 @@ export function composeNftDetailEvidence(
           "Provenance history",
 
         reference:
-          fixture.history.id,
+          provenanceLinked
+            ? fixture.history.id
+            : "",
 
         status:
-          fixture.history.entries.length > 0
+          provenanceLinked &&
+          fixture.history.entries
+            .length > 0
             ? "PRESENT"
             : "ABSENT",
 
@@ -146,7 +184,8 @@ export function composeNftDetailEvidence(
     present,
 
     complete:
-      present === items.length,
+      present ===
+      items.length,
 
     authoritative:
       false,

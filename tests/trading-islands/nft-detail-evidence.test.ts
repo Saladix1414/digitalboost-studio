@@ -35,6 +35,26 @@ test(
 );
 
 test(
+  "linked detail composes complete evidence",
+  () => {
+    const result =
+      composeNftDetailEvidence(
+        nftAssetDetailFixture
+      );
+
+    assert.equal(
+      result.present,
+      5
+    );
+
+    assert.equal(
+      result.complete,
+      true
+    );
+  }
+);
+
+test(
   "detail evidence includes Origin DNA and provenance history",
   () => {
     const result =
@@ -95,6 +115,78 @@ test(
           false
       ),
       true
+    );
+  }
+);
+
+test(
+  "unrelated provenance reference cannot inherit provenance evidence",
+  () => {
+    const result =
+      composeNftDetailEvidence({
+        ...nftAssetDetailFixture,
+
+        integrity: {
+          ...nftAssetDetailFixture
+            .integrity,
+
+          provenanceId:
+            "provenance-unrelated",
+        },
+      });
+
+    const provenanceHistory =
+      result.items.find(
+        (item) =>
+          item.kind ===
+          "PROVENANCE_HISTORY"
+      );
+
+    assert.equal(
+      provenanceHistory?.status,
+      "ABSENT"
+    );
+  }
+);
+
+test(
+  "unrelated DNA reference cannot inherit DNA proof evidence",
+  () => {
+    const result =
+      composeNftDetailEvidence({
+        ...nftAssetDetailFixture,
+
+        integrity: {
+          ...nftAssetDetailFixture
+            .integrity,
+
+          dnaId:
+            "dna-unrelated",
+        },
+      });
+
+    const dnaIdentity =
+      result.items.find(
+        (item) =>
+          item.kind ===
+          "DNA_IDENTITY"
+      );
+
+    const blockchainProof =
+      result.items.find(
+        (item) =>
+          item.kind ===
+          "BLOCKCHAIN_PROOF"
+      );
+
+    assert.equal(
+      dnaIdentity?.status,
+      "ABSENT"
+    );
+
+    assert.equal(
+      blockchainProof?.status,
+      "ABSENT"
     );
   }
 );

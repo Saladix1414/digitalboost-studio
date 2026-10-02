@@ -43,12 +43,12 @@ test(
 
     assert.match(
       workspace,
-      /Asset match/
+      /Provenance reference/
     );
 
     assert.match(
       workspace,
-      /Collection match/
+      /DNA reference/
     );
 
     assert.match(

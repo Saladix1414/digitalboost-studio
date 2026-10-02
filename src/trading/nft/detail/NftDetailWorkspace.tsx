@@ -409,12 +409,12 @@ export function NftDetailWorkspace({
 
         <div>
           <span>
-            Asset match
+            Provenance reference
           </span>
 
           <strong>
             {
-              consistency.assetMatch
+              consistency.provenanceReferenceMatch
                 ? "PASS"
                 : "FAIL"
             }
@@ -423,12 +423,12 @@ export function NftDetailWorkspace({
 
         <div>
           <span>
-            Collection match
+            DNA reference
           </span>
 
           <strong>
             {
-              consistency.collectionMatch
+              consistency.dnaReferenceMatch
                 ? "PASS"
                 : "FAIL"
             }
@@ -445,6 +445,48 @@ export function NftDetailWorkspace({
               consistency.provenanceClosureValid
                 ? "PASS"
                 : "FAIL"
+            }
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            Cross-domain coherence
+          </span>
+
+          <strong>
+            {
+              consistency.coherent
+                ? "PASS"
+                : "FAIL"
+            }
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            Direct asset ID
+          </span>
+
+          <strong>
+            {
+              consistency.assetIdDirectMatch
+                ? "SAME"
+                : "DOMAIN ALIAS"
+            }
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            Direct collection ID
+          </span>
+
+          <strong>
+            {
+              consistency.collectionIdDirectMatch
+                ? "SAME"
+                : "DOMAIN ALIAS"
             }
           </strong>
         </div>

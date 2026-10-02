@@ -10,7 +10,7 @@ import {
 } from "../../src/trading/nft/detail/fixtures";
 
 test(
-  "detail fixture matches provenance asset and collection",
+  "detail fixture closes through provenance and DNA references",
   () => {
     const result =
       evaluateNftDetailConsistency(
@@ -18,17 +18,22 @@ test(
       );
 
     assert.equal(
-      result.assetMatch,
+      result.provenanceReferenceMatch,
       true
     );
 
     assert.equal(
-      result.collectionMatch,
+      result.dnaReferenceMatch,
       true
     );
 
     assert.equal(
       result.provenanceClosureValid,
+      true
+    );
+
+    assert.equal(
+      result.coherent,
       true
     );
 
@@ -40,44 +45,81 @@ test(
 );
 
 test(
-  "asset mismatch is detected",
+  "catalog and provenance asset namespaces remain explicit",
+  () => {
+    const result =
+      evaluateNftDetailConsistency(
+        nftAssetDetailFixture
+      );
+
+    assert.equal(
+      result.assetIdDirectMatch,
+      false
+    );
+
+    assert.equal(
+      result.collectionIdDirectMatch,
+      false
+    );
+
+    assert.equal(
+      result.coherent,
+      true
+    );
+  }
+);
+
+test(
+  "provenance reference mismatch breaks coherence",
   () => {
     const result =
       evaluateNftDetailConsistency({
         ...nftAssetDetailFixture,
 
-        identity: {
-          ...nftAssetDetailFixture.identity,
+        integrity: {
+          ...nftAssetDetailFixture
+            .integrity,
 
-          assetId:
-            "asset-mismatch-999",
+          provenanceId:
+            "provenance-mismatch-999",
         },
       });
 
     assert.equal(
-      result.assetMatch,
+      result.provenanceReferenceMatch,
+      false
+    );
+
+    assert.equal(
+      result.coherent,
       false
     );
   }
 );
 
 test(
-  "collection mismatch is detected",
+  "DNA reference mismatch breaks coherence",
   () => {
     const result =
       evaluateNftDetailConsistency({
         ...nftAssetDetailFixture,
 
-        identity: {
-          ...nftAssetDetailFixture.identity,
+        integrity: {
+          ...nftAssetDetailFixture
+            .integrity,
 
-          collectionId:
-            "collection-mismatch-999",
+          dnaId:
+            "dna-mismatch-999",
         },
       });
 
     assert.equal(
-      result.collectionMatch,
+      result.dnaReferenceMatch,
+      false
+    );
+
+    assert.equal(
+      result.coherent,
       false
     );
   }
