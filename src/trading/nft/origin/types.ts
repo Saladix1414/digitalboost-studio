@@ -269,3 +269,52 @@ export type NftOriginModeValidationResult = {
   readonly issues:
     readonly NftOriginModeValidationIssue[];
 };
+
+export type NftOriginCaptureInput = {
+  readonly id: string;
+
+  readonly assetId: string;
+
+  readonly collectionId: string;
+
+  readonly creator: string;
+
+  readonly modeConfig:
+    NftOriginModeConfig;
+
+  readonly forgeConfig: string;
+
+  readonly source:
+    NftOriginSourceReference;
+
+  readonly createdAt: string;
+
+  readonly capturedAt: string;
+};
+
+export type NftOriginCaptureIssueCode =
+  | "INVALID_MODE_CONFIG"
+  | "SOURCE_TYPE_MISMATCH"
+  | "EMPTY_ASSET_ID"
+  | "EMPTY_COLLECTION_ID"
+  | "EMPTY_CREATOR"
+  | "EMPTY_FORGE_CONFIG"
+  | "EMPTY_CREATED_AT"
+  | "EMPTY_CAPTURED_AT";
+
+export type NftOriginCaptureIssue = {
+  readonly code:
+    NftOriginCaptureIssueCode;
+
+  readonly message: string;
+};
+
+export type NftOriginCaptureResult = {
+  readonly accepted: boolean;
+
+  readonly record:
+    NftOriginRecord | null;
+
+  readonly issues:
+    readonly NftOriginCaptureIssue[];
+};
