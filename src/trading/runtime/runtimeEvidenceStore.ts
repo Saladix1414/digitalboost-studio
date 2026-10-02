@@ -390,21 +390,123 @@ export async function hydrateRuntimeEvidence():
       false,
   });
 
+  /*
+   * Capture the generation before crossing the storage boundary.
+   *
+   * Runtime recording remains memory-first while hydration is pending,
+   * so this generation may legitimately advance before load completes.
+   */
+  const generationBeforeLoad =
+    historyGeneration;
+
   try {
     const result =
       await adapter.load();
 
+    const persistedHistory =
+      result.snapshot?.history ?? {
+        entries:
+          [],
+
+        authoritative:
+          false as const,
+      };
+
+    /*
+     * Always read current memory after load.
+     *
+     * If historyGeneration advanced while storage was in flight,
+     * currentMemory contains runtime evidence that must participate
+     * in startup reconciliation rather than being overwritten.
+     */
+    const currentMemory =
+      history;
+
+    const memoryChangedDuringLoad =
+      historyGeneration !==
+      generationBeforeLoad;
+
+    const reconciliation =
+      reconcileRuntimeEvidenceHistories(
+        currentMemory,
+        persistedHistory
+      );
+
     if (
-      result.snapshot
+      reconciliation.status ===
+      "conflict"
     ) {
-      history =
-        result.snapshot.history;
+      /*
+       * Startup hydration is not allowed to replace current memory
+       * when persisted evidence conflicts with it.
+       */
+      setLifecycle({
+        status:
+          "error",
 
-      historyGeneration +=
-        1;
+        error:
+          `Runtime evidence hydration conflict for session ${reconciliation.conflict.sessionId}. Local memory was preserved.`,
 
-      emitRuntimeEvidenceChange();
+        authoritative:
+          false,
+      });
+
+      return history;
     }
+
+    /*
+     * Commit only the reconciled history.
+     *
+     * This works both for ordinary startup hydration and for the
+     * concurrent-recording case detected by memoryChangedDuringLoad.
+     */
+    history =
+      reconciliation.history;
+
+    historyGeneration +=
+      1;
+
+    emitRuntimeEvidenceChange();
+
+    /*
+     * Persist the reconciled startup view until storage catches the
+     * newest observed in-memory generation.
+     *
+     * This also repairs the case where a runtime record queued its own
+     * persistence while adapter.load() was still pending.
+     */
+    while (
+      true
+    ) {
+      const generation =
+        historyGeneration;
+
+      const snapshot =
+        createRuntimeEvidenceSnapshot(
+          history
+        );
+
+      await enqueuePersistence(
+        async () => {
+          await adapter.save(
+            snapshot
+          );
+        }
+      );
+
+      if (
+        generation ===
+        historyGeneration
+      ) {
+        break;
+      }
+    }
+
+    /*
+     * Keep the explicit detection value in the implementation so
+     * startup race behavior remains auditable and testable.
+     */
+    void memoryChangedDuringLoad;
 
     setLifecycle({
       status:
@@ -416,14 +518,11 @@ export async function hydrateRuntimeEvidence():
       authoritative:
         false,
     });
+
+    return history;
   } catch (
     error
   ) {
-    /*
-     * Evidence hydration is observational only.
-     * Existing in-memory history remains usable and runtime execution
-     * must never depend on this lifecycle.
-     */
     setLifecycle({
       status:
         "error",
@@ -437,11 +536,10 @@ export async function hydrateRuntimeEvidence():
       authoritative:
         false,
     });
+
+    return history;
   }
-
-  return history;
 }
-
 
 export async function persistRuntimeEvidenceHistory():
   Promise<void> {
@@ -455,10 +553,18 @@ export async function persistRuntimeEvidenceHistory():
   }
 
   /*
-   * While evidence is stale or being reconciled, runtime recording
-   * remains memory-first but ordinary persistence is suspended.
+   * While evidence is hydrating, stale, or being reconciled,
+   * runtime recording remains memory-first but ordinary persistence
+   * is suspended.
+   *
+   * During startup hydration this is critical: a local runtime record
+   * must not overwrite persisted evidence before the pending load has
+   * incorporated that evidence into memory. hydrateRuntimeEvidence()
+   * performs the persistence catch-up after reconciliation succeeds.
    */
   if (
+    lifecycle.status ===
+      "hydrating" ||
     lifecycle.status ===
       "stale" ||
     lifecycle.status ===
