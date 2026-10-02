@@ -36,6 +36,8 @@ import {
   nftMarketplaceReadyListingFixture,
 } from "./eligibilityFixtures";
 
+import NftMarketplaceCatalogWorkspace from "./catalog/NftMarketplaceCatalogWorkspace";
+
 export function NftMarketplaceWorkspace() {
   const eligibility =
     useMemo(
@@ -108,6 +110,8 @@ export function NftMarketplaceWorkspace() {
           strokeWidth={1.4}
         />
       </header>
+
+      <NftMarketplaceCatalogWorkspace />
 
       <section className="ti-marketplace__metrics">
         <article>

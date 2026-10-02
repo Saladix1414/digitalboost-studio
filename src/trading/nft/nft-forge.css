@@ -1663,3 +1663,220 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   PHASE 27B — MARKETPLACE CATALOG WORKSPACE
+   ========================================================= */
+
+.ti-market-catalog {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(126, 151, 181, 0.12);
+  background: #0a0f15;
+}
+
+.ti-market-catalog__hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.ti-market-catalog__hero h3 {
+  margin: 5px 0;
+  color: #e3ebf2;
+  font-size: 15px;
+}
+
+.ti-market-catalog__hero p {
+  margin: 0;
+  color: #758393;
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.ti-market-catalog__controls {
+  display: grid;
+  grid-template-columns:
+    minmax(240px, 1fr)
+    190px
+    190px;
+  gap: 8px;
+}
+
+.ti-market-catalog__controls label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid rgba(126, 151, 181, 0.11);
+  background: #0e141b;
+  color: #7f8c99;
+  font-size: 8px;
+}
+
+.ti-market-catalog__controls input,
+.ti-market-catalog__controls select {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #d5dee7;
+  font: inherit;
+}
+
+.ti-market-catalog__controls option {
+  color: #d5dee7;
+  background: #10161d;
+}
+
+.ti-market-catalog__summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: #667483;
+  font-size: 8px;
+}
+
+.ti-market-catalog__grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ti-market-card {
+  overflow: hidden;
+  border: 1px solid rgba(126, 151, 181, 0.1);
+  background: #0e141b;
+}
+
+.ti-market-card__media {
+  display: flex;
+  align-items: flex-end;
+  min-height: 120px;
+  padding: 10px;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(49, 162, 220, 0.16),
+      transparent 50%
+    ),
+    linear-gradient(
+      145deg,
+      #121a22,
+      #0a0f15
+    );
+}
+
+.ti-market-card__media div {
+  padding: 4px 6px;
+  border: 1px solid rgba(126, 200, 236, 0.16);
+  background: rgba(44, 149, 200, 0.06);
+  color: #87cce9;
+  font-size: 7px;
+}
+
+.ti-market-card__body {
+  display: grid;
+  gap: 10px;
+  padding: 11px;
+}
+
+.ti-market-card__body header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ti-market-card__body h4 {
+  margin: 0 0 3px;
+  color: #e0e8ef;
+  font-size: 10px;
+}
+
+.ti-market-card__body header span,
+.ti-market-card__body header small {
+  color: #687685;
+  font-size: 7px;
+}
+
+.ti-market-card__body dl {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.ti-market-card__body dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ti-market-card__body dt {
+  color: #637180;
+  font-size: 7px;
+}
+
+.ti-market-card__body dd {
+  overflow-wrap: anywhere;
+  margin: 0;
+  text-align: right;
+  color: #cbd6df;
+  font-size: 7px;
+}
+
+.ti-market-card__body footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(126, 151, 181, 0.08);
+}
+
+.ti-market-card__body footer span {
+  color: #80d4b2;
+  font-size: 7px;
+}
+
+.ti-market-card__body button {
+  border: 1px solid rgba(126, 151, 181, 0.12);
+  background: #111821;
+  color: #697686;
+  padding: 6px 8px;
+  font-size: 7px;
+  cursor: not-allowed;
+}
+
+.ti-market-catalog__empty {
+  padding: 22px;
+  text-align: center;
+  border: 1px dashed rgba(126, 151, 181, 0.13);
+  color: #677583;
+  font-size: 8px;
+}
+
+.ti-market-catalog__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: #5f6d7a;
+  font-size: 7px;
+}
+
+@media (max-width: 1000px) {
+  .ti-market-catalog__grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .ti-market-catalog__controls,
+  .ti-market-catalog__grid {
+    grid-template-columns: 1fr;
+  }
+}
