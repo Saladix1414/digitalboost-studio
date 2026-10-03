@@ -58,3 +58,22 @@ google-credentials*.json
 # Local security scanner reports
 digitalboost-gitleaks-*.json
 gitleaks-report*.json
+# ============================================================
+# DigitalBoost — retired tracked legacy artifacts
+# ============================================================
+
+# Historical source trees retained outside Git.
+src_COPIA_REAL_HOY_QUE_NO_BORRO/
+tools_archive/
+
+# Historical repository snapshots.
+.digitalboost-*-backup-*/
+
+# Individually retired source snapshots.
+src/App.tsx.broken-20260822-130455
+src/DigitalBoostMainPage.tsx.roto
+src/StoreBuilderWorkspace.ULTIMO-2k-ROTO.tsx
+src/components/ToolWorkspace.before-actions-2.tsx
+src/components/ToolWorkspace.before-actions.tsx
+src/components/ToolWorkspace.before-button-fix.tsx
+src/components/ToolWorkspace.before-real-actions.tsx
