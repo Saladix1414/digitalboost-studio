@@ -1603,44 +1603,50 @@ export default function App() {
     }
   };
 
-  const handleBackToMain =
-    () => {
+  const handleBackToMain = () => {
+    /*
+     * INTERNAL DigitalBoost navigation.
+     *
+     * Never traverse browser history here.
+     * The Trading Islands Back button must simply
+     * return to the DigitalBoost landing screen.
+     */
+    setCurrentScreen("main");
+
+    try {
+      localStorage.setItem(
+        APP_SCREEN_KEY,
+        "main"
+      );
+    } catch {}
+
+    try {
       const state =
         window.history.state as
           | {
               digitalboostScreen?: "main" | "workspace";
+              digitalboostTool?: ToolMode;
             }
           | null;
-
-      if (
-        state?.digitalboostScreen ===
-        "workspace"
-      ) {
-        /*
-         * popstate performs the React state transition.
-         */
-        window.history.back();
-
-        return;
-      }
-
-      /*
-       * Defensive fallback for sessions created before history integration.
-       */
-      setCurrentScreen(
-        "main"
-      );
 
       window.history.replaceState(
         {
           ...state,
           digitalboostScreen:
             "main",
+          digitalboostTool:
+            selectedTool,
         },
         "",
         window.location.href
       );
-    };
+    } catch {
+      /*
+       * Browser-history synchronization is best effort.
+       * React navigation remains the source for this action.
+       */
+    }
+  };
 
   return (
     <div className="bg-[#030308] min-h-screen text-white">
