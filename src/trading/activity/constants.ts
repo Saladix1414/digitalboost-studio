@@ -1,0 +1,2 @@
+export const TRADING_ACTIVITY_HISTORY_LIMIT =
+  500;

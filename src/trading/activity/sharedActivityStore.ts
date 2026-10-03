@@ -8,6 +8,10 @@ import {
   createTradingActivityStore,
 } from "./store";
 
+import {
+  TRADING_ACTIVITY_HISTORY_LIMIT,
+} from "./constants";
+
 type TradingActivityListener =
   () => void;
 
@@ -80,8 +84,12 @@ export function recordTradingActivityEvent(
     return store;
   }
 
-  store =
-    next;
+  store = {
+    events:
+      next.events.slice(
+        -TRADING_ACTIVITY_HISTORY_LIMIT
+      ),
+  };
 
   emitTradingActivityChange();
 
@@ -113,8 +121,12 @@ export function recordTradingActivityEvents(
     return store;
   }
 
-  store =
-    next;
+  store = {
+    events:
+      next.events.slice(
+        -TRADING_ACTIVITY_HISTORY_LIMIT
+      ),
+  };
 
   emitTradingActivityChange();
 
