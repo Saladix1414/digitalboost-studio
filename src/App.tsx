@@ -1433,219 +1433,9 @@ export default function App() {
     } catch {}
   }, [currentScreen, selectedTool]);
 
-  /*
-   * Browser / Android back navigation boundary.
-   *
-   * DigitalBoost uses React state for its internal screens, but the browser
-   * back button operates on window.history. Keep both models synchronized so
-   * leaving a workspace returns to the DigitalBoost landing instead of
-   * navigating to whatever URL existed before the local dev server.
-   */
-  useEffect(() => {
-    const currentHistoryState =
-      window.history.state as
-        | {
-            digitalboostScreen?: "main" | "workspace";
-            digitalboostTool?: ToolMode;
-          }
-        | null;
-
-    /*
-     * A restored workspace may come from localStorage after a reload.
-     * In that case there is no guaranteed DigitalBoost history entry behind
-     * it. Create a safe landing baseline first, then the workspace entry.
-     */
-    if (currentScreen === "workspace") {
-      if (
-        currentHistoryState?.digitalboostScreen !==
-        "workspace"
-      ) {
-        window.history.replaceState(
-          {
-            ...currentHistoryState,
-            digitalboostScreen:
-              "main",
-          },
-          "",
-          window.location.href
-        );
-
-        window.history.pushState(
-          {
-            ...currentHistoryState,
-            digitalboostScreen:
-              "workspace",
-            digitalboostTool:
-              selectedTool,
-          },
-          "",
-          window.location.href
-        );
-      }
-    } else if (
-      currentScreen === "main" &&
-      currentHistoryState?.digitalboostScreen !==
-        "main"
-    ) {
-      window.history.replaceState(
-        {
-          ...currentHistoryState,
-          digitalboostScreen:
-            "main",
-        },
-        "",
-        window.location.href
-      );
-    }
-
-    const handlePopState = (
-      event: PopStateEvent
-    ) => {
-      const state =
-        event.state as
-          | {
-              digitalboostScreen?: "main" | "workspace";
-              digitalboostTool?: ToolMode;
-            }
-          | null;
-
-      if (
-        state?.digitalboostScreen ===
-        "workspace"
-      ) {
-        if (
-          state.digitalboostTool
-        ) {
-          setSelectedTool(
-            state.digitalboostTool
-          );
-        }
-
-        setCurrentScreen(
-          "workspace"
-        );
-
-        return;
-      }
-
-      /*
-       * Any DigitalBoost history entry behind a workspace is the landing.
-       * Never manufacture a second browser navigation here.
-       */
-      setCurrentScreen(
-        "main"
-      );
-    };
-
-    window.addEventListener(
-      "popstate",
-      handlePopState
-    );
-
-    return () => {
-      window.removeEventListener(
-        "popstate",
-        handlePopState
-      );
-    };
-  }, []);
-
-  const handleSelectTool = (
-    mode:
-      ToolMode
-  ) => {
-    setSelectedTool(
-      mode
-    );
-
-    setCurrentScreen(
-      "workspace"
-    );
-
-    const state =
-      window.history.state as
-        | {
-            digitalboostScreen?: "main" | "workspace";
-          }
-        | null;
-
-    /*
-     * Only create one workspace history entry.
-     * Switching tools inside the workspace must not spam browser history.
-     */
-    if (
-      state?.digitalboostScreen !==
-      "workspace"
-    ) {
-      window.history.pushState(
-        {
-          ...state,
-          digitalboostScreen:
-            "workspace",
-          digitalboostTool:
-            mode,
-        },
-        "",
-        window.location.href
-      );
-    } else {
-      window.history.replaceState(
-        {
-          ...state,
-          digitalboostScreen:
-            "workspace",
-          digitalboostTool:
-            mode,
-        },
-        "",
-        window.location.href
-      );
-    }
-  };
-
-  const handleBackToMain = () => {
-    /*
-     * INTERNAL DigitalBoost navigation.
-     *
-     * Never traverse browser history here.
-     * The Trading Islands Back button must simply
-     * return to the DigitalBoost landing screen.
-     */
-    setCurrentScreen("main");
-
-    try {
-      localStorage.setItem(
-        APP_SCREEN_KEY,
-        "main"
-      );
-    } catch {}
-
-    try {
-      const state =
-        window.history.state as
-          | {
-              digitalboostScreen?: "main" | "workspace";
-              digitalboostTool?: ToolMode;
-            }
-          | null;
-
-      window.history.replaceState(
-        {
-          ...state,
-          digitalboostScreen:
-            "main",
-          digitalboostTool:
-            selectedTool,
-        },
-        "",
-        window.location.href
-      );
-    } catch {
-      /*
-       * Browser-history synchronization is best effort.
-       * React navigation remains the source for this action.
-       */
-    }
+  const handleSelectTool = (mode: ToolMode) => {
+    setSelectedTool(mode);
+    setCurrentScreen('workspace');
   };
 
   return (
@@ -1670,18 +1460,17 @@ export default function App() {
 
       {currentScreen === 'main' && (
         <DigitalBoostMainPage
-          onSelectTool={(mode) =>
-            handleSelectTool(
-              mode as ToolMode
-            )
-          }
+          onSelectTool={(mode) => {
+            setSelectedTool(mode as ToolMode);
+            setCurrentScreen('workspace');
+          }}
         />
       )}
 
       {currentScreen === 'workspace' && (
         <InternalWorkspace
           initialMode={selectedTool}
-          onBack={handleBackToMain}
+          onBack={() => setCurrentScreen('main')}
         />
       )}
     </div>

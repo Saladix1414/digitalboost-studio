@@ -5,7 +5,6 @@ import {
   Boxes,
   CandlestickChart,
   Coins,
-  Gauge,
   LineChart,
   ShieldCheck,
   Sparkles,
@@ -38,11 +37,6 @@ const groups = [
   {
     label: "Trading",
     items: [
-      {
-        id: "overview",
-        label: "Overview",
-        icon: Gauge,
-      },
       {
         id: "terminal",
         label: "Terminal",

@@ -25,7 +25,6 @@ import {
   CommandPalette,
   EmptyState,
   StatusBadge,
-  WorkspaceTabs,
   type CommandPaletteItem,
 } from "./components";
 
@@ -170,20 +169,7 @@ const consoleTabs = [
   },
 ] as const;
 
-const workspaceTabs = [
-  {
-    id: "workspace",
-    label: "Workspace",
-  },
-  {
-    id: "research",
-    label: "Research",
-  },
-  {
-    id: "notes",
-    label: "Notes",
-  },
-] as const;
+
 
 export function TradingIslandsWorkspace({
   onBack,
@@ -218,11 +204,6 @@ export function TradingIslandsWorkspace({
     consoleCollapsed,
     setConsoleCollapsed,
   ] = useState(true);
-
-  const [
-    activeWorkspaceTab,
-    setActiveWorkspaceTab,
-  ] = useState("workspace");
 
   const activeMeta =
     sectionMeta[activeSection];
@@ -336,46 +317,26 @@ export function TradingIslandsWorkspace({
             </StatusBadge>
           </div>
 
-          <WorkspaceTabs
-            tabs={workspaceTabs}
-            activeId={
-              activeWorkspaceTab
-            }
-            onChange={
-              setActiveWorkspaceTab
-            }
-            ariaLabel={`${activeMeta.title} workspace`}
-          />
-
           <section className="ti-shell-stage">
-            {activeSection === "overview" &&
-            activeWorkspaceTab === "workspace" ? (
+            {activeSection === "overview" ? (
               <TradingOverview
                 onNavigate={setActiveSection}
               />
-            ) : activeSection === "terminal" &&
-              activeWorkspaceTab === "workspace" ? (
+            ) : activeSection === "terminal" ? (
               <TradingTerminal />
-            ) : activeSection === "strategies" &&
-              activeWorkspaceTab === "workspace" ? (
+            ) : activeSection === "strategies" ? (
               <StrategyBuilder />
-            ) : activeSection === "backtests" &&
-              activeWorkspaceTab === "workspace" ? (
+            ) : activeSection === "backtests" ? (
               <BacktestWorkspace />
-            ) : activeSection === "paper" &&
-              activeWorkspaceTab === "workspace" ? (
+            ) : activeSection === "paper" ? (
               <PaperTradingWorkspace />
-            ) : activeSection === "bot-forge" &&
-              activeWorkspaceTab === "workspace" ? (
+            ) : activeSection === "bot-forge" ? (
               <BotForgeWorkspace />
-            ) : activeSection === "risk" &&
-              activeWorkspaceTab === "workspace" ? (
+            ) : activeSection === "risk" ? (
               <RiskReviewWorkspace />
-            ) : activeSection === "nft-forge" &&
-              activeWorkspaceTab === "workspace" ? (
+            ) : activeSection === "nft-forge" ? (
               <NftForgeWorkspace />
-            ) : activeSection === "activity" &&
-              activeWorkspaceTab === "workspace" ? (
+            ) : activeSection === "activity" ? (
               <ActivityWorkspace />
             ) : (
               <EmptyState
@@ -386,12 +347,7 @@ export function TradingIslandsWorkspace({
                   />
                 }
                 title={`${activeMeta.title} workspace ready`}
-                description={
-                  activeWorkspaceTab ===
-                  "workspace"
-                    ? "This workspace is prepared for the next product phase."
-                    : `${activeWorkspaceTab} is reserved for the upcoming product workflow.`
-                }
+                description="This workspace is prepared for the next product phase."
               />
             )}
           </section>
