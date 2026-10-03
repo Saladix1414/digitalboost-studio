@@ -25,3 +25,36 @@ logs/
 # agent local
 backups/
 -tree -r --name-only HEAD
+# ============================================================
+# DigitalBoost — secrets / credentials
+# ============================================================
+
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+credentials
+credentials.*
+credentials/
+secrets
+secrets.*
+secrets/
+
+*.credentials
+*.secret
+
+# Common local credential artifacts
+service-account*.json
+*-service-account.json
+google-credentials*.json
+
+# Local security scanner reports
+digitalboost-gitleaks-*.json
+gitleaks-report*.json
