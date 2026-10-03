@@ -8,48 +8,140 @@ Documento raíz: ../agente.md
 
 ## Visión
 
-DigitalBoost es un ecosistema tecnológico de cinco productos independientes pero interoperables.
+DigitalBoost es un ecosistema tecnológico compuesto por seis productos
+principales, conceptualmente independientes pero capaces de compartir
+infraestructura cuando exista una razón arquitectónica real.
+
+Los seis productos canónicos son:
+
+1. Commerce OS
+2. Web Builder
+3. AI Forge
+4. Trading Islands
+5. Sentinel
+6. Nexus
+
+---
 
 ## 01 — Commerce OS
 
-Plataforma de comercio digital.
+Plataforma de comercio digital y operación de negocios.
 
-Incluye:
+Puede incluir:
 
 - catálogo;
 - productos;
 - colecciones;
 - clientes;
 - pedidos;
+- inventario;
 - marketing;
 - analítica;
 - automatización;
+- operaciones;
 - inteligencia comercial.
 
 ### Store Builder
 
-Módulo interno de Commerce OS.
+Store Builder es un módulo interno de Commerce OS.
 
-No es una isla independiente.
+No es un producto independiente.
+
+### PULSE
+
+PULSE pertenece actualmente a Commerce OS.
+
+PULSE es la inteligencia operacional de Commerce OS y puede participar
+en análisis, asistencia, propuestas, automatización gobernada y tareas
+operativas dentro de ese dominio.
+
+PULSE no es actualmente una infraestructura global de DigitalBoost.
+
+Una futura integración o evolución de PULSE dentro de Sentinel puede ser
+evaluada más adelante, pero no constituye autoridad ni arquitectura
+vigente fuera de Commerce OS.
 
 ---
 
 ## 02 — Web Builder
 
-Constructor de sitios web independiente.
+Constructor independiente de experiencias web.
 
 Orientado a:
 
-- páginas;
+- sitios web;
 - landing pages;
 - sitios corporativos;
-- experiencias web;
 - portfolios;
-- sitios personalizados.
+- páginas de campaña;
+- experiencias personalizadas;
+- proyectos web.
+
+Web Builder no debe confundirse con Store Builder.
 
 ---
 
-## 03 — Sentinel
+## 03 — AI Forge
+
+Entorno para crear, configurar, probar, evaluar, depurar, versionar,
+desplegar y gobernar sistemas de inteligencia artificial.
+
+Puede incluir:
+
+- modelos;
+- agentes;
+- bots;
+- workflows;
+- multi-agent;
+- knowledge;
+- memory;
+- tools;
+- MCP;
+- skills;
+- datasets;
+- channels;
+- evaluations;
+- sandbox;
+- runtime;
+- deployment;
+- governance.
+
+AI Forge no es PULSE.
+
+AI Forge es un producto independiente del ecosistema.
+
+---
+
+## 04 — Trading Islands
+
+Entorno especializado para mercados, estrategias y activos digitales.
+
+Puede incluir:
+
+- market data;
+- terminal;
+- análisis;
+- strategy builder;
+- AI strategy assistance;
+- backtesting;
+- paper trading;
+- risk review;
+- bot forge;
+- runtime;
+- hosting;
+- NFT Forge;
+- Origin;
+- marketplace;
+- DBX;
+- activity;
+- blockchain gateway.
+
+La simulación, la inferencia o la evidencia visual no equivalen por sí
+solas a ejecución financiera real.
+
+---
+
+## 05 — Sentinel
 
 Plataforma de ciberseguridad y pentesting ético.
 
@@ -62,67 +154,51 @@ Enfocada en:
 - vulnerabilidades;
 - API security;
 - reporting;
-- seguridad defensiva.
+- seguridad defensiva;
+- gobernanza y trazabilidad.
+
+Sentinel debe operar siempre bajo autorización y alcance definido.
 
 ---
 
-## 04 — AI Forge
+## 06 — Nexus
 
-Entorno de desarrollo de inteligencia artificial.
+Nexus es el foro y la capa comunitaria de DigitalBoost.
 
-### Definición oficial
+Puede incluir:
 
-AI Forge permite crear, configurar, probar, evaluar, depurar, versionar, desplegar y gobernar diferentes tipos de sistemas de IA.
-
-### Ocho pilares
-
-1. Command Center
-2. Agent Builder
-3. Workflow Engine
-4. Tool & Skill Forge
-5. Knowledge & Memory
-6. Model Orchestration
-7. Eval & Debug Lab
-8. Deployment & Governance
-
-### Concepto
-
-AI Forge debe sentirse como:
-
-IDE + terminal agéntica + laboratorio de IA + plataforma de deployment.
-
-No como:
-
-chatbot builder + formularios.
-
----
-
-## 05 — Nexus
-
-Plataforma comunitaria.
-
-Incluye potencialmente:
-
-- comunidades;
-- foros;
 - perfiles;
-- conocimiento;
-- eventos;
+- foros;
+- comunidades;
+- publicaciones;
 - proyectos;
+- conocimiento;
+- tutoriales;
+- eventos;
 - reputación;
 - colaboración.
 
+Nexus ocupa la capa social y comunitaria del ecosistema.
+
 ---
 
-## Relación entre productos
+## Infraestructura compartida
 
-Los cinco productos comparten infraestructura cuando sea conveniente:
+Los productos pueden compartir infraestructura cuando esté justificado,
+por ejemplo:
 
 - identidad;
-- billing;
-- seguridad;
-- IA;
 - cuentas;
-- observabilidad.
+- billing;
+- almacenamiento;
+- seguridad;
+- notificaciones;
+- observabilidad;
+- auditoría;
+- infraestructura de ejecución.
 
-Compartir infraestructura no elimina la autonomía conceptual de cada producto.
+Compartir infraestructura no elimina la autonomía conceptual de cada
+producto ni concede autoridad automática entre dominios.
+
+PULSE no forma parte actualmente de esta lista de infraestructura común:
+su ámbito vigente es Commerce OS.

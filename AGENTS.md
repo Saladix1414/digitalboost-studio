@@ -57,8 +57,9 @@ DigitalBoost está compuesto por:
 
 - Commerce OS
 - Web Builder
-- Sentinel
 - AI Forge
+- Trading Islands
+- Sentinel
 - Nexus
 
 Regla estructural:
@@ -71,9 +72,17 @@ No convertir Store Builder en una aplicación/isla independiente.
 
 ## 4. PULSE
 
-PULSE es el cerebro/orquestador operacional.
+PULSE es la inteligencia operacional de Commerce OS.
 
-Cadena obligatoria:
+Su ámbito vigente es Commerce OS.
+
+No asumir que PULSE es una infraestructura global de DigitalBoost.
+Una futura integración con Sentinel requiere una decisión explícita y
+evidencia de implementación.
+
+Cadena de control dentro de su ámbito:
+
+
 
 USER
  PULSE

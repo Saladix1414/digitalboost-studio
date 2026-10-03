@@ -10,13 +10,14 @@ Estas reglas complementan el `AGENTS.md` raíz.
 
 Cuando una tarea afecta varios dominios, considerar este orden:
 
-1. PULSE
+1. Commerce OS / PULSE
 2. IA / Ollama / OpenClaw / Model Infrastructure
 3. Store Builder
-4. Commerce OS
-5. Marketing / SEO
-6. Web Builder
-7. resto del ecosistema
+4. Web Builder
+5. Trading Islands
+6. Sentinel
+7. Nexus
+8. resto del ecosistema
 
 Este orden organiza la integración.
 No autoriza cambios fuera del alcance de la tarea.
@@ -25,9 +26,17 @@ No autoriza cambios fuera del alcance de la tarea.
 
 ## 2. PULSE
 
-PULSE es el orquestador operacional.
+PULSE es la inteligencia operacional de Commerce OS.
 
-Arquitectura obligatoria:
+Su ámbito actual es exclusivamente Commerce OS.
+
+No asumir autoridad de PULSE sobre Web Builder, AI Forge,
+Trading Islands, Sentinel o Nexus.
+
+Una futura integración con Sentinel requiere una decisión explícita y
+una implementación verificable.
+
+Arquitectura de control dentro de Commerce OS:
 
 USER
  PULSE

@@ -20,11 +20,12 @@ const neon =
   "bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400";
 
 const stats = [
-  ["15K+", "Usuarios activos", Users],
-  ["2.5K+", "Proyectos creados", FolderKanban],
-  ["850+", "Tiendas online", ShoppingCart],
-  ["1.2K+", "NFTs generados", Hexagon],
-  ["99.9%", "Uptime garantizado", Gauge],
+  ["01", "Commerce OS", ShoppingCart],
+  ["02", "Web Builder", LayoutTemplate],
+  ["03", "IA Forge", Code2],
+  ["04", "Trading Islands", Terminal],
+  ["05", "Sentinel", Gauge],
+  ["06", "Nexus", Users],
 ] as const;
 
 const tools = [
@@ -61,7 +62,7 @@ function StatRow({
   purple?: boolean;
 }) {
   return (
-    <div className="grid grid-cols-2 divide-x divide-white/[.08] rounded-lg border border-indigo-400/20 bg-[#030914]/80 md:grid-cols-5">
+    <div className="grid grid-cols-2 divide-x divide-white/[.08] rounded-lg border border-indigo-400/20 bg-[#030914]/80 md:grid-cols-6">
       {stats.map(([number, label, Icon]) => (
         <div
           key={label}

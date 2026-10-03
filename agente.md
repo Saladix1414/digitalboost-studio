@@ -1,7 +1,7 @@
 # DIGITALBOOST STUDIO
 # AGENTE — CONSTITUCIÓN OPERATIVA
 
-Versión: 1.1
+Versión: 1.2
 Estado: CANÓNICO
 Autoridad: MÁXIMA
 Documento raíz del proyecto.
@@ -10,7 +10,7 @@ Documento raíz del proyecto.
 
 ## 1. PROPÓSITO
 
-DigitalBoost Studio es un ecosistema tecnológico orientado a comercio digital, construcción web, ciberseguridad ética, inteligencia artificial agéntica y comunidad.
+DigitalBoost Studio es un ecosistema tecnológico orientado a comercio digital, construcción web, inteligencia artificial, mercados y activos digitales, ciberseguridad ética y comunidad.
 
 Este documento define las reglas permanentes que deben respetar agentes, desarrolladores, automatizaciones y sistemas que trabajen sobre el proyecto.
 
@@ -24,26 +24,41 @@ No se modifica el proyecto basándose únicamente en hipótesis.
 
 ## 2. ECOSISTEMA DIGITALBOOST
 
-DigitalBoost está compuesto por cinco productos principales y definitivos:
+DigitalBoost está compuesto por seis productos principales:
 
 1. COMMERCE OS
 2. WEB BUILDER
-3. SENTINEL
-4. AI FORGE
-5. NEXUS
+3. AI FORGE
+4. TRADING ISLANDS
+5. SENTINEL
+6. NEXUS
 
 Arquitectura conceptual:
 
 DIGITALBOOST
  Commerce OS
-   └── Store Builder
+   ├── Store Builder
+   └── PULSE
  Web Builder
- Sentinel
  AI Forge
+ Trading Islands
+ Sentinel
  Nexus
 
 Store Builder es un módulo de Commerce OS.
-No es una sexta isla.
+No es una isla independiente.
+
+PULSE pertenece actualmente a Commerce OS.
+No es actualmente una infraestructura global de DigitalBoost.
+
+Trading Islands es un producto principal especializado en mercados,
+estrategias, simulación, riesgo, bots y activos digitales.
+
+Nexus es el foro y la capa comunitaria del ecosistema.
+
+Una futura integración de capacidades relacionadas con PULSE dentro de
+Sentinel puede evaluarse posteriormente, pero no forma parte de la
+arquitectura vigente.
 
 ---
 

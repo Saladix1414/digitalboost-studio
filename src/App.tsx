@@ -700,11 +700,12 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
   ];
 
   const stats = [
-    ['15K+', 'Usuarios activos'],
-    ['2.5K+', 'Proyectos creados'],
-    ['850+', 'Tiendas online'],
-    ['1.2K+', 'NFTs generados'],
-    ['99.9%', 'Uptime garantizado'],
+    ['01', 'Commerce OS'],
+    ['02', 'Web Builder'],
+    ['03', 'IA Forge'],
+    ['04', 'Trading Islands'],
+    ['05', 'Sentinel'],
+    ['06', 'Nexus'],
   ];
 
   const integrations = ['OpenAI', 'stripe', 'PayPal', 'MongoDB', '▲ Vercel', 'Cloudflare', 'IPFS', 'solana'];
@@ -792,7 +793,7 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
 
       {/* STATS */}
       <section className="px-5 sm:px-8 max-w-[1400px] mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-5 border border-[#1d2940] rounded-xl bg-[#04060d]/80 overflow-hidden">
+        <div className="grid grid-cols-2 md:grid-cols-6 border border-[#1d2940] rounded-xl bg-[#04060d]/80 overflow-hidden">
           {stats.map(([number, label]) => (
             <div key={label} className="px-5 py-6 border-b md:border-b-0 border-[#1d2940] last:border-b-0 md:border-r last:md:border-r-0 flex items-center gap-4">
               <div className="w-11 h-11 rounded-xl border border-sky-400/30 bg-sky-400/5 flex items-center justify-center text-sky-300"><Users size={20}/></div>
