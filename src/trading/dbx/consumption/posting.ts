@@ -32,11 +32,14 @@ export function postDbxConsumption<
       intent
     );
 
-  const nextLedger =
+  const ledgerPosting =
     postDbxLedgerTransaction(
       ledger as any,
       transaction as any
     );
+
+  const nextLedger =
+    ledgerPosting.ledger;
 
   const record:
     DbxConsumptionPostingRecord = {
