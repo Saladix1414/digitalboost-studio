@@ -18,3 +18,34 @@ export {
   activityFromRecoveryAttemptHistoryEntry,
   activityFromRemoteRetryHistoryEntry,
 } from "./builders";
+
+export {
+  getNextTradingActivitySequence,
+  getTradingActivityStore,
+  recordTradingActivityEvent,
+  recordTradingActivityEvents,
+  resetTradingActivityStoreForTests,
+  subscribeTradingActivityStore,
+} from "./sharedActivityStore";
+
+export {
+  projectBlockchainGatewayStateActivity,
+  projectBlockchainIndexActivity,
+  projectBlockchainSubmissionActivity,
+  projectBlockchainVerificationActivity,
+  projectDbxConsumptionActivity,
+  projectDbxMarketplaceSettlementActivity,
+  projectNftMarketplaceLifecycleActivity,
+} from "./liveProjection";
+
+export type {
+  TradingActivityActor,
+  TradingActivityActorType,
+  TradingActivityDomain,
+  TradingActivityEvent,
+  TradingActivityEventSeverity,
+  TradingActivityQuery,
+  TradingActivityReference,
+  TradingActivityStore,
+  TradingActivityType,
+} from "./types";

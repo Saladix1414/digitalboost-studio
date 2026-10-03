@@ -8,6 +8,11 @@ import {
 } from "./RuntimeEvidenceDiagnostics";
 
 import {
+  getTradingActivityStore,
+  subscribeTradingActivityStore,
+} from "./sharedActivityStore";
+
+import {
   ActivityCenterPanel,
 } from "./ActivityCenterPanel";
 
@@ -58,6 +63,13 @@ export function ActivityWorkspace() {
       subscribeRuntimeEvidenceHistory,
       getRuntimeEvidenceHistory,
       getRuntimeEvidenceHistory
+    );
+
+  const unifiedActivityStore =
+    useSyncExternalStore(
+      subscribeTradingActivityStore,
+      getTradingActivityStore,
+      getTradingActivityStore
     );
 
 
@@ -233,6 +245,7 @@ export function ActivityWorkspace() {
 
       <ActivityCenterPanel
         legacyItems={activity}
+        unifiedEvents={unifiedActivityStore.events}
       />
 
       <section className="ti-activity__panel">
