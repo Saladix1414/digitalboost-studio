@@ -8,6 +8,10 @@ import {
 } from "./RuntimeEvidenceDiagnostics";
 
 import {
+  ActivityCenterPanel,
+} from "./ActivityCenterPanel";
+
+import {
   RuntimeEvidenceReconciliationHistory,
 } from "./RuntimeEvidenceReconciliationHistory";
 
@@ -226,6 +230,10 @@ export function ActivityWorkspace() {
           READ-ONLY PROJECTION
         </div>
       </header>
+
+      <ActivityCenterPanel
+        legacyItems={activity}
+      />
 
       <section className="ti-activity__panel">
         <header>
