@@ -131,3 +131,21 @@ export {
   markOwnershipEvidenceStale,
   readObservedAssetQuantity,
 } from "./ownershipEvidence.ts";
+
+export type {
+  IdentityWalletSecurityFailure,
+  IdentityWalletSecurityFailureCode,
+  IdentityWalletSecurityResult,
+  IdentityWalletSecuritySuccess,
+  WalletProofReplayRegistry,
+} from "./security.ts";
+
+export {
+  consumeWalletProof,
+  createWalletProofReplayRegistry,
+  validateIdentitySessionSecurity,
+  validateOwnershipEvidenceSecurity,
+  validateWalletBindingSecurity,
+  validateWalletConnectionSecurity,
+  validateWalletProofSecurity,
+} from "./security.ts";

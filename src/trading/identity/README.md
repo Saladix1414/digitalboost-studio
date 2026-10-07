@@ -304,3 +304,57 @@ No direct RPC or indexer calls are performed here.
 
 Future adapters should receive blockchain observations through the canonical
 Blockchain Gateway or another explicitly approved read boundary.
+
+## Phase 33G — Identity / Wallet Security Hardening
+
+Phase 33G adds explicit fail-closed validation for identity and wallet context.
+
+Security checks include:
+
+- session mismatch
+- user mismatch
+- tenant mismatch
+- wallet mismatch
+- chain mismatch
+- inactive wallet binding
+- inactive wallet connection
+- unverified proof
+- expired proof
+- proof replay
+- stale ownership evidence
+- failed ownership evidence
+
+### Proof replay
+
+Wallet proofs can be consumed through a replay registry.
+
+A consumed proof identifier cannot be consumed a second time.
+
+The registry itself does not grant authority.
+
+### Cross-tenant protection
+
+An active wallet binding must match both the canonical user and canonical
+tenant from the active Trading user context.
+
+Wallet possession cannot cross tenant boundaries.
+
+### Chain protection
+
+Wallet identity, connection, binding and ownership evidence must agree on the
+canonical chain.
+
+A chain mismatch fails closed.
+
+### Ownership freshness
+
+Stale or failed ownership evidence cannot pass the security validation layer.
+
+This still does not mean fresh evidence grants authority.
+
+All Phase 33G security results explicitly retain:
+
+`grantsAuthority = false`
+
+Authorization remains the responsibility of the canonical server-policy
+boundary.
