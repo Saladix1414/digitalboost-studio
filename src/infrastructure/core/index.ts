@@ -70,3 +70,27 @@ export type {
 export {
   createInfrastructureFoundation,
 } from "./foundation";
+
+export type {
+  CacheProvider,
+  DatabaseProvider,
+  InfrastructureConfigurationInput,
+  InfrastructureEnvironment,
+  InfrastructureProviderConfiguration,
+  ObjectStorageProvider,
+  QueueProvider,
+} from "./configuration";
+
+export {
+  createDisabledInfrastructureConfiguration,
+  createInfrastructureProviderConfiguration,
+} from "./configuration";
+
+export type {
+  InfrastructureProviderSelection,
+} from "./providerSelection";
+
+export {
+  infrastructureProvidersReady,
+  selectInfrastructureProviders,
+} from "./providerSelection";
