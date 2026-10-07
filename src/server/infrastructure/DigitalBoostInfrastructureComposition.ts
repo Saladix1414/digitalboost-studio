@@ -15,6 +15,10 @@ import type {
 } from "./DigitalBoostInfrastructureEnvironment";
 
 import {
+  assertSafeInfrastructureRuntimeConfiguration,
+} from "./DigitalBoostInfrastructureSecurity";
+
+import {
   composePostgresDatabaseFromEnvironment,
 } from "./postgresql/PostgresServerComposition";
 
@@ -150,6 +154,14 @@ export async function composeUnifiedInfrastructure(
   Promise<
     UnifiedInfrastructureComposition
   > {
+  assertSafeInfrastructureRuntimeConfiguration({
+    configuration:
+      input.configuration,
+
+    source:
+      input.source,
+  });
+
   const composers:
     InfrastructureComposers = {
     ...DEFAULT_COMPOSERS,
