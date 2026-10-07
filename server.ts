@@ -18,6 +18,10 @@ import {
   composePostgresDatabaseFromEnvironment,
 } from './src/server/infrastructure/postgresql/PostgresServerComposition';
 
+import {
+  composeRedisCacheFromEnvironment,
+} from './src/server/infrastructure/redis/RedisServerComposition';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -47,6 +51,15 @@ async function startServer() {
         process.env,
     });
 
+  const redisInfrastructure =
+    await composeRedisCacheFromEnvironment({
+      configuration:
+        infrastructureConfiguration,
+
+      source:
+        process.env,
+    });
+
   console.log(
     `[infra] ${describeInfrastructureBootstrap(
       infrastructureBootstrap
@@ -66,6 +79,81 @@ async function startServer() {
           await import(
             "./src/server/infrastructure/postgresql/PostgresReadiness"
           );
+
+        const database =
+          await postgres.checkPostgresReadiness({
+            enabled:
+              postgresInfrastructure.enabled,
+
+            database:
+              postgresInfrastructure.database,
+          });
+
+        const cacheHealth =
+          redisInfrastructure.cache ===
+            null
+            ? {
+                state:
+                  "disabled",
+              }
+            : await redisInfrastructure.cache.health();
+
+        const cacheState =
+          cacheHealth.state;
+
+        const unavailable =
+          database.status ===
+            "unavailable" ||
+          cacheState ===
+            "unavailable";
+
+        return res
+          .status(
+            unavailable
+              ? 503
+              : 200
+          )
+          .json({
+            status:
+              unavailable
+                ? "unavailable"
+                : "ready",
+
+            database:
+              database.status,
+
+            cache:
+              cacheState,
+
+            authoritative:
+              false,
+
+            checkedAt:
+              database.checkedAt,
+          });
+      } catch {
+        return res
+          .status(
+            503
+          )
+          .json({
+            status:
+              "unavailable",
+
+            database:
+              "unavailable",
+
+            cache:
+              redisInfrastructure.enabled
+                ? "unavailable"
+                : "disabled",
+
+            authoritative:
+              false,
+          });
+      }
+    }
+  );
 
         const readiness =
           await postgres.checkPostgresReadiness({
@@ -432,25 +520,34 @@ IMPORTANTE: Devuelve SOLAMENTE el código HTML puro. No uses Markdown (\`\`\`htm
 
       httpServer.close(
         () => {
-          void postgresInfrastructure
-            .close()
+          void Promise.allSettled([
+            postgresInfrastructure.close(),
+            redisInfrastructure.close(),
+          ])
             .then(
-              () => {
-                process.exitCode =
-                  0;
-              }
-            )
-            .catch(
-              error => {
-                console.error(
-                  "[infra] PostgreSQL shutdown failed.",
-                  error instanceof Error
-                    ? error.message
-                    : "unknown error"
-                );
+              results => {
+                const failed =
+                  results.some(
+                    result =>
+                      result.status ===
+                        "rejected"
+                  );
+
+                if (
+                  failed
+                ) {
+                  console.error(
+                    "[infra] infrastructure shutdown failed."
+                  );
+
+                  process.exitCode =
+                    1;
+
+                  return;
+                }
 
                 process.exitCode =
-                  1;
+                  0;
               }
             );
         }
