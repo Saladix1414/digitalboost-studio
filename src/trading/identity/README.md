@@ -133,3 +133,66 @@ It does not read or write:
 - IndexedDB
 
 Persistence and recovery are separate infrastructure concerns.
+
+## Phase 33C — Wallet Identity Model
+
+Wallet identity is intentionally separate from canonical application identity.
+
+A wallet address is not a `UserId`.
+
+The canonical model contains:
+
+- `WalletIdentity`
+- `WalletBinding`
+- `WalletAddress`
+- `WalletChain`
+- `WalletConnection`
+- `WalletProof`
+- `WalletSignatureEvidence`
+
+### Connection boundary
+
+A wallet connection only describes a transport/session relationship.
+
+`WalletConnection.provesOwnership` is always `false`.
+
+Connecting a browser wallet does not prove ownership by itself.
+
+### Proof boundary
+
+Wallet signature evidence records the result of a challenge-verification
+workflow without storing raw signatures in the canonical identity model.
+
+Evidence does not grant authority.
+
+### Binding boundary
+
+An active wallet binding requires verified, unexpired wallet proof and binds:
+
+- canonical user
+- canonical tenant
+- canonical wallet
+- canonical chain
+
+The binding remains scoped application evidence and has
+`grantsAuthority = false`.
+
+### Revocation
+
+Wallet bindings are revocable and preserve explicit revocation time and reason.
+
+Revocation does not silently delete historical evidence.
+
+### Not implemented in Phase 33C
+
+This phase performs no:
+
+- browser wallet connection
+- MetaMask integration
+- WalletConnect integration
+- RPC call
+- blockchain transaction
+- message signing
+- signature verification
+
+Those belong to later controlled phases.

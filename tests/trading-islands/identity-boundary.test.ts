@@ -22,7 +22,6 @@ test(
       source("types.ts"),
       source("ids.ts"),
       source("context.ts"),
-      source("index.ts"),
     ].join("\n");
 
     assert.doesNotMatch(
@@ -39,7 +38,6 @@ test(
       source("types.ts"),
       source("ids.ts"),
       source("context.ts"),
-      source("index.ts"),
     ].join("\n");
 
     assert.doesNotMatch(

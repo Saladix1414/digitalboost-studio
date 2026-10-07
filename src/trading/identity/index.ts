@@ -46,3 +46,40 @@ export {
   selectTradingWallet,
   updateTradingUserContextValidation,
 } from "./userContext.ts";
+
+export type {
+  WalletAddress,
+  WalletBinding,
+  WalletBindingId,
+  WalletBindingState,
+  WalletBrandedId,
+  WalletChain,
+  WalletChainFamily,
+  WalletConnection,
+  WalletConnectionId,
+  WalletConnectionState,
+  WalletId,
+  WalletIdentity,
+  WalletProof,
+  WalletProofId,
+  WalletSignatureEvidence,
+  WalletVerificationState,
+} from "./walletTypes.ts";
+
+export {
+  createWalletAddress,
+  createWalletBinding,
+  createWalletBindingId,
+  createWalletChain,
+  createWalletConnection,
+  createWalletConnectionId,
+  createWalletId,
+  createWalletIdentity,
+  createWalletProof,
+  createWalletProofId,
+  createWalletSignatureEvidence,
+  disconnectWalletConnection,
+  revokeWalletBinding,
+  sameWalletChain,
+  walletBindingMatches,
+} from "./wallet.ts";
