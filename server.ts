@@ -58,6 +58,66 @@ async function startServer() {
 
   app.use(express.json({ limit: '10mb' }));
 
+  app.get(
+    "/api/health/infrastructure",
+    async (_req, res) => {
+      try {
+        const postgres =
+          await import(
+            "./src/server/infrastructure/postgresql/PostgresReadiness"
+          );
+
+        const readiness =
+          await postgres.checkPostgresReadiness({
+            enabled:
+              postgresInfrastructure.enabled,
+
+            database:
+              postgresInfrastructure.database,
+          });
+
+        const statusCode =
+          readiness.status ===
+            "unavailable"
+            ? 503
+            : 200;
+
+        return res
+          .status(
+            statusCode
+          )
+          .json({
+            status:
+              readiness.status,
+
+            database:
+              readiness.status,
+
+            authoritative:
+              false,
+
+            checkedAt:
+              readiness.checkedAt,
+          });
+      } catch {
+        return res
+          .status(
+            503
+          )
+          .json({
+            status:
+              "unavailable",
+
+            database:
+              "unavailable",
+
+            authoritative:
+              false,
+          });
+      }
+    }
+  );
+
   // DigitalBoost OpenClaw API debe registrarse antes de Vite/Spa fallback.
   registerOpenClawRoutes(app);
 

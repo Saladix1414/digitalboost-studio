@@ -24,3 +24,34 @@ export type {
 export {
   composePostgresDatabaseFromEnvironment,
 } from "./PostgresServerComposition";
+
+
+export type {
+  PostgresReadiness,
+  PostgresReadinessStatus,
+} from "./PostgresReadiness";
+
+export {
+  checkPostgresReadiness,
+} from "./PostgresReadiness";
+
+export type {
+  PostgresMigration,
+  PostgresMigrationPlan,
+  PostgresMigrationRecord,
+  PostgresMigrationVersion,
+} from "./PostgresMigrationTypes";
+
+export {
+  createPostgresMigrationRegistry,
+  planPostgresMigrations,
+} from "./PostgresMigrationRegistry";
+
+export type {
+  PostgresMigrationRunnerResult,
+} from "./PostgresMigrationRunner";
+
+export {
+  readPostgresMigrationVersion,
+  runPostgresMigrations,
+} from "./PostgresMigrationRunner";
