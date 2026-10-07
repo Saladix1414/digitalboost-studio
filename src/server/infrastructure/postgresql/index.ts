@@ -55,3 +55,12 @@ export {
   readPostgresMigrationVersion,
   runPostgresMigrations,
 } from "./PostgresMigrationRunner";
+
+
+export {
+  postgresMigrations,
+} from "./migrations/index";
+
+export {
+  runPostgresMigrationCli,
+} from "./PostgresMigrationCli";
