@@ -358,3 +358,31 @@ All Phase 33G security results explicitly retain:
 
 Authorization remains the responsibility of the canonical server-policy
 boundary.
+
+## Phase 33I — Integration Tests
+
+Phase 33I validates the canonical identity and wallet system across domain
+boundaries.
+
+Covered integration paths include:
+
+- authenticated identity to wallet connection
+- wallet connection security validation
+- wallet connection to Activity Center projection
+- chain switching and stale connection mismatch
+- explicit connection reconciliation
+- wallet ownership evidence validation
+- ownership evidence to Activity Center projection
+- stale ownership fail-closed behavior
+- Trading Islands Wallet workspace routing
+- direct browser provider isolation
+- transaction execution isolation
+
+The integration suite preserves the central trust model:
+
+- wallet connection does not grant authority
+- ownership evidence does not grant authority
+- Activity Center events are observational
+- chain mismatch fails closed
+- stale evidence fails closed
+- browser wallet access remains outside the canonical domain and UI model
