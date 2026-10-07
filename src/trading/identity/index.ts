@@ -102,3 +102,32 @@ export {
   switchWalletChain,
   walletConnectionMatchesWallet,
 } from "./walletConnection.ts";
+
+export type {
+  AssetKind,
+  AssetObservationId,
+  BlockchainObservationSource,
+  BoundWalletOwnershipEvidence,
+  FungibleTokenAsset,
+  NativeTokenAsset,
+  NftAsset,
+  ObservedAsset,
+  OwnershipEvidenceId,
+  OwnershipEvidenceStatus,
+  WalletAssetObservation,
+  WalletOwnershipEvidence,
+} from "./ownershipEvidence.ts";
+
+export {
+  bindOwnershipEvidenceToIdentity,
+  buildWalletOwnershipEvidence,
+  createAssetObservationId,
+  createFungibleTokenAsset,
+  createNativeTokenAsset,
+  createNftAsset,
+  createOwnershipEvidenceId,
+  createWalletAssetObservation,
+  hasObservedNftHolding,
+  markOwnershipEvidenceStale,
+  readObservedAssetQuantity,
+} from "./ownershipEvidence.ts";

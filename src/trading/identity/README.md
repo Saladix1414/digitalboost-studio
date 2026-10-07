@@ -248,3 +248,59 @@ integration.
 
 The panel receives callbacks and state only; it does not access browser wallet
 globals directly.
+
+## Phase 33E — Ownership Evidence
+
+Phase 33E introduces descriptive blockchain ownership read models.
+
+Supported evidence includes:
+
+- native-token balances
+- fungible-token balances
+- NFT holding observations
+- chain and block context
+- verification timestamps
+- stale evidence state
+
+### Evidence boundary
+
+Ownership evidence is descriptive.
+
+It does not grant application authority.
+
+Every ownership record explicitly carries:
+
+- `grantsAuthority = false`
+- `claimsLegalOwnership = false`
+
+Blockchain observations do not automatically represent legal ownership or
+application permissions.
+
+### Precision
+
+Token quantities use base-unit decimal integer strings.
+
+Floating-point values are intentionally excluded from the canonical evidence
+model.
+
+### Freshness
+
+Ownership evidence can become stale.
+
+Stale evidence must not be interpreted as current chain truth.
+
+### Identity association
+
+Ownership evidence may be associated with a canonical wallet binding, user and
+tenant for application context.
+
+That association still does not convert asset holdings into authorization.
+
+### Data source
+
+Phase 33E defines the read model only.
+
+No direct RPC or indexer calls are performed here.
+
+Future adapters should receive blockchain observations through the canonical
+Blockchain Gateway or another explicitly approved read boundary.
