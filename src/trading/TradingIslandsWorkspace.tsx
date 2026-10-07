@@ -19,7 +19,8 @@ import {
   ShieldCheck,
   Sparkles,
   Store,
-} from "lucide-react";
+
+  Wallet,} from "lucide-react";
 
 import {
   CommandPalette,
@@ -45,6 +46,7 @@ import BotForgeWorkspace from "./bots/BotForgeWorkspace";
 import RiskReviewWorkspace from "./risk/RiskReviewWorkspace";
 import ActivityWorkspace from "./activity/ActivityWorkspace";
 import NftForgeWorkspace from "./nft/NftForgeWorkspace";
+import WalletWorkspace from "./identity/WalletWorkspace";
 
 import {
   MarketDataProvider,
@@ -138,6 +140,19 @@ const sectionMeta: Record<
       "Digital asset discovery and market surfaces.",
     icon: Store,
   },
+
+  wallet: {
+
+    title: "Wallet",
+
+    subtitle:
+
+      "Identity, connection and wallet security context.",
+
+    icon: Wallet,
+
+  },
+
 
   dbx: {
     title: "DBX",
@@ -233,8 +248,9 @@ export function TradingIslandsWorkspace({
               id === "nft-forge" ||
               id === "marketplace"
                 ? "Digital Assets"
-                : id === "dbx" ||
-                    id === "activity"
+                : id === "wallet" ||
+                      id === "dbx" ||
+                      id === "activity"
                   ? "Economy"
                   : "Trading",
           })
@@ -336,6 +352,9 @@ export function TradingIslandsWorkspace({
               <RiskReviewWorkspace />
             ) : activeSection === "nft-forge" ? (
               <NftForgeWorkspace />
+            ) : activeSection === "wallet" ? (
+              <WalletWorkspace />
+
             ) : activeSection === "activity" ? (
               <ActivityWorkspace />
             ) : (

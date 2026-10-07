@@ -76,7 +76,7 @@ test(
 );
 
 test(
-  "isolated wallet panel is not wired into trading shell yet",
+  "wallet panel is wired through dedicated wallet workspace",
   () => {
     const workspace =
       fs.readFileSync(
@@ -87,9 +87,28 @@ test(
         "utf8"
       );
 
-    assert.doesNotMatch(
+    const walletWorkspace =
+      fs.readFileSync(
+        new URL(
+          "../../src/trading/identity/WalletWorkspace.tsx",
+          import.meta.url
+        ),
+        "utf8"
+      );
+
+    assert.match(
       workspace,
+      /WalletWorkspace/
+    );
+
+    assert.match(
+      walletWorkspace,
       /WalletConnectionPanel/
+    );
+
+    assert.doesNotMatch(
+      walletWorkspace,
+      /window\.ethereum|globalThis\.ethereum/
     );
   }
 );

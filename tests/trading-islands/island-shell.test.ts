@@ -62,6 +62,7 @@ test(
       "risk",
       "nft-forge",
       "marketplace",
+      "wallet",
       "dbx",
       "activity",
     ]) {

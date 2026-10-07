@@ -8937,3 +8937,90 @@
       1fr;
   }
 }
+
+/* =========================================================
+   PHASE 33H — WALLET WORKSPACE
+   Local stage content only.
+   Does not modify global shell height or overflow geometry.
+   ========================================================= */
+
+.ti-wallet-workspace {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.ti-wallet-workspace__grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  gap: 16px;
+  min-width: 0;
+}
+
+.ti-wallet-workspace__facts {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.ti-wallet-workspace__facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.ti-wallet-workspace__facts span {
+  color:
+    var(
+      --ti-text-muted,
+      #7f8b9d
+    );
+}
+
+.ti-wallet-workspace__facts strong {
+  min-width: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.ti-wallet-workspace__status {
+  min-width: 0;
+}
+
+.ti-wallet-workspace__notice {
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top:
+    1px solid
+    rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color:
+    var(
+      --ti-text-muted,
+      #7f8b9d
+    );
+}
+
+@media (max-width: 840px) {
+  .ti-wallet-workspace__grid {
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+
+  .ti-wallet-workspace__facts > div {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .ti-wallet-workspace__facts strong {
+    text-align: left;
+  }
+}

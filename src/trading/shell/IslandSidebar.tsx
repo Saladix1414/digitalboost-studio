@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Sparkles,
   Store,
+    Wallet,
 } from "lucide-react";
 
 export type TradingSection =
@@ -22,6 +23,7 @@ export type TradingSection =
   | "risk"
   | "nft-forge"
   | "marketplace"
+    | "wallet"
   | "dbx"
   | "activity";
 
@@ -92,6 +94,11 @@ const groups = [
   {
     label: "Economy",
     items: [
+        {
+          id: "wallet",
+          label: "Wallet",
+          icon: Wallet,
+        },
       {
         id: "dbx",
         label: "DBX",
