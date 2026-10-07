@@ -15,20 +15,12 @@ import {
 } from './src/server/infrastructure/DigitalBoostInfrastructureBootstrap';
 
 import {
-  composePostgresDatabaseFromEnvironment,
-} from './src/server/infrastructure/postgresql/PostgresServerComposition';
+  composeUnifiedInfrastructure,
+} from './src/server/infrastructure/DigitalBoostInfrastructureComposition';
 
 import {
-  composeRedisCacheFromEnvironment,
-} from './src/server/infrastructure/redis/RedisServerComposition';
-
-import {
-  composeS3ObjectStorageFromEnvironment,
-} from './src/server/infrastructure/object-storage/S3ServerComposition';
-
-import {
-  composeQueueFromEnvironment,
-} from './src/server/infrastructure/queue/BullMqServerComposition';
+  checkUnifiedInfrastructureReadiness,
+} from './src/server/infrastructure/DigitalBoostInfrastructureReadiness';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -50,35 +42,8 @@ async function startServer() {
       infrastructureConfiguration
     );
 
-  const postgresInfrastructure =
-    composePostgresDatabaseFromEnvironment({
-      configuration:
-        infrastructureConfiguration,
-
-      source:
-        process.env,
-    });
-
-  const redisInfrastructure =
-    await composeRedisCacheFromEnvironment({
-      configuration:
-        infrastructureConfiguration,
-
-      source:
-        process.env,
-    });
-
-  const objectStorageInfrastructure =
-    composeS3ObjectStorageFromEnvironment({
-      configuration:
-        infrastructureConfiguration,
-
-      source:
-        process.env,
-    });
-
-  const queueInfrastructure =
-    await composeQueueFromEnvironment({
+  const infrastructure =
+    await composeUnifiedInfrastructure({
       configuration:
         infrastructureConfiguration,
 
@@ -101,62 +66,25 @@ async function startServer() {
     "/api/health/infrastructure",
     async (_req, res) => {
       try {
-        const postgres =
-          await import(
-            "./src/server/infrastructure/postgresql/PostgresReadiness"
-          );
+        const readiness =
+          await checkUnifiedInfrastructureReadiness({
+            foundation:
+              infrastructure.foundation,
 
-        const database =
-          await postgres.checkPostgresReadiness({
-            enabled:
-              postgresInfrastructure.enabled,
-
-            database:
-              postgresInfrastructure.database,
+            providers:
+              infrastructure.providers,
           });
-
-        const cacheHealth =
-          redisInfrastructure.cache ===
-            null
-            ? {
-                state:
-                  "disabled",
-              }
-            : await redisInfrastructure.cache.health();
-
-        const cacheState =
-          cacheHealth.state;
-
-        const unavailable =
-          database.status ===
-            "unavailable" ||
-          cacheState ===
-            "unavailable";
 
         return res
           .status(
-            unavailable
+            readiness.status ===
+              "unavailable"
               ? 503
               : 200
           )
-          .json({
-            status:
-              unavailable
-                ? "unavailable"
-                : "ready",
-
-            database:
-              database.status,
-
-            cache:
-              cacheState,
-
-            authoritative:
-              false,
-
-            checkedAt:
-              database.checkedAt,
-          });
+          .json(
+            readiness
+          );
       } catch {
         return res
           .status(
@@ -170,59 +98,12 @@ async function startServer() {
               "unavailable",
 
             cache:
-              redisInfrastructure.enabled
-                ? "unavailable"
-                : "disabled",
-
-            authoritative:
-              false,
-          });
-      }
-    }
-  );
-
-        const readiness =
-          await postgres.checkPostgresReadiness({
-            enabled:
-              postgresInfrastructure.enabled,
-
-            database:
-              postgresInfrastructure.database,
-          });
-
-        const statusCode =
-          readiness.status ===
-            "unavailable"
-            ? 503
-            : 200;
-
-        return res
-          .status(
-            statusCode
-          )
-          .json({
-            status:
-              readiness.status,
-
-            database:
-              readiness.status,
-
-            authoritative:
-              false,
-
-            checkedAt:
-              readiness.checkedAt,
-          });
-      } catch {
-        return res
-          .status(
-            503
-          )
-          .json({
-            status:
               "unavailable",
 
-            database:
+            objectStorage:
+              "unavailable",
+
+            queue:
               "unavailable",
 
             authoritative:
@@ -232,7 +113,6 @@ async function startServer() {
     }
   );
 
-  // DigitalBoost OpenClaw API debe registrarse antes de Vite/Spa fallback.
   registerOpenClawRoutes(app);
 
   const commerceSyncClients = new Set();
@@ -533,7 +413,9 @@ IMPORTANTE: Devuelve SOLAMENTE el código HTML puro. No uses Markdown (\`\`\`htm
       signal:
         string
     ) => {
-      if (shutdownStarted) {
+      if (
+        shutdownStarted
+      ) {
         return;
       }
 
@@ -546,36 +428,22 @@ IMPORTANTE: Devuelve SOLAMENTE el código HTML puro. No uses Markdown (\`\`\`htm
 
       httpServer.close(
         () => {
-          void Promise.allSettled([
-            postgresInfrastructure.close(),
-            redisInfrastructure.close(),
-            objectStorageInfrastructure.close(),
-            queueInfrastructure.close(),
-          ])
+          void infrastructure
+            .close()
             .then(
-              results => {
-                const failed =
-                  results.some(
-                    result =>
-                      result.status ===
-                        "rejected"
-                  );
-
-                if (
-                  failed
-                ) {
-                  console.error(
-                    "[infra] infrastructure shutdown failed."
-                  );
-
-                  process.exitCode =
-                    1;
-
-                  return;
-                }
-
+              () => {
                 process.exitCode =
                   0;
+              }
+            )
+            .catch(
+              () => {
+                console.error(
+                  "[infra] infrastructure shutdown failed."
+                );
+
+                process.exitCode =
+                  1;
               }
             );
         }
