@@ -30,6 +30,48 @@ import {
   composeQueueFromEnvironment,
 } from "./queue/BullMqServerComposition";
 
+type DatabaseComposition =
+  Awaited<
+    ReturnType<
+      typeof composePostgresDatabaseFromEnvironment
+    >
+  >;
+
+type CacheComposition =
+  Awaited<
+    ReturnType<
+      typeof composeRedisCacheFromEnvironment
+    >
+  >;
+
+type ObjectStorageComposition =
+  Awaited<
+    ReturnType<
+      typeof composeS3ObjectStorageFromEnvironment
+    >
+  >;
+
+type QueueComposition =
+  Awaited<
+    ReturnType<
+      typeof composeQueueFromEnvironment
+    >
+  >;
+
+export type InfrastructureComposers = {
+  readonly database:
+    typeof composePostgresDatabaseFromEnvironment;
+
+  readonly cache:
+    typeof composeRedisCacheFromEnvironment;
+
+  readonly objectStorage:
+    typeof composeS3ObjectStorageFromEnvironment;
+
+  readonly queue:
+    typeof composeQueueFromEnvironment;
+};
+
 export type UnifiedInfrastructureComposition = {
   readonly foundation:
     InfrastructureFoundation;
@@ -55,6 +97,44 @@ export type UnifiedInfrastructureComposition = {
     Promise<void>;
 };
 
+const DEFAULT_COMPOSERS:
+  InfrastructureComposers = {
+    database:
+      composePostgresDatabaseFromEnvironment,
+
+    cache:
+      composeRedisCacheFromEnvironment,
+
+    objectStorage:
+      composeS3ObjectStorageFromEnvironment,
+
+    queue:
+      composeQueueFromEnvironment,
+  };
+
+async function settleInfrastructureClose(
+  resources:
+    readonly {
+      close():
+        Promise<void>;
+    }[]
+):
+  Promise<number> {
+  const results =
+    await Promise.allSettled(
+      resources.map(
+        resource =>
+          resource.close()
+      )
+    );
+
+  return results.filter(
+    result =>
+      result.status ===
+        "rejected"
+  ).length;
+}
+
 export async function composeUnifiedInfrastructure(
   input: {
     readonly configuration:
@@ -62,46 +142,99 @@ export async function composeUnifiedInfrastructure(
 
     readonly source:
       InfrastructureEnvironmentSource;
+
+    readonly composers?:
+      Partial<InfrastructureComposers>;
   }
 ):
   Promise<
     UnifiedInfrastructureComposition
   > {
-  const database =
-    composePostgresDatabaseFromEnvironment({
-      configuration:
-        input.configuration,
+  const composers:
+    InfrastructureComposers = {
+    ...DEFAULT_COMPOSERS,
+    ...input.composers,
+  };
 
-      source:
-        input.source,
-    });
+  let database:
+    DatabaseComposition | null =
+    null;
 
-  const cache =
-    await composeRedisCacheFromEnvironment({
-      configuration:
-        input.configuration,
+  let cache:
+    CacheComposition | null =
+    null;
 
-      source:
-        input.source,
-    });
+  let objectStorage:
+    ObjectStorageComposition | null =
+    null;
 
-  const objectStorage =
-    composeS3ObjectStorageFromEnvironment({
-      configuration:
-        input.configuration,
+  let queue:
+    QueueComposition | null =
+    null;
 
-      source:
-        input.source,
-    });
+  try {
+    database =
+      await composers.database({
+        configuration:
+          input.configuration,
 
-  const queue =
-    await composeQueueFromEnvironment({
-      configuration:
-        input.configuration,
+        source:
+          input.source,
+      });
 
-      source:
-        input.source,
-    });
+    cache =
+      await composers.cache({
+        configuration:
+          input.configuration,
+
+        source:
+          input.source,
+      });
+
+    objectStorage =
+      await composers.objectStorage({
+        configuration:
+          input.configuration,
+
+        source:
+          input.source,
+      });
+
+    queue =
+      await composers.queue({
+        configuration:
+          input.configuration,
+
+        source:
+          input.source,
+      });
+  } catch (
+    error
+  ) {
+    const initialized = [
+      database,
+      cache,
+      objectStorage,
+      queue,
+    ].filter(
+      (
+        resource
+      ):
+        resource is
+          | DatabaseComposition
+          | CacheComposition
+          | ObjectStorageComposition
+          | QueueComposition =>
+        resource !==
+          null
+    );
+
+    await settleInfrastructureClose(
+      initialized
+    );
+
+    throw error;
+  }
 
   const foundation =
     createInfrastructureFoundation({
@@ -152,27 +285,20 @@ export async function composeUnifiedInfrastructure(
       closed =
         true;
 
-      const results =
-        await Promise.allSettled([
-          database.close(),
-          cache.close(),
-          objectStorage.close(),
-          queue.close(),
+      const rejected =
+        await settleInfrastructureClose([
+          database,
+          cache,
+          objectStorage,
+          queue,
         ]);
 
-      const rejected =
-        results.filter(
-          result =>
-            result.status ===
-              "rejected"
-        );
-
       if (
-        rejected.length >
+        rejected >
           0
       ) {
         throw new Error(
-          `Infrastructure shutdown failed for ${rejected.length} provider(s).`
+          `Infrastructure shutdown failed for ${rejected} provider(s).`
         );
       }
     },

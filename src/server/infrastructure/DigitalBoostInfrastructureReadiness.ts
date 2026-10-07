@@ -7,21 +7,27 @@ export type UnifiedInfrastructureReadinessState =
   | "degraded"
   | "unavailable";
 
+type ProviderReadinessState =
+  | "ready"
+  | "degraded"
+  | "unavailable"
+  | "disabled";
+
 export type UnifiedInfrastructureReadiness = {
   readonly status:
     UnifiedInfrastructureReadinessState;
 
   readonly database:
-    string;
+    ProviderReadinessState;
 
   readonly cache:
-    string;
+    ProviderReadinessState;
 
   readonly objectStorage:
-    string;
+    ProviderReadinessState;
 
   readonly queue:
-    string;
+    ProviderReadinessState;
 
   readonly checkedAt:
     string;
@@ -29,6 +35,47 @@ export type UnifiedInfrastructureReadiness = {
   readonly authoritative:
     false;
 };
+
+async function isolatedHealth(
+  input: {
+    readonly enabled:
+      boolean;
+
+    readonly health:
+      (() => Promise<{
+        readonly state:
+          "ready"
+          | "degraded"
+          | "unavailable";
+      }>)
+      | null;
+  }
+):
+  Promise<
+    ProviderReadinessState
+  > {
+  if (
+    !input.enabled
+  ) {
+    return "disabled";
+  }
+
+  if (
+    input.health ===
+      null
+  ) {
+    return "unavailable";
+  }
+
+  try {
+    const health =
+      await input.health();
+
+    return health.state;
+  } catch {
+    return "unavailable";
+  }
+}
 
 export async function checkUnifiedInfrastructureReadiness(
   input: {
@@ -61,51 +108,59 @@ export async function checkUnifiedInfrastructureReadiness(
     (() =>
       new Date().toISOString());
 
-  const database =
-    input.foundation.database ===
-      null
-      ? (
-          input.providers.database
-            ? "unavailable"
-            : "disabled"
-        )
-      : (
-          await input.foundation.database.health()
-        ).state;
+  const [
+    database,
+    cache,
+    queue,
+  ] =
+    await Promise.all([
+      isolatedHealth({
+        enabled:
+          input.providers.database,
 
-  const cache =
-    input.foundation.cache ===
-      null
-      ? (
-          input.providers.cache
-            ? "unavailable"
-            : "disabled"
-        )
-      : (
-          await input.foundation.cache.health()
-        ).state;
+        health:
+          input.foundation.database ===
+            null
+            ? null
+            : () =>
+                input.foundation.database!.health(),
+      }),
 
-  const objectStorage =
-    input.foundation.objectStorage ===
-      null
-      ? (
-          input.providers.objectStorage
-            ? "unavailable"
-            : "disabled"
-        )
-      : "ready";
+      isolatedHealth({
+        enabled:
+          input.providers.cache,
 
-  const queue =
-    input.foundation.queue ===
-      null
+        health:
+          input.foundation.cache ===
+            null
+            ? null
+            : () =>
+                input.foundation.cache!.health(),
+      }),
+
+      isolatedHealth({
+        enabled:
+          input.providers.queue,
+
+        health:
+          input.foundation.queue ===
+            null
+            ? null
+            : () =>
+                input.foundation.queue!.health(),
+      }),
+    ]);
+
+  const objectStorage:
+    ProviderReadinessState =
+    input.providers.objectStorage
       ? (
-          input.providers.queue
+          input.foundation.objectStorage ===
+            null
             ? "unavailable"
-            : "disabled"
+            : "ready"
         )
-      : (
-          await input.foundation.queue.health()
-        ).state;
+      : "disabled";
 
   const states = [
     database,
