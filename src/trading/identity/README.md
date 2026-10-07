@@ -85,3 +85,51 @@ Activity Center remains observational.
 
 Identity activity integration belongs to Phase 33F and must not turn
 activity records into authority.
+
+## Phase 33B — Session / User Context
+
+`TradingUserContext` is the operational projection used by Trading Islands.
+
+It contains:
+
+- canonical `userId`
+- canonical `tenantId`
+- canonical `sessionId`
+- `workspaceId`
+- roles and capabilities projected from the existing authorization result
+- selected account reference
+- selected wallet reference
+- environment
+- validation timestamps
+
+The context accepts no caller-supplied roles or capabilities. They are derived
+from the canonical `IdentityContext`.
+
+This prevents UI code from manufacturing authorization by constructing a user
+context with arbitrary permissions.
+
+### Selection is not authority
+
+`selectedAccount` and `selectedWallet` are UI/runtime selections.
+
+They do not prove:
+
+- wallet ownership
+- account ownership
+- application authorization
+- blockchain authority
+- approval
+
+Phase 33C defines the canonical wallet identity and binding model.
+
+### Storage boundary
+
+`TradingUserContext` has no built-in browser persistence.
+
+It does not read or write:
+
+- `localStorage`
+- `sessionStorage`
+- IndexedDB
+
+Persistence and recovery are separate infrastructure concerns.

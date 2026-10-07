@@ -27,3 +27,22 @@ export {
   hasIdentityCapability,
   isAuthenticatedIdentityContext,
 } from "./context.ts";
+
+export type {
+  AccountSelection,
+  CreateTradingUserContextInput,
+  TradingEnvironment,
+  TradingUserContext,
+  WalletSelection,
+  WorkspaceId,
+} from "./userContext.ts";
+
+export {
+  createAccountSelection,
+  createTradingUserContext,
+  createWalletSelection,
+  createWorkspaceId,
+  selectTradingAccount,
+  selectTradingWallet,
+  updateTradingUserContextValidation,
+} from "./userContext.ts";
