@@ -14,6 +14,10 @@ import {
   describeInfrastructureBootstrap,
 } from './src/server/infrastructure/DigitalBoostInfrastructureBootstrap';
 
+import {
+  composePostgresDatabaseFromEnvironment,
+} from './src/server/infrastructure/postgresql/PostgresServerComposition';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -33,6 +37,15 @@ async function startServer() {
     bootstrapInfrastructureConfiguration(
       infrastructureConfiguration
     );
+
+  const postgresInfrastructure =
+    composePostgresDatabaseFromEnvironment({
+      configuration:
+        infrastructureConfiguration,
+
+      source:
+        process.env,
+    });
 
   console.log(
     `[infra] ${describeInfrastructureBootstrap(
@@ -327,9 +340,78 @@ IMPORTANTE: Devuelve SOLAMENTE el código HTML puro. No uses Markdown (\`\`\`htm
   }
 
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 Servidor backend y frontend corriendo en el puerto ${PORT}`);
-  });
+  const httpServer =
+    app.listen(
+      PORT,
+      "0.0.0.0",
+      () => {
+        console.log(
+          `🚀 Servidor backend y frontend corriendo en el puerto ${PORT}`
+        );
+      }
+    );
+
+  let shutdownStarted =
+    false;
+
+  const shutdown =
+    (
+      signal:
+        string
+    ) => {
+      if (shutdownStarted) {
+        return;
+      }
+
+      shutdownStarted =
+        true;
+
+      console.log(
+        `[server] shutdown requested: ${signal}`
+      );
+
+      httpServer.close(
+        () => {
+          void postgresInfrastructure
+            .close()
+            .then(
+              () => {
+                process.exitCode =
+                  0;
+              }
+            )
+            .catch(
+              error => {
+                console.error(
+                  "[infra] PostgreSQL shutdown failed.",
+                  error instanceof Error
+                    ? error.message
+                    : "unknown error"
+                );
+
+                process.exitCode =
+                  1;
+              }
+            );
+        }
+      );
+    };
+
+  process.once(
+    "SIGTERM",
+    () =>
+      shutdown(
+        "SIGTERM"
+      )
+  );
+
+  process.once(
+    "SIGINT",
+    () =>
+      shutdown(
+        "SIGINT"
+      )
+  );
 }
 
 startServer();

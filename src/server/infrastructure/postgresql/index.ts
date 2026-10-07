@@ -13,3 +13,14 @@ export {
   PostgresExpectedVersionUnsupportedError,
   createPostgresDatabaseAdapter,
 } from "./PostgresDatabaseAdapter";
+
+
+export type {
+  ManagedPostgresPoolLike,
+  PostgresPoolFactory,
+  PostgresServerComposition,
+} from "./PostgresServerComposition";
+
+export {
+  composePostgresDatabaseFromEnvironment,
+} from "./PostgresServerComposition";
