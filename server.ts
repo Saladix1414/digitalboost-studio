@@ -22,6 +22,10 @@ import {
   composeRedisCacheFromEnvironment,
 } from './src/server/infrastructure/redis/RedisServerComposition';
 
+import {
+  composeS3ObjectStorageFromEnvironment,
+} from './src/server/infrastructure/object-storage/S3ServerComposition';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -53,6 +57,15 @@ async function startServer() {
 
   const redisInfrastructure =
     await composeRedisCacheFromEnvironment({
+      configuration:
+        infrastructureConfiguration,
+
+      source:
+        process.env,
+    });
+
+  const objectStorageInfrastructure =
+    composeS3ObjectStorageFromEnvironment({
       configuration:
         infrastructureConfiguration,
 
@@ -523,6 +536,7 @@ IMPORTANTE: Devuelve SOLAMENTE el código HTML puro. No uses Markdown (\`\`\`htm
           void Promise.allSettled([
             postgresInfrastructure.close(),
             redisInfrastructure.close(),
+            objectStorageInfrastructure.close(),
           ])
             .then(
               results => {

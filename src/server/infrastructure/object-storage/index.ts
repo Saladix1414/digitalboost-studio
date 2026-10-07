@@ -11,3 +11,14 @@ export type {
 export {
   createS3ObjectStorageAdapter,
 } from "./S3ObjectStorageAdapter";
+
+
+export type {
+  ManagedS3ClientLike,
+  S3ClientFactory,
+  S3ServerComposition,
+} from "./S3ServerComposition";
+
+export {
+  composeS3ObjectStorageFromEnvironment,
+} from "./S3ServerComposition";
