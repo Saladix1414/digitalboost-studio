@@ -26,6 +26,10 @@ import {
   composeS3ObjectStorageFromEnvironment,
 } from './src/server/infrastructure/object-storage/S3ServerComposition';
 
+import {
+  composeQueueFromEnvironment,
+} from './src/server/infrastructure/queue/BullMqServerComposition';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -66,6 +70,15 @@ async function startServer() {
 
   const objectStorageInfrastructure =
     composeS3ObjectStorageFromEnvironment({
+      configuration:
+        infrastructureConfiguration,
+
+      source:
+        process.env,
+    });
+
+  const queueInfrastructure =
+    await composeQueueFromEnvironment({
       configuration:
         infrastructureConfiguration,
 
@@ -537,6 +550,7 @@ IMPORTANTE: Devuelve SOLAMENTE el código HTML puro. No uses Markdown (\`\`\`htm
             postgresInfrastructure.close(),
             redisInfrastructure.close(),
             objectStorageInfrastructure.close(),
+            queueInfrastructure.close(),
           ])
             .then(
               results => {

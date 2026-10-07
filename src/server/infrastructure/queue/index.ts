@@ -19,3 +19,29 @@ export type {
 export {
   createWorkerRuntime,
 } from "./WorkerRuntime";
+
+
+export type {
+  BullMqQueueDriverFactory,
+  ManagedQueueDriver,
+} from "./BullMqQueueDriver";
+
+export {
+  createBullMqQueueDriver,
+} from "./BullMqQueueDriver";
+
+export type {
+  QueueServerComposition,
+} from "./BullMqServerComposition";
+
+export {
+  composeQueueFromEnvironment,
+} from "./BullMqServerComposition";
+
+export type {
+  BullMqWorkerComposition,
+} from "./BullMqWorkerComposition";
+
+export {
+  createBullMqWorkerComposition,
+} from "./BullMqWorkerComposition";
