@@ -196,3 +196,55 @@ This phase performs no:
 - signature verification
 
 Those belong to later controlled phases.
+
+## Phase 33D — Wallet Connection Experience
+
+Phase 33D introduces a controlled wallet connection boundary.
+
+UI components do not communicate directly with browser wallet providers.
+
+The canonical flow is:
+
+UI
+→ wallet connection controller
+→ `WalletConnectorPort`
+→ provider adapter
+
+The connector port exposes only:
+
+- request accounts
+- read chain
+- request chain switch
+
+It exposes no transaction submission or trading execution methods.
+
+### Connection states
+
+The connection domain supports:
+
+- connected
+- disconnected
+- expired
+- unsupported network
+
+Connection remains descriptive session context.
+
+It does not prove ownership and does not grant application authority.
+
+### Chain switching
+
+Chain switching is explicit and verified by reading the provider chain after
+the switch request.
+
+Unsupported chains fail closed.
+
+### UI boundary
+
+`WalletConnectionPanel` is intentionally isolated from the Trading Islands
+shell during Phase 33D.
+
+This avoids modifying the mobile workspace geometry before Phase 33H device
+integration.
+
+The panel receives callbacks and state only; it does not access browser wallet
+globals directly.

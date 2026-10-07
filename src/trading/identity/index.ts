@@ -83,3 +83,22 @@ export {
   sameWalletChain,
   walletBindingMatches,
 } from "./wallet.ts";
+
+export type {
+  ConnectWalletInput,
+  SwitchWalletChainInput,
+  WalletConnectionFailure,
+  WalletConnectionFailureCode,
+  WalletConnectionResult,
+  WalletConnectionSuccess,
+  WalletConnectorPort,
+  WalletProviderAccount,
+} from "./walletConnection.ts";
+
+export {
+  connectWallet,
+  disconnectWallet,
+  expireWalletConnection,
+  switchWalletChain,
+  walletConnectionMatchesWallet,
+} from "./walletConnection.ts";
