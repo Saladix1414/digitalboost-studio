@@ -5,6 +5,14 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { registerOpenClawRoutes } from './src/server/DigitalBoostOpenClawServer';
+import {
+  readInfrastructureEnvironment,
+} from './src/server/infrastructure/DigitalBoostInfrastructureEnvironment';
+
+import {
+  bootstrapInfrastructureConfiguration,
+  describeInfrastructureBootstrap,
+} from './src/server/infrastructure/DigitalBoostInfrastructureBootstrap';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +24,22 @@ function getGeminiClient() {
 }
 
 async function startServer() {
+  const infrastructureConfiguration =
+    readInfrastructureEnvironment(
+      process.env
+    );
+
+  const infrastructureBootstrap =
+    bootstrapInfrastructureConfiguration(
+      infrastructureConfiguration
+    );
+
+  console.log(
+    `[infra] ${describeInfrastructureBootstrap(
+      infrastructureBootstrap
+    )}`
+  );
+
   const app = express();
   const PORT = 3000;
 
