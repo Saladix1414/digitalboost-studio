@@ -29,31 +29,11 @@ const stats = [
 ] as const;
 
 const tools = [
-  [
-    Code2,
-    "IA Forge",
-    "Forja sitios y piezas con IA.",
-  ],
-  [
-    ShoppingCart,
-    "Tiendas Virtuales",
-    "Crea tu tienda online profesional al estilo Shopify.",
-  ],
-  [
-    LayoutTemplate,
-    "Nexus",
-    "Hub de landings y campañas.",
-  ],
-  [
-    Hexagon,
-    "Websites Builder",
-    "Constructor de sitios. Canvas y páginas.",
-  ],
-  [
-    Terminal,
-    "Trading Islands",
-    "Islas de intercambio. Rails reales cuando existan.",
-  ],
+  { icon: Code2, title: "IA Forge", desc: "Forja sitios y piezas con IA.", accent: "text-violet-400", ring: "hover:border-violet-400/60", iconBg: "bg-violet-500/10" },
+  { icon: ShoppingCart, title: "Tiendas Virtuales", desc: "Crea tu tienda online profesional al estilo Shopify.", accent: "text-cyan-400", ring: "hover:border-cyan-400/60", iconBg: "bg-cyan-400/10" },
+  { icon: LayoutTemplate, title: "Nexus", desc: "Hub de landings y campañas.", accent: "text-fuchsia-400", ring: "hover:border-fuchsia-400/60", iconBg: "bg-fuchsia-500/10" },
+  { icon: Hexagon, title: "Websites Builder", desc: "Constructor de sitios. Canvas y páginas.", accent: "text-sky-400", ring: "hover:border-sky-400/60", iconBg: "bg-sky-500/10" },
+  { icon: Terminal, title: "Trading Islands", desc: "Islas de intercambio. Rails reales cuando existan.", accent: "text-emerald-400", ring: "hover:border-emerald-400/60", iconBg: "bg-emerald-500/10" },
 ];
 
 function StatRow({
@@ -317,15 +297,14 @@ export default function DigitalBoostMainPage({
         </h2>
 
         <div className="grid gap-3 md:grid-cols-5">
-          {tools.map(([Icon, title, description]) => (
+          {tools.map(({ icon: Icon, title, desc: description, accent, ring, iconBg }) => (
             <article
               key={title}
-              className="min-h-[174px] rounded-lg border border-indigo-400/20 bg-[#030914] p-4 transition hover:border-cyan-400/50"
+              className={`min-h-[174px] rounded-lg border border-indigo-400/20 bg-[#030914] p-4 transition ${ring}`}
             >
-              <Icon
-                size={34}
-                className="mb-5 text-cyan-400"
-              />
+              <div className={`mb-5 inline-flex rounded-md p-2 ${iconBg}`}>
+                <Icon size={28} className={accent} />
+              </div>
 
               <h3 className="font-semibold">
                 {title}
@@ -343,7 +322,7 @@ export default function DigitalBoostMainPage({
                   else if (title === "Websites Builder") openTool("websites");
                   else if (title === "Trading Islands") openTool("islands");
                 }}
-                className="mt-3 text-xs text-cyan-300 hover:text-cyan-200"
+                className={`mt-3 text-xs ${accent}`}
               >
                 Explorar
                 <ArrowRight
