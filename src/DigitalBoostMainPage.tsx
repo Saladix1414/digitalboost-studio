@@ -1,4 +1,5 @@
 import React from "react";
+import BrainBoostLandingSection from "./brain-boost/BrainBoostLandingSection";
 import {
   ArrowRight,
   ChevronDown,
@@ -42,7 +43,7 @@ function StatRow({
   purple?: boolean;
 }) {
   return (
-    <div className="grid grid-cols-2 divide-x divide-white/[.08] rounded-lg border border-indigo-400/20 bg-[#030914]/80 md:grid-cols-6">
+    <div className="grid grid-cols-2 divide-x divide-white/10 overflow-hidden rounded-xl border border-cyan-400/50 bg-gradient-to-r from-[#07132b] via-[#050a19] to-[#100a25] shadow-[0_0_30px_rgba(0,100,255,.10)] md:grid-cols-6">
       {stats.map(([number, label, Icon]) => (
         <div
           key={label}
@@ -50,7 +51,7 @@ function StatRow({
         >
           <Icon
             size={purple ? 25 : 28}
-            className={purple ? "text-violet-500" : "text-cyan-400"}
+            className={purple ? "text-violet-400" : number === "03" ? "text-fuchsia-400" : number === "04" ? "text-emerald-300" : number === "06" ? "text-fuchsia-400" : "text-cyan-300"}
           />
 
           <div>
@@ -92,63 +93,30 @@ export default function DigitalBoostMainPage({
   return (
     <main
       id="top"
-      className="min-h-screen overflow-hidden bg-[#02050d] text-white selection:bg-fuchsia-500/30"
+      className="min-h-screen overflow-hidden bg-[#020611] text-white selection:bg-cyan-300/30"
+      style={{ backgroundImage: "radial-gradient(ellipse at 12% 27%, rgba(0,132,255,0.16) 0%, transparent 34%), radial-gradient(ellipse at 88% 48%, rgba(109,54,255,0.15) 0%, transparent 36%), radial-gradient(ellipse at 48% 82%, rgba(0,198,255,0.09) 0%, transparent 42%), linear-gradient(180deg, #061126 0%, #040919 48%, #08091d 100%)" }}
     >
 
       {/* HEADER */}
-      <header className="sticky top-0 z-50 border-b border-white/[.07] bg-[#02050d]/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-[72px] max-w-[1200px] items-center justify-between px-5">
+      <header className="sticky top-0 z-50 border-b border-cyan-300/30 bg-[#03091b]/95 shadow-[0_8px_40px_rgba(0,180,255,.15)] backdrop-blur-2xl">
+        <div className="mx-auto flex h-[64px] max-w-[1320px] items-center justify-between px-4 sm:px-6">
 
           <button
             onClick={() => go("top")}
-            className="text-xl font-black tracking-tight"
+            aria-label="DigitalBoost, volver al inicio"
+            className="group flex items-center gap-2.5 text-left"
           >
-            DIGITAL
-            <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
-              BOOST
+            <img
+              src="/digitalboost-dragon-logo.png"
+              alt=""
+              className="h-10 w-[78px] shrink-0 object-contain mix-blend-screen drop-shadow-[0_0_18px_rgba(0,200,255,.42)] sm:h-11 sm:w-[88px]"
+            />
+            <span className="text-base font-black tracking-[0.12em] sm:text-lg">
+              DIGITAL<span className="bg-gradient-to-r from-violet-400 via-blue-400 to-cyan-300 bg-clip-text text-transparent">BOOST</span>
             </span>
           </button>
 
-          <nav className="hidden items-center gap-7 text-sm lg:flex">
-            <button
-              onClick={() => go("top")}
-              className="text-cyan-300"
-            >
-              Inicio
-            </button>
 
-            <button
-              onClick={() => go("tools")}
-              className="flex items-center gap-1"
-            >
-              Herramientas
-              <ChevronDown size={14} />
-            </button>
-
-            <button onClick={() => go("pricing")}>
-              Precios
-            </button>
-
-            <button
-              onClick={() => go("resources")}
-              className="flex items-center gap-1"
-            >
-              Recursos
-              <ChevronDown size={14} />
-            </button>
-
-            <button onClick={() => go("resources")}>
-              Docs
-            </button>
-
-            <button
-              onClick={() => go("footer")}
-              className="flex items-center gap-1"
-            >
-              Empresa
-              <ChevronDown size={14} />
-            </button>
-          </nav>
 
           <div className="flex items-center gap-3">
             <button className="hidden p-2 text-slate-300 sm:block">
@@ -164,7 +132,7 @@ export default function DigitalBoostMainPage({
 
             <button
               onClick={() => openTool("forge")}
-              className={`rounded-lg px-5 py-2.5 text-sm font-bold shadow-[0_0_25px_rgba(90,70,255,.35)] ${neon}`}
+              className={`rounded-lg border border-white/15 px-5 py-2.5 text-sm font-bold shadow-[0_0_28px_rgba(90,70,255,.32)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_34px_rgba(0,200,255,.28)] ${neon}`}
             >
               Comenzar ahora
             </button>
@@ -174,22 +142,23 @@ export default function DigitalBoostMainPage({
 
 
       {/* HERO */}
-      <section className="relative border-b border-white/[.05]">
+      <section className="relative isolate border-b border-cyan-300/35 bg-[radial-gradient(ellipse_at_75%_45%,rgba(0,114,255,0.20),transparent_52%),linear-gradient(135deg,#020611_0%,#06112a_52%,#0b0620_100%)]">
 
         <div
           className="pointer-events-none absolute inset-0 opacity-40"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(38,113,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(38,113,255,.12) 1px,transparent 1px)",
+              "linear-gradient(rgba(38,150,255,.20) 1px,transparent 1px),linear-gradient(90deg,rgba(38,150,255,.20) 1px,transparent 1px)",
             backgroundSize: "58px 58px",
             maskImage:
               "linear-gradient(to bottom,black,transparent 90%)",
           }}
         />
 
-        <div className="pointer-events-none absolute right-[5%] top-[45%] h-[380px] w-[380px] -translate-y-1/2 rounded-full bg-blue-600/10 blur-3xl" />
+        <div className="pointer-events-none absolute right-[8%] top-[45%] h-[420px] w-[420px] -translate-y-1/2 rounded-full bg-blue-500/[0.28] blur-3xl" />
+        <div className="pointer-events-none absolute right-[3%] top-[52%] h-[340px] w-[340px] -translate-y-1/2 rounded-full bg-violet-500/[0.24] blur-3xl" />
 
-        <div className="relative mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-5 px-5 py-12 md:grid-cols-[1.02fr_.98fr] md:py-14 lg:min-h-[465px]">
+        <div className="relative mx-auto grid max-w-[1320px] grid-cols-1 items-center gap-6 px-4 py-10 sm:px-6 md:grid-cols-[.92fr_1.08fr] md:gap-4 md:py-12 lg:min-h-[500px]">
 
           {/* TEXTO HERO */}
           <div className="relative z-20">
@@ -198,11 +167,11 @@ export default function DigitalBoostMainPage({
               TODO EN UNO. POTENCIADO POR IA
             </div>
 
-            <h1 className="text-5xl font-semibold leading-[.98] tracking-tight md:text-[56px]">
+            <h1 className="text-5xl font-semibold leading-[.98] tracking-tight sm:text-6xl md:text-[64px]">
               Crea. Impulsa.
               <br />
 
-              <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-fuchsia-400 bg-clip-text text-transparent">
                 Escala. Innova.
               </span>
             </h1>
@@ -260,16 +229,17 @@ export default function DigitalBoostMainPage({
 
 
           {/* LOGO HERO - ÚNICA APARICIÓN */}
-          <div className="relative z-10 flex min-h-[330px] items-center justify-center md:justify-end">
+          <div className="relative z-10 flex min-h-[300px] items-center justify-center md:min-h-[430px] md:justify-end">
 
-            <div className="pointer-events-none absolute right-[2%] h-[360px] w-[360px] rounded-full border border-cyan-400/20 shadow-[0_0_80px_rgba(0,150,255,.15),inset_0_0_80px_rgba(80,50,255,.10)]" />
+            <div className="pointer-events-none absolute right-[2%] h-[min(82vw,470px)] w-[min(82vw,470px)] rounded-full border border-cyan-300/45 shadow-[0_0_100px_rgba(0,170,255,.32),inset_0_0_85px_rgba(100,50,255,.24)]" />
 
-            <div className="pointer-events-none absolute right-[5%] h-[300px] w-[300px] rounded-full bg-cyan-500/10 blur-3xl" />
+            <div className="pointer-events-none absolute right-[5%] h-[min(68vw,390px)] w-[min(68vw,390px)] rounded-full bg-cyan-400/[0.24] blur-3xl" />
 
             <img
-              src="/logo.png"
-              alt="DigitalBoost"
-              className="relative z-20 block w-[290px] max-w-[90%] object-contain drop-shadow-[0_0_35px_rgba(0,160,255,.45)] sm:w-[350px] md:w-[390px] lg:w-[440px] xl:w-[500px]"
+              src="/digitalboost-dragon-logo.png"
+              alt="Dragón luminoso de DigitalBoost"
+              fetchPriority="high"
+              className="relative z-20 block w-full max-w-[720px] object-contain mix-blend-screen drop-shadow-[0_0_48px_rgba(0,210,255,.58)]"
             />
 
           </div>
@@ -279,7 +249,7 @@ export default function DigitalBoostMainPage({
 
 
       {/* STATS */}
-      <section className="mx-auto max-w-[1200px] px-5 py-4">
+      <section className="mx-auto max-w-[1320px] px-5 py-4">
         <StatRow />
       </section>
 
@@ -287,7 +257,7 @@ export default function DigitalBoostMainPage({
       {/* TOOLS */}
       <section
         id="tools"
-        className="mx-auto max-w-[1200px] px-5 py-7"
+        className="mx-auto max-w-[1320px] px-4 py-7 sm:px-6"
       >
         <h2 className="mb-5 text-center text-sm font-medium tracking-wide text-slate-200">
           TODO LO QUE NECESITAS EN{" "}
@@ -300,7 +270,7 @@ export default function DigitalBoostMainPage({
           {tools.map(({ icon: Icon, title, desc: description, accent, ring, iconBg }) => (
             <article
               key={title}
-              className={`min-h-[174px] rounded-lg border border-indigo-400/20 bg-[#030914] p-4 transition ${ring}`}
+              className={`group relative min-h-[174px] overflow-hidden rounded-xl border border-cyan-400/40 bg-gradient-to-br from-[#0b2042] via-[#050d20] to-[#160b32] p-4 shadow-[0_0_28px_rgba(0,170,255,.10)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_0_28px_rgba(34,211,238,.12)] motion-reduce:transition-none ${ring}`}
             >
               <div className={`mb-5 inline-flex rounded-md p-2 ${iconBg}`}>
                 <Icon size={28} className={accent} />
@@ -336,116 +306,12 @@ export default function DigitalBoostMainPage({
       </section>
 
 
-      {/* IA */}
-      <section
-        id="resources"
-        className="mx-auto grid max-w-[1200px] gap-8 px-5 py-8 md:grid-cols-[280px_1fr]"
-      >
-
-        <div>
-          <h2 className="text-xl font-medium">
-            IA QUE IMPULSA TU
-            <br />
-            <span className="text-2xl font-bold text-violet-500">
-              CREATIVIDAD
-            </span>
-          </h2>
-
-          <p className="mt-3 text-sm leading-6 text-slate-400">
-            Nuestra IA entiende tus ideas y las convierte en soluciones reales.
-            Desde código hasta diseño, contenido y automatización.
-          </p>
-
-          {[
-            "Generación de código y sitios web",
-            "Diseño UI/UX inteligente",
-            "Contenido y copys que convierten",
-          ].map((item) => (
-            <div
-              key={item}
-              className="mt-5 text-sm text-slate-300"
-            >
-              <Sparkles
-                size={16}
-                className="mr-3 inline text-violet-400"
-              />
-              {item}
-            </div>
-          ))}
-
-          <button className="mt-7 rounded-lg border border-indigo-400/40 px-6 py-2.5 text-sm">
-            Conocer más sobre IA
-          </button>
-        </div>
-
-
-        <div className="overflow-hidden rounded-lg border border-indigo-400/25 bg-[#06101d] shadow-[0_0_45px_rgba(0,80,255,.12)]">
-
-          <div className="flex h-8 items-center gap-2 border-b border-white/10 px-3 text-[9px] text-slate-400">
-            <span className="text-cyan-300">
-              AI WEB BUILDER
-            </span>
-
-            <span className="ml-auto">
-              ＋　□　◉
-            </span>
-          </div>
-
-          <div className="grid min-h-[280px] md:grid-cols-2">
-
-            <pre className="overflow-hidden border-r border-white/10 p-5 text-[10px] leading-5 text-slate-400">
-{`<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport"
-    content="width=device-width,
-    initial-scale=1.0" />
-</head>
-<body>
-  <header class="hero">
-    <h1>Impulsa tu negocio
-      al siguiente nivel</h1>
-    <p>Herramientas digitales para crear,
-      escalar e innovar sin límites.</p>
-  </header>
-</body>
-</html>`}
-            </pre>
-
-            <div className="relative p-6">
-              <div className="text-[9px] text-slate-500">
-                PREVIEW
-              </div>
-
-              <div className="mt-8 text-2xl font-semibold leading-tight">
-                Impulsa tu negocio
-                <br />
-                al siguiente nivel
-              </div>
-
-              <p className="mt-3 text-xs text-slate-400">
-                Herramientas digitales para crear,
-                escalar e innovar sin límites.
-              </p>
-
-              <button
-                className={`mt-5 rounded-md px-5 py-2 text-xs font-bold ${neon}`}
-              >
-                Comenzar ahora
-              </button>
-
-              <div className="absolute -bottom-16 -right-10 h-48 w-48 rounded-full bg-violet-600/20 blur-3xl" />
-            </div>
-
-          </div>
-        </div>
-      </section>
-
+      {/* BRAIN BOOST */}
+      <BrainBoostLandingSection />
 
       {/* INTEGRACIONES */}
-      <section className="mx-auto max-w-[1200px] px-5 py-3">
-        <div className="rounded-lg border border-indigo-400/20 bg-[#030914] px-6 py-5">
+      <section className="mx-auto max-w-[1320px] px-5 py-3">
+        <div className="rounded-xl border border-cyan-400/30 bg-gradient-to-br from-[#07172c] to-[#100b2a] px-6 py-5 shadow-[0_0_28px_rgba(0,170,255,.08)]">
 
           <div className="mb-4 text-center text-xs font-semibold tracking-[.18em] text-cyan-300">
             INTEGRACIONES CON LO MEJOR
@@ -516,7 +382,7 @@ export default function DigitalBoostMainPage({
 
 
       {/* SECOND STATS */}
-      <section className="mx-auto max-w-[1200px] px-5 py-4">
+      <section className="mx-auto max-w-[1320px] px-5 py-4">
         <StatRow purple />
       </section>
 
@@ -525,9 +391,9 @@ export default function DigitalBoostMainPage({
       {/* PRICING */}
       <section
         id="pricing"
-        className="mx-auto max-w-[1200px] px-5 py-10"
+        className="mx-auto max-w-[1320px] px-5 py-10"
       >
-        <div className="rounded-lg border border-indigo-400/20 bg-[#030914] p-7">
+        <div className="rounded-xl border border-violet-400/30 bg-gradient-to-br from-[#07132a] to-[#100a28] p-7 shadow-[0_0_30px_rgba(100,60,255,.08)]">
           <h2 className="text-center text-2xl font-semibold">
             Planes simples y transparentes
           </h2>
@@ -537,7 +403,7 @@ export default function DigitalBoostMainPage({
           </p>
 
           <div className="mt-7 grid gap-4 md:grid-cols-3">
-            <div className="rounded-lg border border-white/10 bg-[#050b16] p-5">
+            <div className="rounded-xl border border-indigo-300/25 bg-[#071022] p-5 shadow-[0_0_18px_rgba(60,90,255,.06)]">
               <h3 className="font-bold">Starter</h3>
               <p className="mt-2 text-2xl font-bold">$0</p>
               <p className="mt-2 text-xs text-slate-400">
@@ -568,7 +434,7 @@ export default function DigitalBoostMainPage({
               </button>
             </div>
 
-            <div className="rounded-lg border border-white/10 bg-[#050b16] p-5">
+            <div className="rounded-xl border border-indigo-300/25 bg-[#071022] p-5 shadow-[0_0_18px_rgba(60,90,255,.06)]">
               <h3 className="font-bold">Business</h3>
               <p className="mt-2 text-2xl font-bold">$79</p>
               <p className="mt-2 text-xs text-slate-400">
@@ -588,7 +454,7 @@ export default function DigitalBoostMainPage({
       {/* CTA PRINCIPAL */}
       <section
         id="cta"
-        className="mx-auto max-w-[1200px] px-5 py-4"
+        className="mx-auto max-w-[1320px] px-5 py-4"
       >
         <div className="relative overflow-hidden rounded-lg border border-indigo-400/25 bg-[#030914] px-7 py-8 md:flex md:items-center md:justify-between">
 
@@ -641,7 +507,7 @@ export default function DigitalBoostMainPage({
         className="mt-4 border-t border-white/[.07] bg-[#020711]"
       >
 
-        <div className="mx-auto grid max-w-[1200px] gap-8 px-5 py-9 md:grid-cols-5">
+        <div className="mx-auto grid max-w-[1320px] gap-8 px-5 py-9 md:grid-cols-5">
 
           <div>
             <div className="text-lg font-black">
@@ -717,7 +583,7 @@ export default function DigitalBoostMainPage({
 
         </div>
 
-        <div className="mx-auto flex max-w-[1200px] items-center justify-between border-t border-white/[.06] px-5 py-5 text-xs text-slate-500">
+        <div className="mx-auto flex max-w-[1320px] items-center justify-between border-t border-white/[.06] px-5 py-5 text-xs text-slate-500">
 
           <div>
             © 2025 DigitalBoost.
