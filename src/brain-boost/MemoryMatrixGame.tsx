@@ -24,9 +24,15 @@ function readBestScore(): number {
 }
 
 const tileTones = [
-  "border-cyan-300/30 bg-cyan-300/[0.035] shadow-[inset_0_0_18px_rgba(34,211,238,.025)]",
-  "border-sky-300/30 bg-sky-300/[0.035] shadow-[inset_0_0_18px_rgba(56,189,248,.025)]",
-  "border-violet-300/30 bg-violet-400/[0.035] shadow-[inset_0_0_18px_rgba(139,92,246,.025)]",
+  "border-cyan-300/40 bg-gradient-to-br from-cyan-300/20 via-cyan-950/50 to-slate-950 shadow-[inset_0_0_28px_rgba(34,211,238,.09)]",
+  "border-violet-300/40 bg-gradient-to-br from-violet-300/20 via-violet-950/50 to-slate-950 shadow-[inset_0_0_28px_rgba(139,92,246,.09)]",
+  "border-fuchsia-300/40 bg-gradient-to-br from-fuchsia-300/20 via-fuchsia-950/50 to-slate-950 shadow-[inset_0_0_28px_rgba(217,70,239,.09)]",
+  "border-sky-300/40 bg-gradient-to-br from-sky-300/20 via-sky-950/50 to-slate-950 shadow-[inset_0_0_28px_rgba(56,189,248,.09)]",
+  "border-emerald-300/40 bg-gradient-to-br from-emerald-300/20 via-emerald-950/50 to-slate-950 shadow-[inset_0_0_28px_rgba(52,211,153,.09)]",
+  "border-amber-300/40 bg-gradient-to-br from-amber-300/20 via-amber-950/50 to-slate-950 shadow-[inset_0_0_28px_rgba(251,191,36,.09)]",
+  "border-rose-300/40 bg-gradient-to-br from-rose-300/20 via-rose-950/50 to-slate-950 shadow-[inset_0_0_28px_rgba(251,113,133,.09)]",
+  "border-blue-300/40 bg-gradient-to-br from-blue-300/20 via-blue-950/50 to-slate-950 shadow-[inset_0_0_28px_rgba(96,165,250,.09)]",
+  "border-teal-300/40 bg-gradient-to-br from-teal-300/20 via-teal-950/50 to-slate-950 shadow-[inset_0_0_28px_rgba(45,212,191,.09)]",
 ];
 
 export default function MemoryMatrixGame() {
@@ -270,28 +276,30 @@ export default function MemoryMatrixGame() {
   return (
     <section
       aria-labelledby="memory-matrix-title"
-      className="relative isolate overflow-hidden rounded-xl border border-cyan-200/40 bg-gradient-to-br from-[#04172b] via-[#060b20] to-[#150a35] p-4 shadow-[0_0_38px_rgba(34,211,238,.14),0_0_60px_rgba(139,92,246,.09)] sm:p-5"
+      className="relative isolate overflow-hidden rounded-3xl border border-cyan-200/25 bg-[#030817] p-5 shadow-[0_0_60px_rgba(34,211,238,.10),0_25px_80px_rgba(0,0,0,.38)] sm:p-7"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.13]"
+        className="pointer-events-none absolute inset-0 opacity-[0.15]"
         style={{
-          backgroundImage: "radial-gradient(circle, rgba(103,232,249,.8) 1px, transparent 1.5px)",
-          backgroundSize: "24px 24px",
+          backgroundImage: "linear-gradient(rgba(34,211,238,.13) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,.13) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
         }}
       />
 
+      <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-violet-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-16 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
       <div className="relative">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-300">
-              Neural Arcade / Tesla coil sequence
+              BRAIN BOOST / NEURAL SIGNAL LAB
             </p>
             <h4 id="memory-matrix-title" className="mt-2 text-xl font-black text-white sm:text-2xl">
               Memory Matrix
             </h4>
             <p className="mt-1 text-xs text-slate-400">
-              Memorizá la descarga y repetí la secuencia eléctrica.
+              Nueve nodos. Una secuencia. ¿Hasta dónde llega tu memoria?
             </p>
           </div>
 
@@ -349,7 +357,7 @@ export default function MemoryMatrixGame() {
           </div>
         </div>
 
-        <div className="mt-5 rounded-xl border border-cyan-300/20 bg-[#050b1b]/75 p-3 sm:p-4">
+        <div className="mt-6 rounded-2xl border border-cyan-200/20 bg-gradient-to-b from-[#071426]/95 via-[#050b1b]/95 to-[#100a24]/95 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,.04),0_18px_50px_rgba(0,0,0,.25)] sm:p-5">
           <div className="mb-3 flex items-center justify-between gap-2">
             <span className="text-[9px] font-black uppercase tracking-[0.16em] text-cyan-100/80">
               <span className="flex items-center gap-2">
@@ -357,7 +365,7 @@ export default function MemoryMatrixGame() {
                   <path d="M16 3v5M9 10h14M11 14h10M13 18h6M16 22v7M6 7l4 4M26 7l-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                   <path d="M18 7l-6 9h5l-3 9 8-12h-5l2-6Z" stroke="#c4b5fd" strokeWidth="1.4" strokeLinejoin="round" />
                 </svg>
-                <span>Tesla coil / 3 × 3 node matrix</span>
+                <span>NEURAL GRID / 3 × 3 SYNAPTIC NODES</span>
               </span>
             </span>
             <span className="text-[9px] font-bold text-slate-500">
@@ -365,7 +373,7 @@ export default function MemoryMatrixGame() {
             </span>
           </div>
 
-          <div className="mx-auto grid w-full max-w-[270px] grid-cols-3 gap-2.5">
+          <div className="mx-auto grid w-full max-w-[360px] grid-cols-3 gap-3 sm:gap-4">
             {Array.from({ length: CELL_COUNT }, (_, cell) => {
               const isLit = activeCell === cell;
 
@@ -376,15 +384,22 @@ export default function MemoryMatrixGame() {
                   disabled={phase !== "input"}
                   aria-label={`Nodo ${cell + 1}`}
                   onClick={() => handleCellPress(cell)}
-                  className={`aspect-square rounded-xl border transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed motion-reduce:transition-none ${
+                  className={`group relative aspect-square overflow-hidden rounded-2xl border text-left transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed motion-reduce:transition-none ${
                     isLit
-                      ? "scale-[1.04] border-white bg-[#bffaff] shadow-[0_0_12px_rgba(103,232,249,.98),0_0_34px_rgba(34,211,238,.82),0_0_58px_rgba(139,92,246,.28),inset_0_0_18px_rgba(255,255,255,.95)]"
+                      ? "z-10 scale-[1.04] border-white bg-gradient-to-br from-white via-cyan-100 to-sky-200 shadow-[0_0_20px_rgba(255,255,255,.95),0_0_48px_rgba(34,211,238,.85),0_0_75px_rgba(139,92,246,.4),inset_0_0_24px_white]"
                       : `${tileTones[cell % tileTones.length]} hover:border-cyan-200/65 hover:bg-cyan-300/[0.09]`
                   }`}
                 >
-                  <span className={`mx-auto block h-2 w-2 rounded-full transition-colors ${
-                    isLit ? "bg-white shadow-[0_0_12px_rgba(255,255,255,.98)]" : "bg-cyan-100/35"
-                  }`} />
+                  <span className={`relative z-10 flex h-full flex-col items-center justify-center gap-2 transition-all duration-200 ${
+                    isLit ? "text-slate-950" : "text-white/75"
+                  }`}>
+                    <span className={`text-2xl font-black tracking-[0.15em] sm:text-3xl ${
+                      isLit ? "drop-shadow-[0_0_10px_white]" : "drop-shadow-[0_0_12px_rgba(103,232,249,.3)]"
+                    }`}>{String(cell + 1).padStart(2, "0")}</span>
+                    <span className={`text-[7px] font-black tracking-[0.3em] ${
+                      isLit ? "text-slate-800" : "text-cyan-100/45"
+                    }`}>{isLit ? "PULSE" : "NODE"}</span>
+                  </span>
                 </button>
               );
             })}

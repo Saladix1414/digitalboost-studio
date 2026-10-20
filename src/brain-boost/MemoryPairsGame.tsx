@@ -52,6 +52,43 @@ const OCEAN_SPECIES: Species[] = [
     soundRemote: "https://www.fisheries.noaa.gov/s3/2023-04/Oror-Multisound-AWI-Van-Opzeeland-01-killer-clip.mp3",
     tone: "blue",
   },
+
+  {
+    id: "blue-whale",
+    name: "Ballena azul",
+    subtitle: "Ocean Echo / 05",
+    image: "/brain-boost/cards/ocean/blue-whale.jpg",
+    soundFile: "/brain-boost/audio/blue-whale.mp3",
+    soundRemote: "https://www.fisheries.noaa.gov/s3/2023-04/Cornell-NY-LongIsland-20090123-000000-LPfilter20-amplified-x8speed-blue-clip.mp3",
+    tone: "blue",
+  },
+  {
+    id: "fin-whale",
+    name: "Ballena de aleta",
+    subtitle: "Ocean Echo / 06",
+    image: "/brain-boost/cards/ocean/fin-whale.jpg",
+    soundFile: "/brain-boost/audio/fin-whale.mp3",
+    soundRemote: "https://www.fisheries.noaa.gov/s3/2023-04/Baph-song-NOAA-PAGroup-05-x5speed-fin-clip.mp3",
+    tone: "violet",
+  },
+  {
+    id: "minke-whale",
+    name: "Ballena minke",
+    subtitle: "Ocean Echo / 07",
+    image: "/brain-boost/cards/ocean/minke-whale.jpg",
+    soundFile: "/brain-boost/audio/minke-whale.mp3",
+    soundRemote: "https://www.fisheries.noaa.gov/s3/2023-04/Baac-pulsetrains-NOAA-PAGroup-25-minke-clip.mp3",
+    tone: "cyan",
+  },
+  {
+    id: "north-atlantic-right-whale",
+    name: "Ballena franca del Atlántico Norte",
+    subtitle: "Ocean Echo / 08",
+    image: "/brain-boost/cards/ocean/north-atlantic-right-whale.jpg",
+    soundFile: "/brain-boost/audio/north-atlantic-right-whale.mp3",
+    soundRemote: "https://www.fisheries.noaa.gov/s3/2023-04/Eugl-upcall-NOAA-PAGroup-01-right-clip-1.mp3",
+    tone: "emerald",
+  },
 ];
 
 // Ilustraciones originales de concepto para el primer prototipo de Origin X.
@@ -156,6 +193,7 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
   const lockedRef = useRef(false);
   const flipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const soundFadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
@@ -166,6 +204,7 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
 
   useEffect(() => () => {
     if (flipTimerRef.current !== null) window.clearTimeout(flipTimerRef.current);
+    if (soundFadeTimerRef.current !== null) window.clearInterval(soundFadeTimerRef.current);
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
@@ -189,13 +228,21 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
   function playSpeciesSound(card: MemoryCard) {
     if (!isOcean || !soundEnabled || !card.soundFile) return;
 
+    if (soundFadeTimerRef.current !== null) {
+      window.clearInterval(soundFadeTimerRef.current);
+      soundFadeTimerRef.current = null;
+    }
+
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
 
     const player = new Audio(card.soundFile);
-    player.volume = 0.62;
+    const targetVolume = 0.48;
+    const maxDurationMs = 4200;
+    const fadeDurationMs = 700;
+    player.volume = targetVolume;
     audioRef.current = player;
     let triedRemote = false;
 
@@ -208,6 +255,34 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
     };
 
     player.addEventListener("error", useRemoteFallback, { once: true });
+
+    const startedAt = Date.now();
+    soundFadeTimerRef.current = window.setInterval(() => {
+      const elapsed = Date.now() - startedAt;
+      const fadeStartsAt = maxDurationMs - fadeDurationMs;
+
+      if (elapsed >= fadeStartsAt) {
+        const remaining = Math.max(
+          0,
+          (maxDurationMs - elapsed) / fadeDurationMs,
+        );
+        player.volume = targetVolume * remaining;
+      }
+
+      if (elapsed >= maxDurationMs || player.ended) {
+        if (soundFadeTimerRef.current !== null) {
+          window.clearInterval(soundFadeTimerRef.current);
+          soundFadeTimerRef.current = null;
+        }
+        player.pause();
+        try {
+          player.currentTime = 0;
+        } catch {
+          // El navegador puede no permitir reiniciar un recurso todavía no cargado.
+        }
+      }
+    }, 50);
+
     void player.play().catch(useRemoteFallback);
   }
 
@@ -294,7 +369,11 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
     if (phase !== "playing" || lockedRef.current) return;
     if (flippedIds.includes(card.cardId) || matchedIds.includes(card.cardId)) return;
 
-    if (!isOcean) playDragonEffect("reveal", card.tone);
+    if (isOcean) {
+      playSpeciesSound(card);
+    } else {
+      playDragonEffect("reveal", card.tone);
+    }
     setErrorIds([]);
     const nextFlipped = [...flippedIds, card.cardId];
     setFlippedIds(nextFlipped);
@@ -320,7 +399,7 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
       setMessage(isOcean
         ? `¡Pareja encontrada! Escuchá: ${card.name}. +100 puntos.`
         : `¡Relic sincronizada! ${card.name}. +100 puntos.`);
-      playSpeciesSound(card);
+
       if (!isOcean) playDragonEffect("match", card.tone);
 
       flipTimerRef.current = window.setTimeout(() => {
