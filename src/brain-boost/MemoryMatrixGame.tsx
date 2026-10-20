@@ -53,7 +53,6 @@ export default function MemoryMatrixGame() {
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
-  const musicStepRef = useRef(0);
 
   function getAudioContext(): AudioContext | null {
     if (typeof window === "undefined" || typeof window.AudioContext === "undefined") {
@@ -74,12 +73,13 @@ export default function MemoryMatrixGame() {
     duration = 0.16,
     level = 0.022,
     wave: OscillatorType = "triangle",
+    delay = 0,
   ) {
     if (!soundEnabled) return;
     const context = getAudioContext();
     if (!context) return;
 
-    const now = context.currentTime;
+    const now = context.currentTime + delay;
     const oscillator = context.createOscillator();
     const gain = context.createGain();
     oscillator.type = wave;
@@ -103,15 +103,26 @@ export default function MemoryMatrixGame() {
     if (!wrong) playTeslaNote(base * 2.02, 0.095, 0.006, "sine");
   }
 
-  function playTeslaMusicNote(roundNumber: number) {
-    const scale = [164.81, 196, 246.94, 293.66, 329.63, 392, 440, 329.63];
-    const step = musicStepRef.current++;
-    const octave = Math.min(2, Math.floor((roundNumber - 1) / 3));
-    const frequency = scale[step % scale.length] * Math.pow(2, octave);
-    playTeslaNote(frequency, 0.27, 0.010, "triangle");
-    if (roundNumber >= 3 && step % 4 === 0) {
-      playTeslaNote(frequency * 1.5, 0.17, 0.0035, "sine");
-    }
+  function playLevelMelody(roundNumber: number): number {
+    if (!soundEnabled) return 0;
+
+    const phrase = [0, 7, 12, 7, 10, 7, 5, 3, 0, 3, 7, 12, 14, 12, 7, 5, 3, 0];
+    const count = Math.min(phrase.length, 6 + Math.max(0, roundNumber - 1));
+    const octave = Math.min(2, Math.floor((roundNumber - 1) / 4));
+    const gap = Math.max(0.125, 0.19 - Math.min(12, roundNumber - 1) * 0.004);
+    const root = 196 * Math.pow(2, octave);
+
+    phrase.slice(0, count).forEach((step, index) => {
+      const delay = 0.12 + index * gap;
+      const frequency = root * Math.pow(2, step / 12);
+      playTeslaNote(frequency, gap * 0.72, 0.0105, "square", delay);
+
+      if (index % 4 === 0) {
+        playTeslaNote(root * 0.5, 0.18, 0.003, "triangle", delay);
+      }
+    });
+
+    return (0.12 + (count - 1) * gap + gap * 0.72 + 0.12) * 1000;
   }
 
   useEffect(() => {
@@ -126,12 +137,7 @@ export default function MemoryMatrixGame() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!soundEnabled || phase === "ready" || phase === "game-over") return;
-    const intervalMs = Math.max(300, 680 - (round - 1) * 24);
-    const timer = window.setInterval(() => playTeslaMusicNote(round), intervalMs);
-    return () => window.clearInterval(timer);
-  }, [soundEnabled, phase, round]);
+
 
   useEffect(() => {
     if (phase !== "showing") return;
@@ -190,7 +196,6 @@ export default function MemoryMatrixGame() {
 
   function startGame() {
     clearPendingTimers();
-    musicStepRef.current = 0;
     if (soundEnabled) playTeslaNote(110, 0.22, 0.014, "triangle");
 
     setRound(1);
@@ -248,8 +253,7 @@ export default function MemoryMatrixGame() {
 
     const reward = sequence.length * 100 + round * 50;
     setScore((current) => current + reward);
-    playTeslaNote(523.25, 0.19, 0.014, "triangle");
-    playTeslaNote(783.99, 0.24, 0.010, "sine");
+    const melodyDurationMs = playLevelMelody(round);
     setPhase("round-clear");
     setMessage(`¡Secuencia completada! +${reward} puntos.`);
 
@@ -263,7 +267,7 @@ export default function MemoryMatrixGame() {
       setMessage(`Ronda ${nextRound}: una señal más. ¡Prestá atención!`);
       setPhase("showing");
       transitionTimerRef.current = null;
-    }, 1150);
+    }, Math.max(1150, melodyDurationMs + 180));
   }
 
   const statusLabel =
