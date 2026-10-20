@@ -46,6 +46,7 @@ export default function MemoryMatrixGame() {
   const [lives, setLives] = useState(3);
   const [bestScore, setBestScore] = useState<number>(readBestScore);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const soundEnabledRef = useRef(soundEnabled);
   const [message, setMessage] = useState(
     "Observá las señales, memorizá la ruta y reproducila en el mismo orden.",
   );
@@ -75,7 +76,7 @@ export default function MemoryMatrixGame() {
     wave: OscillatorType = "triangle",
     delay = 0,
   ) {
-    if (!soundEnabled) return;
+    if (!soundEnabledRef.current) return;
     const context = getAudioContext();
     if (!context) return;
 
@@ -104,7 +105,7 @@ export default function MemoryMatrixGame() {
   }
 
   function playLevelMelody(roundNumber: number): number {
-    if (!soundEnabled) return 0;
+    if (!soundEnabledRef.current) return 0;
 
     const phrase = [0, 7, 12, 7, 10, 7, 5, 3, 0, 3, 7, 12, 14, 12, 7, 5, 3, 0];
     const count = Math.min(phrase.length, 6 + Math.max(0, roundNumber - 1));
@@ -303,7 +304,7 @@ export default function MemoryMatrixGame() {
               Memory Matrix
             </h4>
             <p className="mt-1 text-xs text-slate-400">
-              Nueve nodos. Una secuencia. ¿Hasta dónde llega tu memoria?
+              Nueve bobinas. Una descarga. ¿Podés recordar la secuencia?
             </p>
           </div>
 
@@ -323,10 +324,18 @@ export default function MemoryMatrixGame() {
               aria-label={soundEnabled ? "Desactivar música y efectos" : "Activar música y efectos"}
               onClick={() => {
                 const next = !soundEnabled;
+                soundEnabledRef.current = next;
                 setSoundEnabled(next);
+
                 if (next) {
                   const context = getAudioContext();
                   if (context) void context.resume().catch(() => undefined);
+                } else {
+                  const context = audioContextRef.current;
+                  audioContextRef.current = null;
+                  if (context && context.state !== "closed") {
+                    void context.close().catch(() => undefined);
+                  }
                 }
               }}
               className={`rounded-md border px-2 py-1.5 text-[9px] font-black tracking-wider transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
@@ -369,7 +378,7 @@ export default function MemoryMatrixGame() {
                   <path d="M16 3v5M9 10h14M11 14h10M13 18h6M16 22v7M6 7l4 4M26 7l-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                   <path d="M18 7l-6 9h5l-3 9 8-12h-5l2-6Z" stroke="#c4b5fd" strokeWidth="1.4" strokeLinejoin="round" />
                 </svg>
-                <span>NEURAL GRID / 3 × 3 SYNAPTIC NODES</span>
+                <span>TESLA ARRAY / 3 × 3 COILS</span>
               </span>
             </span>
             <span className="text-[9px] font-bold text-slate-500">
@@ -388,22 +397,38 @@ export default function MemoryMatrixGame() {
                   disabled={phase !== "input"}
                   aria-label={`Nodo ${cell + 1}`}
                   onClick={() => handleCellPress(cell)}
-                  className={`group relative aspect-square overflow-hidden rounded-2xl border text-left transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed motion-reduce:transition-none ${
+                  className={`group relative aspect-square overflow-hidden rounded-full border text-center transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed motion-reduce:transition-none ${
                     isLit
                       ? "z-10 scale-[1.04] border-white bg-gradient-to-br from-white via-cyan-100 to-sky-200 shadow-[0_0_20px_rgba(255,255,255,.95),0_0_48px_rgba(34,211,238,.85),0_0_75px_rgba(139,92,246,.4),inset_0_0_24px_white]"
                       : `${tileTones[cell % tileTones.length]} hover:border-cyan-200/65 hover:bg-cyan-300/[0.09]`
                   }`}
                 >
-                  <span className={`relative z-10 flex h-full flex-col items-center justify-center gap-2 transition-all duration-200 ${
-                    isLit ? "text-slate-950" : "text-white/75"
-                  }`}>
-                    <span className={`text-2xl font-black tracking-[0.15em] sm:text-3xl ${
-                      isLit ? "drop-shadow-[0_0_10px_white]" : "drop-shadow-[0_0_12px_rgba(103,232,249,.3)]"
-                    }`}>{String(cell + 1).padStart(2, "0")}</span>
-                    <span className={`text-[7px] font-black tracking-[0.3em] ${
-                      isLit ? "text-slate-800" : "text-cyan-100/45"
-                    }`}>{isLit ? "PULSE" : "NODE"}</span>
-                  </span>
+                  <svg viewBox="0 0 100 100" className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
+                    <defs>
+                      <radialGradient id={"coil-core-" + cell}>
+                        <stop offset="0%" stopColor="#e0faff" stopOpacity={isLit ? 1 : 0.55} />
+                        <stop offset="45%" stopColor="#22d3ee" stopOpacity={isLit ? 0.6 : 0.12} />
+                        <stop offset="100%" stopColor="#071426" stopOpacity="0" />
+                      </radialGradient>
+                    </defs>
+                    <circle cx="50" cy="50" r="47" fill={"url(#coil-core-" + cell + ")"} />
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#67e8f9" strokeOpacity={isLit ? 0.95 : 0.32} strokeWidth="1.2" strokeDasharray="2 4" />
+                    <circle cx="50" cy="50" r="32" fill="none" stroke="#a78bfa" strokeOpacity="0.55" strokeWidth="1.5" />
+                    <circle cx="50" cy="50" r="24" fill="none" stroke="#22d3ee" strokeOpacity="0.7" strokeWidth="1" />
+                    <g transform={"rotate(" + (cell * 17) + " 50 50)"} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth={isLit ? 2.6 : 1.8}>
+                      <path d="M43 33 L36 27 L40 21 L30 15 L34 9" stroke={isLit ? "#ffffff" : "#67e8f9"} />
+                      <path d="M57 33 L64 27 L60 21 L70 15 L66 9" stroke={isLit ? "#ffffff" : "#a78bfa"} />
+                      <path d="M33 43 L26 37 L20 43 L14 36 L9 40" stroke={isLit ? "#ffffff" : "#a78bfa"} />
+                      <path d="M67 43 L74 37 L80 43 L86 36 L91 40" stroke={isLit ? "#ffffff" : "#67e8f9"} />
+                      <path d="M43 67 L36 73 L40 79 L30 85 L34 91" stroke={isLit ? "#ffffff" : "#67e8f9"} />
+                      <path d="M57 67 L64 73 L60 79 L70 85 L66 91" stroke={isLit ? "#ffffff" : "#a78bfa"} />
+                    </g>
+                    <circle cx="50" cy="50" r="18" fill={isLit ? "#dffbff" : "#0b263d"} stroke={isLit ? "#ffffff" : "#67e8f9"} strokeWidth="2" />
+                    <circle cx="50" cy="50" r="12" fill="none" stroke={isLit ? "#0891b2" : "#164e63"} strokeWidth="1.2" />
+                    <text x="50" y="54" textAnchor="middle" fontSize="10" fontWeight="900" fill={isLit ? "#082f49" : "#e0faff"}>{String(cell + 1).padStart(2, "0")}</text>
+                    <text x="50" y="81" textAnchor="middle" fontSize="5.5" fontWeight="800" letterSpacing="1.2" fill={isLit ? "#ffffff" : "#a5f3fc"}>{isLit ? "PULSE" : "TESLA"}</text>
+                  </svg>
+                  <span className="pointer-events-none absolute inset-0 rounded-full border border-white/10" aria-hidden="true" />
                 </button>
               );
             })}
