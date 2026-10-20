@@ -34,8 +34,7 @@ export const
   PULSE_GOAL_RECONCILIATION_EVIDENCE_CONTRACT =
     "p0.7.2.11" as const;
 
-export type
-  PulseGoalReconciliationEvidence = {
+export type PulseGoalReconciliationEvidence = {
   contract:
     typeof
       PULSE_GOAL_RECONCILIATION_EVIDENCE_CONTRACT;
