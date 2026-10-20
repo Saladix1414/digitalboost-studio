@@ -417,27 +417,43 @@ export default function BrainBoostLandingSection() {
                 : "md:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]"
             }`}>
               <div className={activeGame?.id === "sequence" ? "hidden" : "grid content-start gap-3 sm:grid-cols-2 md:grid-cols-1"}>
-                {activeCategory.games.map((game) => (
+                {activeCategory.games.map((game, index) => (
                   <button
                     key={game.id}
                     type="button"
                     onClick={() => setActiveGame(game)}
-                    className={`group rounded-xl border p-4 text-left transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 motion-reduce:transition-none ${
+                    className={`group relative isolate overflow-hidden rounded-2xl border p-4 text-left transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_28px_rgba(34,211,238,.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 motion-reduce:transition-none ${
                       activeGame?.id === game.id
-                        ? "border-cyan-300/60 bg-cyan-300/[0.08] shadow-[0_0_22px_rgba(34,211,238,0.08)]"
-                        : "border-white/10 bg-white/[0.02] hover:border-violet-300/35 hover:bg-white/[0.04]"
-                    }`}
+                        ? "border-cyan-200/70 bg-gradient-to-br from-cyan-400/[0.16] via-[#0a1730] to-violet-500/[0.14] shadow-[0_0_28px_rgba(34,211,238,.16)]"
+                        : "border-cyan-300/25 bg-gradient-to-br from-[#0b1c37] via-[#080e20] to-[#120c29] hover:border-cyan-200/60"
+                    }` }
                   >
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-300">{game.area}</span>
-                    <span className="mt-2 block font-bold">{game.title}</span>
-                    <span className="mt-2 block text-xs leading-5 text-slate-400">{game.description}</span>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[9px] font-black uppercase tracking-[0.18em] text-cyan-200">{game.area}</span>
+                      <span className="rounded border border-cyan-200/30 bg-cyan-300/[0.07] px-1.5 py-1 font-mono text-[8px] font-black text-cyan-100">
+                        MODE {String(index + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <span className="block font-black tracking-tight text-white">{game.title}</span>
+                        <span className="mt-2 block text-xs leading-5 text-slate-400">{game.description}</span>
+                      </div>
+                      <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-300/30 bg-cyan-300/[0.07] text-lg text-cyan-100 transition group-hover:bg-cyan-300/[0.16]">↗</span>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between gap-2 border-t border-white/[0.08] pt-3">
+                      <span className="text-[8px] font-bold uppercase tracking-wider text-slate-500">Neural arcade</span>
+                      <span className="text-[8px] font-black uppercase tracking-wider text-cyan-200">
+                        {game.id === "sequence" ? "Play now →" : "Select mode →"}
+                      </span>
+                    </div>
                   </button>
                 ))}
               </div>
 
               <div className={activeGame?.id === "sequence"
                 ? "relative min-h-[70dvh] rounded-2xl border border-cyan-300/35 bg-[#050b1b]/85 p-3 shadow-[0_0_42px_rgba(0,190,255,.13),inset_0_1px_0_rgba(255,255,255,.05)] sm:p-5"
-                : "min-h-48 rounded-xl border border-white/10 bg-black/20 p-5"}>
+                : "relative isolate flex min-h-[330px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-cyan-300/35 bg-gradient-to-br from-[#0b1d3a] via-[#070d20] to-[#180d35] p-5 text-center shadow-[0_0_38px_rgba(34,211,238,.12),inset_0_0_34px_rgba(139,92,246,.09)]"}>
                 {activeGame?.id === "sequence" ? (
                   <MemoryMatrixGame />
                 ) : activeGame ? (
@@ -451,11 +467,24 @@ export default function BrainBoostLandingSection() {
                   </>
                 ) : (
                   <>
-                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Vista previa</p>
-                    <h4 className="mt-3 text-lg font-bold">Seleccioná una actividad</h4>
-                    <p className="mt-2 text-sm leading-6 text-slate-400">
-                      Elegí una ficha de la lista para consultar sus detalles.
+                    <div aria-hidden="true" className="relative mb-5 flex h-24 w-24 items-center justify-center rounded-full border border-cyan-300/40 bg-[#061329]/90 shadow-[0_0_36px_rgba(34,211,238,.18)]">
+                      <span className="absolute inset-2 rounded-full border border-dashed border-violet-300/55 motion-safe:animate-[spin_24s_linear_infinite] motion-reduce:animate-none" />
+                      <span className="absolute inset-4 rounded-full border border-cyan-300/30" />
+                      <svg viewBox="0 0 64 64" className="relative h-12 w-12 drop-shadow-[0_0_10px_rgba(103,232,249,.7)]" fill="none">
+                        <path d="M32 8V22M32 42V56M8 32H22M42 32H56M15 15L25 25M39 39L49 49M49 15L39 25M25 39L15 49" stroke="#67E8F9" strokeWidth="2.5" strokeLinecap="round"/>
+                        <path d="M32 22L42 32L32 42L22 32Z" stroke="#C4B5FD" strokeWidth="2"/>
+                        <circle cx="32" cy="32" r="4" fill="#A5F3FC"/>
+                      </svg>
+                    </div>
+                    <p className="text-[9px] font-black uppercase tracking-[0.22em] text-cyan-300">Neural Core / Ready</p>
+                    <h4 className="mt-3 text-xl font-black tracking-tight text-white sm:text-2xl">Seleccioná tu modo</h4>
+                    <p className="mt-3 max-w-xs text-sm leading-6 text-slate-400">
+                      Elegí una actividad para entrar a su experiencia. Cada nodo tiene su propio desafío.
                     </p>
+                    <div className="mt-6 flex flex-wrap justify-center gap-2">
+                      <span className="rounded-md border border-cyan-300/25 bg-cyan-300/[0.06] px-2.5 py-1.5 text-[8px] font-black uppercase tracking-wider text-cyan-100">Touch to select</span>
+                      <span className="rounded-md border border-violet-300/25 bg-violet-300/[0.06] px-2.5 py-1.5 text-[8px] font-black uppercase tracking-wider text-violet-100">Arcade online</span>
+                    </div>
                   </>
                 )}
               </div>
