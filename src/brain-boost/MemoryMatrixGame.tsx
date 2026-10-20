@@ -24,9 +24,9 @@ function readBestScore(): number {
 }
 
 const tileTones = [
-  "border-violet-300/25 bg-violet-400/[0.05]",
-  "border-cyan-300/25 bg-cyan-400/[0.05]",
-  "border-blue-300/25 bg-blue-400/[0.05]",
+  "border-cyan-300/30 bg-cyan-300/[0.035] shadow-[inset_0_0_18px_rgba(34,211,238,.025)]",
+  "border-sky-300/30 bg-sky-300/[0.035] shadow-[inset_0_0_18px_rgba(56,189,248,.025)]",
+  "border-violet-300/30 bg-violet-400/[0.035] shadow-[inset_0_0_18px_rgba(139,92,246,.025)]",
 ];
 
 export default function MemoryMatrixGame() {
@@ -39,23 +39,93 @@ export default function MemoryMatrixGame() {
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [bestScore, setBestScore] = useState<number>(readBestScore);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const [message, setMessage] = useState(
     "Observá las señales, memorizá la ruta y reproducila en el mismo orden.",
   );
 
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const musicStepRef = useRef(0);
+
+  function getAudioContext(): AudioContext | null {
+    if (typeof window === "undefined" || typeof window.AudioContext === "undefined") {
+      return null;
+    }
+    if (!audioContextRef.current || audioContextRef.current.state === "closed") {
+      audioContextRef.current = new window.AudioContext();
+    }
+    const context = audioContextRef.current;
+    if (context.state === "suspended") {
+      void context.resume().catch(() => undefined);
+    }
+    return context;
+  }
+
+  function playTeslaNote(
+    frequency: number,
+    duration = 0.16,
+    level = 0.022,
+    wave: OscillatorType = "triangle",
+  ) {
+    if (!soundEnabled) return;
+    const context = getAudioContext();
+    if (!context) return;
+
+    const now = context.currentTime;
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.type = wave;
+    oscillator.frequency.setValueAtTime(Math.max(45, Math.min(1400, frequency)), now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(level, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.addEventListener("ended", () => {
+      oscillator.disconnect();
+      gain.disconnect();
+    }, { once: true });
+    oscillator.start(now);
+    oscillator.stop(now + duration + 0.025);
+  }
+
+  function playTeslaPulse(cell: number, wrong = false) {
+    const base = (230 + cell * 31) * (1 + Math.min(round - 1, 10) * 0.012);
+    playTeslaNote(wrong ? base * 0.63 : base, wrong ? 0.2 : 0.14, wrong ? 0.012 : 0.022, wrong ? "sawtooth" : "square");
+    if (!wrong) playTeslaNote(base * 2.02, 0.095, 0.006, "sine");
+  }
+
+  function playTeslaMusicNote(roundNumber: number) {
+    const scale = [164.81, 196, 246.94, 293.66, 329.63, 392, 440, 329.63];
+    const step = musicStepRef.current++;
+    const octave = Math.min(2, Math.floor((roundNumber - 1) / 3));
+    const frequency = scale[step % scale.length] * Math.pow(2, octave);
+    playTeslaNote(frequency, 0.27, 0.010, "triangle");
+    if (roundNumber >= 3 && step % 4 === 0) {
+      playTeslaNote(frequency * 1.5, 0.17, 0.0035, "sine");
+    }
+  }
 
   useEffect(() => {
     return () => {
-      if (transitionTimerRef.current !== null) {
-        clearTimeout(transitionTimerRef.current);
-      }
-      if (feedbackTimerRef.current !== null) {
-        clearTimeout(feedbackTimerRef.current);
+      if (transitionTimerRef.current !== null) clearTimeout(transitionTimerRef.current);
+      if (feedbackTimerRef.current !== null) clearTimeout(feedbackTimerRef.current);
+      if (audioContextRef.current) {
+        const context = audioContextRef.current;
+        audioContextRef.current = null;
+        if (context.state !== "closed") void context.close().catch(() => undefined);
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!soundEnabled || phase === "ready" || phase === "game-over") return;
+    const intervalMs = Math.max(300, 680 - (round - 1) * 24);
+    const timer = window.setInterval(() => playTeslaMusicNote(round), intervalMs);
+    return () => window.clearInterval(timer);
+  }, [soundEnabled, phase, round]);
 
   useEffect(() => {
     if (phase !== "showing") return;
@@ -73,6 +143,7 @@ export default function MemoryMatrixGame() {
 
     const cell = sequence[playbackIndex];
     setActiveCell(cell);
+    playTeslaPulse(cell);
 
     const lightTimer = setTimeout(() => {
       setActiveCell((current) => current === cell ? null : current);
@@ -113,6 +184,8 @@ export default function MemoryMatrixGame() {
 
   function startGame() {
     clearPendingTimers();
+    musicStepRef.current = 0;
+    if (soundEnabled) playTeslaNote(110, 0.22, 0.014, "triangle");
 
     setRound(1);
     setSequence(createSequence(3));
@@ -128,6 +201,7 @@ export default function MemoryMatrixGame() {
   function handleCellPress(cell: number) {
     if (phase !== "input") return;
 
+    playTeslaPulse(cell, cell !== sequence[inputIndex]);
     setActiveCell(cell);
 
     if (feedbackTimerRef.current !== null) {
@@ -168,6 +242,8 @@ export default function MemoryMatrixGame() {
 
     const reward = sequence.length * 100 + round * 50;
     setScore((current) => current + reward);
+    playTeslaNote(523.25, 0.19, 0.014, "triangle");
+    playTeslaNote(783.99, 0.24, 0.010, "sine");
     setPhase("round-clear");
     setMessage(`¡Secuencia completada! +${reward} puntos.`);
 
@@ -194,7 +270,7 @@ export default function MemoryMatrixGame() {
   return (
     <section
       aria-labelledby="memory-matrix-title"
-      className="relative isolate overflow-hidden rounded-xl border border-cyan-300/25 bg-gradient-to-br from-[#081a34] via-[#080d22] to-[#160d32] p-4 shadow-[0_0_30px_rgba(34,211,238,.09)] sm:p-5"
+      className="relative isolate overflow-hidden rounded-xl border border-cyan-200/40 bg-gradient-to-br from-[#04172b] via-[#060b20] to-[#150a35] p-4 shadow-[0_0_38px_rgba(34,211,238,.14),0_0_60px_rgba(139,92,246,.09)] sm:p-5"
     >
       <div
         aria-hidden="true"
@@ -209,25 +285,47 @@ export default function MemoryMatrixGame() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-300">
-              Neural Arcade / Memory mode
+              Neural Arcade / Tesla coil sequence
             </p>
             <h4 id="memory-matrix-title" className="mt-2 text-xl font-black text-white sm:text-2xl">
               Memory Matrix
             </h4>
             <p className="mt-1 text-xs text-slate-400">
-              Memorizá la ruta de energía.
+              Memorizá la descarga y repetí la secuencia eléctrica.
             </p>
           </div>
 
-          <span className={`rounded-md border px-2 py-1.5 text-[9px] font-black tracking-wider ${
-            phase === "game-over"
-              ? "border-rose-300/35 bg-rose-400/[0.08] text-rose-200"
-              : phase === "input"
-                ? "border-emerald-300/35 bg-emerald-400/[0.08] text-emerald-200"
-                : "border-cyan-300/30 bg-cyan-300/[0.06] text-cyan-100"
-          }`}>
-            {statusLabel}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className={`rounded-md border px-2 py-1.5 text-[9px] font-black tracking-wider ${
+              phase === "game-over"
+                ? "border-rose-300/35 bg-rose-400/[0.08] text-rose-200"
+                : phase === "input"
+                  ? "border-emerald-300/35 bg-emerald-400/[0.08] text-emerald-200"
+                  : "border-cyan-300/30 bg-cyan-300/[0.06] text-cyan-100"
+            }`}>
+              {statusLabel}
+            </span>
+            <button
+              type="button"
+              aria-pressed={soundEnabled}
+              aria-label={soundEnabled ? "Desactivar música y efectos" : "Activar música y efectos"}
+              onClick={() => {
+                const next = !soundEnabled;
+                setSoundEnabled(next);
+                if (next) {
+                  const context = getAudioContext();
+                  if (context) void context.resume().catch(() => undefined);
+                }
+              }}
+              className={`rounded-md border px-2 py-1.5 text-[9px] font-black tracking-wider transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
+                soundEnabled
+                  ? "border-cyan-200/45 bg-cyan-300/[0.08] text-cyan-100"
+                  : "border-violet-200/30 bg-violet-300/[0.05] text-violet-200"
+              }`}
+            >
+              {soundEnabled ? "⚡ AUDIO ON" : "AUDIO OFF"}
+            </button>
+          </div>
         </div>
 
         <div className="mt-4 grid grid-cols-3 gap-2">
@@ -254,7 +352,13 @@ export default function MemoryMatrixGame() {
         <div className="mt-5 rounded-xl border border-cyan-300/20 bg-[#050b1b]/75 p-3 sm:p-4">
           <div className="mb-3 flex items-center justify-between gap-2">
             <span className="text-[9px] font-black uppercase tracking-[0.16em] text-cyan-100/80">
-              Neural grid / 3 × 3
+              <span className="flex items-center gap-2">
+                <svg viewBox="0 0 32 32" className="h-5 w-5 text-cyan-200 drop-shadow-[0_0_7px_rgba(34,211,238,.8)]" fill="none" aria-hidden="true">
+                  <path d="M16 3v5M9 10h14M11 14h10M13 18h6M16 22v7M6 7l4 4M26 7l-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M18 7l-6 9h5l-3 9 8-12h-5l2-6Z" stroke="#c4b5fd" strokeWidth="1.4" strokeLinejoin="round" />
+                </svg>
+                <span>Tesla coil / 3 × 3 node matrix</span>
+              </span>
             </span>
             <span className="text-[9px] font-bold text-slate-500">
               {phase === "input" ? `${inputIndex}/${sequence.length}` : phase === "ready" ? "En espera" : `${sequence.length} señales`}
@@ -274,12 +378,12 @@ export default function MemoryMatrixGame() {
                   onClick={() => handleCellPress(cell)}
                   className={`aspect-square rounded-xl border transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed motion-reduce:transition-none ${
                     isLit
-                      ? "scale-[1.03] border-cyan-100 bg-cyan-200 shadow-[0_0_26px_rgba(103,232,249,.85),inset_0_0_18px_rgba(255,255,255,.65)]"
+                      ? "scale-[1.04] border-white bg-[#bffaff] shadow-[0_0_12px_rgba(103,232,249,.98),0_0_34px_rgba(34,211,238,.82),0_0_58px_rgba(139,92,246,.28),inset_0_0_18px_rgba(255,255,255,.95)]"
                       : `${tileTones[cell % tileTones.length]} hover:border-cyan-200/65 hover:bg-cyan-300/[0.09]`
                   }`}
                 >
                   <span className={`mx-auto block h-2 w-2 rounded-full transition-colors ${
-                    isLit ? "bg-white shadow-[0_0_12px_rgba(255,255,255,.95)]" : "bg-slate-600/80"
+                    isLit ? "bg-white shadow-[0_0_12px_rgba(255,255,255,.98)]" : "bg-cyan-100/35"
                   }`} />
                 </button>
               );
