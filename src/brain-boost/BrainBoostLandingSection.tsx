@@ -4,6 +4,7 @@ import MemoryMatrixGame from "./MemoryMatrixGame";
 import MemoryPairsGame from "./MemoryPairsGame";
 import LogicReactorGame from "./LogicReactorGame";
 import NumberPatternsGame from "./NumberPatternsGame";
+import SpatialRiftGame from "./SpatialRiftGame";
 
 type Game = {
   id: string;
@@ -388,12 +389,12 @@ export default function BrainBoostLandingSection() {
             aria-modal="true"
             aria-labelledby="brain-boost-dialog-title"
             className={`relative isolate flex w-full flex-col overflow-y-auto rounded-2xl border border-cyan-300/40 bg-[#050b1c] p-4 shadow-[0_0_70px_rgba(0,180,255,.18),0_0_100px_rgba(139,92,246,.16)] sm:rounded-3xl sm:p-6 ${
-              (activeGame?.id === "sequence" || activeGame?.id === "pairs" || activeGame?.id === "originx-dragons" || activeGame?.id === "deduction" || activeGame?.id === "number") ? "h-[88dvh] max-h-[88dvh] max-w-5xl" : "max-h-[82dvh] max-w-3xl"
+              (activeGame?.id === "sequence" || activeGame?.id === "pairs" || activeGame?.id === "originx-dragons" || activeGame?.id === "deduction" || activeGame?.id === "number" || activeGame?.id === "rotation") ? "h-[88dvh] max-h-[88dvh] max-w-5xl" : "max-h-[82dvh] max-w-3xl"
             }` }
           >
             <div className="relative z-10 flex items-start justify-between gap-4">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-200">{activeGame?.id === "number" ? "NEURAL ARCADE / NUMBER PATTERNS" : activeGame?.id === "deduction" ? "NEURAL ARCADE / LOGIC REACTOR" : activeGame?.id === "sequence" ? "NEURAL ARCADE / MEMORY MATRIX" : activeGame?.id === "pairs" ? "NEURAL ARCADE / OCEAN ECHOES" : activeGame?.id === "originx-dragons" ? "ORIGIN X / DRAGON RELICS" : activeCategory.id === "daily" ? "NEURAL ARCADE / DAILY RUN" : "NEURAL ARCADE / MODE SELECT"}</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-200">{activeGame?.id === "rotation" ? "NEURAL ARCADE / SPATIAL RIFT" : activeGame?.id === "number" ? "NEURAL ARCADE / NUMBER PATTERNS" : activeGame?.id === "deduction" ? "NEURAL ARCADE / LOGIC REACTOR" : activeGame?.id === "sequence" ? "NEURAL ARCADE / MEMORY MATRIX" : activeGame?.id === "pairs" ? "NEURAL ARCADE / OCEAN ECHOES" : activeGame?.id === "originx-dragons" ? "ORIGIN X / DRAGON RELICS" : activeCategory.id === "daily" ? "NEURAL ARCADE / DAILY RUN" : "NEURAL ARCADE / MODE SELECT"}</p>
                 <h3 id="brain-boost-dialog-title" className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">{activeGame ? activeGame.title : activeCategory.name}</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-400">{activeGame ? activeGame.description : activeCategory.description}</p>
               </div>
@@ -452,7 +453,9 @@ export default function BrainBoostLandingSection() {
               </div>
 
               <div className={activeGame ? "relative min-h-[70dvh] rounded-2xl border border-cyan-300/35 bg-[#050b1b]/85 p-3 shadow-[0_0_42px_rgba(0,190,255,.13),inset_0_1px_0_rgba(255,255,255,.05)] sm:p-5" : "relative isolate flex min-h-[330px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-cyan-300/35 bg-gradient-to-br from-[#0b1d3a] via-[#070d20] to-[#180d35] p-5 text-center shadow-[0_0_38px_rgba(34,211,238,.12),inset_0_0_34px_rgba(139,92,246,.09)]"}>
-                {activeGame?.id === "number" ? (
+                {activeGame?.id === "rotation" ? (
+                  <SpatialRiftGame />
+                ) : activeGame?.id === "number" ? (
                   <NumberPatternsGame />
                 ) : activeGame?.id === "deduction" ? (
                   <LogicReactorGame />
