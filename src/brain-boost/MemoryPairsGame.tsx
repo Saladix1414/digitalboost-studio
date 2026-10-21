@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import BrainBoostCanvas from "./BrainBoostCanvas";
 
 type MemoryPairsMode = "ocean" | "originx";
 type Phase = "ready" | "playing" | "won";
@@ -459,6 +460,7 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
           : "border-violet-300/35 bg-gradient-to-br from-[#101b43] via-[#0a1029] to-[#2a102b]"
       }`}
     >
+      <BrainBoostCanvas theme={isOcean ? "ocean" : "dragon"} intensity={0.24} seed={59} />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 opacity-20"

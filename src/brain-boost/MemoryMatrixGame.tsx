@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import BrainBoostCanvas from "./BrainBoostCanvas";
 
 type GamePhase = "ready" | "showing" | "input" | "round-clear" | "game-over";
 
@@ -294,6 +295,8 @@ export default function MemoryMatrixGame() {
 
       <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-violet-500/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -left-16 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
+<BrainBoostCanvas theme="memory" intensity={0.25} seed={47} />
+
       <div className="relative">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>

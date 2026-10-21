@@ -1,4 +1,5 @@
 import { useMemo, useReducer, useState } from "react";
+import BrainBoostCanvas from "./BrainBoostCanvas";
 import {
   generateLogicPuzzle,
   type LogicPuzzle,
@@ -116,6 +117,8 @@ export default function LogicReactorGame() {
   return (
     <section className="relative overflow-hidden rounded-3xl border border-cyan-300/20 bg-slate-950 p-4 text-slate-100 shadow-2xl sm:p-6 lg:p-8">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(34,211,238,0.10),transparent_45%),radial-gradient(ellipse_at_bottom_left,rgba(139,92,246,0.12),transparent_40%)]" />
+
+<BrainBoostCanvas theme="logic" intensity={0.27} seed={31} />
 
       <div className="relative">
         <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
