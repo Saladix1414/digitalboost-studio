@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useReducer, useState } from "react";
 import {
   generateLogicPuzzle,
   type LogicPuzzle,
@@ -10,15 +10,15 @@ import {
   normalizeCoreLevel,
   safeInteger,
 } from "./logicReactorProgress";
+import {
+  createInitialLogicReactorSession,
+  logicReactorSessionReducer,
+} from "./logicReactorSession";
 
 type Progress = {
   unlockedLevel: number;
   bestScore: number;
   completedRuns: number;
-};
-
-type Feedback = {
-  correct: boolean;
 };
 
 const STORAGE_KEY = "digitalboost:brain-boost:logic-reactor:v1";
@@ -50,18 +50,20 @@ export default function LogicReactorGame() {
     () => readProgress().unlockedLevel,
   );
   const [seed, setSeed] = useState(103);
-  const [phase, setPhase] = useState<"briefing" | "playing" | "results">(
-    "briefing",
+  const [session, dispatch] = useReducer(
+    logicReactorSessionReducer,
+    createInitialLogicReactorSession(),
   );
-  const [round, setRound] = useState(0);
-  const [score, setScore] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [hintsUsed, setHintsUsed] = useState(0);
-  const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(
-    null,
-  );
-  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const {
+    phase,
+    round,
+    score,
+    streak,
+    correctCount,
+    hintsUsed,
+    selectedChoiceId,
+    feedback,
+  } = session;
 
   const puzzle: LogicPuzzle = useMemo(
     () => generateLogicPuzzle(coreLevel + round, seed + round * 31),
@@ -71,46 +73,28 @@ export default function LogicReactorGame() {
   const isFinalRun = coreLevel + roundsInRun - 1 >= MAX_LEVEL;
 
   function beginRun(level: number, nextSeed: number) {
-    setCoreLevel(level);
+    setCoreLevel(normalizeCoreLevel(level));
     setSeed(nextSeed);
-    setRound(0);
-    setScore(0);
-    setStreak(0);
-    setCorrectCount(0);
-    setHintsUsed(0);
-    setSelectedChoiceId(null);
-    setFeedback(null);
-    setPhase("playing");
+    dispatch({ type: "START" });
   }
 
   function chooseAnswer(choiceId: string) {
-    if (feedback) return;
-
-    const correct = choiceId === puzzle.correctChoiceId;
-    setSelectedChoiceId(choiceId);
-    setFeedback({ correct });
-
-    if (correct) {
-      setScore((current) => current + 100 + streak * 15);
-      setStreak((current) => current + 1);
-      setCorrectCount((current) => current + 1);
-    } else {
-      setStreak(0);
-    }
+    dispatch({
+      type: "ANSWER",
+      choiceId,
+      correctChoiceId: puzzle.correctChoiceId,
+    });
   }
 
   function revealHint() {
-    setHintsUsed((current) => Math.min(2, current + 1));
+    dispatch({ type: "REVEAL_HINT" });
   }
 
   function advanceRound() {
     if (!feedback) return;
 
     if (round < roundsInRun - 1) {
-      setRound((current) => current + 1);
-      setHintsUsed(0);
-      setSelectedChoiceId(null);
-      setFeedback(null);
+      dispatch({ type: "ADVANCE", roundsInRun });
       return;
     }
 
@@ -126,7 +110,7 @@ export default function LogicReactorGame() {
     } catch {
       // El juego sigue funcionando si el almacenamiento no está disponible.
     }
-    setPhase("results");
+    dispatch({ type: "ADVANCE", roundsInRun });
   }
 
   return (
@@ -453,7 +437,7 @@ export default function LogicReactorGame() {
               </button>
               <button
                 type="button"
-                onClick={() => setPhase("briefing")}
+                onClick={() => dispatch({ type: "RETURN_TO_BRIEFING" })}
                 className="flex-1 rounded-xl border border-white/10 px-4 py-3 text-sm font-bold text-slate-300 transition hover:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
                 Volver al inicio
