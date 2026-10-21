@@ -293,3 +293,18 @@ export function generateLogicPuzzle(
       return createConditionalPuzzle(safeLevel, random);
   }
 }
+
+/**
+ * Genera exclusivamente secuencias numéricas para Number Patterns.
+ * Utiliza el mismo motor determinista que Logic Reactor.
+ */
+export function generateNumberPatternPuzzle(
+  level: number,
+  seed: number,
+): LogicPuzzle {
+  const safeLevel = Number.isFinite(level)
+    ? Math.max(1, Math.min(99, Math.floor(level)))
+    : 1;
+
+  return createNumberPuzzle(safeLevel, createRandom(seed));
+}
