@@ -3,6 +3,13 @@ import {
   generateLogicPuzzle,
   type LogicPuzzle,
 } from "./logicReactorEngine";
+import {
+  getRoundsInRun,
+  getUnlockedLevelAfterRun,
+  MAX_LEVEL,
+  normalizeCoreLevel,
+  safeInteger,
+} from "./logicReactorProgress";
 
 type Progress = {
   unlockedLevel: number;
@@ -15,7 +22,6 @@ type Feedback = {
 };
 
 const STORAGE_KEY = "digitalboost:brain-boost:logic-reactor:v1";
-
 function readProgress(): Progress {
   const fallback: Progress = {
     unlockedLevel: 1,
@@ -29,18 +35,9 @@ function readProgress(): Progress {
 
     const saved = JSON.parse(raw) as Partial<Progress>;
     return {
-      unlockedLevel:
-        typeof saved.unlockedLevel === "number"
-          ? Math.max(1, saved.unlockedLevel)
-          : 1,
-      bestScore:
-        typeof saved.bestScore === "number"
-          ? Math.max(0, saved.bestScore)
-          : 0,
-      completedRuns:
-        typeof saved.completedRuns === "number"
-          ? Math.max(0, saved.completedRuns)
-          : 0,
+      unlockedLevel: normalizeCoreLevel(saved.unlockedLevel),
+      bestScore: safeInteger(saved.bestScore, 0, 0, 1_000_000),
+      completedRuns: safeInteger(saved.completedRuns, 0, 0, 1_000_000_000),
     };
   } catch {
     return fallback;
@@ -70,6 +67,8 @@ export default function LogicReactorGame() {
     () => generateLogicPuzzle(coreLevel + round, seed + round * 31),
     [coreLevel, round, seed],
   );
+  const roundsInRun = getRoundsInRun(coreLevel);
+  const isFinalRun = coreLevel + roundsInRun - 1 >= MAX_LEVEL;
 
   function beginRun(level: number, nextSeed: number) {
     setCoreLevel(level);
@@ -107,7 +106,7 @@ export default function LogicReactorGame() {
   function advanceRound() {
     if (!feedback) return;
 
-    if (round < 4) {
+    if (round < roundsInRun - 1) {
       setRound((current) => current + 1);
       setHintsUsed(0);
       setSelectedChoiceId(null);
@@ -116,10 +115,7 @@ export default function LogicReactorGame() {
     }
 
     const nextProgress: Progress = {
-      unlockedLevel:
-        correctCount >= 4
-          ? Math.max(progress.unlockedLevel, coreLevel + 1)
-          : progress.unlockedLevel,
+      unlockedLevel: getUnlockedLevelAfterRun(progress.unlockedLevel, coreLevel, correctCount),
       bestScore: Math.max(progress.bestScore, score),
       completedRuns: progress.completedRuns + 1,
     };
@@ -171,15 +167,17 @@ export default function LogicReactorGame() {
               Núcleo lógico {coreLevel}
             </h3>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
-              Superá cinco desafíos. Vas a encontrar patrones numéricos,
-              reglas simbólicas y deducciones condicionales. Necesitás
-              cuatro respuestas correctas para desbloquear el siguiente núcleo.
+              Superá {roundsInRun} desafíos. Vas a encontrar patrones numéricos,
+              reglas simbólicas y deducciones condicionales.{" "}
+              {isFinalRun
+                ? "Necesitás cuatro respuestas correctas para completar el núcleo final."
+                : "Necesitás cuatro respuestas correctas para desbloquear el siguiente núcleo."}
             </p>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
               <div className="rounded-xl border border-cyan-300/15 bg-cyan-300/[0.05] p-4">
                 <p className="text-xs text-slate-400">Desafíos</p>
-                <p className="mt-1 text-xl font-black">05</p>
+                <p className="mt-1 text-xl font-black">{String(roundsInRun).padStart(2, "0")}</p>
               </div>
               <div className="rounded-xl border border-violet-300/15 bg-violet-300/[0.05] p-4">
                 <p className="text-xs text-slate-400">Pistas por desafío</p>
@@ -211,7 +209,7 @@ export default function LogicReactorGame() {
                   Progreso de misión
                 </p>
                 <p className="mt-1 text-sm font-bold">
-                  Desafío {round + 1} de 5
+                  Desafío {round + 1} de {roundsInRun}
                 </p>
               </div>
               <div className="text-right">
@@ -225,12 +223,12 @@ export default function LogicReactorGame() {
               role="progressbar"
               aria-label="Progreso de la misión"
               aria-valuemin={0}
-              aria-valuemax={5}
+              aria-valuemax={roundsInRun}
               aria-valuenow={round + 1}
             >
               <div
                 className="h-full rounded-full bg-gradient-to-r from-cyan-300 to-violet-400 transition-all duration-300"
-                style={{ width: `${((round + 1) / 5) * 100}%` }}
+                style={{ width: `${((round + 1) / roundsInRun) * 100}%` }}
               />
             </div>
 
@@ -336,9 +334,19 @@ export default function LogicReactorGame() {
                   </button>
 
                   {hintsUsed > 0 && (
-                    <p className="mt-3 rounded-lg border border-violet-300/15 bg-violet-300/[0.05] p-3 text-sm leading-6 text-violet-100">
-                      {puzzle.hints[hintsUsed - 1]}
-                    </p>
+                    <div className="mt-3 rounded-lg border border-violet-300/15 bg-violet-300/[0.05] p-3 text-sm leading-6 text-violet-100">
+                      {puzzle.hints.slice(0, hintsUsed).map((hint, index) => (
+                        <p
+                          key={index}
+                          className={index === 0 ? "" : "mt-2 border-t border-violet-300/10 pt-2"}
+                        >
+                          <span className="font-bold text-violet-200">
+                            Pista {index + 1}:
+                          </span>{" "}
+                          {hint}
+                        </p>
+                      ))}
+                    </div>
                   )}
                 </div>
               )}
@@ -365,7 +373,7 @@ export default function LogicReactorGame() {
                     onClick={advanceRound}
                     className="mt-4 w-full rounded-xl bg-gradient-to-r from-cyan-300 to-violet-300 px-4 py-3 text-sm font-black text-slate-950 transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:w-auto"
                   >
-                    {round < 4 ? "Siguiente desafío" : "Ver resultados"}
+                    {round < roundsInRun - 1 ? "Siguiente desafío" : "Ver resultados"}
                   </button>
                 </div>
               )}
@@ -384,12 +392,20 @@ export default function LogicReactorGame() {
               Informe de misión
             </p>
             <h3 className="mt-3 text-2xl font-black sm:text-3xl">
-              {correctCount >= 4 ? "Núcleo estabilizado" : "Misión completada"}
+              {correctCount >= 4
+                ? isFinalRun
+                  ? "Núcleo maestro dominado"
+                  : "Núcleo estabilizado"
+                : "Misión completada"}
             </h3>
             <p className="mt-3 text-sm leading-6 text-slate-300">
               {correctCount >= 4
-                ? "Superaste el objetivo. El siguiente núcleo ya está disponible."
-                : "Necesitás cuatro respuestas correctas para desbloquear el siguiente núcleo. Podés volver a intentarlo."}
+                ? isFinalRun
+                  ? "Completaste todos los niveles de Logic Reactor. Podés repetir el tramo final para mejorar tu puntuación."
+                  : "Superaste el objetivo. El siguiente núcleo ya está disponible."
+                : isFinalRun
+                  ? "Necesitás cuatro respuestas correctas para completar el núcleo final. Podés volver a intentarlo."
+                  : "Necesitás cuatro respuestas correctas para desbloquear el siguiente núcleo. Podés volver a intentarlo."}
             </p>
 
             <div className="my-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -402,7 +418,7 @@ export default function LogicReactorGame() {
               <div className="rounded-xl border border-emerald-300/15 bg-emerald-300/[0.05] p-4">
                 <p className="text-xs text-slate-400">Aciertos</p>
                 <p className="mt-1 text-2xl font-black text-emerald-100">
-                  {correctCount}/5
+                  {correctCount}/{roundsInRun}
                 </p>
               </div>
               <div className="col-span-2 rounded-xl border border-violet-300/15 bg-violet-300/[0.05] p-4 sm:col-span-1">
