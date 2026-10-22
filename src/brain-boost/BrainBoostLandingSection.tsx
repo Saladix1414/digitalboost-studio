@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import "./brainBoostArtDirection.css";
+import "./memoryPairsArtDirection.css";
 import MemoryMatrixGame from "./MemoryMatrixGame";
 import MemoryPairsGame from "./MemoryPairsGame";
 import LogicReactorGame from "./LogicReactorGame";

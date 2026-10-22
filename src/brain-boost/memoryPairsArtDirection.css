@@ -1,0 +1,147 @@
+
+/* OCEAN ECHOES — cristal submarino y bioluminiscencia. */
+[data-brain-boost-window="pairs"] [aria-labelledby="memory-pairs-title"] {
+  border: 1px solid #5eead4 !important;
+  border-radius: 32px 13px 32px 13px !important;
+  background:
+    radial-gradient(ellipse at 10% 0%, rgba(45,212,191,.34), transparent 48%),
+    radial-gradient(ellipse at 95% 100%, rgba(59,130,246,.28), transparent 48%),
+    linear-gradient(155deg,#075064,#052239 55%,#07132d) !important;
+  box-shadow: 0 18px 55px rgba(13,148,136,.22),
+    inset 0 0 38px rgba(45,212,191,.12) !important;
+}
+
+[data-brain-boost-window="pairs"] [aria-labelledby="memory-pairs-title"] > div.relative > div.relative.mt-4 {
+  overflow: hidden;
+  border: 1px solid rgba(94,234,212,.48) !important;
+  border-radius: 26px 10px 26px 10px !important;
+  background:
+    radial-gradient(circle at 12% 20%,rgba(153,246,228,.2) 0 2px,transparent 4px),
+    radial-gradient(circle at 84% 33%,rgba(125,211,252,.18) 0 5px,transparent 7px),
+    radial-gradient(ellipse at 50% 100%,rgba(8,145,178,.32),transparent 62%),
+    linear-gradient(180deg,#062e45,#031126) !important;
+  box-shadow: inset 0 0 38px rgba(34,211,238,.12);
+}
+
+[data-brain-boost-window="pairs"] [aria-labelledby="memory-pairs-title"] button[style*="perspective"] {
+  border: 1px solid rgba(103,232,249,.62) !important;
+  border-radius: 22px 9px 22px 9px !important;
+  background: linear-gradient(145deg,#0c5265,#07162e 72%) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2),
+    0 8px 20px rgba(2,132,199,.2) !important;
+  transition: border-color .25s,box-shadow .25s,filter .25s;
+}
+
+[data-brain-boost-window="pairs"] [aria-labelledby="memory-pairs-title"] button[style*="perspective"] > span > span:first-child {
+  background:
+    radial-gradient(circle at 25% 22%,rgba(255,255,255,.24) 0 2px,transparent 4px),
+    radial-gradient(circle at 72% 68%,rgba(94,234,212,.25) 0 5px,transparent 7px),
+    radial-gradient(ellipse at 50% 35%,rgba(45,212,191,.34),transparent 56%),
+    linear-gradient(145deg,#0a5262,#0b2440 62%,#071329) !important;
+}
+
+[data-brain-boost-window="pairs"] [aria-labelledby="memory-pairs-title"] button[style*="perspective"] > span > span:first-child > span:first-child {
+  border-color: rgba(153,246,228,.72) !important;
+  border-radius: 12px !important;
+}
+
+[data-brain-boost-window="pairs"] [aria-labelledby="memory-pairs-title"] button[style*="perspective"] > span > span:first-child > span:nth-child(2) {
+  border-color: #99f6e4 !important;
+  background: linear-gradient(145deg,rgba(45,212,191,.48),rgba(14,116,144,.36)) !important;
+  color: #ecfeff !important;
+  box-shadow: 0 0 27px rgba(45,212,191,.42),
+    inset 0 1px 0 rgba(255,255,255,.28);
+}
+
+[data-brain-boost-window="pairs"] [aria-labelledby="memory-pairs-title"] button[style*="perspective"] img {
+  filter: saturate(1.35) contrast(1.1) brightness(1.08);
+}
+
+[data-brain-boost-window="pairs"] [aria-labelledby="memory-pairs-title"] button[class*="border-emerald-200"] {
+  border-color: #99f6e4 !important;
+  box-shadow: 0 0 30px rgba(45,212,191,.7) !important;
+}
+
+/* DRAGON RELICS — placas talladas, jade, oro y energía carmesí. */
+[data-brain-boost-window="originx-dragons"] [aria-labelledby="memory-pairs-title"] {
+  border: 1px solid #fbbf24 !important;
+  border-radius: 6px !important;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(251,191,36,.32),transparent 48%),
+    radial-gradient(ellipse at 100% 100%,rgba(244,63,94,.25),transparent 50%),
+    linear-gradient(145deg,#49251b,#21101c 53%,#200b29) !important;
+  box-shadow: 0 18px 55px rgba(180,83,9,.24),
+    inset 0 0 38px rgba(251,191,36,.12) !important;
+}
+
+[data-brain-boost-window="originx-dragons"] [aria-labelledby="memory-pairs-title"] > div.relative > div.relative.mt-4 {
+  overflow: hidden;
+  border: 1px solid rgba(251,191,36,.48) !important;
+  border-radius: 5px !important;
+  background:
+    linear-gradient(45deg,transparent 48%,rgba(251,191,36,.09) 49%,transparent 50%),
+    radial-gradient(ellipse at 85% 10%,rgba(251,113,133,.2),transparent 42%),
+    linear-gradient(155deg,#2d1928,#100d24) !important;
+  box-shadow: inset 0 0 40px rgba(251,191,36,.1);
+}
+
+[data-brain-boost-window="originx-dragons"] [aria-labelledby="memory-pairs-title"] button[style*="perspective"] {
+  border: 1px solid rgba(251,191,36,.62) !important;
+  border-radius: 5px !important;
+  background: linear-gradient(145deg,#56341c,#241226 72%) !important;
+  box-shadow: inset 0 1px 0 rgba(255,243,199,.23),
+    0 8px 20px rgba(120,53,15,.24) !important;
+  transition: border-color .25s,box-shadow .25s,filter .25s;
+}
+
+[data-brain-boost-window="originx-dragons"] [aria-labelledby="memory-pairs-title"] button[style*="perspective"] > span > span:first-child {
+  background:
+    radial-gradient(ellipse at 50% 35%,rgba(251,191,36,.32),transparent 36%),
+    radial-gradient(ellipse at 24% 76%,rgba(244,63,94,.22),transparent 52%),
+    linear-gradient(145deg,#563020,#251326 63%,#120d20) !important;
+}
+
+[data-brain-boost-window="originx-dragons"] [aria-labelledby="memory-pairs-title"] button[style*="perspective"] > span > span:first-child > span:first-child {
+  border-color: rgba(251,191,36,.72) !important;
+  border-radius: 4px !important;
+  transform: rotate(45deg) scale(.86);
+}
+
+[data-brain-boost-window="originx-dragons"] [aria-labelledby="memory-pairs-title"] button[style*="perspective"] > span > span:first-child > span:nth-child(2) {
+  border-color: #fde68a !important;
+  border-radius: 5px !important;
+  background: linear-gradient(145deg,rgba(251,191,36,.48),rgba(159,18,57,.34)) !important;
+  color: #fef3c7 !important;
+  box-shadow: 0 0 27px rgba(251,191,36,.36),
+    inset 0 1px 0 rgba(255,255,255,.25);
+}
+
+[data-brain-boost-window="originx-dragons"] [aria-labelledby="memory-pairs-title"] button[style*="perspective"] img {
+  filter: saturate(1.4) contrast(1.13) brightness(1.08);
+}
+
+[data-brain-boost-window="originx-dragons"] [aria-labelledby="memory-pairs-title"] button[class*="border-emerald-200"] {
+  border-color: #fde68a !important;
+  box-shadow: 0 0 30px rgba(251,191,36,.72) !important;
+}
+
+/* Errores: señal roja intensa y explícita en ambas variantes. */
+[data-brain-boost-window="pairs"] [aria-labelledby="memory-pairs-title"] button[class*="border-rose-300"],
+[data-brain-boost-window="originx-dragons"] [aria-labelledby="memory-pairs-title"] button[class*="border-rose-300"] {
+  border-color: #fb7185 !important;
+  box-shadow: 0 0 29px rgba(251,113,133,.78) !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-brain-boost-window="pairs"] [aria-labelledby="memory-pairs-title"] button[style*="perspective"]:hover,
+  [data-brain-boost-window="originx-dragons"] [aria-labelledby="memory-pairs-title"] button[style*="perspective"]:hover {
+    filter: brightness(1.16);
+  }
+}
+
+@media (max-width: 420px) {
+  [data-brain-boost-window="pairs"] [aria-labelledby="memory-pairs-title"],
+  [data-brain-boost-window="originx-dragons"] [aria-labelledby="memory-pairs-title"] {
+    padding: 10px !important;
+  }
+}
