@@ -38,6 +38,52 @@ test("Spatial Rift genera desafíos deterministas hasta el nivel 99", () => {
   }
 });
 
+test("Rift Routes alinea el recorrido completo en una sola opción", () => {
+  for (let level = 1; level <= 99; level++) {
+    for (const seed of [1, 17, 271, 999]) {
+      const puzzle = generateSpatialPuzzle(level, seed);
+
+      assert.equal(
+        puzzle.mode,
+        level <= 10 ? "orientation" : "rift-route",
+      );
+      assert.ok(puzzle.route.pathVertexIndices.length >= 2);
+      assert.equal(puzzle.route.pathVertexIndices[0], 0);
+      assert.equal(
+        puzzle.route.pathVertexIndices.at(-1),
+        puzzle.route.exitVertexIndex,
+      );
+
+      const target = transformSpatialVertices(
+        puzzle.vertices,
+        puzzle.rotationDeg,
+        false,
+      );
+
+      for (const choice of puzzle.choices) {
+        const transformed = transformSpatialVertices(
+          puzzle.vertices,
+          choice.rotationDeg,
+          choice.mirrored,
+        );
+
+        const aligned = puzzle.route.pathVertexIndices.every((index) =>
+          Math.hypot(
+            transformed[index].x - target[index].x,
+            transformed[index].y - target[index].y,
+          ) < 1e-9,
+        );
+
+        assert.equal(
+          aligned,
+          choice.id === puzzle.correctChoiceId,
+          `Alineación inesperada en nivel ${level}, semilla ${seed}, opción ${choice.label}.`,
+        );
+      }
+    }
+  }
+});
+
 test("las transformaciones producen coordenadas válidas", () => {
   const point = [{ x: 1, y: 0 }];
 

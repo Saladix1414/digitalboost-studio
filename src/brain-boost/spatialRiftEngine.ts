@@ -10,8 +10,16 @@ export interface SpatialChoice {
   mirrored: boolean;
 }
 
+export interface SpatialRoute {
+  sourceVertexIndex: number;
+  exitVertexIndex: number;
+  pathVertexIndices: number[];
+}
+
 export interface SpatialPuzzle {
   level: number;
+  mode: "orientation" | "rift-route";
+  route: SpatialRoute;
   title: string;
   subtitle: string;
   prompt: string;
@@ -138,29 +146,51 @@ export function generateSpatialPuzzle(
     throw new Error("No se pudo generar la transformación correcta.");
   }
 
+  const mode = safe <= 10 ? "orientation" : "rift-route";
+  const exitVertexIndex = Math.floor(vertices.length / 2);
+  const route = {
+    sourceVertexIndex: 0,
+    exitVertexIndex,
+    pathVertexIndices: Array.from(
+      { length: exitVertexIndex + 1 },
+      (_, index) => index,
+    ),
+  };
+
   return {
     level: safe,
+    mode,
+    route,
     title:
       safe <= 10
         ? "Orientation Initiation"
         : safe <= 30
-          ? "Vector Rotation"
+          ? "Rift Routes"
           : "Spatial Rift",
     subtitle: "GEOMETRÍA / ROTACIÓN MENTAL",
     prompt:
-      `Imaginá la pieza girando ${rotationDeg}° en sentido horario. ` +
-      "Elegí la misma pieza rotada, sin reflejarla.",
+      mode === "rift-route"
+        ? `Rotá la pieza ${rotationDeg}° en sentido horario. Elegí la orientación que conecta ambos portales sin reflejar el recorrido.`
+        : `Imaginá la pieza girando ${rotationDeg}° en sentido horario. ` +
+          "Elegí la misma pieza rotada, sin reflejarla.",
     rotationDeg,
     vertices,
     choices,
     correctChoiceId: correct.id,
     explanation:
-      `La transformación correcta gira cada punto ${rotationDeg}° en sentido horario. ` +
-      "Una rotación conserva la orientación de la figura; un reflejo invierte su disposición.",
-    hints: [
-      "Seguí dos vértices asimétricos de la pieza. Un giro cambia su posición, no las conexiones entre ellos.",
-      `Buscá una pieza girada ${rotationDeg}°. Descartá la que invierte la figura como si estuviera frente a un espejo.`,
-    ],
+      mode === "rift-route"
+        ? `La pieza correcta gira ${rotationDeg}° y alinea los extremos del recorrido con los portales. Una reflexión invierte la disposición de la ruta.`
+        : `La transformación correcta gira cada punto ${rotationDeg}° en sentido horario. Una rotación conserva la orientación de la figura; un reflejo invierte su disposición.`,
+    hints:
+      mode === "rift-route"
+        ? [
+            "Seguí el recorrido hasta sus dos extremos y compará la posición de los portales.",
+            `Buscá el giro de ${rotationDeg}°. Ambos extremos deben coincidir y la pieza no debe estar reflejada.`,
+          ]
+        : [
+            "Seguí dos vértices asimétricos de la pieza. Un giro cambia su posición, no las conexiones entre ellos.",
+            `Buscá una pieza girada ${rotationDeg}°. Descartá la que invierte la figura como si estuviera frente a un espejo.`,
+          ],
   };
 }
 
@@ -376,6 +406,104 @@ function drawPerspectiveChamber(
   ctx.restore();
 }
 
+function drawSpatialRouteOverlay(
+  ctx: CanvasRenderingContext2D,
+  puzzle: SpatialPuzzle,
+  cx: number,
+  cy: number,
+  size: number,
+  rotationDeg: number,
+  mirrored: boolean,
+  showTargetPorts: boolean,
+): void {
+  const points = transformSpatialVertices(
+    puzzle.vertices,
+    rotationDeg,
+    mirrored,
+  );
+  const route = puzzle.route;
+
+  ctx.save();
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+
+  if (showTargetPorts) {
+    const targets = transformSpatialVertices(
+      puzzle.vertices,
+      puzzle.rotationDeg,
+      false,
+    );
+
+    for (const index of [
+      route.sourceVertexIndex,
+      route.exitVertexIndex,
+    ]) {
+      const point = targets[index];
+      const color =
+        index === route.sourceVertexIndex ? "#67e8f9" : "#c4b5fd";
+
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.9;
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath();
+      ctx.arc(
+        cx + point.x * size,
+        cy + point.y * size,
+        Math.max(4, Math.min(8, size * 0.055)),
+        0,
+        Math.PI * 2,
+      );
+      ctx.stroke();
+    }
+
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.strokeStyle = "#c4b5fd";
+  ctx.lineWidth = Math.max(2, Math.min(3.4, size * 0.027));
+  ctx.shadowColor = "#a78bfa";
+  ctx.shadowBlur = Math.min(9, size * 0.06);
+  ctx.beginPath();
+
+  route.pathVertexIndices.forEach((index, position) => {
+    const point = points[index];
+    const x = cx + point.x * size;
+    const y = cy + point.y * size;
+
+    if (position === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  for (const index of [
+    route.sourceVertexIndex,
+    route.exitVertexIndex,
+  ]) {
+    const point = points[index];
+    const color =
+      index === route.sourceVertexIndex ? "#67e8f9" : "#c4b5fd";
+
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = Math.min(7, size * 0.045);
+    ctx.beginPath();
+    ctx.arc(
+      cx + point.x * size,
+      cy + point.y * size,
+      Math.max(2, Math.min(3.3, size * 0.025)),
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
 function drawGrid(
   ctx: CanvasRenderingContext2D,
   width: number,
@@ -462,13 +590,31 @@ export function drawSpatialRiftScene(
     "#67e8f9",
     2.2,
   );
+
+  if (puzzle.mode === "rift-route") {
+    drawSpatialRouteOverlay(
+      ctx,
+      puzzle,
+      baseX,
+      centerY + float,
+      size,
+      0,
+      false,
+      false,
+    );
+  }
+
   ctx.restore();
 
   ctx.save();
   ctx.textAlign = "center";
   ctx.font = "800 10px system-ui, sans-serif";
   ctx.fillStyle = "rgba(165, 243, 252, 0.8)";
-  ctx.fillText("PIEZA BASE", baseX, height - 18);
+  ctx.fillText(
+    puzzle.mode === "rift-route" ? "RECORRIDO BASE" : "PIEZA BASE",
+    baseX,
+    height - 18,
+  );
 
   const gaugeX = width * 0.73;
   const gaugeY = height * 0.48;
@@ -525,7 +671,11 @@ export function drawSpatialRiftScene(
 
   ctx.font = "800 10px system-ui, sans-serif";
   ctx.fillStyle = "rgba(196, 181, 253, 0.88)";
-  ctx.fillText("GIRO OBJETIVO", gaugeX, height - 18);
+  ctx.fillText(
+    puzzle.mode === "rift-route" ? "ROTACIÓN DE ENLACE" : "GIRO OBJETIVO",
+    gaugeX,
+    height - 18,
+  );
   ctx.restore();
 }
 
@@ -560,17 +710,31 @@ export function drawSpatialChoicePreview(
     ? "rgba(167, 139, 250, 0.24)"
     : "rgba(6, 182, 212, 0.22)";
   const stroke = choice.mirrored ? "#c4b5fd" : "#67e8f9";
+  const size = Math.min(width, height) * 0.66;
 
   drawPolygon(
     ctx,
     puzzle.vertices,
     width / 2,
     height / 2,
-    Math.min(width, height) * 0.66,
+    size,
     choice.rotationDeg,
     choice.mirrored,
     fill,
     stroke,
     1.8,
   );
+
+  if (puzzle.mode === "rift-route") {
+    drawSpatialRouteOverlay(
+      ctx,
+      puzzle,
+      width / 2,
+      height / 2,
+      size,
+      choice.rotationDeg,
+      choice.mirrored,
+      true,
+    );
+  }
 }

@@ -277,8 +277,7 @@ export default function SpatialRiftGame() {
               Rift Sequence · Núcleo {coreLevel}
             </h3>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
-              Completá {roundsInRun} desafíos de rotación mental. La dificultad
-              evoluciona desde giros amplios hasta ángulos más precisos.
+              Completá {roundsInRun} desafíos espaciales. Desde el nivel 11, vas a conectar portales mediante rotaciones sin invertir la figura.
               Necesitás cuatro aciertos para desbloquear el próximo núcleo.
             </p>
 
@@ -353,7 +352,9 @@ export default function SpatialRiftGame() {
             </div>
 
             <p className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">
-              Elegí la pieza transformada correcta
+              {puzzle.mode === "rift-route"
+                ? "Elegí la pieza que conecta los portales"
+                : "Elegí la pieza transformada correcta"}
             </p>
 
             <div className="grid grid-cols-2 gap-3">
