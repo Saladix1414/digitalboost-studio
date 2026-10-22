@@ -201,6 +201,11 @@ export default function SpatialRiftGame() {
       choiceId,
       correctChoiceId: puzzle.correctChoiceId,
     });
+    window.dispatchEvent(
+      new CustomEvent("brainboost:spatial-rift-answer", {
+        detail: { correct: choiceId === puzzle.correctChoiceId },
+      }),
+    );
   }
 
   function advanceRound() {

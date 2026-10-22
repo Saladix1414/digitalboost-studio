@@ -23,6 +23,20 @@ export default function SpatialRiftPhaserLayer() {
 
         class RiftEffectsScene extends Phaser.Scene {
           private gfx!: PhaserTypes.GameObjects.Graphics;
+          private responseKind: "correct" | "incorrect" | null = null;
+          private responseStartedAt = 0;
+
+          private readonly onAnswer = (event: Event) => {
+            const detail = (
+              event as CustomEvent<{ correct?: boolean }>
+            ).detail;
+            if (typeof detail?.correct !== "boolean") return;
+
+            this.responseKind = detail.correct ? "correct" : "incorrect";
+            this.responseStartedAt = this.time.now;
+            this.drawAmbient(this.time.now);
+          };
+
           private readonly onResize = () => {
             this.drawAmbient(this.time.now);
           };
@@ -34,8 +48,16 @@ export default function SpatialRiftPhaserLayer() {
           create() {
             this.gfx = this.add.graphics();
             this.scale.on("resize", this.onResize);
+            window.addEventListener(
+              "brainboost:spatial-rift-answer",
+              this.onAnswer,
+            );
             this.events.once("shutdown", () => {
               this.scale.off("resize", this.onResize);
+              window.removeEventListener(
+                "brainboost:spatial-rift-answer",
+                this.onAnswer,
+              );
             });
             this.drawAmbient(0);
           }
@@ -85,6 +107,16 @@ export default function SpatialRiftPhaserLayer() {
             const cy = h * 0.48;
             const r = Math.min(h * 0.235, w * 0.12, 72);
             const pulse = 1 + Math.sin(t * 2.1) * 0.045;
+            let responseStrength = 0;
+
+            if (this.responseKind) {
+              const age = Math.max(0, time - this.responseStartedAt);
+              if (age >= 1250) {
+                this.responseKind = null;
+              } else {
+                responseStrength = 1 - age / 1250;
+              }
+            }
 
             g.clear();
 
@@ -317,6 +349,70 @@ export default function SpatialRiftPhaserLayer() {
               g.moveTo(x + dx * 5, y + dy * 5);
               g.lineTo(x + dx * 11, y + dy * 5);
               g.strokePath();
+            }
+
+            // Reacción temporal del portal a la respuesta del jugador.
+            if (responseStrength > 0 && this.responseKind) {
+              const correct = this.responseKind === "correct";
+              const color = correct ? 0x67e8f9 : 0xfb7185;
+              const expansion = (1 - responseStrength) * r * 0.72;
+              const ringCount = correct ? 4 : 3;
+
+              for (let i = 0; i < ringCount; i++) {
+                const radius = r * (0.45 + i * 0.28) + expansion;
+                g.lineStyle(
+                  correct ? 2.2 : 1.8,
+                  color,
+                  responseStrength * (0.62 - i * 0.10),
+                );
+                this.traceEllipse(
+                  cx,
+                  cy,
+                  radius,
+                  radius * (correct ? 0.72 : 0.65),
+                  t * (correct ? 0.18 : 0.75),
+                  0,
+                  Math.PI * 2,
+                  44,
+                );
+              }
+
+              // Chispas expulsadas desde el núcleo.
+              for (let i = 0; i < 20; i++) {
+                const angle = (i / 20) * Math.PI * 2 + t * 0.65;
+                const distance =
+                  r * (0.48 + (1 - responseStrength) * 1.15 +
+                    (i % 4) * 0.08);
+                const x = cx + Math.cos(angle) * distance;
+                const y = cy + Math.sin(angle) * distance * 0.72;
+
+                g.fillStyle(
+                  color,
+                  responseStrength * (0.35 + (i % 3) * 0.20),
+                );
+                g.fillCircle(
+                  x,
+                  y,
+                  (correct ? 1.3 : 2) * responseStrength,
+                );
+              }
+
+              // Distorsión breve cuando la respuesta es incorrecta.
+              if (!correct) {
+                for (let i = 0; i < 5; i++) {
+                  const y =
+                    cy + (i - 2) * r * 0.24 +
+                    Math.sin(t * 18 + i) * r * 0.07 * responseStrength;
+
+                  g.lineStyle(1.3, color, responseStrength * 0.52);
+                  g.beginPath();
+                  g.moveTo(cx - r * 1.18, y);
+                  g.lineTo(cx - r * 0.42, y + r * 0.05);
+                  g.lineTo(cx + r * 0.38, y - r * 0.04);
+                  g.lineTo(cx + r * 1.18, y + r * 0.02);
+                  g.strokePath();
+                }
+              }
             }
           }
         }
