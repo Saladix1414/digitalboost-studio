@@ -261,7 +261,17 @@ function createConditionalPuzzle(
     logicLines: lines,
     ...makeChoices(
       answer,
-      ["No se puede determinar", "Ambos estados", "Desconocido"],
+      forward
+        ? [
+            "Inactivo",
+            "No se puede determinar",
+            "Solo el nodo inicial está activo",
+          ]
+        : [
+            "Activo",
+            "No se puede determinar",
+            "Las reglas no permiten deducir el estado hacia atrás",
+          ],
       random,
     ),
     explanation,

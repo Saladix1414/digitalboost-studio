@@ -220,6 +220,107 @@ export default function LogicReactorGame() {
             </div>
 
             <article className="rounded-2xl border border-white/10 bg-slate-900/85 p-4 sm:p-6">
+              <div
+                role="status"
+                aria-live="polite"
+                className="mb-5 grid gap-4 rounded-xl border border-cyan-300/15 bg-[#06111f]/90 p-4 sm:grid-cols-[auto_1fr_auto] sm:items-center"
+              >
+                <div
+                  aria-hidden="true"
+                  className={
+                    "relative flex h-16 w-16 items-center justify-center rounded-full border transition-colors duration-300 " +
+                    (feedback
+                      ? feedback.correct
+                        ? "border-emerald-300/60 bg-emerald-300/10 shadow-[0_0_28px_rgba(52,211,153,.2)]"
+                        : "border-rose-300/60 bg-rose-300/10 shadow-[0_0_28px_rgba(244,63,94,.2)]"
+                      : "border-cyan-300/40 bg-cyan-300/[0.06] shadow-[0_0_28px_rgba(34,211,238,.15)]")
+                  }
+                >
+                  <span
+                    className={
+                      "absolute inset-1 rounded-full border border-dashed motion-safe:animate-[spin_16s_linear_infinite] " +
+                      (feedback
+                        ? feedback.correct
+                          ? "border-emerald-200/50"
+                          : "border-rose-200/50"
+                        : "border-cyan-200/50")
+                    }
+                  />
+                  <svg viewBox="0 0 48 48" className="h-11 w-11">
+                    <path
+                      d="M24 4 41 14V34L24 44 7 34V14Z"
+                      fill="none"
+                      stroke={feedback ? (feedback.correct ? "#6ee7b7" : "#fda4af") : "#67e8f9"}
+                      strokeWidth="1.5"
+                    />
+                    <path
+                      d="M24 11 34 17V31L24 37 14 31V17Z"
+                      fill="none"
+                      stroke={feedback ? (feedback.correct ? "#34d399" : "#fb7185") : "#a78bfa"}
+                      strokeWidth="1.5"
+                      strokeDasharray="3 3"
+                    />
+                    <circle
+                      cx="24"
+                      cy="24"
+                      r="5"
+                      fill={feedback ? (feedback.correct ? "#34d399" : "#fb7185") : "#22d3ee"}
+                    />
+                    <circle
+                      cx="24"
+                      cy="24"
+                      r="9"
+                      fill="none"
+                      stroke={feedback ? (feedback.correct ? "#6ee7b7" : "#fda4af") : "#67e8f9"}
+                      strokeWidth="1"
+                      strokeOpacity=".7"
+                    />
+                  </svg>
+                </div>
+
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300">
+                    Reactor telemetry // en vivo
+                  </p>
+                  <p
+                    className={
+                      "mt-1 text-sm font-black tracking-wide " +
+                      (feedback
+                        ? feedback.correct
+                          ? "text-emerald-200"
+                          : "text-rose-200"
+                        : "text-cyan-100")
+                    }
+                  >
+                    {feedback
+                      ? feedback.correct
+                        ? "NÚCLEO ESTABLE"
+                        : "SEÑAL ANÓMALA"
+                      : "ESPERANDO DEDUCCIÓN"}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-slate-400">
+                    {feedback
+                      ? feedback.correct
+                        ? "Regla confirmada. El circuito responde."
+                        : "La hipótesis no coincide. Revisá las pistas."
+                      : puzzle.kind === "number-pattern"
+                        ? "Analizá la progresión y encontrá la regla."
+                        : puzzle.kind === "symbol-rule"
+                          ? "Compará las transformaciones entre símbolos."
+                          : "Seguí las condiciones y deducí la conclusión."}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2 sm:flex-col sm:items-end">
+                  <span className="rounded-md border border-cyan-300/20 bg-cyan-300/[0.06] px-2.5 py-1.5 text-[10px] font-bold tracking-wider text-cyan-100">
+                    NIVEL {String(puzzle.level).padStart(2, "0")}
+                  </span>
+                  <span className="rounded-md border border-violet-300/20 bg-violet-300/[0.06] px-2.5 py-1.5 text-[10px] font-bold tracking-wider text-violet-200">
+                    RACHA {String(streak).padStart(2, "0")}
+                  </span>
+                </div>
+              </div>
+
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-bold text-cyan-200">
                   {puzzle.kind === "number-pattern"
@@ -257,15 +358,78 @@ export default function LogicReactorGame() {
               )}
 
               {puzzle.logicLines && (
-                <div className="my-5 space-y-2 rounded-xl border border-violet-300/15 bg-violet-300/[0.04] p-4">
-                  {puzzle.logicLines.map((line, index) => (
-                    <p
-                      key={`${index}-${line}`}
-                      className="text-sm leading-6 text-violet-100"
-                    >
-                      {line}
+                <div
+                  role="group"
+                  aria-label="Reglas de deducción"
+                  className="my-5 rounded-xl border border-violet-300/20 bg-gradient-to-br from-violet-300/[0.06] to-slate-950/80 p-4"
+                >
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-200">
+                      Circuito lógico
                     </p>
-                  ))}
+                    <span className="rounded-md border border-violet-300/20 px-2 py-1 text-[10px] font-bold text-violet-300">
+                      {puzzle.logicLines.filter((line) => line.startsWith("Si el nodo ")).length} REGLAS
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {puzzle.logicLines.map((line) => {
+                      const rule = line.match(
+                        /^Si el nodo (.+?) está activo, entonces (.+?) está activo/,
+                      );
+
+                      if (!rule) {
+                        return (
+                          <div
+                            key={line}
+                            className="flex flex-wrap items-center gap-3 rounded-lg border border-cyan-300/25 bg-cyan-300/[0.06] p-3"
+                          >
+                            <span className="rounded-md bg-cyan-300/15 px-2 py-1 text-[10px] font-black tracking-wider text-cyan-200">
+                              PREMISA
+                            </span>
+                            <span className="text-sm font-semibold leading-6 text-cyan-50">
+                              {line.replace("Premisa: ", "")}
+                            </span>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={line}
+                          className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 rounded-lg border border-violet-300/10 bg-slate-950/70 p-2 sm:p-3"
+                        >
+                          <div className="min-w-0 rounded-md border border-violet-300/20 bg-violet-300/[0.06] p-2 text-center">
+                            <span className="block text-[9px] font-black uppercase tracking-wider text-violet-300">
+                              SI
+                            </span>
+                            <span className="mt-1 block text-sm font-black text-violet-100">
+                              NODO {rule[1]}
+                            </span>
+                            <span className="mt-1 inline-block rounded bg-violet-300/10 px-2 py-0.5 text-[9px] font-bold text-violet-200">
+                              ACTIVO
+                            </span>
+                          </div>
+                          <span
+                            aria-hidden="true"
+                            className="text-lg font-black text-cyan-300"
+                          >
+                            →
+                          </span>
+                          <div className="min-w-0 rounded-md border border-cyan-300/20 bg-cyan-300/[0.05] p-2 text-center">
+                            <span className="block text-[9px] font-black uppercase tracking-wider text-cyan-300">
+                              ENTONCES
+                            </span>
+                            <span className="mt-1 block text-sm font-black text-cyan-100">
+                              NODO {rule[2]}
+                            </span>
+                            <span className="mt-1 inline-block rounded bg-cyan-300/10 px-2 py-0.5 text-[9px] font-bold text-cyan-200">
+                              ACTIVO
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 

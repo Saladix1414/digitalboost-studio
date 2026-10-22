@@ -108,6 +108,16 @@ test("396 desafíos son deterministas, completos y semánticamente correctos", (
 
         assert.ok(expected, `Premisa desconocida en nivel ${level}`);
         assert.equal(correct.value, expected);
+
+        const values = new Set(puzzle.choices.map(c => c.value));
+        assert.ok(
+          values.has(expected === "Activo" ? "Inactivo" : "Activo"),
+          `Falta el estado opuesto en nivel ${level}`,
+        );
+        assert.ok(
+          values.has("No se puede determinar"),
+          `Falta una alternativa de incertidumbre en nivel ${level}`,
+        );
       }
 
       total++;
