@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import "./brainBoostArtDirection.css";
+import "./brainBoostCategoryArtDirection.css";
 import "./memoryPairsArtDirection.css";
 import MemoryMatrixGame from "./MemoryMatrixGame";
 import MemoryPairsGame from "./MemoryPairsGame";
@@ -406,7 +407,7 @@ export default function BrainBoostLandingSection() {
           <section
             role="dialog"
             aria-modal="true"
-            data-brain-boost-window={activeGame?.id ?? "mode-select"}
+            data-brain-boost-window={activeGame?.id ?? activeCategory.id}
             aria-labelledby="brain-boost-dialog-title"
             className={`relative isolate flex w-full flex-col overflow-y-auto rounded-2xl border border-cyan-300/40 bg-[#050b1c] p-4 shadow-[0_0_70px_rgba(0,180,255,.18),0_0_100px_rgba(139,92,246,.16)] sm:rounded-3xl sm:p-6 ${
               activeGame ? "max-h-[calc(100dvh-24px)] max-w-5xl" : "max-h-[82dvh] max-w-3xl"
@@ -438,7 +439,7 @@ export default function BrainBoostLandingSection() {
             <div className={`relative z-10 mt-6 grid flex-1 content-start gap-5 ${
               activeGame ? "grid-cols-1" : "md:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]"
             }`}>
-              <div className={activeGame ? "hidden" : "grid content-start gap-3 sm:grid-cols-2 md:grid-cols-1"}>
+              <div data-brain-boost-mode-list={activeCategory.id} className={activeGame ? "hidden" : "grid content-start gap-3 sm:grid-cols-2 md:grid-cols-1"}>
                 {activeCategory.games.map((game, index) => (
                   <button
                     key={game.id}
@@ -477,7 +478,7 @@ export default function BrainBoostLandingSection() {
                 ))}
               </div>
 
-              <div data-brain-boost-stage={activeGame?.id ?? "mode-select"}
+              <div data-brain-boost-stage={activeGame?.id ?? activeCategory.id}
                 className={activeGame ? "relative min-w-0 overflow-hidden rounded-2xl border p-3 transition-colors duration-300 sm:p-5" : "relative isolate flex min-h-[330px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-cyan-300/35 bg-gradient-to-br from-[#0b1d3a] via-[#070d20] to-[#180d35] p-5 text-center shadow-[0_0_38px_rgba(34,211,238,.12),inset_0_0_34px_rgba(139,92,246,.09)]"}
                 style={activeArt ? {
                   borderColor: activeArt.primary,
@@ -508,7 +509,7 @@ export default function BrainBoostLandingSection() {
                   </>
                 ) : (
                   <>
-                    <div aria-hidden="true" className="relative mb-5 flex h-24 w-24 items-center justify-center rounded-full border border-cyan-300/40 bg-[#061329]/90 shadow-[0_0_36px_rgba(34,211,238,.18)]">
+                    <div aria-hidden="true" data-brain-boost-category-emblem={activeCategory.id} className="relative mb-5 flex h-24 w-24 items-center justify-center rounded-full border border-cyan-300/40 bg-[#061329]/90 shadow-[0_0_36px_rgba(34,211,238,.18)]">
                       <span className="absolute inset-2 rounded-full border border-dashed border-violet-300/55 motion-safe:animate-[spin_24s_linear_infinite] motion-reduce:animate-none" />
                       <span className="absolute inset-4 rounded-full border border-cyan-300/30" />
                       <svg viewBox="0 0 64 64" className="relative h-12 w-12 drop-shadow-[0_0_10px_rgba(103,232,249,.7)]" fill="none">
