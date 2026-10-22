@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   generateSpatialPuzzle,
+  isSpatialRouteConnected,
   transformSpatialVertices,
 } from "../../src/brain-boost/spatialRiftEngine.ts";
 
@@ -79,6 +80,9 @@ test("Rift Routes alinea el recorrido completo en una sola opción", () => {
           choice.id === puzzle.correctChoiceId,
           `Alineación inesperada en nivel ${level}, semilla ${seed}, opción ${choice.label}.`,
         );
+        if (puzzle.mode === "rift-route") {
+          assert.equal(isSpatialRouteConnected(puzzle, choice), aligned);
+        }
       }
     }
   }

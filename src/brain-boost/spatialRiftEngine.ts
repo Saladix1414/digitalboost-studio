@@ -213,6 +213,44 @@ export function transformSpatialVertices(
   });
 }
 
+export function isSpatialRouteConnected(
+  puzzle: SpatialPuzzle,
+  choice: SpatialChoice,
+  tolerance = 1e-9,
+): boolean {
+  if (puzzle.mode !== "rift-route") {
+    return choice.id === puzzle.correctChoiceId;
+  }
+
+  const target = transformSpatialVertices(
+    puzzle.vertices,
+    puzzle.rotationDeg,
+    false,
+  );
+  const candidate = transformSpatialVertices(
+    puzzle.vertices,
+    choice.rotationDeg,
+    choice.mirrored,
+  );
+
+  return (
+    puzzle.route.pathVertexIndices.length >= 2 &&
+    puzzle.route.pathVertexIndices.every((index) => {
+      const expected = target[index];
+      const actual = candidate[index];
+
+      if (!expected || !actual) return false;
+
+      return (
+        Math.hypot(
+          actual.x - expected.x,
+          actual.y - expected.y,
+        ) <= tolerance
+      );
+    })
+  );
+}
+
 function drawPolygon(
   ctx: CanvasRenderingContext2D,
   vertices: readonly SpatialPoint[],

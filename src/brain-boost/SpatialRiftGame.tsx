@@ -5,6 +5,7 @@ import {
   drawSpatialChoicePreview,
   drawSpatialRiftScene,
   generateSpatialPuzzle,
+  isSpatialRouteConnected,
   type SpatialChoice,
   type SpatialPuzzle,
 } from "./spatialRiftEngine";
@@ -196,14 +197,33 @@ export default function SpatialRiftGame() {
   }
 
   function chooseAnswer(choiceId: string) {
+    const selectedChoice = puzzle.choices.find(
+      (choice) => choice.id === choiceId,
+    );
+
+    const routeCorrectChoiceId =
+      puzzle.mode === "rift-route"
+        ? puzzle.choices.find((choice) =>
+            isSpatialRouteConnected(puzzle, choice),
+          )?.id ?? "__rift_route_invalid__"
+        : puzzle.correctChoiceId;
+
+    const correct =
+      selectedChoice !== undefined &&
+      isSpatialRouteConnected(puzzle, selectedChoice) &&
+      choiceId === routeCorrectChoiceId;
+
     dispatch({
       type: "ANSWER",
       choiceId,
-      correctChoiceId: puzzle.correctChoiceId,
+      correctChoiceId: correct
+        ? choiceId
+        : routeCorrectChoiceId,
     });
+
     window.dispatchEvent(
       new CustomEvent("brainboost:spatial-rift-answer", {
-        detail: { correct: choiceId === puzzle.correctChoiceId },
+        detail: { correct },
       }),
     );
   }
