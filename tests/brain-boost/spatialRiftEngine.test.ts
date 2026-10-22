@@ -33,9 +33,13 @@ test("Spatial Rift genera desafíos deterministas hasta el nivel 99", () => {
 
       level <= 10
         ? assert.ok([90, 180, 270].includes(puzzle.rotationDeg))
-        : level <= 30
+        : level <= 25
           ? assert.equal(puzzle.rotationDeg % 45, 0)
-          : assert.equal(puzzle.rotationDeg % 30, 0);
+          : level <= 50
+            ? assert.equal(puzzle.rotationDeg % 30, 0)
+            : level <= 75
+              ? assert.equal(puzzle.rotationDeg % 15, 0)
+              : assert.equal(puzzle.rotationDeg % 10, 0);
     }
   }
 });
@@ -89,13 +93,29 @@ test("Rift Routes alinea el recorrido completo en una sola opción", () => {
   }
 });
 
-test("Rift Routes genera dos caminos y una rama sin salida", () => {
+test("Spatial Rift aumenta la complejidad topológica por nivel", () => {
   for (let level = 11; level <= 99; level++) {
     for (const seed of [1, 17, 271, 999]) {
       const puzzle = generateSpatialPuzzle(level, seed);
       const { route } = puzzle;
 
       assert.ok(isSpatialRouteTopologyValid(route, puzzle.vertices.length));
+
+      const expected = level <= 20
+        ? { main: 3, alternate: 4, deadEnds: 1, additional: 0 }
+        : level <= 30
+          ? { main: 3, alternate: 4, deadEnds: 2, additional: 0 }
+          : level <= 50
+            ? { main: 4, alternate: 5, deadEnds: 1, additional: 0 }
+            : level <= 70
+              ? { main: 4, alternate: 5, deadEnds: 2, additional: 0 }
+              : { main: 4, alternate: 5, deadEnds: 2, additional: 1 };
+
+      assert.equal(route.pathVertexIndices.length, expected.main);
+      assert.equal(route.alternatePathVertexIndices.length, expected.alternate);
+      assert.equal(route.deadEndVertexIndices.length, expected.deadEnds);
+      assert.equal(route.additionalPathVertexIndices.length, expected.additional);
+
       assert.equal(route.pathVertexIndices[0], route.sourceVertexIndex);
       assert.equal(route.pathVertexIndices.at(-1), route.exitVertexIndex);
       assert.equal(
@@ -121,6 +141,7 @@ test("Rift Routes genera dos caminos y una rama sin salida", () => {
       for (const path of [
         route.pathVertexIndices,
         route.alternatePathVertexIndices,
+        ...route.additionalPathVertexIndices,
       ]) {
         for (let index = 1; index < path.length; index++) {
           assert.ok(hasEdge(path[index - 1], path[index]));
@@ -197,6 +218,23 @@ test("Rift Routes rechaza redes desconectadas y callejones mal definidos", () =>
     isSpatialRouteConnected(
       { ...puzzle, route: disconnectedRoute },
       correct,
+    ),
+    false,
+  );
+
+  const invalidAdditionalPathRoute = {
+    ...puzzle.route,
+    additionalPathVertexIndices: [[
+      0,
+      3,
+      puzzle.route.exitVertexIndex,
+    ]],
+  };
+
+  assert.equal(
+    isSpatialRouteTopologyValid(
+      invalidAdditionalPathRoute,
+      puzzle.vertices.length,
     ),
     false,
   );
