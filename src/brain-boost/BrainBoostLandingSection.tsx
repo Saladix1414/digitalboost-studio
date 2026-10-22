@@ -21,6 +21,22 @@ type Category = {
   games: Game[];
 };
 
+type GameArtDirection = {
+  primary: string;
+  secondary: string;
+  surface: string;
+  glow: string;
+};
+
+const gameArtDirections: Record<string, GameArtDirection> = {
+  sequence: { primary: "#22d3ee", secondary: "#e879f9", surface: "#07152c", glow: "rgba(34,211,238,.24)" },
+  pairs: { primary: "#2dd4bf", secondary: "#60a5fa", surface: "#05202b", glow: "rgba(45,212,191,.23)" },
+  "originx-dragons": { primary: "#fbbf24", secondary: "#fb7185", surface: "#21101a", glow: "rgba(251,191,36,.24)" },
+  number: { primary: "#fbbf24", secondary: "#22d3ee", surface: "#171a2b", glow: "rgba(245,158,11,.24)" },
+  deduction: { primary: "#a3e635", secondary: "#60a5fa", surface: "#0a2020", glow: "rgba(163,230,53,.22)" },
+  rotation: { primary: "#e879f9", secondary: "#22d3ee", surface: "#160d35", glow: "rgba(217,70,239,.24)" },
+};
+
 const categories: Category[] = [
   {
     id: "memory",
@@ -92,6 +108,7 @@ const dailyCategory: Category = {
 export default function BrainBoostLandingSection() {
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [activeGame, setActiveGame] = useState<Game | null>(null);
+  const activeArt = activeGame ? gameArtDirections[activeGame.id] : undefined;
 
   function openCategory(category: Category) {
     setActiveCategory(category);
@@ -389,8 +406,9 @@ export default function BrainBoostLandingSection() {
             aria-modal="true"
             aria-labelledby="brain-boost-dialog-title"
             className={`relative isolate flex w-full flex-col overflow-y-auto rounded-2xl border border-cyan-300/40 bg-[#050b1c] p-4 shadow-[0_0_70px_rgba(0,180,255,.18),0_0_100px_rgba(139,92,246,.16)] sm:rounded-3xl sm:p-6 ${
-              (activeGame?.id === "sequence" || activeGame?.id === "pairs" || activeGame?.id === "originx-dragons" || activeGame?.id === "deduction" || activeGame?.id === "number" || activeGame?.id === "rotation") ? "h-[88dvh] max-h-[88dvh] max-w-5xl" : "max-h-[82dvh] max-w-3xl"
+              activeGame ? "max-h-[calc(100dvh-24px)] max-w-5xl" : "max-h-[82dvh] max-w-3xl"
             }` }
+            style={activeArt ? { borderColor: activeArt.primary, backgroundColor: activeArt.surface, boxShadow: `0 0 80px ${activeArt.glow}` } : undefined}
           >
             <div className="relative z-10 flex items-start justify-between gap-4">
               <div>
@@ -423,15 +441,19 @@ export default function BrainBoostLandingSection() {
                     key={game.id}
                     type="button"
                     onClick={() => setActiveGame(game)}
-                    className={`group relative isolate overflow-hidden rounded-2xl border p-4 text-left transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_28px_rgba(34,211,238,.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 motion-reduce:transition-none ${
-                      activeGame?.id === game.id
-                        ? "border-cyan-200/70 bg-gradient-to-br from-cyan-400/[0.16] via-[#0a1730] to-violet-500/[0.14] shadow-[0_0_28px_rgba(34,211,238,.16)]"
-                        : "border-cyan-300/25 bg-gradient-to-br from-[#0b1c37] via-[#080e20] to-[#120c29] hover:border-cyan-200/60"
-                    }` }
+                    className="group relative isolate overflow-hidden rounded-2xl border p-4 text-left transition duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 motion-reduce:transition-none"
+                    style={{
+                      borderColor: gameArtDirections[game.id]?.primary ?? "#22d3ee",
+                      backgroundColor: gameArtDirections[game.id]?.surface ?? "#080e20",
+                      backgroundImage: gameArtDirections[game.id]
+                        ? "radial-gradient(ellipse at top left, " + gameArtDirections[game.id].primary + "42, transparent 72%), linear-gradient(145deg, " + gameArtDirections[game.id].surface + ", #060b1c)"
+                        : undefined,
+                      boxShadow: gameArtDirections[game.id]?.glow,
+                    }}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-[9px] font-black uppercase tracking-[0.18em] text-cyan-200">{game.area}</span>
-                      <span className="rounded border border-cyan-200/30 bg-cyan-300/[0.07] px-1.5 py-1 font-mono text-[8px] font-black text-cyan-100">
+                      <span className="text-[9px] font-black uppercase tracking-[0.18em]" style={{ color: gameArtDirections[game.id]?.primary ?? "#a5f3fc" }}>{game.area}</span>
+                      <span className="rounded border px-1.5 py-1 font-mono text-[8px] font-black" style={{ borderColor: gameArtDirections[game.id]?.primary, backgroundColor: gameArtDirections[game.id]?.surface, color: gameArtDirections[game.id]?.primary }}>
                         MODE {String(index + 1).padStart(2, "0")}
                       </span>
                     </div>
@@ -452,7 +474,14 @@ export default function BrainBoostLandingSection() {
                 ))}
               </div>
 
-              <div className={activeGame ? "relative min-h-[70dvh] rounded-2xl border border-cyan-300/35 bg-[#050b1b]/85 p-3 shadow-[0_0_42px_rgba(0,190,255,.13),inset_0_1px_0_rgba(255,255,255,.05)] sm:p-5" : "relative isolate flex min-h-[330px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-cyan-300/35 bg-gradient-to-br from-[#0b1d3a] via-[#070d20] to-[#180d35] p-5 text-center shadow-[0_0_38px_rgba(34,211,238,.12),inset_0_0_34px_rgba(139,92,246,.09)]"}>
+              <div
+                className={activeGame ? "relative min-w-0 overflow-hidden rounded-2xl border p-3 transition-colors duration-300 sm:p-5" : "relative isolate flex min-h-[330px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-cyan-300/35 bg-gradient-to-br from-[#0b1d3a] via-[#070d20] to-[#180d35] p-5 text-center shadow-[0_0_38px_rgba(34,211,238,.12),inset_0_0_34px_rgba(139,92,246,.09)]"}
+                style={activeArt ? {
+                  borderColor: activeArt.primary,
+                  backgroundImage: "radial-gradient(ellipse at 15% 0%, " + activeArt.primary + "42, transparent 62%), radial-gradient(ellipse at 100% 100%, " + activeArt.secondary + "28, transparent 54%), linear-gradient(145deg, " + activeArt.surface + ", #050b1b)",
+                  boxShadow: "inset 0 0 42px " + activeArt.glow,
+                } : undefined}
+              >
                 {activeGame?.id === "rotation" ? (
                   <SpatialRiftGame />
                 ) : activeGame?.id === "number" ? (
