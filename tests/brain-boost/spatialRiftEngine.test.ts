@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   generateSpatialPuzzle,
   isSpatialRouteConnected,
+  isSpatialRouteTopologyValid,
   transformSpatialVertices,
 } from "../../src/brain-boost/spatialRiftEngine.ts";
 
@@ -86,6 +87,128 @@ test("Rift Routes alinea el recorrido completo en una sola opción", () => {
       }
     }
   }
+});
+
+test("Rift Routes genera dos caminos y una rama sin salida", () => {
+  for (let level = 11; level <= 99; level++) {
+    for (const seed of [1, 17, 271, 999]) {
+      const puzzle = generateSpatialPuzzle(level, seed);
+      const { route } = puzzle;
+
+      assert.ok(isSpatialRouteTopologyValid(route, puzzle.vertices.length));
+      assert.equal(route.pathVertexIndices[0], route.sourceVertexIndex);
+      assert.equal(route.pathVertexIndices.at(-1), route.exitVertexIndex);
+      assert.equal(
+        route.alternatePathVertexIndices[0],
+        route.sourceVertexIndex,
+      );
+      assert.equal(
+        route.alternatePathVertexIndices.at(-1),
+        route.exitVertexIndex,
+      );
+      assert.notDeepEqual(
+        route.pathVertexIndices,
+        route.alternatePathVertexIndices,
+      );
+
+      const hasEdge = (from: number, to: number) =>
+        route.edges.some(
+          (edge) =>
+            (edge.fromVertexIndex === from && edge.toVertexIndex === to) ||
+            (edge.fromVertexIndex === to && edge.toVertexIndex === from),
+        );
+
+      for (const path of [
+        route.pathVertexIndices,
+        route.alternatePathVertexIndices,
+      ]) {
+        for (let index = 1; index < path.length; index++) {
+          assert.ok(hasEdge(path[index - 1], path[index]));
+        }
+      }
+
+      assert.ok(route.deadEndVertexIndices.length > 0);
+      for (const deadEnd of route.deadEndVertexIndices) {
+        assert.equal(
+          route.edges.filter(
+            (edge) =>
+              edge.fromVertexIndex === deadEnd ||
+              edge.toVertexIndex === deadEnd,
+          ).length,
+          1,
+        );
+      }
+
+      const target = transformSpatialVertices(
+        puzzle.vertices,
+        puzzle.rotationDeg,
+        false,
+      );
+      const routeVertices = new Set(
+        route.edges.flatMap((edge) => [
+          edge.fromVertexIndex,
+          edge.toVertexIndex,
+        ]),
+      );
+
+      for (const choice of puzzle.choices) {
+        const transformed = transformSpatialVertices(
+          puzzle.vertices,
+          choice.rotationDeg,
+          choice.mirrored,
+        );
+        const aligned = [...routeVertices].every(
+          (index) =>
+            Math.hypot(
+              transformed[index].x - target[index].x,
+              transformed[index].y - target[index].y,
+            ) < 1e-9,
+        );
+
+        assert.equal(aligned, choice.id === puzzle.correctChoiceId);
+        assert.equal(isSpatialRouteConnected(puzzle, choice), aligned);
+      }
+    }
+  }
+});
+
+test("Rift Routes rechaza redes desconectadas y callejones mal definidos", () => {
+  const puzzle = generateSpatialPuzzle(11, 17);
+  const correct = puzzle.choices.find(
+    (choice) => choice.id === puzzle.correctChoiceId,
+  );
+  assert.ok(correct);
+
+  const disconnectedRoute = {
+    ...puzzle.route,
+    edges: puzzle.route.edges.filter(
+      (edge) => !(
+        edge.fromVertexIndex === 0 &&
+        edge.toVertexIndex === 2
+      ),
+    ),
+  };
+
+  assert.equal(
+    isSpatialRouteTopologyValid(disconnectedRoute, puzzle.vertices.length),
+    false,
+  );
+  assert.equal(
+    isSpatialRouteConnected(
+      { ...puzzle, route: disconnectedRoute },
+      correct,
+    ),
+    false,
+  );
+
+  const invalidDeadEndRoute = {
+    ...puzzle.route,
+    deadEndVertexIndices: [5],
+  };
+  assert.equal(
+    isSpatialRouteTopologyValid(invalidDeadEndRoute, puzzle.vertices.length),
+    false,
+  );
 });
 
 test("las transformaciones producen coordenadas válidas", () => {

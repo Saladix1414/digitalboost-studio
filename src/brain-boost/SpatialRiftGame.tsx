@@ -468,8 +468,12 @@ export default function SpatialRiftGame() {
               >
                 <p className="font-bold">
                   {feedback.correct
-                    ? "¡Transformación correcta!"
-                    : "No era esa. Compará los vértices y fijate si la pieza está reflejada."}
+                    ? puzzle.mode === "rift-route"
+                      ? "¡Rift conectado!"
+                      : "¡Transformación correcta!"
+                    : puzzle.mode === "rift-route"
+                      ? "No era esa. Seguí las rutas entre portales y descartá el callejón sin salida."
+                      : "No era esa. Compará los vértices y fijate si la pieza está reflejada."}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-slate-300">
                   {puzzle.explanation}

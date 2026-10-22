@@ -10,10 +10,18 @@ export interface SpatialChoice {
   mirrored: boolean;
 }
 
+export interface SpatialRouteEdge {
+  fromVertexIndex: number;
+  toVertexIndex: number;
+}
+
 export interface SpatialRoute {
   sourceVertexIndex: number;
   exitVertexIndex: number;
   pathVertexIndices: number[];
+  alternatePathVertexIndices: number[];
+  deadEndVertexIndices: number[];
+  edges: SpatialRouteEdge[];
 }
 
 export interface SpatialPuzzle {
@@ -148,13 +156,21 @@ export function generateSpatialPuzzle(
 
   const mode = safe <= 10 ? "orientation" : "rift-route";
   const exitVertexIndex = Math.floor(vertices.length / 2);
-  const route = {
+  const route: SpatialRoute = {
     sourceVertexIndex: 0,
     exitVertexIndex,
-    pathVertexIndices: Array.from(
-      { length: exitVertexIndex + 1 },
-      (_, index) => index,
-    ),
+    pathVertexIndices: [0, 2, exitVertexIndex],
+    alternatePathVertexIndices: [0, 1, 3, exitVertexIndex],
+    deadEndVertexIndices: [6],
+    edges: [
+      { fromVertexIndex: 0, toVertexIndex: 2 },
+      { fromVertexIndex: 2, toVertexIndex: exitVertexIndex },
+      { fromVertexIndex: 0, toVertexIndex: 1 },
+      { fromVertexIndex: 1, toVertexIndex: 3 },
+      { fromVertexIndex: 3, toVertexIndex: exitVertexIndex },
+      { fromVertexIndex: 2, toVertexIndex: 5 },
+      { fromVertexIndex: 5, toVertexIndex: 6 },
+    ],
   };
 
   return {
@@ -170,7 +186,7 @@ export function generateSpatialPuzzle(
     subtitle: "GEOMETRÍA / ROTACIÓN MENTAL",
     prompt:
       mode === "rift-route"
-        ? `Rotá la pieza ${rotationDeg}° en sentido horario. Elegí la orientación que conecta ambos portales sin reflejar el recorrido.`
+        ? `Rotá la red ${rotationDeg}° en sentido horario. Elegí la orientación que alinea ambos portales sin reflejarla: hay dos rutas continuas y un callejón sin salida.`
         : `Imaginá la pieza girando ${rotationDeg}° en sentido horario. ` +
           "Elegí la misma pieza rotada, sin reflejarla.",
     rotationDeg,
@@ -179,13 +195,13 @@ export function generateSpatialPuzzle(
     correctChoiceId: correct.id,
     explanation:
       mode === "rift-route"
-        ? `La pieza correcta gira ${rotationDeg}° y alinea los extremos del recorrido con los portales. Una reflexión invierte la disposición de la ruta.`
+        ? `La red correcta gira ${rotationDeg}° y alinea entrada y salida. Tiene dos caminos continuos y una rama sin salida; una reflexión altera la geometría.`
         : `La transformación correcta gira cada punto ${rotationDeg}° en sentido horario. Una rotación conserva la orientación de la figura; un reflejo invierte su disposición.`,
     hints:
       mode === "rift-route"
         ? [
-            "Seguí el recorrido hasta sus dos extremos y compará la posición de los portales.",
-            `Buscá el giro de ${rotationDeg}°. Ambos extremos deben coincidir y la pieza no debe estar reflejada.`,
+            "Seguí las bifurcaciones y distinguí los caminos que llegan a la salida de la rama sin salida.",
+            `Buscá el giro de ${rotationDeg}°. La red debe conservar sus conexiones y alinear ambos portales.`,
           ]
         : [
             "Seguí dos vértices asimétricos de la pieza. Un giro cambia su posición, no las conexiones entre ellos.",
@@ -213,6 +229,123 @@ export function transformSpatialVertices(
   });
 }
 
+function spatialRouteHasEdge(
+  route: SpatialRoute,
+  from: number,
+  to: number,
+): boolean {
+  return route.edges.some(
+    (edge) =>
+      (edge.fromVertexIndex === from && edge.toVertexIndex === to) ||
+      (edge.fromVertexIndex === to && edge.toVertexIndex === from),
+  );
+}
+
+export function isSpatialRouteTopologyValid(
+  route: SpatialRoute,
+  vertexCount: number,
+): boolean {
+  if (
+    !Number.isInteger(vertexCount) ||
+    vertexCount < 2 ||
+    !Array.isArray(route.edges) ||
+    !Array.isArray(route.pathVertexIndices) ||
+    !Array.isArray(route.alternatePathVertexIndices) ||
+    !Array.isArray(route.deadEndVertexIndices) ||
+    route.sourceVertexIndex === route.exitVertexIndex
+  ) {
+    return false;
+  }
+
+  const validIndex = (index: number) =>
+    Number.isInteger(index) && index >= 0 && index < vertexCount;
+
+  if (
+    !validIndex(route.sourceVertexIndex) ||
+    !validIndex(route.exitVertexIndex) ||
+    route.edges.length === 0
+  ) {
+    return false;
+  }
+
+  const edgeKeys = new Set<string>();
+  const adjacency = new Map<number, number[]>();
+  const graphVertices = new Set<number>();
+  const degree = new Map<number, number>();
+
+  for (const edge of route.edges) {
+    const from = edge.fromVertexIndex;
+    const to = edge.toVertexIndex;
+
+    if (!validIndex(from) || !validIndex(to) || from === to) {
+      return false;
+    }
+
+    const key = from < to ? `${from}:${to}` : `${to}:${from}`;
+    if (edgeKeys.has(key)) return false;
+    edgeKeys.add(key);
+
+    graphVertices.add(from);
+    graphVertices.add(to);
+    degree.set(from, (degree.get(from) ?? 0) + 1);
+    degree.set(to, (degree.get(to) ?? 0) + 1);
+
+    adjacency.set(from, [...(adjacency.get(from) ?? []), to]);
+    adjacency.set(to, [...(adjacency.get(to) ?? []), from]);
+  }
+
+  const pathIsValid = (path: number[]) =>
+    path.length >= 2 &&
+    path[0] === route.sourceVertexIndex &&
+    path[path.length - 1] === route.exitVertexIndex &&
+    new Set(path).size === path.length &&
+    path.every(validIndex) &&
+    path.slice(1).every((vertex, index) =>
+      spatialRouteHasEdge(route, path[index], vertex),
+    );
+
+  if (
+    !pathIsValid(route.pathVertexIndices) ||
+    !pathIsValid(route.alternatePathVertexIndices) ||
+    JSON.stringify(route.pathVertexIndices) ===
+      JSON.stringify(route.alternatePathVertexIndices)
+  ) {
+    return false;
+  }
+
+  if (
+    route.deadEndVertexIndices.length === 0 ||
+    new Set(route.deadEndVertexIndices).size !==
+      route.deadEndVertexIndices.length ||
+    route.deadEndVertexIndices.some(
+      (vertex) =>
+        !validIndex(vertex) ||
+        vertex === route.sourceVertexIndex ||
+        vertex === route.exitVertexIndex ||
+        !graphVertices.has(vertex) ||
+        degree.get(vertex) !== 1,
+    )
+  ) {
+    return false;
+  }
+
+  const reachable = new Set<number>([route.sourceVertexIndex]);
+  const queue = [route.sourceVertexIndex];
+
+  for (let cursor = 0; cursor < queue.length; cursor++) {
+    for (const next of adjacency.get(queue[cursor]) ?? []) {
+      if (reachable.has(next)) continue;
+      reachable.add(next);
+      queue.push(next);
+    }
+  }
+
+  return (
+    reachable.has(route.exitVertexIndex) &&
+    [...graphVertices].every((vertex) => reachable.has(vertex))
+  );
+}
+
 export function isSpatialRouteConnected(
   puzzle: SpatialPuzzle,
   choice: SpatialChoice,
@@ -220,6 +353,14 @@ export function isSpatialRouteConnected(
 ): boolean {
   if (puzzle.mode !== "rift-route") {
     return choice.id === puzzle.correctChoiceId;
+  }
+
+  if (
+    !Number.isFinite(tolerance) ||
+    tolerance < 0 ||
+    !isSpatialRouteTopologyValid(puzzle.route, puzzle.vertices.length)
+  ) {
+    return false;
   }
 
   const target = transformSpatialVertices(
@@ -233,22 +374,22 @@ export function isSpatialRouteConnected(
     choice.mirrored,
   );
 
-  return (
-    puzzle.route.pathVertexIndices.length >= 2 &&
-    puzzle.route.pathVertexIndices.every((index) => {
-      const expected = target[index];
-      const actual = candidate[index];
-
-      if (!expected || !actual) return false;
-
-      return (
-        Math.hypot(
-          actual.x - expected.x,
-          actual.y - expected.y,
-        ) <= tolerance
-      );
-    })
+  const routeVertices = new Set(
+    puzzle.route.edges.flatMap((edge) => [
+      edge.fromVertexIndex,
+      edge.toVertexIndex,
+    ]),
   );
+
+  return [...routeVertices].every((index) => {
+    const expected = target[index];
+    const actual = candidate[index];
+    if (!expected || !actual) return false;
+
+    return (
+      Math.hypot(actual.x - expected.x, actual.y - expected.y) <= tolerance
+    );
+  });
 }
 
 function drawPolygon(
@@ -461,6 +602,19 @@ function drawSpatialRouteOverlay(
   );
   const route = puzzle.route;
 
+  const edgeKey = (from: number, to: number) =>
+    from < to ? `${from}:${to}` : `${to}:${from}`;
+
+  const keysForPath = (path: number[]) =>
+    new Set(
+      path.slice(1).map((vertex, index) =>
+        edgeKey(path[index], vertex),
+      ),
+    );
+
+  const mainKeys = keysForPath(route.pathVertexIndices);
+  const alternateKeys = keysForPath(route.alternatePathVertexIndices);
+
   ctx.save();
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
@@ -477,13 +631,13 @@ function drawSpatialRouteOverlay(
       route.exitVertexIndex,
     ]) {
       const point = targets[index];
-      const color =
-        index === route.sourceVertexIndex ? "#67e8f9" : "#c4b5fd";
+      if (!point) continue;
 
-      ctx.strokeStyle = color;
-      ctx.globalAlpha = 0.9;
-      ctx.lineWidth = 1.6;
-      ctx.setLineDash([2, 2]);
+      ctx.strokeStyle =
+        index === route.sourceVertexIndex ? "#67e8f9" : "#c4b5fd";
+      ctx.globalAlpha = 0.95;
+      ctx.lineWidth = 1.8;
+      ctx.setLineDash([3, 3]);
       ctx.beginPath();
       ctx.arc(
         cx + point.x * size,
@@ -494,45 +648,80 @@ function drawSpatialRouteOverlay(
       );
       ctx.stroke();
     }
-
-    ctx.setLineDash([]);
-    ctx.globalAlpha = 1;
   }
 
-  ctx.strokeStyle = "#c4b5fd";
-  ctx.lineWidth = Math.max(2, Math.min(3.4, size * 0.027));
-  ctx.shadowColor = "#a78bfa";
-  ctx.shadowBlur = Math.min(9, size * 0.06);
-  ctx.beginPath();
+  const orderedEdges = [
+    ...route.edges.filter(
+      (edge) =>
+        !mainKeys.has(edgeKey(edge.fromVertexIndex, edge.toVertexIndex)),
+    ),
+    ...route.edges.filter((edge) =>
+      mainKeys.has(edgeKey(edge.fromVertexIndex, edge.toVertexIndex)),
+    ),
+  ];
 
-  route.pathVertexIndices.forEach((index, position) => {
-    const point = points[index];
-    const x = cx + point.x * size;
-    const y = cy + point.y * size;
+  for (const edge of orderedEdges) {
+    const from = points[edge.fromVertexIndex];
+    const to = points[edge.toVertexIndex];
+    if (!from || !to) continue;
 
-    if (position === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  });
+    const key = edgeKey(edge.fromVertexIndex, edge.toVertexIndex);
+    const isMain = mainKeys.has(key);
+    const isAlternate = alternateKeys.has(key);
 
-  ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = isMain
+      ? "#c4b5fd"
+      : isAlternate
+        ? "#67e8f9"
+        : "#fb923c";
+    ctx.lineWidth = isMain
+      ? Math.max(2.4, Math.min(3.6, size * 0.029))
+      : Math.max(1.3, Math.min(2.3, size * 0.019));
+    ctx.setLineDash(isMain ? [] : isAlternate ? [4, 3] : [2, 3]);
+    ctx.shadowColor = isMain
+      ? "#a78bfa"
+      : isAlternate
+        ? "#67e8f9"
+        : "#fb923c";
+    ctx.shadowBlur = isMain ? Math.min(9, size * 0.06) : 2;
+    ctx.beginPath();
+    ctx.moveTo(cx + from.x * size, cy + from.y * size);
+    ctx.lineTo(cx + to.x * size, cy + to.y * size);
+    ctx.stroke();
+  }
+
+  ctx.setLineDash([]);
   ctx.shadowBlur = 0;
 
-  for (const index of [
-    route.sourceVertexIndex,
-    route.exitVertexIndex,
-  ]) {
-    const point = points[index];
-    const color =
-      index === route.sourceVertexIndex ? "#67e8f9" : "#c4b5fd";
+  const nodeIndices = new Set(
+    route.edges.flatMap((edge) => [
+      edge.fromVertexIndex,
+      edge.toVertexIndex,
+    ]),
+  );
 
+  for (const index of nodeIndices) {
+    const point = points[index];
+    if (!point) continue;
+
+    const color = route.deadEndVertexIndices.includes(index)
+      ? "#fb923c"
+      : index === route.sourceVertexIndex
+        ? "#67e8f9"
+        : index === route.exitVertexIndex
+          ? "#c4b5fd"
+          : "#e0f2fe";
+
+    ctx.globalAlpha = 1;
     ctx.fillStyle = color;
     ctx.shadowColor = color;
-    ctx.shadowBlur = Math.min(7, size * 0.045);
+    ctx.shadowBlur = Math.min(6, size * 0.04);
     ctx.beginPath();
     ctx.arc(
       cx + point.x * size,
       cy + point.y * size,
-      Math.max(2, Math.min(3.3, size * 0.025)),
+      Math.max(2.1, Math.min(3.5, size * 0.027)),
       0,
       Math.PI * 2,
     );
