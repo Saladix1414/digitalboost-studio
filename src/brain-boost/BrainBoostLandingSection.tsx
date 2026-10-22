@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import "./brainBoostArtDirection.css";
 import MemoryMatrixGame from "./MemoryMatrixGame";
 import MemoryPairsGame from "./MemoryPairsGame";
 import LogicReactorGame from "./LogicReactorGame";
@@ -404,6 +405,7 @@ export default function BrainBoostLandingSection() {
           <section
             role="dialog"
             aria-modal="true"
+            data-brain-boost-window={activeGame?.id ?? "mode-select"}
             aria-labelledby="brain-boost-dialog-title"
             className={`relative isolate flex w-full flex-col overflow-y-auto rounded-2xl border border-cyan-300/40 bg-[#050b1c] p-4 shadow-[0_0_70px_rgba(0,180,255,.18),0_0_100px_rgba(139,92,246,.16)] sm:rounded-3xl sm:p-6 ${
               activeGame ? "max-h-[calc(100dvh-24px)] max-w-5xl" : "max-h-[82dvh] max-w-3xl"
@@ -474,7 +476,7 @@ export default function BrainBoostLandingSection() {
                 ))}
               </div>
 
-              <div
+              <div data-brain-boost-stage={activeGame?.id ?? "mode-select"}
                 className={activeGame ? "relative min-w-0 overflow-hidden rounded-2xl border p-3 transition-colors duration-300 sm:p-5" : "relative isolate flex min-h-[330px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-cyan-300/35 bg-gradient-to-br from-[#0b1d3a] via-[#070d20] to-[#180d35] p-5 text-center shadow-[0_0_38px_rgba(34,211,238,.12),inset_0_0_34px_rgba(139,92,246,.09)]"}
                 style={activeArt ? {
                   borderColor: activeArt.primary,

@@ -1,0 +1,199 @@
+
+/* Brain Boost: cada disciplina tiene una silueta y una ambientación propias. */
+
+[data-brain-boost-window] {
+  isolation: isolate;
+}
+
+[data-brain-boost-window]::before,
+[data-brain-boost-window]::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
+[data-brain-boost-window]::before {
+  inset: 0;
+  opacity: .82;
+  mix-blend-mode: screen;
+}
+
+[data-brain-boost-window]::after {
+  inset: 9px;
+  border: 1px solid var(--bb-frame, rgba(103, 232, 249, .5));
+  opacity: .72;
+}
+
+[data-brain-boost-stage] {
+  isolation: isolate;
+}
+
+[data-brain-boost-stage]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .88;
+  mix-blend-mode: screen;
+}
+
+[data-brain-boost-stage] > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* MEMORY MATRIX — carcasa electrónica angular y matriz de bobinas. */
+[data-brain-boost-window="sequence"],
+[data-brain-boost-stage="sequence"] {
+  --bb-frame: rgba(34, 245, 255, .8);
+  border-radius: 18px 3px 18px 3px !important;
+}
+
+[data-brain-boost-window="sequence"]::before,
+[data-brain-boost-stage="sequence"]::before {
+  background-image:
+    linear-gradient(rgba(34, 245, 255, .11) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 245, 255, .11) 1px, transparent 1px),
+    radial-gradient(ellipse at 18% 20%, rgba(34, 245, 255, .26), transparent 52%),
+    radial-gradient(ellipse at 85% 80%, rgba(232, 121, 249, .22), transparent 50%);
+  background-size: 26px 26px, 26px 26px, auto, auto;
+  clip-path: polygon(
+    0 22px, 22px 0, calc(100% - 22px) 0, 100% 22px,
+    100% calc(100% - 22px), calc(100% - 22px) 100%,
+    22px 100%, 0 calc(100% - 22px)
+  );
+}
+
+[data-brain-boost-window="sequence"]::after {
+  color: #22f5ff;
+  clip-path: polygon(
+    0 22px, 22px 0, calc(100% - 22px) 0, 100% 22px,
+    100% calc(100% - 22px), calc(100% - 22px) 100%,
+    22px 100%, 0 calc(100% - 22px)
+  );
+}
+
+/* OCEAN ECHOES — contorno orgánico, burbujas y ondas. */
+[data-brain-boost-window="pairs"],
+[data-brain-boost-stage="pairs"] {
+  --bb-frame: rgba(45, 212, 191, .8);
+  border-radius: 42px 16px 38px 16px !important;
+}
+
+[data-brain-boost-window="pairs"]::before,
+[data-brain-boost-stage="pairs"]::before {
+  background-image:
+    radial-gradient(circle at 12% 21%, rgba(153, 246, 228, .72) 0 3px, transparent 4px),
+    radial-gradient(circle at 22% 52%, rgba(96, 165, 250, .5) 0 5px, transparent 6px),
+    radial-gradient(circle at 87% 28%, rgba(45, 212, 191, .68) 0 4px, transparent 5px),
+    radial-gradient(circle at 78% 72%, rgba(96, 165, 250, .48) 0 7px, transparent 8px),
+    radial-gradient(ellipse at 50% 100%, rgba(13, 148, 136, .3), transparent 60%);
+}
+
+[data-brain-boost-window="pairs"]::after {
+  border-radius: 36px 12px 32px 12px;
+}
+
+/* DRAGON RELICS — placa de reliquia con esquinas talladas. */
+[data-brain-boost-window="originx-dragons"],
+[data-brain-boost-stage="originx-dragons"] {
+  --bb-frame: rgba(251, 191, 36, .85);
+  border-radius: 5px !important;
+}
+
+[data-brain-boost-window="originx-dragons"]::before,
+[data-brain-boost-stage="originx-dragons"]::before {
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(251, 191, 36, .27), transparent 62%),
+    radial-gradient(ellipse at 100% 100%, rgba(244, 63, 94, .22), transparent 55%),
+    linear-gradient(135deg, transparent 48%, rgba(251, 191, 36, .09) 49%, transparent 50%);
+  clip-path: polygon(
+    0 18px, 18px 0, calc(100% - 18px) 0, 100% 18px,
+    100% calc(100% - 18px), calc(100% - 18px) 100%,
+    18px 100%, 0 calc(100% - 18px)
+  );
+}
+
+[data-brain-boost-window="originx-dragons"]::after {
+  clip-path: polygon(
+    0 18px, 18px 0, calc(100% - 18px) 0, 100% 18px,
+    100% calc(100% - 18px), calc(100% - 18px) 100%,
+    18px 100%, 0 calc(100% - 18px)
+  );
+}
+
+/* NUMBER PATTERNS — instrumento de análisis con cuadrícula y trazas. */
+[data-brain-boost-window="number"],
+[data-brain-boost-stage="number"] {
+  --bb-frame: rgba(250, 204, 21, .85);
+  border-radius: 14px 14px 32px 14px !important;
+}
+
+[data-brain-boost-window="number"]::before,
+[data-brain-boost-stage="number"]::before {
+  background-image:
+    linear-gradient(rgba(250, 204, 21, .1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, .11) 1px, transparent 1px),
+    radial-gradient(ellipse at 100% 0%, rgba(250, 204, 21, .22), transparent 58%),
+    linear-gradient(155deg, transparent 65%, rgba(34, 211, 238, .1) 65.5%, transparent 66%);
+  background-size: 24px 24px, 24px 24px, auto, auto;
+}
+
+[data-brain-boost-window="number"]::after {
+  border-radius: 10px 10px 28px 10px;
+}
+
+/* LOGIC REACTOR — placa de circuito con rutas y nodos conectados. */
+[data-brain-boost-window="deduction"],
+[data-brain-boost-stage="deduction"] {
+  --bb-frame: rgba(163, 230, 53, .85);
+  border-radius: 17px 3px 17px 3px !important;
+}
+
+[data-brain-boost-window="deduction"]::before,
+[data-brain-boost-stage="deduction"]::before {
+  background-image:
+    linear-gradient(rgba(163, 230, 53, .09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(96, 165, 250, .1) 1px, transparent 1px),
+    radial-gradient(ellipse at 0% 50%, rgba(163, 230, 53, .24), transparent 62%),
+    radial-gradient(ellipse at 100% 100%, rgba(96, 165, 250, .2), transparent 55%);
+  background-size: 30px 30px, 30px 30px, auto, auto;
+}
+
+[data-brain-boost-window="deduction"]::after {
+  clip-path: polygon(
+    0 0, calc(100% - 24px) 0, 100% 24px,
+    100% calc(100% - 12px), calc(100% - 12px) 100%,
+    20px 100%, 0 calc(100% - 20px)
+  );
+}
+
+/* SPATIAL RIFT — portal octogonal y anillos dimensionales. */
+[data-brain-boost-window="rotation"],
+[data-brain-boost-stage="rotation"] {
+  --bb-frame: rgba(232, 121, 249, .85);
+  border-radius: 48px 14px 48px 14px !important;
+}
+
+[data-brain-boost-window="rotation"]::before,
+[data-brain-boost-stage="rotation"]::before {
+  background-image:
+    radial-gradient(circle at 76% 42%, transparent 0 12%, rgba(232, 121, 249, .34) 12.2% 12.5%, transparent 12.8% 19%, rgba(34, 211, 238, .3) 19.2% 19.5%, transparent 19.8% 26%, rgba(232, 121, 249, .2) 26.2% 26.5%, transparent 26.8%),
+    radial-gradient(ellipse at 0% 100%, rgba(34, 211, 238, .19), transparent 60%);
+}
+
+[data-brain-boost-window="rotation"]::after {
+  border-radius: 40px 10px 40px 10px;
+  clip-path: polygon(
+    0 32px, 32px 0, calc(100% - 32px) 0, 100% 32px,
+    100% calc(100% - 32px), calc(100% - 32px) 100%,
+    32px 100%, 0 calc(100% - 32px)
+  );
+}
+
+/* La selección conserva una silueta neutra, distinta de los escenarios. */
+[data-brain-boost-window="mode-select"] {
+  border-radius: 30px 12px 30px 12px !important;
+}
