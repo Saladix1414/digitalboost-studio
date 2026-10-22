@@ -105,7 +105,7 @@ function safeLevel(level: number): number {
 }
 
 
-function createSpatialRoute(
+function createSpatialRouteTemplate(
   level: number,
   vertexCount: number,
 ): SpatialRoute {
@@ -205,6 +205,66 @@ function createSpatialRoute(
   };
 }
 
+function createSpatialRoute(
+  level: number,
+  vertexCount: number,
+  random: RandomSource,
+): SpatialRoute {
+  const route = createSpatialRouteTemplate(level, vertexCount);
+  const templateRoleIndices = [1, 2, 3, 5, 6, 7, 8];
+  const availableRoleIndices = Array.from(
+    { length: vertexCount },
+    (_, index) => index,
+  ).filter(
+    (index) =>
+      index !== route.sourceVertexIndex &&
+      index !== route.exitVertexIndex,
+  );
+
+  if (
+    availableRoleIndices.length !== templateRoleIndices.length ||
+    templateRoleIndices.includes(route.sourceVertexIndex) ||
+    templateRoleIndices.includes(route.exitVertexIndex)
+  ) {
+    throw new Error(
+      "Spatial Rift requiere una figura compatible de nueve vértices.",
+    );
+  }
+
+  const shuffledRoles = shuffle(availableRoleIndices, random);
+  const remap = new Map<number, number>([
+    [route.sourceVertexIndex, route.sourceVertexIndex],
+    [route.exitVertexIndex, route.exitVertexIndex],
+  ]);
+
+  templateRoleIndices.forEach((templateIndex, index) => {
+    remap.set(templateIndex, shuffledRoles[index]);
+  });
+
+  const remapIndex = (index: number): number => {
+    const mapped = remap.get(index);
+    if (mapped === undefined) {
+      throw new Error("La topología contiene un vértice sin correspondencia.");
+    }
+    return mapped;
+  };
+
+  return {
+    ...route,
+    pathVertexIndices: route.pathVertexIndices.map(remapIndex),
+    alternatePathVertexIndices:
+      route.alternatePathVertexIndices.map(remapIndex),
+    additionalPathVertexIndices: route.additionalPathVertexIndices.map(
+      (path) => path.map(remapIndex),
+    ),
+    deadEndVertexIndices: route.deadEndVertexIndices.map(remapIndex),
+    edges: route.edges.map((edge) => ({
+      fromVertexIndex: remapIndex(edge.fromVertexIndex),
+      toVertexIndex: remapIndex(edge.toVertexIndex),
+    })),
+  };
+}
+
 export function generateSpatialPuzzle(
   level: number,
   seed: number,
@@ -262,7 +322,7 @@ export function generateSpatialPuzzle(
   }
 
   const mode = safe <= 10 ? "orientation" : "rift-route";
-  const route = createSpatialRoute(safe, vertices.length);
+  const route = createSpatialRoute(safe, vertices.length, random);
   const routeDescription =
     safe <= 20
       ? "dos rutas entre portales y una rama sin salida"

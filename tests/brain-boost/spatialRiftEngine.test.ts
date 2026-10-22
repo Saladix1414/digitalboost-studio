@@ -193,6 +193,39 @@ test("Spatial Rift aumenta la complejidad topológica por nivel", () => {
   }
 });
 
+test("Spatial Rift varía el trazado por semilla y mantiene su topología", () => {
+  for (const level of [11, 25, 40, 60, 80]) {
+    const signatures = new Set<string>();
+
+    for (let seed = 1; seed <= 24; seed++) {
+      const puzzle = generateSpatialPuzzle(level, seed);
+      const { route } = puzzle;
+
+      assert.ok(
+        isSpatialRouteTopologyValid(route, puzzle.vertices.length),
+        `Topología inválida en nivel ${level}, semilla ${seed}.`,
+      );
+
+      const signature = route.edges
+        .map(({ fromVertexIndex, toVertexIndex }) => {
+          const a = Math.min(fromVertexIndex, toVertexIndex);
+          const b = Math.max(fromVertexIndex, toVertexIndex);
+          return `${a}:${b}`;
+        })
+        .sort()
+        .join("|");
+
+      signatures.add(signature);
+      assert.deepEqual(puzzle, generateSpatialPuzzle(level, seed));
+    }
+
+    assert.ok(
+      signatures.size >= 4,
+      `Poca variación topológica en nivel ${level}: ${signatures.size} trazados.`,
+    );
+  }
+});
+
 test("Rift Routes rechaza redes desconectadas y callejones mal definidos", () => {
   const puzzle = generateSpatialPuzzle(11, 17);
   const correct = puzzle.choices.find(
@@ -200,12 +233,17 @@ test("Rift Routes rechaza redes desconectadas y callejones mal definidos", () =>
   );
   assert.ok(correct);
 
+  const brokenFrom = puzzle.route.pathVertexIndices[0];
+  const brokenTo = puzzle.route.pathVertexIndices[1];
+
   const disconnectedRoute = {
     ...puzzle.route,
     edges: puzzle.route.edges.filter(
       (edge) => !(
-        edge.fromVertexIndex === 0 &&
-        edge.toVertexIndex === 2
+        (edge.fromVertexIndex === brokenFrom &&
+          edge.toVertexIndex === brokenTo) ||
+        (edge.fromVertexIndex === brokenTo &&
+          edge.toVertexIndex === brokenFrom)
       ),
     ),
   };
@@ -225,8 +263,8 @@ test("Rift Routes rechaza redes desconectadas y callejones mal definidos", () =>
   const invalidAdditionalPathRoute = {
     ...puzzle.route,
     additionalPathVertexIndices: [[
-      0,
-      3,
+      puzzle.route.sourceVertexIndex,
+      puzzle.vertices.length + 1,
       puzzle.route.exitVertexIndex,
     ]],
   };
