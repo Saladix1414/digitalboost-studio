@@ -5,6 +5,7 @@ import {
   mkdtempSync,
   readFileSync,
   readdirSync,
+  statSync,
   writeFileSync,
 } from "node:fs";
 
@@ -216,11 +217,16 @@ test("P0.4.23 tampered persisted approval is rejected", () => {
 
   assert.equal(files.length, 1);
 
-  const file =
+  const entryPath =
     join(
       namespaceDir,
       files[0],
     );
+
+  const file =
+    statSync(entryPath).isDirectory()
+      ? join(entryPath, "record.json")
+      : entryPath;
 
   const parsed =
     JSON.parse(

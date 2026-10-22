@@ -6,10 +6,11 @@ import {
 
 import {
   existsSync,
-  linkSync,
   mkdirSync,
   readFileSync,
-  unlinkSync,
+  renameSync,
+  rmSync,
+  statSync,
   writeFileSync,
 } from "node:fs";
 
@@ -147,9 +148,13 @@ export class ServerExecutionClaimStore
     filePath: string,
     expectedApprovalId: string,
   ): PulseExecutionClaim {
+    const storedPath =
+      statSync(filePath).isDirectory()
+        ? path.join(filePath, "claim.json")
+        : filePath;
     const raw =
       readFileSync(
-        filePath,
+        storedPath,
         "utf8",
       );
 
@@ -218,27 +223,11 @@ export class ServerExecutionClaimStore
         },
       );
 
-      /**
-       * IMPORTANTE:
-       *
-       * No hacemos:
-       *
-       *   exists -> write
-       *
-       * porque ese patrón es vulnerable a race conditions.
-       *
-       * El temp file contiene el payload COMPLETO.
-       * Luego linkSync crea el destino exclusivamente si
-       * todavía no existe. La creación del nombre final actúa
-       * como la operación compare-and-set del adapter.
-       */
       const tempPath =
         path.join(
           this.tenantDir,
           "." +
-            hashNamespace(
-              approvalId,
-            ) +
+            hashNamespace(approvalId) +
             "." +
             process.pid +
             "." +
@@ -247,8 +236,9 @@ export class ServerExecutionClaimStore
         );
 
       try {
+        mkdirSync(tempPath, { mode: 0o700 });
         writeFileSync(
-          tempPath,
+          path.join(tempPath, "claim.json"),
           claimPayload(claim),
           {
             flag: "wx",
@@ -257,34 +247,22 @@ export class ServerExecutionClaimStore
         );
 
         try {
-          linkSync(
-            tempPath,
-            filePath,
-          );
-
+          renameSync(tempPath, filePath);
           return {
             claimed: true,
             claim,
           };
         } catch (error) {
           const code =
-            error &&
-            typeof error === "object" &&
-            "code" in error
-              ? String(
-                  (error as {
-                    code?: unknown;
-                  }).code,
-                )
+            error && typeof error === "object" && "code" in error
+              ? String((error as { code?: unknown }).code)
               : "";
 
-          if (code === "EEXIST") {
-            const existing =
-              this.readExistingClaim(
-                filePath,
-                approvalId,
-              );
-
+          if (
+            existsSync(filePath) &&
+            ["EEXIST", "ENOTEMPTY", "ENOTDIR", "EISDIR"].includes(code)
+          ) {
+            this.readExistingClaim(filePath, approvalId);
             return {
               claimed: false,
               reason: "ALREADY_CLAIMED",
@@ -295,15 +273,7 @@ export class ServerExecutionClaimStore
         }
       } finally {
         try {
-          if (
-            existsSync(
-              tempPath,
-            )
-          ) {
-            unlinkSync(
-              tempPath,
-            );
-          }
+          rmSync(tempPath, { recursive: true, force: true });
         } catch {}
       }
     } catch (error) {

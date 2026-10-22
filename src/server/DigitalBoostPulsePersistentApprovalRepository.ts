@@ -1,14 +1,16 @@
 import {
   createHash,
+  randomUUID,
 } from "node:crypto";
 
 import {
   existsSync,
   mkdirSync,
   readFileSync,
-  unlinkSync,
+  renameSync,
+  rmSync,
+  statSync,
   writeFileSync,
-  linkSync,
 } from "node:fs";
 
 import {
@@ -287,22 +289,17 @@ export class PersistentApprovalRepository {
       );
     }
 
-    const tempPath =
-      join(
-        this.tenantDir,
-        `.${approvalNamespace(approvalId)}.${process.pid}.${Date.now()}.tmp`,
-      );
+    const tempPath = join(
+      this.tenantDir,
+      `.${approvalNamespace(approvalId)}.${process.pid}.${randomUUID()}.tmp`,
+    );
 
-    const serialized =
-      JSON.stringify(
-        persisted,
-        null,
-        2,
-      ) + "\n";
+    const serialized = JSON.stringify(persisted, null, 2) + "\n";
 
     try {
+      mkdirSync(tempPath, { mode: 0o700 });
       writeFileSync(
-        tempPath,
+        join(tempPath, "record.json"),
         serialized,
         {
           encoding: "utf8",
@@ -312,36 +309,27 @@ export class PersistentApprovalRepository {
       );
 
       /*
-       * Hard-link publication:
-       *
-       * link(temp, final) fails atomically if final already exists.
-       * This preserves immutable approval creation semantics without
-       * silently replacing an already persisted approval.
+       * Publish a fully written directory atomically.
+       * This avoids hard links, which Android/Termux may deny.
+       * A competing publication cannot replace the non-empty
+       * directory created by the first successful publication.
        */
-      linkSync(
-        tempPath,
-        finalPath,
-      );
-
-      unlinkSync(tempPath);
+      renameSync(tempPath, finalPath);
     } catch (error) {
       try {
-        if (existsSync(tempPath)) {
-          unlinkSync(tempPath);
-        }
+        rmSync(tempPath, { recursive: true, force: true });
       } catch {
-        /* Preserve original failure. */
+        /* Preserve the original storage error. */
       }
 
+      const code =
+        error && typeof error === "object" && "code" in error
+          ? String((error as { code?: unknown }).code)
+          : "";
+
       if (
-        error &&
-        typeof error === "object" &&
-        "code" in error &&
-        (
-          error as {
-            code?: unknown;
-          }
-        ).code === "EEXIST"
+        existsSync(finalPath) &&
+        ["EEXIST", "ENOTEMPTY", "ENOTDIR", "EISDIR"].includes(code)
       ) {
         throw new PulseApprovalRepositoryError(
           "DUPLICATE_APPROVAL",
@@ -376,9 +364,13 @@ export class PersistentApprovalRepository {
     let parsed: PersistedApprovalEnvelope<TApproval>;
 
     try {
+      const storedPath =
+        statSync(filePath).isDirectory()
+          ? join(filePath, "record.json")
+          : filePath;
       parsed = JSON.parse(
         readFileSync(
-          filePath,
+          storedPath,
           "utf8",
         ),
       ) as PersistedApprovalEnvelope<TApproval>;
