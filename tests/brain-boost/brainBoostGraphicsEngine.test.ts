@@ -107,6 +107,27 @@ test("el renderizador dibuja una escena sin borrar el fondo anfitrión", () => {
   assert.ok(!calls.includes("clearRect"));
 });
 
+test("cada disciplina dibuja su firma ambiental", () => {
+  const themes = [
+    "neural", "spatial", "logic", "memory",
+    "focus", "ocean", "dragon", "numbers",
+  ] as const;
+
+  for (const theme of themes) {
+    const { ctx, calls } = createFakeContext();
+    drawBrainBoostAmbient(ctx, 360, 640, 1200, theme, {
+      intensity: 0.3,
+      seed: 17,
+    });
+
+    assert.ok(calls.includes("arc"), `Faltan elementos para ${theme}`);
+    assert.ok(calls.includes("stroke"), `Faltan trazos para ${theme}`);
+    assert.equal(calls[0], "save");
+    assert.equal(calls.at(-1), "restore");
+    assert.ok(!calls.includes("clearRect"));
+  }
+});
+
 test("el renderizador no dibuja cuando el tamaño es inválido", () => {
   const { ctx, calls } = createFakeContext();
 
