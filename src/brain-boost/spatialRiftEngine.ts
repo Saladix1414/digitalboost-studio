@@ -198,22 +198,181 @@ function drawPolygon(
   const points = transformSpatialVertices(vertices, rotationDeg, mirrored);
   if (points.length === 0) return;
 
+  const depthX = Math.max(2, Math.min(7, size * 0.045));
+  const depthY = depthX * 1.25;
+
   ctx.save();
   ctx.translate(cx, cy);
-  ctx.beginPath();
-  ctx.moveTo(points[0].x * size, points[0].y * size);
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
 
-  for (let i = 1; i < points.length; i++) {
-    ctx.lineTo(points[i].x * size, points[i].y * size);
+  const tracePolygon = (offsetX: number, offsetY: number): void => {
+    ctx.beginPath();
+    ctx.moveTo(
+      points[0].x * size + offsetX,
+      points[0].y * size + offsetY,
+    );
+
+    for (let i = 1; i < points.length; i++) {
+      ctx.lineTo(
+        points[i].x * size + offsetX,
+        points[i].y * size + offsetY,
+      );
+    }
+
+    ctx.closePath();
+  };
+
+  // Cara posterior: crea un volumen discreto sin alterar la transformación.
+  ctx.globalAlpha = 0.36;
+  tracePolygon(depthX, depthY);
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = Math.max(0.8, lineWidth * 0.75);
+  ctx.stroke();
+
+  // Uniones alternas que dan aspecto de cristal tallado.
+  ctx.globalAlpha = 0.40;
+  ctx.lineWidth = Math.max(0.7, lineWidth * 0.65);
+
+  for (let i = 0; i < points.length; i += 2) {
+    ctx.beginPath();
+    ctx.moveTo(points[i].x * size, points[i].y * size);
+    ctx.lineTo(
+      points[i].x * size + depthX,
+      points[i].y * size + depthY,
+    );
+    ctx.stroke();
   }
 
-  ctx.closePath();
+  // Cara frontal con iluminación de borde.
+  ctx.globalAlpha = 1;
+  ctx.shadowColor = stroke;
+  ctx.shadowBlur = Math.min(12, size * 0.075);
+  tracePolygon(0, 0);
   ctx.fillStyle = fill;
   ctx.fill();
   ctx.strokeStyle = stroke;
   ctx.lineWidth = lineWidth;
-  ctx.lineJoin = "round";
   ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Facetas interiores tenues: hacen más legibles los vértices.
+  ctx.globalAlpha = 0.20;
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = Math.max(0.6, lineWidth * 0.5);
+
+  for (let i = 0; i < points.length; i += 3) {
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(points[i].x * size, points[i].y * size);
+    ctx.stroke();
+  }
+
+  // Nodos luminosos en los vértices de la pieza.
+  ctx.globalAlpha = 0.95;
+  ctx.fillStyle = stroke;
+  ctx.shadowColor = stroke;
+  ctx.shadowBlur = Math.min(6, size * 0.04);
+  const nodeRadius = Math.max(1.4, Math.min(3.2, size * 0.024));
+
+  for (const point of points) {
+    ctx.beginPath();
+    ctx.arc(
+      point.x * size,
+      point.y * size,
+      nodeRadius,
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function drawPerspectiveChamber(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  elapsedMs: number,
+): void {
+  const centerX = width * 0.51;
+  const centerY = height * 0.52;
+
+  ctx.save();
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  // Marcos hexagonales flotantes, con velocidades de giro distintas.
+  for (let layer = 0; layer < 4; layer++) {
+    const radiusX = width * (0.105 + layer * 0.052);
+    const radiusY = height * (0.16 + layer * 0.084);
+    const direction = layer % 2 === 0 ? 1 : -1;
+    const rotation = elapsedMs * 0.000035 * direction + layer * 0.19;
+    const points: SpatialPoint[] = [];
+
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2 - Math.PI / 2 + rotation;
+      points.push({
+        x: centerX + Math.cos(angle) * radiusX,
+        y: centerY + Math.sin(angle) * radiusY,
+      });
+    }
+
+    const alpha = 0.045 + layer * 0.018;
+    ctx.strokeStyle =
+      layer % 2 === 0
+        ? `rgba(103, 232, 249, ${alpha})`
+        : `rgba(167, 139, 250, ${alpha})`;
+    ctx.lineWidth = layer === 0 ? 1.4 : 0.9;
+
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+
+    for (let i = 1; i < points.length; i++) {
+      ctx.lineTo(points[i].x, points[i].y);
+    }
+
+    ctx.closePath();
+    ctx.stroke();
+
+    // Estructura interna de la cámara.
+    ctx.globalAlpha = 0.48;
+
+    for (let i = 0; i < 3; i++) {
+      const opposite = i + 3;
+      ctx.beginPath();
+      ctx.moveTo(points[i].x, points[i].y);
+      ctx.lineTo(points[opposite].x, points[opposite].y);
+      ctx.stroke();
+    }
+
+    ctx.globalAlpha = 1;
+  }
+
+  // Pequeños indicadores en las esquinas de la cámara.
+  const inset = Math.max(9, Math.min(18, width * 0.025));
+  const cornerLength = Math.max(7, Math.min(15, width * 0.022));
+  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = "rgba(103, 232, 249, 0.30)";
+
+  const corners = [
+    { x: inset, y: inset, dx: 1, dy: 1 },
+    { x: width - inset, y: inset, dx: -1, dy: 1 },
+    { x: inset, y: height - inset, dx: 1, dy: -1 },
+    { x: width - inset, y: height - inset, dx: -1, dy: -1 },
+  ];
+
+  for (const corner of corners) {
+    ctx.beginPath();
+    ctx.moveTo(corner.x + corner.dx * cornerLength, corner.y);
+    ctx.lineTo(corner.x, corner.y);
+    ctx.lineTo(corner.x, corner.y + corner.dy * cornerLength);
+    ctx.stroke();
+  }
+
   ctx.restore();
 }
 
@@ -265,6 +424,7 @@ export function drawSpatialRiftScene(
   ctx.fillRect(0, 0, width, height);
 
   drawGrid(ctx, width, height, elapsedMs);
+  drawPerspectiveChamber(ctx, width, height, elapsedMs);
 
   for (let i = 0; i < 20; i++) {
     const travel =
