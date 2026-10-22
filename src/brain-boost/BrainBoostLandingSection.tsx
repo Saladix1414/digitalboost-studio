@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import "./brainBoostArtDirection.css";
+import "./brainBoostGameMiniatures.css";
 import "./brainBoostCategoryArtDirection.css";
 import "./memoryPairsArtDirection.css";
 import MemoryMatrixGame from "./MemoryMatrixGame";
@@ -107,6 +108,148 @@ const dailyCategory: Category = {
     { id: "daily-review", title: "5. Review", description: "Cierre y revisión de la sesión.", area: "Cognitive Tests" },
   ],
 };
+
+
+function GameMiniature({ id }: { id: string }) {
+  const kinds: Record<string, string> = {
+    sequence: "memory",
+    pairs: "ocean",
+    "originx-dragons": "dragon",
+    deduction: "logic",
+    number: "numbers",
+    rotation: "spatial",
+    routes: "spatial",
+    targets: "focus",
+    signals: "focus",
+    baseline: "baseline",
+    mixed: "daily",
+    "daily-memory": "memory",
+    "daily-logic": "logic",
+    "daily-spatial": "spatial",
+    "daily-focus": "focus",
+    "daily-review": "daily",
+  };
+
+  const kind = kinds[id] ?? "daily";
+  const art = kind === "ocean"
+    ? "/brain-boost/cards/ocean/dolphin.webp"
+    : kind === "dragon"
+      ? "/brain-boost/cards/originx/dragon-forest.webp"
+      : null;
+
+  return (
+    <span
+      className={"bb-game-miniature bb-game-miniature--" + kind}
+      aria-hidden="true"
+    >
+      {art && (
+        <img
+          src={art}
+          alt=""
+          loading="lazy"
+          draggable={false}
+          className="bb-game-miniature__image"
+        />
+      )}
+      {art && <span className="bb-game-miniature__image-wash" />}
+      <svg
+        viewBox="0 0 120 76"
+        className="bb-game-miniature__svg"
+        fill="none"
+        focusable="false"
+      >
+        {kind === "memory" ? (
+          <>
+            <path className="bb-mini-grid" d="M25 17H95M25 38H95M25 59H95M37 9V67M60 9V67M83 9V67" />
+            <circle className="bb-mini-node" cx="37" cy="17" r="6" />
+            <circle className="bb-mini-node" cx="60" cy="38" r="7" />
+            <circle className="bb-mini-node" cx="83" cy="59" r="6" />
+            <circle className="bb-mini-node bb-mini-node--alt" cx="83" cy="17" r="4" />
+            <circle className="bb-mini-node bb-mini-node--alt" cx="37" cy="59" r="4" />
+            <path className="bb-mini-current" d="M37 17L60 38L83 59" />
+          </>
+        ) : kind === "ocean" ? (
+          <>
+            <circle className="bb-mini-bubble" cx="19" cy="19" r="4" />
+            <circle className="bb-mini-bubble" cx="99" cy="15" r="3" />
+            <circle className="bb-mini-bubble" cx="92" cy="48" r="5" />
+            <circle className="bb-mini-bubble" cx="30" cy="52" r="2.5" />
+            <path className="bb-mini-wave" d="M2 58Q16 49 30 58T58 58T86 58T118 58" />
+            <path className="bb-mini-wave bb-mini-wave--second" d="M2 65Q18 58 34 65T66 65T98 65T128 65" />
+            <path className="bb-mini-shine" d="M18 10L21 13L18 16L15 13Z" />
+          </>
+        ) : kind === "dragon" ? (
+          <>
+            <g className="bb-mini-sigil">
+              <path className="bb-mini-relic" d="M60 12L76 27L70 49L60 64L50 49L44 27Z" />
+              <path className="bb-mini-relic bb-mini-relic--inner" d="M60 23L68 34L60 47L52 34Z" />
+              <path className="bb-mini-relic" d="M44 27L32 23L40 40L50 49M76 27L88 23L80 40L70 49" />
+            </g>
+            <circle className="bb-mini-node" cx="60" cy="35" r="4" />
+            <path className="bb-mini-shine" d="M20 15L23 21L29 24L23 27L20 33L17 27L11 24L17 21Z" />
+            <path className="bb-mini-shine" d="M98 45L100 49L104 51L100 53L98 57L96 53L92 51L96 49Z" />
+          </>
+        ) : kind === "numbers" ? (
+          <>
+            <path className="bb-mini-grid" d="M12 17H108M12 35H108M12 53H108M20 8V65M44 8V65M68 8V65M92 8V65" />
+            <rect className="bb-mini-bar" x="23" y="43" width="10" height="22" rx="2" />
+            <rect className="bb-mini-bar" x="43" y="30" width="10" height="35" rx="2" />
+            <rect className="bb-mini-bar" x="63" y="37" width="10" height="28" rx="2" />
+            <rect className="bb-mini-bar" x="83" y="17" width="10" height="48" rx="2" />
+            <path className="bb-mini-current" d="M12 39L28 34L48 21L68 28L88 10L105 15" />
+            <circle className="bb-mini-node bb-mini-node--alt" cx="88" cy="10" r="3.5" />
+          </>
+        ) : kind === "logic" ? (
+          <>
+            <path className="bb-mini-grid" d="M12 18H108M12 38H108M12 58H108M30 8V68M60 8V68M90 8V68" />
+            <path className="bb-mini-circuit" d="M9 18H30V38H60V18H91V48H109M60 38V58H30V65H12" />
+            <circle className="bb-mini-node" cx="30" cy="18" r="5" />
+            <circle className="bb-mini-node bb-mini-node--alt" cx="60" cy="38" r="5" />
+            <circle className="bb-mini-node" cx="91" cy="18" r="5" />
+            <circle className="bb-mini-node bb-mini-node--alt" cx="91" cy="48" r="4" />
+            <circle className="bb-mini-signal" cx="30" cy="18" r="2" />
+          </>
+        ) : kind === "spatial" ? (
+          <>
+            <g className="bb-mini-orbit">
+              <ellipse className="bb-mini-ring" cx="60" cy="38" rx="32" ry="12" transform="rotate(-33 60 38)" />
+              <ellipse className="bb-mini-ring bb-mini-ring--alt" cx="60" cy="38" rx="32" ry="12" transform="rotate(33 60 38)" />
+            </g>
+            <circle className="bb-mini-ring" cx="60" cy="38" r="24" />
+            <path className="bb-mini-crystal" d="M60 17L78 37L60 59L42 37Z" />
+            <path className="bb-mini-crystal bb-mini-crystal--inner" d="M60 27L69 37L60 49L51 37Z" />
+            <circle className="bb-mini-node" cx="60" cy="38" r="3.5" />
+          </>
+        ) : kind === "focus" ? (
+          <>
+            <circle className="bb-mini-ring" cx="60" cy="38" r="27" />
+            <circle className="bb-mini-ring bb-mini-ring--alt" cx="60" cy="38" r="17" />
+            <circle className="bb-mini-ring" cx="60" cy="38" r="7" />
+            <path className="bb-mini-sweep" d="M60 38L60 10A28 28 0 0 1 83 23Z" />
+            <path className="bb-mini-current" d="M10 38H25M95 38H110M60 5V18M60 58V71" />
+            <circle className="bb-mini-node" cx="60" cy="38" r="3" />
+          </>
+        ) : kind === "baseline" ? (
+          <>
+            <path className="bb-mini-grid" d="M9 19H111M9 38H111M9 57H111" />
+            <path className="bb-mini-current bb-mini-trace" d="M7 40H24L32 39L39 18L48 58L57 31L65 42H79L87 25L94 40H113" />
+            <circle className="bb-mini-node" cx="87" cy="25" r="4" />
+          </>
+        ) : (
+          <>
+            <circle className="bb-mini-ring" cx="60" cy="38" r="29" />
+            <circle className="bb-mini-ring bb-mini-ring--alt" cx="60" cy="38" r="19" />
+            <path className="bb-mini-crystal" d="M60 11L69 29L91 22L80 42L92 56L68 55L60 67L49 54L29 58L39 39L28 23L51 28Z" />
+            <circle className="bb-mini-node" cx="60" cy="38" r="5" />
+            <circle className="bb-mini-node bb-mini-node--alt" cx="30" cy="17" r="3" />
+            <circle className="bb-mini-node bb-mini-node--alt" cx="94" cy="58" r="3" />
+          </>
+        )}
+      </svg>
+      <span className="bb-game-miniature__launch">↗</span>
+    </span>
+  );
+}
 
 export default function BrainBoostLandingSection() {
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
@@ -466,7 +609,7 @@ export default function BrainBoostLandingSection() {
                         <span className="block font-black tracking-tight text-white">{game.title}</span>
                         <span className="mt-2 block text-xs leading-5 text-slate-400">{game.description}</span>
                       </div>
-                      <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-300/30 bg-cyan-300/[0.07] text-lg text-cyan-100 transition group-hover:bg-cyan-300/[0.16]">↗</span>
+                      <GameMiniature id={game.id} />
                     </div>
                     <div className="mt-4 flex items-center justify-between gap-2 border-t border-white/[0.08] pt-3">
                       <span className="text-[8px] font-bold uppercase tracking-wider text-slate-500">Neural arcade</span>
