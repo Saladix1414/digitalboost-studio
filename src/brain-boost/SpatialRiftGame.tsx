@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import BrainBoostCanvas from "./BrainBoostCanvas";
+import SpatialRiftPhaserLayer from "./SpatialRiftPhaserLayer";
 import {
   drawSpatialChoicePreview,
   drawSpatialRiftScene,
@@ -103,13 +104,16 @@ function SpatialSceneCanvas({ puzzle }: { puzzle: SpatialPuzzle }) {
   }, [puzzle]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={720}
-      height={320}
-      aria-hidden="true"
-      className="block h-64 w-full sm:h-72"
-    />
+    <div className="relative h-64 w-full sm:h-72">
+      <canvas
+        ref={canvasRef}
+        width={720}
+        height={320}
+        aria-hidden="true"
+        className="absolute inset-0 block h-full w-full"
+      />
+      <SpatialRiftPhaserLayer />
+    </div>
   );
 }
 
