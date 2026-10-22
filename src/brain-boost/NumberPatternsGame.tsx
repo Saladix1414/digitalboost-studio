@@ -70,6 +70,10 @@ export default function NumberPatternsGame() {
     [coreLevel, round, seed],
   );
 
+  const sequenceTerms = (puzzle.sequence ?? []).slice(0, 5).map(Number);
+  const sequenceDeltas = sequenceTerms.slice(1).map(
+    (term, index) => term - sequenceTerms[index],
+  );
   const roundsInRun = getRoundsInRun(coreLevel);
   const isFinalRun = coreLevel + roundsInRun - 1 >= MAX_LEVEL;
 
@@ -238,15 +242,81 @@ export default function NumberPatternsGame() {
                 {puzzle.prompt}
               </p>
 
-              <div className="my-5 flex flex-wrap items-center justify-center gap-2 rounded-xl border border-cyan-300/15 bg-black/20 p-4 sm:gap-3">
-                {puzzle.sequence?.map((item, index) => (
-                  <div
-                    key={`${index}-${item}`}
-                    className="flex min-h-12 min-w-12 items-center justify-center rounded-lg border border-cyan-200/20 bg-cyan-300/[0.07] px-3 text-lg font-black text-cyan-100 sm:min-h-14 sm:min-w-14 sm:text-xl"
-                  >
-                    {item}
+              <div
+                aria-label="Secuencia numérica"
+                className="my-5 rounded-2xl border border-cyan-300/20 bg-[#06111f]/90 p-4 sm:p-5"
+              >
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-200">
+                    Secuencia observada
+                  </p>
+                  <span className="rounded-md border border-cyan-300/15 px-2 py-1 text-[9px] font-bold tracking-wider text-slate-400">
+                    REGLA OCULTA
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-3">
+                  {puzzle.sequence?.map((item, index) => {
+                    const isUnknown = item === "?";
+
+                    return (
+                      <div
+                        key={index + "-" + item}
+                        className={
+                          "flex min-h-[76px] min-w-0 flex-col items-center justify-center gap-2 rounded-xl border px-1 py-3 transition-colors " +
+                          (isUnknown
+                            ? "border-amber-200/50 bg-gradient-to-b from-amber-200/15 to-orange-300/[0.06] shadow-[0_0_22px_rgba(251,191,36,.12)]"
+                            : "border-cyan-200/20 bg-cyan-300/[0.05]")
+                        }
+                      >
+                        <span
+                          className={
+                            "text-[9px] font-black tracking-widest " +
+                            (isUnknown ? "text-amber-200" : "text-cyan-300/60")
+                          }
+                        >
+                          {isUnknown ? "SIGUIENTE" : "T" + (index + 1)}
+                        </span>
+                        <span
+                          className={
+                            "font-mono text-xl font-black sm:text-2xl " +
+                            (isUnknown ? "text-amber-100" : "text-cyan-50")
+                          }
+                        >
+                          {item}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {hintsUsed > 0 && (
+                  <div className="mt-4 rounded-xl border border-violet-300/20 bg-violet-300/[0.04] p-3">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-violet-200">
+                        Diferencias consecutivas
+                      </p>
+                      <span className="text-[9px] font-bold text-slate-500">
+                        Término siguiente − anterior
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {sequenceDeltas.map((difference, index) => (
+                        <div
+                          key={index}
+                          className="rounded-lg border border-violet-300/15 bg-slate-950/80 px-1 py-2 text-center"
+                        >
+                          <span className="block text-[9px] font-bold text-slate-500">
+                            Δ{index + 1}
+                          </span>
+                          <span className="mt-1 block text-base font-black text-violet-100">
+                            {difference > 0 ? "+" : ""}{difference}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
+                )}
               </div>
 
               <p className="mb-3 mt-6 text-xs font-bold uppercase tracking-widest text-slate-400">
