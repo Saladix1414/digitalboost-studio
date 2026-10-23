@@ -4,6 +4,10 @@ import {
   playBrainBoostSfx,
   startBrainBoostAmbience,
   stopBrainBoostAmbience,
+  isBrainBoostAudioEnabled,
+  subscribeBrainBoostAudioEnabled,
+  startBrainBoostMusic,
+  stopBrainBoostMusic,
 } from "./brainBoostAudio";
 import {
   generateLogicPuzzle,
@@ -79,12 +83,24 @@ export default function LogicReactorGame() {
   const isFinalRun = coreLevel + roundsInRun - 1 >= MAX_LEVEL;
 
   useEffect(() => {
-    if (phase === "playing") {
-      startBrainBoostAmbience("logic-reactor");
-    } else {
+    const syncAudio = (enabled: boolean) => {
+      if (phase === "playing" && enabled) {
+        startBrainBoostAmbience("logic-reactor");
+        startBrainBoostMusic("logic-reactor");
+      } else {
+        stopBrainBoostMusic("logic-reactor");
+        stopBrainBoostAmbience("logic-reactor");
+      }
+    };
+
+    syncAudio(isBrainBoostAudioEnabled());
+    const unsubscribe = subscribeBrainBoostAudioEnabled(syncAudio);
+
+    return () => {
+      unsubscribe();
+      stopBrainBoostMusic("logic-reactor");
       stopBrainBoostAmbience("logic-reactor");
-    }
-    return () => stopBrainBoostAmbience("logic-reactor");
+    };
   }, [phase]);
 
   function beginRun(level: number, nextSeed: number) {

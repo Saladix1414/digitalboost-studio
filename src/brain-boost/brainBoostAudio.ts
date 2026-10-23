@@ -353,7 +353,8 @@ export function stopBrainBoostAmbience(game?: BrainBoostGame): void {
   }, 380);
 }
 
-type CyberAssaultMusicState = {
+type BrainBoostMusicState = {
+  game: BrainBoostGame;
   context: AudioContext;
   envelope: GainNode;
   timer: number;
@@ -361,7 +362,16 @@ type CyberAssaultMusicState = {
   nextAt: number;
 };
 
-let cyberAssaultMusic: CyberAssaultMusicState | null = null;
+type MusicPattern = {
+  bpm: number;
+  melody: Array<number | null>;
+  bass: number[];
+  shifts: number[];
+  wave: OscillatorType;
+  style: "relics" | "ocean" | "reactor" | "number" | "rift";
+};
+
+let activeMusic: BrainBoostMusicState | null = null;
 
 const CYBER_MELODY: Array<number | null> = [
   64, null, 67, 71, 74, null, 71, 67,
@@ -478,7 +488,7 @@ function cyberKick(
 }
 
 function scheduleCyberStep(
-  state: CyberAssaultMusicState,
+  state: BrainBoostMusicState,
   step: number,
   at: number,
 ): void {
@@ -518,13 +528,133 @@ function scheduleCyberStep(
   }
 }
 
-export function startCyberAssaultMusic(): void {
+const MUSIC_PATTERNS: Partial<Record<BrainBoostGame, MusicPattern>> = {
+  "memory-pairs": {
+    bpm: 96,
+    melody: [60, null, 67, 72, 71, null, 67, 64, 60, null, 64, 67, 69, null, 67, null],
+    bass: [36, 43, 31, 38],
+    shifts: [0, 3, -2, 5],
+    wave: "triangle",
+    style: "relics",
+  },
+  "ocean-echoes": {
+    bpm: 74,
+    melody: [57, null, null, 64, null, 69, null, null, 64, null, 60, null, 57, null, null, null],
+    bass: [33, 33, 29, 31],
+    shifts: [0, 0, -2, 3],
+    wave: "sine",
+    style: "ocean",
+  },
+  "logic-reactor": {
+    bpm: 106,
+    melody: [52, null, 59, 63, null, 66, 63, null, 58, null, 61, 65, null, 70, 65, null],
+    bass: [28, 35, 31, 27],
+    shifts: [0, 3, -1, 2],
+    wave: "square",
+    style: "reactor",
+  },
+  "number-patterns": {
+    bpm: 124,
+    melody: [60, 64, 67, 72, 71, 67, 64, 60, 62, 65, 69, 74, 72, 69, 65, 62],
+    bass: [36, 43, 40, 38],
+    shifts: [0, 2, 5, 7],
+    wave: "square",
+    style: "number",
+  },
+  "spatial-rift": {
+    bpm: 88,
+    melody: [57, null, 64, null, 69, null, 72, null, 67, null, 74, null, 76, null, 72, null],
+    bass: [33, 38, 31, 40],
+    shifts: [0, 5, 3, 7],
+    wave: "sine",
+    style: "rift",
+  },
+};
+
+function schedulePatternStep(
+  state: BrainBoostMusicState,
+  step: number,
+  at: number,
+): void {
+  const pattern = MUSIC_PATTERNS[state.game];
+  if (!pattern) return;
+
+  const context = state.context;
+  const pos = step % 16;
+  const bar = Math.floor(step / 16) % 4;
+  const melody = pattern.melody[pos];
+  const ocean = pattern.style === "ocean";
+  const rift = pattern.style === "rift";
+
+  if (melody !== null && melody !== undefined) {
+    cyberTone(
+      context,
+      state.envelope,
+      melody + pattern.shifts[bar],
+      at,
+      ocean ? 0.34 : rift ? 0.2 : 0.12,
+      ocean ? 0.018 : rift ? 0.025 : 0.032,
+      pattern.wave,
+    );
+  }
+
+  if (pos % (ocean || rift ? 8 : 4) === 0) {
+    const bass = pattern.bass[bar] + pattern.shifts[bar];
+    cyberTone(
+      context,
+      state.envelope,
+      bass,
+      at,
+      ocean ? 0.42 : rift ? 0.3 : 0.19,
+      ocean ? 0.026 : 0.045,
+      ocean || rift ? "sine" : "triangle",
+    );
+  }
+
+  if (
+    (pattern.style === "reactor" || pattern.style === "number") &&
+    (pos === 0 || pos === 8)
+  ) {
+    cyberKick(context, state.envelope, at);
+  }
+
+  if (pattern.style === "reactor" && (pos === 4 || pos === 12)) {
+    cyberNoise(context, state.envelope, at, 0.055, 0.007, 2400);
+  }
+
+  if (rift && pos === 8) {
+    cyberNoise(context, state.envelope, at, 0.12, 0.003, 1100);
+  }
+
+  if (pattern.style === "number" && pos % 4 === 2) {
+    cyberTone(
+      context, state.envelope,
+      pattern.melody[(pos + 2) % 16] ?? 67,
+      at, 0.065, 0.009, "triangle",
+    );
+  }
+}
+
+function scheduleBrainBoostMusicStep(
+  state: BrainBoostMusicState,
+  step: number,
+  at: number,
+): void {
+  if (state.game === "memory-matrix") {
+    scheduleCyberStep(state, step, at);
+  } else {
+    schedulePatternStep(state, step, at);
+  }
+}
+
+export function startBrainBoostMusic(game: BrainBoostGame): void {
   if (!isBrainBoostAudioEnabled()) return;
+  if (game !== "memory-matrix" && !MUSIC_PATTERNS[game]) return;
 
   const audio = getGraph();
   if (!audio || audio.context.state === "closed") return;
 
-  if (cyberAssaultMusic?.context === audio.context) {
+  if (activeMusic?.game === game && activeMusic.context === audio.context) {
     resume(audio.context);
     return;
   }
@@ -540,37 +670,45 @@ export function startCyberAssaultMusic(): void {
   envelope.gain.exponentialRampToValueAtTime(0.9, now + 0.3);
   envelope.connect(audio.music);
 
-  const state: CyberAssaultMusicState = {
+  const state: BrainBoostMusicState = {
+    game,
     context,
     envelope,
     timer: 0,
     step: 0,
     nextAt: now + 0.04,
   };
-  cyberAssaultMusic = state;
+  activeMusic = state;
 
-  const stepDuration = 60 / 112 / 4;
+  const bpm = game === "memory-matrix"
+    ? 112
+    : MUSIC_PATTERNS[game]?.bpm ?? 112;
+  const stepDuration = 60 / bpm / 4;
 
   state.timer = window.setInterval(() => {
-    if (cyberAssaultMusic !== state || context.state === "closed") {
+    if (activeMusic !== state || context.state === "closed") {
       window.clearInterval(state.timer);
       return;
     }
 
     const horizon = context.currentTime + 0.12;
     while (state.nextAt < horizon) {
-      scheduleCyberStep(state, state.step, state.nextAt);
+      scheduleBrainBoostMusicStep(state, state.step, state.nextAt);
       state.step = (state.step + 1) % 64;
       state.nextAt += stepDuration;
     }
   }, 25);
 }
 
-export function stopBrainBoostMusic(): void {
-  const state = cyberAssaultMusic;
-  if (!state) return;
+export function startCyberAssaultMusic(): void {
+  startBrainBoostMusic("memory-matrix");
+}
 
-  cyberAssaultMusic = null;
+export function stopBrainBoostMusic(game?: BrainBoostGame): void {
+  const state = activeMusic;
+  if (!state || (game && state.game !== game)) return;
+
+  activeMusic = null;
   window.clearInterval(state.timer);
   if (state.context.state === "closed") return;
 

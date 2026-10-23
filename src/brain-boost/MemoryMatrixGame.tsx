@@ -148,7 +148,7 @@ export default function MemoryMatrixGame() {
 
   useEffect(() => {
     return () => {
-      stopBrainBoostMusic();
+      stopBrainBoostMusic("memory-matrix");
       if (transitionTimerRef.current !== null) clearTimeout(transitionTimerRef.current);
       if (feedbackTimerRef.current !== null) clearTimeout(feedbackTimerRef.current);
       if (audioContextRef.current) {
@@ -163,7 +163,7 @@ export default function MemoryMatrixGame() {
 
   useEffect(() => {
     if (phase === "ready" || phase === "game-over") {
-      stopBrainBoostMusic();
+      stopBrainBoostMusic("memory-matrix");
     }
   }, [phase]);
 
@@ -173,7 +173,7 @@ export default function MemoryMatrixGame() {
       setSoundEnabled(enabled);
 
       if (!enabled) {
-        stopBrainBoostMusic();
+        stopBrainBoostMusic("memory-matrix");
       } else if (phase !== "ready" && phase !== "game-over") {
         startCyberAssaultMusic();
       }
@@ -240,7 +240,7 @@ export default function MemoryMatrixGame() {
     if (soundEnabled && isBrainBoostAudioEnabled()) {
       startCyberAssaultMusic();
     } else {
-      stopBrainBoostMusic();
+      stopBrainBoostMusic("memory-matrix");
     }
     if (soundEnabled) playTeslaNote(110, 0.22, 0.014, "triangle");
 
@@ -391,7 +391,7 @@ export default function MemoryMatrixGame() {
                     startCyberAssaultMusic();
                   }
                 } else {
-                  stopBrainBoostMusic();
+                  stopBrainBoostMusic("memory-matrix");
                   const context = audioContextRef.current;
                   audioContextRef.current = null;
                   if (context && context.state !== "closed") {

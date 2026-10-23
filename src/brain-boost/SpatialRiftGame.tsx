@@ -4,6 +4,10 @@ import {
   playBrainBoostSfx,
   startBrainBoostAmbience,
   stopBrainBoostAmbience,
+  isBrainBoostAudioEnabled,
+  subscribeBrainBoostAudioEnabled,
+  startBrainBoostMusic,
+  stopBrainBoostMusic,
 } from "./brainBoostAudio";
 import SpatialRiftPhaserLayer from "./SpatialRiftPhaserLayer";
 import {
@@ -196,12 +200,24 @@ export default function SpatialRiftGame() {
   const isFinalRun = coreLevel + roundsInRun - 1 >= MAX_LEVEL;
 
   useEffect(() => {
-    if (phase === "playing") {
-      startBrainBoostAmbience("spatial-rift");
-    } else {
+    const syncAudio = (enabled: boolean) => {
+      if (phase === "playing" && enabled) {
+        startBrainBoostAmbience("spatial-rift");
+        startBrainBoostMusic("spatial-rift");
+      } else {
+        stopBrainBoostMusic("spatial-rift");
+        stopBrainBoostAmbience("spatial-rift");
+      }
+    };
+
+    syncAudio(isBrainBoostAudioEnabled());
+    const unsubscribe = subscribeBrainBoostAudioEnabled(syncAudio);
+
+    return () => {
+      unsubscribe();
+      stopBrainBoostMusic("spatial-rift");
       stopBrainBoostAmbience("spatial-rift");
-    }
-    return () => stopBrainBoostAmbience("spatial-rift");
+    };
   }, [phase]);
 
   function beginRun(level: number, nextSeed: number) {

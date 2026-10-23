@@ -4,6 +4,8 @@ import {
   isBrainBoostAudioEnabled,
   setBrainBoostAudioEnabled,
   subscribeBrainBoostAudioEnabled,
+  startBrainBoostMusic,
+  stopBrainBoostMusic,
 } from "./brainBoostAudio";
 
 type MemoryPairsMode = "ocean" | "originx";
@@ -248,6 +250,26 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
       }
     });
   }, []);
+
+  useEffect(() => {
+    const game = isOcean ? "ocean-echoes" : "memory-pairs";
+
+    const syncMusic = (enabled: boolean) => {
+      if (enabled && phase === "playing") {
+        startBrainBoostMusic(game);
+      } else {
+        stopBrainBoostMusic(game);
+      }
+    };
+
+    syncMusic(isBrainBoostAudioEnabled());
+    const unsubscribe = subscribeBrainBoostAudioEnabled(syncMusic);
+
+    return () => {
+      unsubscribe();
+      stopBrainBoostMusic(game);
+    };
+  }, [isOcean, phase]);
 
   function clearPendingFlipTimer() {
     if (flipTimerRef.current !== null) {
