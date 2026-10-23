@@ -67,6 +67,18 @@ let enabledCache: boolean | null = null;
 let graph: AudioGraph | null = null;
 let activeScene: AmbientScene | null = null;
 
+type AudioPreferenceListener = (enabled: boolean) => void;
+const audioPreferenceListeners = new Set<AudioPreferenceListener>();
+
+export function subscribeBrainBoostAudioEnabled(
+  listener: AudioPreferenceListener,
+): () => void {
+  audioPreferenceListeners.add(listener);
+  return () => {
+    audioPreferenceListeners.delete(listener);
+  };
+}
+
 export function isBrainBoostAudioEnabled(): boolean {
   if (enabledCache !== null) return enabledCache;
 
@@ -149,6 +161,14 @@ function resume(context: AudioContext): void {
 
 export function setBrainBoostAudioEnabled(value: boolean): void {
   enabledCache = value;
+
+  for (const listener of [...audioPreferenceListeners]) {
+    try {
+      listener(value);
+    } catch {
+      // Un suscriptor no debe impedir que se aplique el silencio global.
+    }
+  }
 
   try {
     window.localStorage.setItem(STORAGE_KEY, String(value));

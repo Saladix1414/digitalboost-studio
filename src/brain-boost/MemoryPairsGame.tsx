@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import BrainBoostCanvas from "./BrainBoostCanvas";
+import {
+  isBrainBoostAudioEnabled,
+  setBrainBoostAudioEnabled,
+  subscribeBrainBoostAudioEnabled,
+} from "./brainBoostAudio";
 
 type MemoryPairsMode = "ocean" | "originx";
 type Phase = "ready" | "playing" | "won";
@@ -183,7 +188,7 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
   const [moves, setMoves] = useState(0);
   const [score, setScore] = useState(0);
   const [elapsed, setElapsed] = useState(0);
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(isBrainBoostAudioEnabled);
   const [bestScore, setBestScore] = useState(() => loadBestScore(mode));
   const [message, setMessage] = useState(
     isOcean
@@ -219,6 +224,31 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
     }
   }, []);
 
+  useEffect(() => {
+    return subscribeBrainBoostAudioEnabled((enabled) => {
+      setSoundEnabled(enabled);
+      if (enabled) return;
+
+      if (soundFadeTimerRef.current !== null) {
+        window.clearInterval(soundFadeTimerRef.current);
+        soundFadeTimerRef.current = null;
+      }
+
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+
+      if (audioContextRef.current) {
+        const context = audioContextRef.current;
+        audioContextRef.current = null;
+        if (context.state !== "closed") {
+          void context.close().catch(() => undefined);
+        }
+      }
+    });
+  }, []);
+
   function clearPendingFlipTimer() {
     if (flipTimerRef.current !== null) {
       window.clearTimeout(flipTimerRef.current);
@@ -227,7 +257,7 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
   }
 
   function playSpeciesSound(card: MemoryCard) {
-    if (!isOcean || !soundEnabled || !card.soundFile) return;
+    if (!isOcean || !soundEnabled || !isBrainBoostAudioEnabled() || !card.soundFile) return;
 
     if (soundFadeTimerRef.current !== null) {
       window.clearInterval(soundFadeTimerRef.current);
@@ -305,48 +335,139 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
     effect: "start" | "reveal" | "match" | "miss" | "win",
     tone: Species["tone"] = "cyan",
   ) {
-    if (isOcean || !soundEnabled) return;
+    if (isOcean || !soundEnabled || !isBrainBoostAudioEnabled()) return;
     const context = getSynthContext();
     if (!context) return;
 
     const roots: Record<Species["tone"], number> = {
-      cyan: 392,
-      violet: 329.63,
-      blue: 349.23,
-      emerald: 293.66,
-      amber: 440,
+      cyan: 220,
+      violet: 196,
+      blue: 174.61,
+      emerald: 164.81,
+      amber: 246.94,
     };
-    const root = roots[tone];
-    const patterns: Record<typeof effect, number[]> = {
-      start: [root * 0.5, root * 0.75, root],
-      reveal: [root * 1.5],
-      match: [root, root * 1.25, root * 1.5],
-      miss: [root * 0.72, root * 0.55],
-      win: [root, root * 1.25, root * 1.5, root * 2],
-    };
-    const duration = effect === "reveal" ? 0.075 : effect === "miss" ? 0.13 : effect === "win" ? 0.17 : 0.12;
-    const level = effect === "reveal" ? 0.010 : effect === "miss" ? 0.010 : effect === "win" ? 0.015 : 0.012;
-    const wave: OscillatorType = effect === "miss" ? "sawtooth" : effect === "reveal" ? "square" : "triangle";
-    const now = context.currentTime;
 
-    patterns[effect].forEach((frequency, index) => {
-      const startAt = now + index * 0.055;
+    const scales: Record<Species["tone"], number[]> = {
+      cyan: [0, 7, 12, 16],
+      violet: [0, 3, 7, 10],
+      blue: [0, 5, 7, 12],
+      emerald: [0, 4, 7, 11],
+      amber: [0, 2, 7, 9],
+    };
+
+    const root = roots[tone];
+    const scale = scales[tone];
+    const startAt = context.currentTime + 0.02;
+
+    function note(
+      frequency: number,
+      offset: number,
+      duration: number,
+      level: number,
+      wave: OscillatorType = "sine",
+      detune = 0,
+    ) {
+      const at = startAt + offset;
       const oscillator = context.createOscillator();
+      const filter = context.createBiquadFilter();
       const gain = context.createGain();
+
       oscillator.type = wave;
-      oscillator.frequency.setValueAtTime(frequency, startAt);
-      gain.gain.setValueAtTime(0.0001, startAt);
-      gain.gain.exponentialRampToValueAtTime(level, startAt + 0.012);
-      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
-      oscillator.connect(gain);
+      oscillator.frequency.setValueAtTime(
+        Math.max(55, Math.min(1760, frequency)),
+        at,
+      );
+      oscillator.detune.setValueAtTime(detune, at);
+
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(
+        Math.min(5200, Math.max(850, frequency * 5.5)),
+        at,
+      );
+      filter.Q.setValueAtTime(0.55, at);
+
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(level, at + 0.035);
+      gain.gain.setValueAtTime(level, at + duration * 0.42);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + duration);
+
+      oscillator.connect(filter);
+      filter.connect(gain);
       gain.connect(context.destination);
+
       oscillator.addEventListener("ended", () => {
         oscillator.disconnect();
+        filter.disconnect();
         gain.disconnect();
       }, { once: true });
-      oscillator.start(startAt);
-      oscillator.stop(startAt + duration + 0.02);
+
+      oscillator.start(at);
+      oscillator.stop(at + duration + 0.04);
+    }
+
+    if (effect === "reveal") {
+      scale.slice(0, 3).forEach((interval, index) => {
+        note(
+          root * Math.pow(2, interval / 12),
+          index * 0.085,
+          0.34,
+          0.008,
+          "sine",
+          index % 2 ? 4 : -4,
+        );
+      });
+      note(root * 0.5, 0, 0.44, 0.003, "triangle");
+      return;
+    }
+
+    if (effect === "start") {
+      note(root * 0.5, 0, 0.68, 0.005, "sine", -3);
+      scale.slice(0, 3).forEach((interval, index) => {
+        note(
+          root * Math.pow(2, interval / 12),
+          0.13 + index * 0.12,
+          0.48,
+          0.006,
+          "triangle",
+        );
+      });
+      return;
+    }
+
+    if (effect === "match") {
+      [0, 1, 2].forEach((index) => {
+        note(
+          root * Math.pow(2, scale[index] / 12),
+          index * 0.075,
+          0.43,
+          0.008,
+          "sine",
+          index === 1 ? 3 : 0,
+        );
+      });
+      note(root * 0.5, 0, 0.52, 0.0035, "triangle");
+      return;
+    }
+
+    if (effect === "miss") {
+      note(root * Math.pow(2, -3 / 12), 0, 0.28, 0.006, "triangle");
+      note(root * Math.pow(2, -7 / 12), 0.12, 0.38, 0.005, "sine");
+      note(root * 0.5, 0.02, 0.36, 0.0025, "sine");
+      return;
+    }
+
+    note(root * 0.5, 0, 0.78, 0.004, "sine", -4);
+    scale.forEach((interval, index) => {
+      note(
+        root * Math.pow(2, interval / 12),
+        index * 0.085,
+        0.62,
+        0.007,
+        "triangle",
+        index % 2 ? 3 : -2,
+      );
     });
+    note(root * 2, 0.16, 0.58, 0.0025, "sine", 5);
   }
 
   function startGame() {
@@ -460,7 +581,6 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
           : "border-violet-300/35 bg-gradient-to-br from-[#101b43] via-[#0a1029] to-[#2a102b]"
       }`}
     >
-      <BrainBoostCanvas theme={isOcean ? "ocean" : "dragon"} intensity={0.24} seed={59} />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 opacity-20"
@@ -469,6 +589,8 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
           backgroundSize: "24px 24px",
         }}
       />
+
+<BrainBoostCanvas theme={isOcean ? "ocean" : "dragon"} intensity={0.24} seed={59} />
 
       <div className="relative">
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -488,9 +610,17 @@ export default function MemoryPairsGame({ mode }: { mode: MemoryPairsMode }) {
             onClick={() => {
               const next = !soundEnabled;
               setSoundEnabled(next);
+              setBrainBoostAudioEnabled(next);
               if (!next && audioRef.current) {
                 audioRef.current.pause();
                 audioRef.current = null;
+              }
+              if (!next && audioContextRef.current) {
+                const context = audioContextRef.current;
+                audioContextRef.current = null;
+                if (context.state !== "closed") {
+                  void context.close().catch(() => undefined);
+                }
               }
               if (next && !isOcean) {
                 const context = getSynthContext();

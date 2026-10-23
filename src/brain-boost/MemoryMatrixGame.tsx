@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import BrainBoostCanvas from "./BrainBoostCanvas";
+import {
+  isBrainBoostAudioEnabled,
+  setBrainBoostAudioEnabled,
+  subscribeBrainBoostAudioEnabled,
+  startCyberAssaultMusic,
+  stopBrainBoostMusic,
+} from "./brainBoostAudio";
 
 type GamePhase = "ready" | "showing" | "input" | "round-clear" | "game-over";
 
@@ -46,14 +53,26 @@ export default function MemoryMatrixGame() {
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [bestScore, setBestScore] = useState<number>(readBestScore);
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(isBrainBoostAudioEnabled);
   const soundEnabledRef = useRef(soundEnabled);
+  const [answerFeedback, setAnswerFeedback] = useState<{ cell: number; kind: "correct" | "incorrect" } | null>(null);
   const [message, setMessage] = useState(
     "Observá las señales, memorizá la ruta y reproducila en el mismo orden.",
   );
 
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!answerFeedback) return;
+
+    const snapshot = answerFeedback;
+    const timer = window.setTimeout(() => {
+      setAnswerFeedback((current) => current === snapshot ? null : current);
+    }, snapshot.kind === "incorrect" ? 520 : 260);
+
+    return () => window.clearTimeout(timer);
+  }, [answerFeedback]);
   const audioContextRef = useRef<AudioContext | null>(null);
 
   function getAudioContext(): AudioContext | null {
@@ -129,6 +148,7 @@ export default function MemoryMatrixGame() {
 
   useEffect(() => {
     return () => {
+      stopBrainBoostMusic();
       if (transitionTimerRef.current !== null) clearTimeout(transitionTimerRef.current);
       if (feedbackTimerRef.current !== null) clearTimeout(feedbackTimerRef.current);
       if (audioContextRef.current) {
@@ -140,6 +160,25 @@ export default function MemoryMatrixGame() {
   }, []);
 
 
+
+  useEffect(() => {
+    if (phase === "ready" || phase === "game-over") {
+      stopBrainBoostMusic();
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    return subscribeBrainBoostAudioEnabled((enabled) => {
+      soundEnabledRef.current = enabled;
+      setSoundEnabled(enabled);
+
+      if (!enabled) {
+        stopBrainBoostMusic();
+      } else if (phase !== "ready" && phase !== "game-over") {
+        startCyberAssaultMusic();
+      }
+    });
+  }, [phase]);
 
   useEffect(() => {
     if (phase !== "showing") return;
@@ -198,6 +237,11 @@ export default function MemoryMatrixGame() {
 
   function startGame() {
     clearPendingTimers();
+    if (soundEnabled && isBrainBoostAudioEnabled()) {
+      startCyberAssaultMusic();
+    } else {
+      stopBrainBoostMusic();
+    }
     if (soundEnabled) playTeslaNote(110, 0.22, 0.014, "triangle");
 
     setRound(1);
@@ -216,6 +260,10 @@ export default function MemoryMatrixGame() {
 
     playTeslaPulse(cell, cell !== sequence[inputIndex]);
     setActiveCell(cell);
+    setAnswerFeedback({
+      cell,
+      kind: cell === sequence[inputIndex] ? "correct" : "incorrect",
+    });
 
     if (feedbackTimerRef.current !== null) {
       clearTimeout(feedbackTimerRef.current);
@@ -271,6 +319,11 @@ export default function MemoryMatrixGame() {
       transitionTimerRef.current = null;
     }, Math.max(1150, melodyDurationMs + 180));
   }
+
+  const sequenceProgress =
+    phase === "input" ? inputIndex :
+    phase === "showing" ? playbackIndex :
+    phase === "round-clear" ? sequence.length : 0;
 
   const statusLabel =
     phase === "ready" ? "READY" :
@@ -329,11 +382,16 @@ export default function MemoryMatrixGame() {
                 const next = !soundEnabled;
                 soundEnabledRef.current = next;
                 setSoundEnabled(next);
+                setBrainBoostAudioEnabled(next);
 
                 if (next) {
                   const context = getAudioContext();
                   if (context) void context.resume().catch(() => undefined);
+                  if (phase !== "ready" && phase !== "game-over") {
+                    startCyberAssaultMusic();
+                  }
                 } else {
+                  stopBrainBoostMusic();
                   const context = audioContextRef.current;
                   audioContextRef.current = null;
                   if (context && context.state !== "closed") {
@@ -389,9 +447,40 @@ export default function MemoryMatrixGame() {
             </span>
           </div>
 
+          {sequence.length > 0 && (
+            <div
+              className="mb-4 flex gap-1.5"
+              role="progressbar"
+              aria-label="Progreso de la secuencia"
+              aria-valuemin={0}
+              aria-valuemax={sequence.length}
+              aria-valuenow={sequenceProgress}
+            >
+              {sequence.map((_, index) => {
+                const complete = index < sequenceProgress;
+                return (
+                  <span
+                    key={index}
+                    aria-hidden="true"
+                    className={complete
+                      ? phase === "round-clear"
+                        ? "h-1.5 min-w-0 flex-1 rounded-full bg-emerald-300 shadow-[0_0_10px_rgba(110,231,183,.7)]"
+                        : "h-1.5 min-w-0 flex-1 rounded-full bg-gradient-to-r from-cyan-300 to-violet-300 shadow-[0_0_8px_rgba(34,211,238,.45)]"
+                      : "h-1.5 min-w-0 flex-1 rounded-full bg-white/10 transition-colors duration-200"}
+                  />
+                );
+              })}
+            </div>
+          )}
+
           <div className="mx-auto grid w-full max-w-[360px] grid-cols-3 gap-3 sm:gap-4">
             {Array.from({ length: CELL_COUNT }, (_, cell) => {
-              const isLit = activeCell === cell;
+              const answerKind =
+                answerFeedback?.cell === cell ? answerFeedback.kind : null;
+              const isWrongFeedback = answerKind === "incorrect";
+              const isCorrectFeedback = answerKind === "correct";
+              const isLit =
+                activeCell === cell || isWrongFeedback || isCorrectFeedback;
 
               return (
                 <button
@@ -401,16 +490,20 @@ export default function MemoryMatrixGame() {
                   aria-label={`Nodo ${cell + 1}`}
                   onClick={() => handleCellPress(cell)}
                   className={`group relative aspect-square overflow-hidden rounded-full border text-center transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed motion-reduce:transition-none ${
-                    isLit
-                      ? "z-10 scale-[1.04] border-white bg-gradient-to-br from-white via-cyan-100 to-sky-200 shadow-[0_0_20px_rgba(255,255,255,.95),0_0_48px_rgba(34,211,238,.85),0_0_75px_rgba(139,92,246,.4),inset_0_0_24px_white]"
-                      : `${tileTones[cell % tileTones.length]} hover:border-cyan-200/65 hover:bg-cyan-300/[0.09]`
+                    isWrongFeedback
+                      ? "z-10 scale-[1.04] border-rose-100 bg-gradient-to-br from-rose-50 via-rose-200 to-rose-500 shadow-[0_0_20px_rgba(255,228,230,.95),0_0_48px_rgba(244,63,94,.85),0_0_75px_rgba(244,63,94,.4),inset_0_0_24px_white]"
+                      : isCorrectFeedback
+                        ? "z-10 scale-[1.04] border-emerald-50 bg-gradient-to-br from-white via-emerald-100 to-emerald-300 shadow-[0_0_20px_rgba(255,255,255,.95),0_0_48px_rgba(52,211,153,.75),0_0_75px_rgba(16,185,129,.4),inset_0_0_24px_white]"
+                        : isLit
+                          ? "z-10 scale-[1.04] border-white bg-gradient-to-br from-white via-cyan-100 to-sky-200 shadow-[0_0_20px_rgba(255,255,255,.95),0_0_48px_rgba(34,211,238,.85),0_0_75px_rgba(139,92,246,.4),inset_0_0_24px_white]"
+                        : `${tileTones[cell % tileTones.length]} hover:border-cyan-200/65 hover:bg-cyan-300/[0.09]`
                   }`}
                 >
                   <svg viewBox="0 0 100 100" className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
                     <defs>
                       <radialGradient id={"coil-core-" + cell}>
-                        <stop offset="0%" stopColor="#e0faff" stopOpacity={isLit ? 1 : 0.55} />
-                        <stop offset="45%" stopColor="#22d3ee" stopOpacity={isLit ? 0.6 : 0.12} />
+                        <stop offset="0%" stopColor={isWrongFeedback ? "#fff1f2" : isCorrectFeedback ? "#ecfdf5" : "#e0faff"} stopOpacity={isLit ? 1 : 0.55} />
+                        <stop offset="45%" stopColor={isWrongFeedback ? "#fb7185" : isCorrectFeedback ? "#34d399" : "#22d3ee"} stopOpacity={isLit ? 0.6 : 0.12} />
                         <stop offset="100%" stopColor="#071426" stopOpacity="0" />
                       </radialGradient>
                     </defs>
@@ -426,10 +519,10 @@ export default function MemoryMatrixGame() {
                       <path d="M43 67 L36 73 L40 79 L30 85 L34 91" stroke={isLit ? "#ffffff" : "#67e8f9"} />
                       <path d="M57 67 L64 73 L60 79 L70 85 L66 91" stroke={isLit ? "#ffffff" : "#a78bfa"} />
                     </g>
-                    <circle cx="50" cy="50" r="18" fill={isLit ? "#dffbff" : "#0b263d"} stroke={isLit ? "#ffffff" : "#67e8f9"} strokeWidth="2" />
+                    <circle cx="50" cy="50" r="18" fill={isWrongFeedback ? "#ffe4e6" : isCorrectFeedback ? "#d1fae5" : isLit ? "#dffbff" : "#0b263d"} stroke={isWrongFeedback ? "#fb7185" : isCorrectFeedback ? "#34d399" : isLit ? "#ffffff" : "#67e8f9"} strokeWidth="2" />
                     <circle cx="50" cy="50" r="12" fill="none" stroke={isLit ? "#0891b2" : "#164e63"} strokeWidth="1.2" />
-                    <text x="50" y="54" textAnchor="middle" fontSize="10" fontWeight="900" fill={isLit ? "#082f49" : "#e0faff"}>{String(cell + 1).padStart(2, "0")}</text>
-                    <text x="50" y="81" textAnchor="middle" fontSize="5.5" fontWeight="800" letterSpacing="1.2" fill={isLit ? "#ffffff" : "#a5f3fc"}>{isLit ? "PULSE" : "TESLA"}</text>
+                    <text x="50" y="54" textAnchor="middle" fontSize="10" fontWeight="900" fill={isWrongFeedback ? "#881337" : isLit ? "#082f49" : "#e0faff"}>{String(cell + 1).padStart(2, "0")}</text>
+                    <text x="50" y="81" textAnchor="middle" fontSize="5.5" fontWeight="800" letterSpacing="1.2" fill={isLit ? "#ffffff" : "#a5f3fc"}>{isWrongFeedback ? "ERROR" : isCorrectFeedback ? "SYNC" : isLit ? "PULSE" : "TESLA"}</text>
                   </svg>
                   <span className="pointer-events-none absolute inset-0 rounded-full border border-white/10" aria-hidden="true" />
                 </button>
