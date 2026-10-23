@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import BrainBoostCanvas from "./BrainBoostCanvas";
+import {
+  playBrainBoostSfx,
+  startBrainBoostAmbience,
+  stopBrainBoostAmbience,
+} from "./brainBoostAudio";
 import SpatialRiftPhaserLayer from "./SpatialRiftPhaserLayer";
 import {
   drawSpatialChoicePreview,
@@ -190,13 +195,25 @@ export default function SpatialRiftGame() {
   const roundsInRun = getRoundsInRun(coreLevel);
   const isFinalRun = coreLevel + roundsInRun - 1 >= MAX_LEVEL;
 
+  useEffect(() => {
+    if (phase === "playing") {
+      startBrainBoostAmbience("spatial-rift");
+    } else {
+      stopBrainBoostAmbience("spatial-rift");
+    }
+    return () => stopBrainBoostAmbience("spatial-rift");
+  }, [phase]);
+
   function beginRun(level: number, nextSeed: number) {
     setCoreLevel(normalizeCoreLevel(level));
     setSeed(nextSeed);
+    playBrainBoostSfx("spatial-rift", "start");
     dispatch({ type: "START" });
   }
 
   function chooseAnswer(choiceId: string) {
+    if (feedback) return;
+
     const selectedChoice = puzzle.choices.find(
       (choice) => choice.id === choiceId,
     );
@@ -213,6 +230,11 @@ export default function SpatialRiftGame() {
       isSpatialRouteConnected(puzzle, selectedChoice) &&
       choiceId === routeCorrectChoiceId;
 
+    playBrainBoostSfx(
+      "spatial-rift",
+      correct ? "correct" : "incorrect",
+    );
+
     dispatch({
       type: "ANSWER",
       choiceId,
@@ -228,8 +250,18 @@ export default function SpatialRiftGame() {
     );
   }
 
+  function revealHint() {
+    if (feedback || hintsUsed >= 2) return;
+    playBrainBoostSfx("spatial-rift", "hint");
+    dispatch({ type: "REVEAL_HINT" });
+  }
+
   function advanceRound() {
     if (!feedback) return;
+    playBrainBoostSfx(
+      "spatial-rift",
+      round < roundsInRun - 1 ? "advance" : "complete",
+    );
 
     if (round < roundsInRun - 1) {
       dispatch({ type: "ADVANCE", roundsInRun });
@@ -426,7 +458,7 @@ export default function SpatialRiftGame() {
               <div className="mt-5">
                 <button
                   type="button"
-                  onClick={() => dispatch({ type: "REVEAL_HINT" })}
+                  onClick={revealHint}
                   disabled={hintsUsed >= 2}
                   className="rounded-lg border border-violet-300/25 px-4 py-2.5 text-sm font-bold text-violet-200 transition hover:bg-violet-300/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 disabled:cursor-not-allowed disabled:opacity-40"
                 >

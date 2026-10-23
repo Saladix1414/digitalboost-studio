@@ -1,5 +1,10 @@
-import { useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import BrainBoostCanvas from "./BrainBoostCanvas";
+import {
+  playBrainBoostSfx,
+  startBrainBoostAmbience,
+  stopBrainBoostAmbience,
+} from "./brainBoostAudio";
 import {
   generateLogicPuzzle,
   type LogicPuzzle,
@@ -73,13 +78,28 @@ export default function LogicReactorGame() {
   const roundsInRun = getRoundsInRun(coreLevel);
   const isFinalRun = coreLevel + roundsInRun - 1 >= MAX_LEVEL;
 
+  useEffect(() => {
+    if (phase === "playing") {
+      startBrainBoostAmbience("logic-reactor");
+    } else {
+      stopBrainBoostAmbience("logic-reactor");
+    }
+    return () => stopBrainBoostAmbience("logic-reactor");
+  }, [phase]);
+
   function beginRun(level: number, nextSeed: number) {
     setCoreLevel(normalizeCoreLevel(level));
     setSeed(nextSeed);
+    playBrainBoostSfx("logic-reactor", "start");
     dispatch({ type: "START" });
   }
 
   function chooseAnswer(choiceId: string) {
+    if (feedback) return;
+    playBrainBoostSfx(
+      "logic-reactor",
+      choiceId === puzzle.correctChoiceId ? "correct" : "incorrect",
+    );
     dispatch({
       type: "ANSWER",
       choiceId,
@@ -88,11 +108,17 @@ export default function LogicReactorGame() {
   }
 
   function revealHint() {
+    if (feedback || hintsUsed >= 2) return;
+    playBrainBoostSfx("logic-reactor", "hint");
     dispatch({ type: "REVEAL_HINT" });
   }
 
   function advanceRound() {
     if (!feedback) return;
+    playBrainBoostSfx(
+      "logic-reactor",
+      round < roundsInRun - 1 ? "advance" : "complete",
+    );
 
     if (round < roundsInRun - 1) {
       dispatch({ type: "ADVANCE", roundsInRun });
