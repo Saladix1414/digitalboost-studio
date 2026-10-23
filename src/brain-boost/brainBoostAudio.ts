@@ -4,7 +4,8 @@ export type BrainBoostGame =
   | "ocean-echoes"
   | "logic-reactor"
   | "number-patterns"
-  | "spatial-rift";
+  | "spatial-rift"
+  | "focus-protocol";
 
 export type BrainBoostCue =
   | "start"
@@ -49,6 +50,7 @@ const PROFILES: Record<BrainBoostGame, Profile> = {
   "logic-reactor": { root: 164.81, intervals: [0, 4, 7, 11] },
   "number-patterns": { root: 220, intervals: [0, 2, 7, 9] },
   "spatial-rift": { root: 146.83, intervals: [0, 5, 10, 17] },
+  "focus-protocol": { root: 261.63, intervals: [0, 3, 7, 12] },
 };
 
 const CUES: Record<BrainBoostCue, number[]> = {
@@ -368,7 +370,7 @@ type MusicPattern = {
   bass: number[];
   shifts: number[];
   wave: OscillatorType;
-  style: "relics" | "ocean" | "reactor" | "number" | "rift";
+  style: "relics" | "ocean" | "reactor" | "number" | "rift" | "focus";
 };
 
 let activeMusic: BrainBoostMusicState | null = null;
@@ -568,6 +570,14 @@ const MUSIC_PATTERNS: Partial<Record<BrainBoostGame, MusicPattern>> = {
     shifts: [0, 5, 3, 7],
     wave: "sine",
     style: "rift",
+  },
+  "focus-protocol": {
+    bpm: 118,
+    melody: [72, null, 76, 79, null, 76, 83, null, 81, null, 79, 76, null, 74, 76, null],
+    bass: [48, 43, 45, 40],
+    shifts: [0, 2, 5, 3],
+    wave: "triangle",
+    style: "focus",
   },
 };
 
