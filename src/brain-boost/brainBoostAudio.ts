@@ -7,7 +7,8 @@ export type BrainBoostGame =
   | "spatial-rift"
   | "focus-protocol"
   | "signal-hunt"
-  | "vector-routes";
+  | "vector-routes"
+  | "neural-baseline";
 
 export type BrainBoostCue =
   | "start"
@@ -55,6 +56,7 @@ const PROFILES: Record<BrainBoostGame, Profile> = {
   "focus-protocol": { root: 261.63, intervals: [0, 3, 7, 12] },
   "signal-hunt": { root: 329.63, intervals: [0, 7, 10, 14] },
   "vector-routes": { root: 293.66, intervals: [0, 5, 9, 12] },
+  "neural-baseline": { root: 233.08, intervals: [0, 2, 7, 14] },
 };
 
 const CUES: Record<BrainBoostCue, number[]> = {
@@ -374,7 +376,7 @@ type MusicPattern = {
   bass: number[];
   shifts: number[];
   wave: OscillatorType;
-  style: "relics" | "ocean" | "reactor" | "number" | "rift" | "focus" | "signal" | "vector";
+  style: "relics" | "ocean" | "reactor" | "number" | "rift" | "focus" | "signal" | "vector" | "baseline";
 };
 
 let activeMusic: BrainBoostMusicState | null = null;
@@ -599,6 +601,14 @@ const MUSIC_PATTERNS: Partial<Record<BrainBoostGame, MusicPattern>> = {
     wave: "triangle",
     style: "vector",
   },
+  "neural-baseline": {
+    bpm: 102,
+    melody: [65, null, 69, 72, null, 69, 74, null, 72, 69, 67, null, 71, 74, 69, null],
+    bass: [34, 41, 38, 36],
+    shifts: [0, 2, 5, 3],
+    wave: "triangle",
+    style: "baseline",
+  },
 };
 
 function schedulePatternStep(
@@ -615,6 +625,7 @@ function schedulePatternStep(
   const melody = pattern.melody[pos];
   const ocean = pattern.style === "ocean";
   const rift = pattern.style === "rift";
+  const baseline = pattern.style === "baseline";
 
   if (melody !== null && melody !== undefined) {
     cyberTone(
@@ -622,27 +633,27 @@ function schedulePatternStep(
       state.envelope,
       melody + pattern.shifts[bar],
       at,
-      ocean ? 0.34 : rift ? 0.2 : 0.12,
+      ocean ? 0.34 : rift ? 0.2 : baseline ? 0.14 : 0.12,
       ocean ? 0.018 : rift ? 0.025 : 0.032,
       pattern.wave,
     );
   }
 
-  if (pos % (ocean || rift ? 8 : 4) === 0) {
+  if (pos % (ocean || rift || baseline ? 8 : 4) === 0) {
     const bass = pattern.bass[bar] + pattern.shifts[bar];
     cyberTone(
       context,
       state.envelope,
       bass,
       at,
-      ocean ? 0.42 : rift ? 0.3 : 0.19,
+      ocean ? 0.42 : rift ? 0.3 : baseline ? 0.22 : 0.19,
       ocean ? 0.026 : 0.045,
-      ocean || rift ? "sine" : "triangle",
+      ocean || rift || baseline ? "sine" : "triangle",
     );
   }
 
   if (
-    (pattern.style === "reactor" || pattern.style === "number") &&
+    (pattern.style === "reactor" || pattern.style === "number" || baseline) &&
     (pos === 0 || pos === 8)
   ) {
     cyberKick(context, state.envelope, at);
@@ -654,6 +665,10 @@ function schedulePatternStep(
 
   if (rift && pos === 8) {
     cyberNoise(context, state.envelope, at, 0.12, 0.003, 1100);
+  }
+
+  if (baseline && (pos === 2 || pos === 10)) {
+    cyberNoise(context, state.envelope, at, 0.035, 0.002, 4800);
   }
 
   if (pattern.style === "number" && pos % 4 === 2) {
