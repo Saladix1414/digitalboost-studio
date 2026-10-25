@@ -1,11 +1,14 @@
 import * as THREE from 'three';
 import { CONFIG, type GameSimulation } from './GameSimulation';
+import { splitViewports, type Viewport } from './LocalControls';
 import { OBSTACLES } from './SurvivalRules';
 
 /** All world geometry is shared or instanced; combat is read-only here. */
 export class SurvivalWorld {
   readonly scene = new THREE.Scene();
   readonly camera = new THREE.OrthographicCamera(-22, 22, 22, -22, .1, 130);
+  readonly cameras = [this.camera, this.camera.clone()];
+  viewports: Viewport[] = [{ x: 0, y: 0, width: 1, height: 1 }];
   private geometries = new Set<THREE.BufferGeometry>(); private materials = new Set<THREE.Material>(); private textures = new Set<THREE.Texture>();
   private dummy = new THREE.Object3D(); private color = new THREE.Color(); private marine = new THREE.Group();
   private gun = new THREE.Group(); private boots: THREE.Mesh[] = []; private suit!: THREE.MeshStandardMaterial;
@@ -14,9 +17,11 @@ export class SurvivalWorld {
   private items!: THREE.InstancedMesh; private crosses!: THREE.InstancedMesh; private bullets!: THREE.InstancedMesh; private warnings!: THREE.InstancedMesh;
   private stains!: THREE.InstancedMesh; private blasts!: THREE.InstancedMesh; private trails!: THREE.LineSegments; private flame!: THREE.Mesh; private shock!: THREE.Mesh;
   private torch = new THREE.PointLight(0xbde9cf, 12, 14, 1.8); private flash = new THREE.PointLight(0xff9c35, 0, 9, 2);
-  private viewWidth = 44; private viewHeight = 44; private follow = new THREE.Vector2(); private lastTime = 0;
+  private lastTime = 0;
+  private frames = Array.from({ length: 2 }, () => ({ width: 44, height: 44, follow: new THREE.Vector2(), lastPlayer: new THREE.Vector2(0, 3) }));
+  private marineViews: { body: THREE.Group; gun: THREE.Group; boots: THREE.Mesh[]; suit: THREE.MeshStandardMaterial; torch: THREE.PointLight; flash: THREE.PointLight; flame: THREE.Mesh; shock: THREE.Mesh }[] = [];
   private corpses: { x: number; z: number; born: number; id: number }[] = []; private lastEvent = 0;
-  private remains = true; private lastPlayer = new THREE.Vector2(0, 3); private followTarget = new THREE.Vector2();
+  private remains = true; private followTarget = new THREE.Vector2();
   private up = new THREE.Vector3(0, 1, 0); private flameAxis = new THREE.Vector3();
   constructor(private reduced: boolean) { this.build(); }
   private geo<T extends THREE.BufferGeometry>(g: T) { this.geometries.add(g); return g; }
@@ -75,6 +80,7 @@ export class SurvivalWorld {
     const veins = this.pool(this.geo(new THREE.CylinderGeometry(.06, .09, 1, 5)), olive, 100);
     for (let i = 0; i < 100; i++) this.instance(veins, i, Math.sin(i * 5.3) * 21, .08, Math.cos(i * 2.7) * 21, 1, .4 + i % 5 * .3, 1, i * .7, Math.PI / 2);
     veins.count = 100; veins.instanceMatrix.needsUpdate = true;
+    this.gun.name = 'weapon';
     this.suit = this.standard(0xb6c8ad); this.scene.add(this.marine); this.marine.add(this.gun);
     this.marine.scale.setScalar(1.15);
     this.mesh(box, this.suit, this.marine, 0, .7, 0, .65, .8, .45);
@@ -88,6 +94,7 @@ export class SurvivalWorld {
     }
     this.mesh(box, metal, this.gun, .15, .91, .75, .22, .24, .95);
     this.mesh(box, amber, this.gun, .15, .93, 1.25, .12, .13, .12);
+    this.boots.forEach((boot, i) => { boot.name = `boot-${i}`; });
     this.body = this.pool(sphere, shell, CONFIG.maxEnemies);
     this.heads = this.pool(sphere, shell, CONFIG.maxEnemies);
     this.legs = this.pool(box, olive, CONFIG.maxEnemies * 12);
@@ -103,31 +110,48 @@ export class SurvivalWorld {
     this.flame = this.mesh(this.geo(new THREE.ConeGeometry(2.8, 6, 12, 1, true)), this.mat(new THREE.MeshBasicMaterial({ color: 0xff8d24, transparent: true, opacity: .36, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })), this.scene);
     const lineGeo = this.geo(new THREE.BufferGeometry()); lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array((CONFIG.maxProjectiles + CONFIG.maxEnemies + 2) * 6), 3));
     this.trails = new THREE.LineSegments(lineGeo, this.mat(new THREE.LineBasicMaterial({ color: 0xe4db9a, transparent: true, opacity: .65 }))); this.trails.frustumCulled = false; this.scene.add(this.trails);
+    this.marineViews.push({ body: this.marine, gun: this.gun, boots: this.boots, suit: this.suit, torch: this.torch, flash: this.flash, flame: this.flame, shock: this.shock });
+    const second = this.marine.clone(true), secondSuit = this.mat(this.suit.clone()); secondSuit.color.setHex(0xd49e61);
+    second.traverse(node => { if (node instanceof THREE.Mesh) { if (node.material === this.suit) node.material = secondSuit; else if (node.material === cyan) node.material = amber; } });
+    const torch = this.torch.clone(), flash = this.flash.clone(), flame = this.flame.clone(), shock = this.shock.clone();
+    torch.color.setHex(0xffd59b); shock.material = this.standard(0xffda98, 0xff9019, .8);
+    this.scene.add(second, torch, flash, flame, shock);
+    this.marineViews.push({ body: second, gun: second.getObjectByName('weapon') as THREE.Group, boots: [second.getObjectByName('boot-0') as THREE.Mesh, second.getObjectByName('boot-1') as THREE.Mesh], suit: secondSuit, torch, flash, flame, shock });
   }
-  resize(width: number, height: number) {
-    const aspect = width / height;
-    this.viewWidth = Math.min(46, Math.max(27, 42 * aspect)); this.viewHeight = this.viewWidth / aspect;
-    this.camera.left = -this.viewWidth / 2; this.camera.right = this.viewWidth / 2; this.camera.top = this.viewHeight / 2; this.camera.bottom = -this.viewHeight / 2;
-    this.camera.updateProjectionMatrix();
+  resize(width: number, height: number, count = 1) {
+    this.viewports = splitViewports(width, height, count);
+    this.viewports.forEach((rect, i) => {
+      if (!rect.width || !rect.height) return;
+      const aspect = rect.width / rect.height, frame = this.frames[i], camera = this.cameras[i];
+      frame.width = count === 2 ? Math.min(32, Math.max(20, 28 * aspect)) : Math.min(46, Math.max(27, 42 * aspect)); frame.height = frame.width / aspect;
+      const maxX = Math.max(0, 22 - frame.width / 2), maxZ = Math.max(0, 22 - frame.height / 2);
+      frame.follow.x = Math.max(-maxX, Math.min(maxX, frame.follow.x)); frame.follow.y = Math.max(-maxZ, Math.min(maxZ, frame.follow.y));
+      camera.left = -frame.width / 2; camera.right = frame.width / 2; camera.top = frame.height / 2; camera.bottom = -frame.height / 2; camera.updateProjectionMatrix();
+    });
   }
   setRemains(enabled: boolean) { this.remains = enabled; }
   draw(s: GameSimulation) {
-    const p = s.player, t = s.elapsed, dt = Math.max(0, Math.min(.1, t - this.lastTime)); this.lastTime = t;
-    const targetX = Math.max(-Math.max(0, 22 - this.viewWidth / 2), Math.min(Math.max(0, 22 - this.viewWidth / 2), p.x));
-    const targetZ = Math.max(-Math.max(0, 22 - this.viewHeight / 2), Math.min(Math.max(0, 22 - this.viewHeight / 2), p.z));
-    this.follow.lerp(this.followTarget.set(targetX, targetZ), this.reduced ? 1 : 1 - Math.exp(-dt * 9));
-    const shake = !this.reduced && p.invulnerable > .45 ? Math.sin(t * 91) * .06 : 0;
-    this.camera.position.set(this.follow.x + shake, 48, this.follow.y + 8); this.camera.lookAt(this.follow.x, 0, this.follow.y); this.camera.updateMatrixWorld();
-    this.marine.position.set(p.x, 0, p.z); this.marine.rotation.y = Math.PI / 2 - p.heading; this.gun.rotation.y = p.heading - p.fireAngle;
-    this.suit.emissive.setHex(p.invulnerable > 0 ? 0x993311 : p.shield > 0 ? 0x116677 : 0); this.suit.emissiveIntensity = .5;
-    const moving = s.phase === 'PLAYING' && Math.hypot(p.x - this.lastPlayer.x, p.z - this.lastPlayer.y) > .001;
-    this.lastPlayer.set(p.x, p.z);
-    this.boots.forEach((boot, i) => { boot.position.z = -.45 + (this.reduced || !moving ? 0 : Math.sin(t * 13 + i * Math.PI) * .16); });
-    this.torch.position.set(p.x, 4, p.z);
+    const t = s.elapsed, dt = Math.max(0, Math.min(.1, t - this.lastTime)); this.lastTime = t;
+    this.marineViews.forEach((view, i) => {
+      const p = s.players[i]; view.body.visible = !!p; view.torch.visible = !!p; view.flash.visible = !!p;
+      if (!p) { view.flame.visible = view.shock.visible = false; return; }
+      const follow = p.health > 0 ? p : s.nearestPlayer(p.x, p.z), frame = this.frames[i], camera = this.cameras[i];
+      const maxX = Math.max(0, 22 - frame.width / 2), maxZ = Math.max(0, 22 - frame.height / 2);
+      const targetX = Math.max(-maxX, Math.min(maxX, follow.x)), targetZ = Math.max(-maxZ, Math.min(maxZ, follow.z));
+      frame.follow.lerp(this.followTarget.set(targetX, targetZ), this.reduced ? 1 : 1 - Math.exp(-dt * 9));
+      const shake = !this.reduced && p.invulnerable > .45 ? Math.sin(t * 91) * .06 : 0;
+      camera.position.set(frame.follow.x + shake, 48, frame.follow.y + 8); camera.lookAt(frame.follow.x, 0, frame.follow.y); camera.updateMatrixWorld();
+      view.body.position.set(p.x, p.health > 0 ? 0 : -.1, p.z); view.body.rotation.set(p.health > 0 ? 0 : Math.PI / 2, Math.PI / 2 - p.heading, 0); view.gun.rotation.y = p.heading - p.fireAngle;
+      view.suit.emissive.setHex(p.health <= 0 ? 0 : p.invulnerable > 0 ? 0x993311 : p.shield > 0 ? 0x116677 : 0); view.suit.emissiveIntensity = .5;
+      const moving = s.phase === 'PLAYING' && p.health > 0 && Math.hypot(p.x - frame.lastPlayer.x, p.z - frame.lastPlayer.y) > .001; frame.lastPlayer.set(p.x, p.z);
+      view.boots.forEach((boot, j) => { boot.position.z = -.45 + (this.reduced || !moving ? 0 : Math.sin(t * 13 + j * Math.PI) * .16); });
+      view.torch.position.set(follow.x, 4, follow.z);
+    });
     let count = 0, lc = 0, pc = 0, wc = 0, bossCount = 0;
     for (const e of s.enemies) {
       const scale = e.state === 'DYING' ? Math.max(.01, 1 - e.age / .35) : e.state === 'SPAWNING' ? Math.min(1, e.age / .65) : 1;
-      const r = e.radius * scale, a = Math.atan2(p.x - e.x, p.z - e.z);
+      const target = s.nearestPlayer(e.x, e.z);
+      const r = e.radius * scale, a = Math.atan2(target.x - e.x, target.z - e.z);
       const color = e.burn > 0 ? 0xe68524 : e.kind === 'carapace' || e.kind === 'maw' ? 0x8d7952 : e.kind === 'spitter' ? 0x84a34f : e.kind === 'stalker' ? 0xaa5350 : e.boss ? 0xb58b4c : 0x8a995b;
       this.instance(this.body, count, e.x, r * .55, e.z, r * .85, r * .6, r * 1.3, a);
       this.body.setColorAt(count, this.color.setHex(color));
@@ -161,7 +185,7 @@ export class SurvivalWorld {
       attr.setXYZ(lines++, b.x, .65, b.z); attr.setXYZ(lines++, b.x - b.vx * .025, .65, b.z - b.vz * .025);
     }
     for (const e of s.enemies) if (e.warning > 0 && ['stalker', 'maw', 'spitter', 'sovereign'].includes(e.kind)) { attr.setXYZ(lines++, e.x, .1, e.z); attr.setXYZ(lines++, e.x + e.aimX * 7, .1, e.z + e.aimZ * 7); }
-    attr.setXYZ(lines++, p.x, .15, p.z); attr.setXYZ(lines++, p.x + Math.cos(p.fireAngle) * 2.7, .15, p.z + Math.sin(p.fireAngle) * 2.7);
+    for (const p of s.players) if (p.health > 0) { attr.setXYZ(lines++, p.x, .15, p.z); attr.setXYZ(lines++, p.x + Math.cos(p.fireAngle) * 2.7, .15, p.z + Math.sin(p.fireAngle) * 2.7); }
     attr.needsUpdate = true; this.trails.geometry.setDrawRange(0, lines); this.finish(this.bullets, bc, true);
     let ic = 0;
     for (const item of s.pickups) {
@@ -178,21 +202,25 @@ export class SurvivalWorld {
       ic++;
     }
     this.finish(this.items, ic, true); this.finish(this.crosses, ic * 2);
-    let blastCount = 0; let firing = false, flaming = false;
+    let blastCount = 0; const firing = [false, false], flaming = [false, false];
     for (const event of s.events) {
       if (event.kind === 'kill' && event.id > this.lastEvent) { this.corpses.push({ x: event.x, z: event.z, born: t, id: event.id }); }
       if (event.kind === 'explosion') { const r = .3 + event.age * 7; this.instance(this.blasts, blastCount++, event.x, .5, event.z, r, .5, r); }
-      if (event.kind === 'shot' && event.age < .06) firing = true;
-      if (event.kind === 'flame' && event.age < .15) flaming = true;
+      if (event.kind === 'shot' && event.age < .06) firing[event.playerId ?? 0] = true;
+      if (event.kind === 'flame' && event.age < .15) flaming[event.playerId ?? 0] = true;
       this.lastEvent = Math.max(this.lastEvent, event.id);
     }
     this.corpses = this.corpses.filter(c => t - c.born < 18).slice(-80);
     this.corpses.forEach((c, i) => this.instance(this.stains, i, c.x, .018 + i * .0001, c.z, .8, 1, .8, 0, -Math.PI / 2)); this.finish(this.stains, this.remains ? this.corpses.length : 0); this.finish(this.blasts, blastCount);
-    this.flash.position.set(p.x + Math.cos(p.fireAngle), 1.5, p.z + Math.sin(p.fireAngle)); this.flash.intensity = firing ? 18 : flaming ? 28 : 0;
-    this.flame.visible = flaming;
-    this.flame.position.set(p.x + Math.cos(p.fireAngle) * 3, .7, p.z + Math.sin(p.fireAngle) * 3);
-    this.flame.quaternion.setFromUnitVectors(this.up, this.flameAxis.set(-Math.cos(p.fireAngle), 0, -Math.sin(p.fireAngle)));
-    this.shock.visible = s.shockAge >= 0; this.shock.position.set(s.shockOrigin.x, .1, s.shockOrigin.z); this.shock.scale.setScalar(Math.max(.01, s.shockRadius));
+    for (const [i, p] of s.players.entries()) {
+      const view = this.marineViews[i];
+      view.flash.position.set(p.x + Math.cos(p.fireAngle), 1.5, p.z + Math.sin(p.fireAngle)); view.flash.intensity = p.health <= 0 ? 0 : firing[i] ? 18 : flaming[i] ? 28 : 0;
+      view.flame.visible = p.health > 0 && flaming[i];
+      view.flame.position.set(p.x + Math.cos(p.fireAngle) * 3, .7, p.z + Math.sin(p.fireAngle) * 3);
+      view.flame.quaternion.setFromUnitVectors(this.up, this.flameAxis.set(-Math.cos(p.fireAngle), 0, -Math.sin(p.fireAngle)));
+      view.shock.visible = p.health > 0 && p.shockAge >= 0; view.shock.position.set(p.shockOrigin.x, .1, p.shockOrigin.z); view.shock.scale.setScalar(Math.max(.01, s.shockRadiusFor(p)));
+    }
+
   }
   private finish(pool: THREE.InstancedMesh, count: number, colors = false) { pool.count = count; pool.instanceMatrix.needsUpdate = true; if (colors && pool.instanceColor) pool.instanceColor.needsUpdate = true; }
   dispose() {
