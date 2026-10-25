@@ -1,5 +1,7 @@
 # Neon Arena V4 — Alien Horde Survival
 
+Continuation: [V4.1 cover, supplies and full-run verification](neon-arena-v4-1-balance.md).
+
 ## Master specification
 
 The user's accepted V4.0 prompt and Phobia II screenshot supersede the old reactor-defense rules. This is a migration of the existing Brain Boost experience, not a second game or standalone application.

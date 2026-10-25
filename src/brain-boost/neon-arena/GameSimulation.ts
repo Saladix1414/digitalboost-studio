@@ -93,6 +93,8 @@ export class GameSimulation {
     e.state = 'DYING'; e.age = 0; this.score += e.value; this.kills++; this.emit('kill', e.x, e.z);
     if (this.kills === 30) this.unlock('shotgun');
     if (e.boss) {
+      // A confirmed boss death also proves that this wave's encounter appeared.
+      this.bossSpawned = true;
       this.bossesKilled++; this.unlock(BOSSES[e.kind as keyof typeof BOSSES].reward, e.kind);
       this.drop('medkit', e.x, e.z); this.drop('ammo', e.x + 1, e.z);
     } else if (this.kills % 5 === 0) {

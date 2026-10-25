@@ -34,6 +34,8 @@ try {
     assert.equal(await page.evaluate(() => window.neonPendingFrames()), 1, 'one owned frame loop');
     await page.getByRole('button', { name: 'Iniciar supervivencia →', exact: true }).click();
     await page.waitForSelector('[data-neon-phase="PLAYING"]');
+    await page.waitForSelector('[data-na-director]');
+    assert.match(await page.locator('[data-na-director]').innerText(), /EN CAMPO.*LLEGANDO.*OLA 5/s);
     await page.waitForTimeout(1600);
     const canvas = await page.locator('.na-canvas canvas').elementHandle();
     if (mobile) {

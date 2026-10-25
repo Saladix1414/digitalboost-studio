@@ -35,6 +35,8 @@ try {
     await page.getByRole('button', { name: /SHOCKWAVE/ }).click();
     await page.waitForFunction(id => JSON.parse(localStorage.getItem('digitalboost:brain-boost:neon-arena:arsenal:v1') || '{}').unlocked?.includes(id), weapon);
     await page.waitForSelector('.na-notice');
+    await page.waitForSelector('[data-na-director]');
+    assert.match(await page.locator('[data-na-director]').innerText(), new RegExp(`OLA ${boss === 'brood' ? 10 : boss === 'maw' ? 15 : 20}`));
     assert.equal(await page.locator('.na-weapon-bar button').count() >= 2, true);
     await page.getByRole('button', { name: 'Salir', exact: true }).click();
     console.log(`${boss}: real HUD + Shockwave defeat + immediate persisted ${weapon} unlock PASS`);

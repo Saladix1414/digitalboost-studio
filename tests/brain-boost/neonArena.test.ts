@@ -35,8 +35,10 @@ test('shockwave damages each enemy exactly once and cannot be spammed', () => {
 });
 test('boss defeat grants one permanent reward immediately and cannot grant it twice', () => {
   for (const [kind, weapon] of [['brood', 'flame'], ['maw', 'cascade'], ['sovereign', 'rail']] as const) {
-    const s = game(); const e = createEnemy(kind, 9999, 2, 3); e.hp = 1; e.warning = 1; s.enemies.push(e); s.shock(); run(s, .2);
+    const s = game(); s.wave = kind === 'brood' ? 5 : kind === 'maw' ? 10 : 15;
+    const e = createEnemy(kind, 9999, 2, 3); e.hp = 1; e.warning = 1; s.enemies.push(e); s.shock(); run(s, .2);
     assert.equal(e.state, 'DYING'); assert.equal(s.bossesKilled, 1); assert.equal(s.progressRevision, 1); assert.ok(s.progress.unlocked.includes(weapon)); run(s, .2); assert.equal(s.bossesKilled, 1);
+    assert.equal(s.snapshot().nextEncounter.wave, s.wave + 5);
     const values = new Map<string, string>(); const storage = { getItem: (k: string) => values.get(k) ?? null, setItem: (k: string, v: string) => { values.set(k, v); } };
     saveProgress(s.progress, storage); const next = new GameSimulation(1, readProgress(storage)); assert.equal(next.equip(weapon), false); next.ready(); assert.equal(next.equip(weapon), true); assert.ok(values.has(PROGRESS_KEY));
   }
