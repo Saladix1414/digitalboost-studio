@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import "./brainBoostArtDirection.css";
 import "./brainBoostGameMiniatures.css";
@@ -13,6 +13,9 @@ import FocusProtocolGame from "./FocusProtocolGame";
 import SignalHuntGame from "./SignalHuntGame";
 import NeuralBaselineGame from "./NeuralBaselineGame";
 import VectorRoutesGame from "./VectorRoutesGame";
+import NeonArenaBoundary from "./neon-arena/NeonArenaBoundary";
+
+const NeonArenaGame = lazy(() => import("./neon-arena/NeonArenaGame"));
 
 type Game = {
   id: string;
@@ -37,6 +40,7 @@ type GameArtDirection = {
 };
 
 const gameArtDirections: Record<string, GameArtDirection> = {
+  "neon-arena": { primary: "#00f3ff", secondary: "#ff1744", surface: "#06142d", glow: "rgba(0,243,255,.24)" },
   sequence: { primary: "#22d3ee", secondary: "#e879f9", surface: "#07152c", glow: "rgba(34,211,238,.24)" },
   pairs: { primary: "#2dd4bf", secondary: "#60a5fa", surface: "#05202b", glow: "rgba(45,212,191,.23)" },
   "originx-dragons": { primary: "#fbbf24", secondary: "#fb7185", surface: "#21101a", glow: "rgba(251,191,36,.24)" },
@@ -89,6 +93,7 @@ const categories: Category[] = [
     games: [
       { id: "targets", title: "Focus Protocol", description: "Identificá el objetivo correcto entre señales visuales.", area: "Atención" },
       { id: "signals", title: "Signal Hunt", description: "Encontrá la señal correcta entre distractores.", area: "Atención" },
+      { id: "neon-arena", title: "Neon Arena: Virus Survivor", description: "Defendé el reactor de enjambres de virus en una arena 3D. Acción y atención en tiempo real.", area: "Arcade / Atención" },
     ],
   },
   {
@@ -129,6 +134,7 @@ function GameMiniature({ id }: { id: string }) {
     routes: "spatial",
     targets: "focus",
     signals: "focus",
+    "neon-arena": "arena",
     baseline: "baseline",
     mixed: "daily",
     "daily-memory": "memory",
@@ -166,7 +172,14 @@ function GameMiniature({ id }: { id: string }) {
         fill="none"
         focusable="false"
       >
-        {kind === "memory" ? (
+        {kind === "arena" ? (
+          <>
+            <path d="M9 47L60 22L111 47L60 71Z" stroke="#168bff" fill="#06142d" />
+            <ellipse cx="60" cy="44" rx="16" ry="7" stroke="#00f3ff" strokeWidth="2" />
+            <path d="M53 44V17L60 9L67 17V44M25 50L53 35M95 50L67 35" stroke="#00f3ff" strokeWidth="3" />
+            <path d="M23 36L28 41L23 46L18 41ZM96 32L101 37L96 42L91 37Z" fill="#ff1744" />
+          </>
+        ) : kind === "memory" ? (
           <>
             <path className="bb-mini-grid" d="M25 17H95M25 38H95M25 59H95M37 9V67M60 9V67M83 9V67" />
             <circle className="bb-mini-node" cx="37" cy="17" r="6" />
@@ -568,9 +581,9 @@ export default function BrainBoostLandingSection() {
           >
             <div className="relative z-10 flex items-start justify-between gap-4">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-200">{activeGame?.id === "baseline" ? "NEURAL ARCADE / NEURAL BASELINE" : activeGame?.id === "routes" ? "NEURAL ARCADE / VECTOR ROUTES" : activeGame?.id === "signals" ? "NEURAL ARCADE / SIGNAL HUNT" : activeGame?.id === "targets" ? "NEURAL ARCADE / FOCUS PROTOCOL" : activeGame?.id === "rotation" ? "NEURAL ARCADE / SPATIAL RIFT" : activeGame?.id === "number" ? "NEURAL ARCADE / NUMBER PATTERNS" : activeGame?.id === "deduction" ? "NEURAL ARCADE / LOGIC REACTOR" : activeGame?.id === "sequence" ? "NEURAL ARCADE / MEMORY MATRIX" : activeGame?.id === "pairs" ? "NEURAL ARCADE / OCEAN ECHOES" : activeGame?.id === "originx-dragons" ? "ORIGIN X / DRAGON RELICS" : activeCategory.id === "daily" ? "NEURAL ARCADE / DAILY RUN" : "NEURAL ARCADE / MODE SELECT"}</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-200">{activeGame?.id === "neon-arena" ? "NEURAL ARCADE / NEON ARENA" : activeGame?.id === "baseline" ? "NEURAL ARCADE / NEURAL BASELINE" : activeGame?.id === "routes" ? "NEURAL ARCADE / VECTOR ROUTES" : activeGame?.id === "signals" ? "NEURAL ARCADE / SIGNAL HUNT" : activeGame?.id === "targets" ? "NEURAL ARCADE / FOCUS PROTOCOL" : activeGame?.id === "rotation" ? "NEURAL ARCADE / SPATIAL RIFT" : activeGame?.id === "number" ? "NEURAL ARCADE / NUMBER PATTERNS" : activeGame?.id === "deduction" ? "NEURAL ARCADE / LOGIC REACTOR" : activeGame?.id === "sequence" ? "NEURAL ARCADE / MEMORY MATRIX" : activeGame?.id === "pairs" ? "NEURAL ARCADE / OCEAN ECHOES" : activeGame?.id === "originx-dragons" ? "ORIGIN X / DRAGON RELICS" : activeCategory.id === "daily" ? "NEURAL ARCADE / DAILY RUN" : "NEURAL ARCADE / MODE SELECT"}</p>
                 <h3 id="brain-boost-dialog-title" className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">{activeGame ? activeGame.title : activeCategory.name}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-400">{activeGame ? activeGame.description : activeCategory.description}</p>
+                <p className={activeGame?.id === "neon-arena" ? "hidden sm:mt-2 sm:block sm:text-sm sm:leading-6 sm:text-slate-400" : "mt-2 text-sm leading-6 text-slate-400"}>{activeGame ? activeGame.description : activeCategory.description}</p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 {activeGame && (
@@ -631,14 +644,20 @@ export default function BrainBoostLandingSection() {
               </div>
 
               <div data-brain-boost-stage={activeGame?.id ?? activeCategory.id}
-                className={activeGame ? "relative min-w-0 overflow-hidden rounded-2xl border p-3 transition-colors duration-300 sm:p-5" : "relative isolate flex min-h-[330px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-cyan-300/35 bg-gradient-to-br from-[#0b1d3a] via-[#070d20] to-[#180d35] p-5 text-center shadow-[0_0_38px_rgba(34,211,238,.12),inset_0_0_34px_rgba(139,92,246,.09)]"}
+                className={activeGame?.id === "neon-arena" ? "relative min-w-0 overflow-hidden rounded-2xl border" : activeGame ? "relative min-w-0 overflow-hidden rounded-2xl border p-3 transition-colors duration-300 sm:p-5" : "relative isolate flex min-h-[330px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-cyan-300/35 bg-gradient-to-br from-[#0b1d3a] via-[#070d20] to-[#180d35] p-5 text-center shadow-[0_0_38px_rgba(34,211,238,.12),inset_0_0_34px_rgba(139,92,246,.09)]"}
                 style={activeArt ? {
                   borderColor: activeArt.primary,
                   backgroundImage: "radial-gradient(ellipse at 15% 0%, " + activeArt.primary + "42, transparent 62%), radial-gradient(ellipse at 100% 100%, " + activeArt.secondary + "28, transparent 54%), linear-gradient(145deg, " + activeArt.surface + ", #050b1b)",
                   boxShadow: "inset 0 0 42px " + activeArt.glow,
                 } : undefined}
               >
-                {activeGame?.id === "baseline" ? (
+                {activeGame?.id === "neon-arena" ? (
+                  <NeonArenaBoundary onExit={() => setActiveGame(null)}>
+                    <Suspense fallback={<p role="status">Cargando Neon Arena 3D…</p>}>
+                      <NeonArenaGame onExit={() => setActiveGame(null)} />
+                    </Suspense>
+                  </NeonArenaBoundary>
+                ) : activeGame?.id === "baseline" ? (
                   <NeuralBaselineGame />
                 ) : activeGame?.id === "routes" ? (
                   <VectorRoutesGame />

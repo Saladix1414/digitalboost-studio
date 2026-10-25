@@ -1,4 +1,5 @@
 export type BrainBoostGame =
+  | "neon-arena"
   | "memory-matrix"
   | "memory-pairs"
   | "ocean-echoes"
@@ -47,6 +48,7 @@ const EFFECTS_VOLUME_KEY = `${STORAGE_KEY}:effects-volume`;
 const AMBIENCE_VOLUME_KEY = `${STORAGE_KEY}:ambience-volume`;
 
 const PROFILES: Record<BrainBoostGame, Profile> = {
+  "neon-arena": { root: 130.81, intervals: [0, 7, 12, 19] },
   "memory-matrix": { root: 220, intervals: [0, 7, 12, 19] },
   "memory-pairs": { root: 196, intervals: [0, 3, 7, 10] },
   "ocean-echoes": { root: 174.61, intervals: [0, 5, 12, 17] },
