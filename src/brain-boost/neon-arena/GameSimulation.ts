@@ -1,10 +1,10 @@
-import { OBSTACLES, WEAPONS, firstBlockTime, normalizeProgress, segmentCircleEntry, type Progress, type WeaponId } from './SurvivalRules.ts';
+import { BOSSES, OBSTACLES, WEAPONS, bossForWave, firstBlockTime, nextBossEncounter, normalizeProgress, segmentCircleEntry, supplyForRoll, type PickupKind, type Progress, type WeaponId } from './SurvivalRules.ts';
 export type Phase = 'LOADING' | 'READY' | 'PLAYING' | 'PAUSED' | 'WAVE_TRANSITION' | 'GAME_OVER' | 'ERROR' | 'DISPOSED';
 export type EnemyKind = 'skitter' | 'carapace' | 'spitter' | 'stalker' | 'brood' | 'maw' | 'sovereign';
 export type Enemy = { id: number; kind: EnemyKind; x: number; z: number; hp: number; maxHp: number; radius: number; speed: number; damage: number; value: number; age: number; state: 'SPAWNING' | 'ADVANCING' | 'DYING' | 'REMOVED'; boss: boolean; attackClock: number; warning: number; aimX: number; aimZ: number; burn: number; burnClock: number };
 export type CombatEvent = { id: number; kind: 'shot' | 'flame' | 'kill' | 'impact' | 'shock' | 'explosion' | 'pickup' | 'unlock'; x: number; z: number; angle?: number; age: number; weapon?: WeaponId };
 export type Projectile = { id: number; x: number; z: number; vx: number; vz: number; life: number; damage: number; radius: number; weapon: WeaponId; hostile: boolean; hits: Set<number>; remaining: number };
-export type Pickup = { id: number; kind: 'medkit' | 'ammo' | 'grenade' | 'shield' | 'haste'; x: number; z: number; life: number };
+export type Pickup = { id: number; kind: PickupKind; x: number; z: number; life: number };
 export const CONFIG = Object.freeze({ step: 1 / 60, maxSteps: 6, maxDelta: .1, arena: 21, maxEnemies: 240, maxProjectiles: 320, maxEvents: 100, maxPickups: 18, health: 100, shockCooldown: 12, shockRadius: 8, shockDuration: .5, playerSpeed: 7.5 });
 const stats = {
   skitter: { hp: 30, radius: .43, speed: 2.6, damage: 8, value: 10 },
@@ -93,13 +93,30 @@ export class GameSimulation {
     e.state = 'DYING'; e.age = 0; this.score += e.value; this.kills++; this.emit('kill', e.x, e.z);
     if (this.kills === 30) this.unlock('shotgun');
     if (e.boss) {
-      this.bossesKilled++; this.unlock(e.kind === 'brood' ? 'flame' : e.kind === 'maw' ? 'cascade' : 'rail', e.kind);
+      this.bossesKilled++; this.unlock(BOSSES[e.kind as keyof typeof BOSSES].reward, e.kind);
       this.drop('medkit', e.x, e.z); this.drop('ammo', e.x + 1, e.z);
     } else if (this.kills % 5 === 0) {
-      const kinds: Pickup['kind'][] = ['medkit', 'ammo', 'grenade', 'shield', 'haste']; this.drop(kinds[Math.floor(this.random() * kinds.length)], e.x, e.z);
+      this.drop(supplyForRoll(this.random(), this.progress.unlocked), e.x, e.z);
     }
   }
   private drop(kind: Pickup['kind'], x: number, z: number) { if (this.pickups.length < CONFIG.maxPickups) this.pickups.push({ id: this.nextId++, kind, x, z, life: 25 }); }
+  private collect(kind: PickupKind) {
+    if (kind === 'medkit') {
+      if (this.health >= CONFIG.health) return false;
+      this.health = Math.min(CONFIG.health, this.health + 25); return true;
+    }
+    if (kind === 'shield' || kind === 'haste') {
+      if (this.player[kind] > 6) return false;
+      this.player[kind] = Math.min(12, this.player[kind] + 6); return true;
+    }
+    let changed = false;
+    for (const id of this.progress.unlocked) {
+      if (id === 'machinegun' || (kind === 'grenade' ? id !== 'cascade' : id === 'cascade')) continue;
+      const next = Math.min(WEAPONS[id].reserve * 2, this.ammo[id] + Math.ceil(WEAPONS[id].reserve * .35));
+      if (next > this.ammo[id]) { this.ammo[id] = next; changed = true; }
+    }
+    return changed;
+  }
   private hurt(damage: number) {
     if (this.phase !== 'PLAYING' || this.player.invulnerable > 0) return;
     this.health = Math.max(0, this.health - damage * (this.player.shield > 0 ? .4 : 1)); this.player.invulnerable = .65; this.emit('impact', this.player.x, this.player.z);
@@ -209,7 +226,7 @@ export class GameSimulation {
     p.fireAngle = this.aim ?? p.heading + Math.PI / 4;
     this.spawnClock -= dt;
     if (this.spawned < this.waveSize && this.spawnClock <= 0 && this.spawn()) { this.spawned++; this.spawnClock = Math.max(.12, .42 - this.wave * .016); }
-    if (this.wave % 5 === 0 && !this.bossSpawned && this.spawned >= this.waveSize / 2) this.bossSpawned = this.spawn(this.wave % 15 === 0 ? 'sovereign' : this.wave % 10 === 0 ? 'maw' : 'brood');
+    if (this.wave % 5 === 0 && !this.bossSpawned && this.spawned >= this.waveSize / 2) this.bossSpawned = this.spawn(bossForWave(this.wave));
     this.grid.rebuild(this.enemies);
     for (const e of this.enemies.slice()) { this.enemyStep(e, dt); if (this.phase === 'GAME_OVER') return; }
     this.grid.rebuild(this.enemies); this.fire();
@@ -226,10 +243,7 @@ export class GameSimulation {
     for (const item of this.pickups) {
       item.life -= dt;
       if (Math.hypot(p.x - item.x, p.z - item.z) > 1.3) continue;
-      if (item.kind === 'medkit') this.health = Math.min(CONFIG.health, this.health + 25);
-      if (item.kind === 'shield') p.shield = Math.min(12, p.shield + 6);
-      if (item.kind === 'haste') p.haste = Math.min(12, p.haste + 6);
-      if (item.kind === 'ammo' || item.kind === 'grenade') for (const id of this.progress.unlocked) if (id !== 'machinegun') this.ammo[id] = Math.min(WEAPONS[id].reserve * 2, this.ammo[id] + Math.ceil(WEAPONS[id].reserve * .35));
+      if (!this.collect(item.kind)) continue;
       item.life = -1; this.emit('pickup', item.x, item.z);
     }
     this.pickups = this.pickups.filter(i => i.life > 0); this.enemies = this.enemies.filter(e => e.state !== 'REMOVED');
@@ -237,7 +251,10 @@ export class GameSimulation {
   }
   snapshot() {
     const boss = this.enemies.find(e => e.boss && e.state !== 'DYING' && e.state !== 'REMOVED');
-    return { phase: this.phase, health: Math.ceil(this.health), score: this.score, wave: this.wave, kills: this.kills, elapsed: this.elapsed, cooldown: this.cooldown, weapon: this.equipped, ammo: this.ammo[this.equipped], unlocked: [...this.progress.unlocked], bossesKilled: this.bossesKilled, boss: boss ? { name: boss.kind, hp: boss.hp, maxHp: boss.maxHp, warning: boss.warning > 0, phase: boss.hp <= boss.maxHp / 2 ? 2 : 1 } : null, shield: this.player.shield, haste: this.player.haste, progressRevision: this.progressRevision };
+    const activeEnemies = this.enemies.filter(e => e.state === 'SPAWNING' || e.state === 'ADVANCING').length;
+    const pendingEnemies = Math.max(0, this.waveSize - this.spawned) + (this.wave % 5 === 0 && !this.bossSpawned ? 1 : 0);
+    const nextEncounter = nextBossEncounter(this.wave, this.bossSpawned && !boss);
+    return { phase: this.phase, health: Math.ceil(this.health), score: this.score, wave: this.wave, kills: this.kills, elapsed: this.elapsed, cooldown: this.cooldown, weapon: this.equipped, ammo: this.ammo[this.equipped], unlocked: [...this.progress.unlocked], bossesKilled: this.bossesKilled, boss: boss ? { name: boss.kind as keyof typeof BOSSES, hp: boss.hp, maxHp: boss.maxHp, warning: boss.warning > 0, phase: boss.hp <= boss.maxHp / 2 ? 2 : 1 } : null, shield: this.player.shield, haste: this.player.haste, progressRevision: this.progressRevision, activeEnemies, pendingEnemies, nextEncounter };
   }
   dispose() { this.transition('DISPOSED'); this.clearInput(); this.enemies = []; this.projectiles = []; this.pickups = []; this.events = []; this.explosions = []; this.shockHits.clear(); this.grid.rebuild([]); }
 }

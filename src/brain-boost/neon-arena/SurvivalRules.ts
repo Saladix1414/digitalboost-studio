@@ -30,10 +30,28 @@ export const OBSTACLES = [
   { x: -12, z: 10, radius: 1.6 }, { x: 12, z: 9, radius: 1.5 },
   { x: -4, z: -15, radius: 1.2 }, { x: 5, z: 15, radius: 1.2 },
 ];
-export function segmentDistance(px: number, pz: number, ax: number, az: number, bx: number, bz: number) {
-  const dx = bx - ax, dz = bz - az, d = dx * dx + dz * dz;
-  const t = d ? Math.max(0, Math.min(1, ((px - ax) * dx + (pz - az) * dz) / d)) : 0;
-  return { distance: Math.hypot(px - ax - dx * t, pz - az - dz * t), t };
+export type PickupKind = 'medkit' | 'ammo' | 'grenade' | 'shield' | 'haste';
+export function supplyForRoll(roll: number, unlocked: readonly WeaponId[]): PickupKind {
+  const available: PickupKind[] = ['medkit', 'shield', 'haste'];
+  if (unlocked.some(id => id !== 'machinegun' && id !== 'cascade')) available.push('ammo');
+  if (unlocked.includes('cascade')) available.push('grenade');
+  const value = Number.isFinite(roll) ? Math.max(0, Math.min(.999999, roll)) : 0;
+  return available[Math.floor(value * available.length)];
+}
+
+export const BOSSES = {
+  brood: { name: 'BROOD MOTHER', reward: 'flame' },
+  maw: { name: 'IRON MAW', reward: 'cascade' },
+  sovereign: { name: 'HIVE SOVEREIGN', reward: 'rail' },
+} as const;
+export function bossForWave(wave: number): keyof typeof BOSSES {
+  return wave % 15 === 0 ? 'sovereign' : wave % 10 === 0 ? 'maw' : 'brood';
+}
+export function nextBossEncounter(wave: number, clearedCurrent = false) {
+  const safeWave = Number.isSafeInteger(wave) && wave > 0 ? wave : 1;
+  const encounterWave = safeWave % 5 === 0 && clearedCurrent ? safeWave + 5 : Math.ceil(safeWave / 5) * 5;
+  const kind = bossForWave(encounterWave);
+  return { wave: encounterWave, kind, ...BOSSES[kind] };
 }
 
 /** First intersection along a swept segment; Infinity means no intersection. */

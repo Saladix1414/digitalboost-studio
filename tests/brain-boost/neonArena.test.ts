@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { CONFIG, FixedClock, GameSimulation, createEnemy } from '../../src/brain-boost/neon-arena/GameSimulation.ts';
-import { OBSTACLES, WEAPONS, PROGRESS_KEY, normalizeProgress, readProgress, saveProgress } from '../../src/brain-boost/neon-arena/SurvivalRules.ts';
+import { OBSTACLES, WEAPONS, PROGRESS_KEY, bossForWave, nextBossEncounter, supplyForRoll, normalizeProgress, readProgress, saveProgress } from '../../src/brain-boost/neon-arena/SurvivalRules.ts';
 function game(progress?: unknown) { const s = new GameSimulation(72, progress); s.ready(); s.start(); return s; }
 function run(s: GameSimulation, seconds: number) { for (let i = 0; i < seconds * 60; i++) s.step(); }
 const all = { version: 1, unlocked: ['machinegun', 'shotgun', 'flame', 'cascade', 'rail'], bosses: [] };
@@ -111,4 +111,33 @@ test('rail hits a creature before an obstacle but cannot hit another behind it i
 });
 test('flame damage respects cover instead of burning through a solid nest', () => {
   const s = game(all); s.player.x = -14; s.player.z = -8; const e = createEnemy('skitter', 50000, -8.4, -8); e.speed = 0; s.enemies.push(e); s.equip('flame'); s.setInput(0, 0, true, 0); s.step(); assert.equal(e.hp, e.maxHp); assert.equal(e.burn, 0);
+});
+test('supply tables never generate ammunition or grenades for locked weapons', () => {
+  for (let i = 0; i < 100; i++) {
+    const initial = supplyForRoll(i / 100, ['machinegun']); assert.ok(['medkit', 'shield', 'haste'].includes(initial));
+    assert.notEqual(supplyForRoll(i / 100, ['machinegun', 'shotgun']), 'grenade');
+  }
+  assert.equal(supplyForRoll(.99, ['machinegun', 'flame', 'cascade']), 'grenade');
+  assert.equal(supplyForRoll(NaN, ['machinegun']), 'medkit');
+});
+test('full-health medkits and full reserves remain on the floor until they can help', () => {
+  const s = game(all); const p = s.player;
+  s.pickups.push({ id: 9000, kind: 'medkit', x: p.x, z: p.z, life: 10 }); s.step(); assert.equal(s.pickups.length, 1);
+  s.health = 80; s.step(); assert.equal(s.pickups.length, 0); assert.equal(s.health, 100);
+  s.ammo.shotgun = 60; s.ammo.flame = 300; s.ammo.rail = 56;
+  s.pickups.push({ id: 9001, kind: 'ammo', x: p.x, z: p.z, life: 10 }); s.step(); assert.equal(s.pickups.length, 1);
+  s.ammo.shotgun = 59; s.step(); assert.equal(s.pickups.length, 0); assert.equal(s.ammo.shotgun, 60);
+});
+test('grenades only refill cascade and stacked buffs are not wasted every subsequent frame', () => {
+  const s = game(all); const p = s.player; s.ammo.shotgun = 0; s.ammo.flame = 1; s.ammo.cascade = 5;
+  s.pickups.push({ id: 9000, kind: 'grenade', x: p.x, z: p.z, life: 10 }); s.step(); assert.equal(s.ammo.cascade, 10); assert.equal(s.ammo.shotgun, 0); assert.equal(s.ammo.flame, 1);
+  p.shield = 12; s.pickups.push({ id: 9001, kind: 'shield', x: p.x, z: p.z, life: 10 }); run(s, 1); assert.equal(s.pickups.length, 1); assert.ok(p.shield < 12);
+  run(s, 5.1); assert.equal(s.pickups.length, 0); assert.ok(p.shield > 10);
+});
+test('director counters distinguish active and pending creatures; encounter preview follows the actual boss cycle', () => {
+  const s = game(); assert.equal(s.snapshot().activeEnemies, 0); assert.equal(s.snapshot().pendingEnemies, 16); run(s, .4);
+  assert.equal(s.snapshot().activeEnemies, 1); assert.equal(s.snapshot().pendingEnemies, 15);
+  assert.equal(s.snapshot().nextEncounter.wave, 5); assert.equal(nextBossEncounter(5, true).wave, 10);
+  assert.equal(nextBossEncounter(10, true).kind, 'sovereign'); assert.equal(bossForWave(20), 'maw'); assert.equal(nextBossEncounter(16).wave, 20);
+  assert.equal(nextBossEncounter(NaN).wave, 5);
 });

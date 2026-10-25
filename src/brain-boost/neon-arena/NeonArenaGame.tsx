@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { NeonArenaEngine } from './NeonArenaEngine';
 import { GameSimulation } from './GameSimulation';
-import { WEAPONS, WEAPON_IDS, readProgress, saveProgress, type WeaponId } from './SurvivalRules';
+import { BOSSES, WEAPONS, WEAPON_IDS, readProgress, saveProgress, type WeaponId } from './SurvivalRules';
 import { isBrainBoostAudioEnabled, playBrainBoostSfx, playNeonSurvivalSfx, setBrainBoostAudioEnabled, subscribeBrainBoostAudioEnabled, startBrainBoostMusic, stopBrainBoostMusic, setNeonSurvivalMood } from '../brainBoostAudio';
 import './NeonArenaGame.css';
 const initial = new GameSimulation().snapshot();
 const BEST_KEY = 'digitalboost:brain-boost:neon-arena:best:v1';
 function storage() { try { return window.localStorage; } catch { return undefined; } }
 function readBest() { try { const n = Number(storage()?.getItem(BEST_KEY)); return Number.isSafeInteger(n) && n >= 0 ? n : 0; } catch { return 0; } }
-const bossNames: Record<string, string> = { brood: 'BROOD MOTHER', maw: 'IRON MAW', sovereign: 'HIVE SOVEREIGN' };
 const unlockDescriptions: Record<WeaponId, string> = { machinegun: 'Disponible', shotgun: 'Eliminá 30 criaturas en una partida', flame: 'Derrotá a Brood Mother · oleada 5', cascade: 'Derrotá a Iron Maw · oleada 10', rail: 'Derrotá a Hive Sovereign · oleada 15' };
 export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
   const host = useRef<HTMLDivElement>(null), engine = useRef<NeonArenaEngine | null>(null), startButton = useRef<HTMLButtonElement>(null);
@@ -70,7 +69,8 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
         <span className={`na-health${snapshot.health <= 30 ? ' na-critical' : ''}`}><small>MARINE · {snapshot.health}%</small><span role="progressbar" aria-label="Salud del marine" aria-valuenow={snapshot.health} aria-valuemin={0} aria-valuemax={100} className="na-meter"><i style={{ width: `${snapshot.health}%` }} /></span></span>
         <button type="button" disabled={!['PLAYING', 'WAVE_TRANSITION', 'PAUSED'].includes(snapshot.phase) || !!error} onClick={() => engine.current?.togglePause()}>{snapshot.phase === 'PAUSED' ? 'Reanudar' : 'Pausa'}</button>
       </div>
-      {snapshot.boss && <div className="na-boss" role="status"><b>{bossNames[snapshot.boss.name]} · FASE {snapshot.boss.phase}</b><span className="na-meter"><i style={{ width: `${snapshot.boss.hp / snapshot.boss.maxHp * 100}%` }} /></span><small>{snapshot.boss.warning ? '¡ATAQUE INMINENTE! MOVETE FUERA DE LA SEÑAL' : 'Buscá una ventana para atacar'}</small></div>}
+      {active && !snapshot.boss && <div className="na-director" data-na-director=""><span>EN CAMPO <b>{snapshot.activeEnemies}</b> · LLEGANDO <b>{snapshot.pendingEnemies}</b></span><span>JEFE · OLA {snapshot.nextEncounter.wave}</span></div>}
+      {snapshot.boss && <div className="na-boss" role="status"><b>{BOSSES[snapshot.boss.name].name} · FASE {snapshot.boss.phase}</b><span className="na-meter" role="progressbar" aria-label="Salud del jefe" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.ceil(snapshot.boss.hp / snapshot.boss.maxHp * 100)}><i style={{ width: `${snapshot.boss.hp / snapshot.boss.maxHp * 100}%` }} /></span><small>{snapshot.boss.warning ? '¡ATAQUE INMINENTE! MOVETE FUERA DE LA SEÑAL' : 'Buscá una ventana para atacar'}</small></div>}
       {snapshot.health <= 30 && active && <div className="na-warning" role="status">SALUD CRÍTICA · BUSCÁ UN BOTIQUÍN</div>}
       {notice && <div className="na-notice" role="status">{notice}</div>}
       <div className="na-combat-controls" hidden={!active}>
@@ -87,6 +87,7 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
           <label className="na-mode"><input type="checkbox" checked={remains} onChange={e => { setRemains(e.target.checked); engine.current?.setRemains(e.target.checked); }} /> Restos de combate en el suelo</label>
           {snapshot.phase === 'READY' && <div className="na-loadout" aria-label="Arsenal inicial">{WEAPON_IDS.map(id => <button type="button" key={id} disabled={!progress.unlocked.includes(id)} aria-pressed={snapshot.weapon === id} title={unlockDescriptions[id]} onClick={() => choose(id)}>{WEAPONS[id].name}{!progress.unlocked.includes(id) && <small>{unlockDescriptions[id]}</small>}</button>)}</div>}
           <p className="na-controls">Récord {best} · {progress.unlocked.length}/5 armas · Progreso local recreativo</p></>}
+        {!error && <p className="na-objective">PRÓXIMO JEFE · {snapshot.nextEncounter.name} · OLA {snapshot.nextEncounter.wave}<small>{progress.unlocked.includes(snapshot.nextEncounter.reward) ? 'Arma obtenida · superá tu marca de supervivencia' : `Desbloquea ${WEAPONS[snapshot.nextEncounter.reward].name}`}</small></p>}
         <div className="na-menu-actions"><button ref={startButton} type="button" className="na-primary" disabled={!error && snapshot.phase === 'LOADING'} onClick={error || snapshot.phase === 'GAME_OVER' ? restart : snapshot.phase === 'PAUSED' ? () => engine.current?.togglePause() : start}>{error ? 'Reintentar escena' : snapshot.phase === 'GAME_OVER' ? 'Nueva partida' : snapshot.phase === 'PAUSED' ? 'Reanudar partida' : snapshot.phase === 'LOADING' ? 'Cargando escena…' : 'Iniciar supervivencia →'}</button><button type="button" onClick={onExit}>Volver a Focus Lab</button></div>
       </div></div>}
     </div>
