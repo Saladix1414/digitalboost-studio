@@ -1,4 +1,5 @@
-import { BOSSES, OBSTACLES, WEAPONS, bossForWave, firstBlockTime, nextBossEncounter, normalizeProgress, segmentCircleEntry, supplyForRoll, type PickupKind, type Progress, type WeaponId } from './SurvivalRules.ts';
+import { LEGACY_ARENA, type ArenaDefinition } from './ArenaDefinition.ts';
+import { BOSSES, WEAPONS, bossForWave, firstBlockTime, nextBossEncounter, normalizeProgress, segmentCircleEntry, supplyForRoll, type PickupKind, type Progress, type WeaponId } from './SurvivalRules.ts';
 import { interceptAngle, selectAimTarget, type AimMode } from './AimAssist.ts';
 export type Phase = 'LOADING' | 'READY' | 'PLAYING' | 'PAUSED' | 'WAVE_TRANSITION' | 'GAME_OVER' | 'ERROR' | 'DISPOSED';
 export type EnemyKind = 'skitter' | 'carapace' | 'spitter' | 'stalker' | 'brood' | 'maw' | 'sovereign';
@@ -6,7 +7,7 @@ export type Enemy = { id: number; kind: EnemyKind; x: number; z: number; hp: num
 export type CombatEvent = { id: number; kind: 'shot' | 'flame' | 'kill' | 'impact' | 'shock' | 'explosion' | 'pickup' | 'unlock' | 'revive' | 'boss' | 'creature'; x: number; z: number; angle?: number; age: number; weapon?: WeaponId; playerId?: number; creature?: EnemyKind };
 export type Projectile = { id: number; x: number; z: number; vx: number; vz: number; life: number; damage: number; radius: number; weapon: WeaponId; hostile: boolean; hits: Set<number>; remaining: number; playerId?: number };
 export type Pickup = { id: number; kind: PickupKind; x: number; z: number; life: number };
-export const CONFIG = Object.freeze({ step: 1 / 60, maxSteps: 6, maxDelta: .1, arena: 21, maxEnemies: 240, maxProjectiles: 320, maxEvents: 100, maxPickups: 18, health: 100, shockCooldown: 12, shockRadius: 8, shockDuration: .5, playerSpeed: 7.5 });
+export const CONFIG = Object.freeze({ step: 1 / 60, maxSteps: 6, maxDelta: .1, arena: LEGACY_ARENA.halfExtent, maxEnemies: 240, maxProjectiles: 320, maxEvents: 100, maxPickups: 18, health: 100, shockCooldown: 12, shockRadius: 8, shockDuration: .5, playerSpeed: 7.5 });
 export function createMarine(id: number, count = 1) {
   return {
     id, x: count === 1 ? 0 : id === 0 ? -2 : 2, z: 3, heading: -Math.PI / 2, fireAngle: -Math.PI / 4,
@@ -69,9 +70,9 @@ export class GameSimulation {
   private seed: number; private spawned = 0; private spawnClock = .3; private transitionClock = 0; private bossSpawned = false;
   private resumePhase: 'PLAYING' | 'WAVE_TRANSITION' = 'PLAYING';
   private explosions: { x: number; z: number; delay: number; damage: number; radius: number }[] = [];
-  readonly maxEnemies: number;
-  constructor(seed = 42819, progress: unknown = null, maxEnemies = 120, playerCount: 1 | 2 = 1) {
-    this.seed = seed >>> 0; this.progress = normalizeProgress(progress); this.maxEnemies = Math.max(16, Math.min(CONFIG.maxEnemies, maxEnemies));
+  readonly maxEnemies: number; readonly arena: ArenaDefinition;
+  constructor(seed = 42819, progress: unknown = null, maxEnemies = 120, playerCount: 1 | 2 = 1, arena: ArenaDefinition = LEGACY_ARENA) {
+    this.arena = arena; this.seed = seed >>> 0; this.progress = normalizeProgress(progress); this.maxEnemies = Math.max(16, Math.min(CONFIG.maxEnemies, maxEnemies));
     this.setPlayerCount(playerCount);
   }
   transition(next: Phase) { if (!allowed[this.phase].includes(next)) return false; this.phase = next; return true; }
@@ -168,18 +169,18 @@ export class GameSimulation {
   private spawn(kind?: EnemyKind, origin?: { x: number; z: number }) {
     if (this.enemies.length >= this.maxEnemies) return false;
     const a = this.random() * Math.PI * 2;
-    let x = Math.cos(a) * 20, z = Math.sin(a) * 20;
+    const rim = this.arena.spawnRadius; let x = Math.cos(a) * rim, z = Math.sin(a) * rim;
     if (!origin && this.wave === 1 && this.spawned < 6) { x = Math.cos(a) * 11; z = Math.sin(a) * 11; }
-    if (origin) { x = Math.max(-20, Math.min(20, origin.x + Math.cos(a) * 3)); z = Math.max(-20, Math.min(20, origin.z + Math.sin(a) * 3)); }
-    if (this.players.length === 1) {
+    if (origin) { x = Math.max(-rim, Math.min(rim, origin.x + Math.cos(a) * 3)); z = Math.max(-rim, Math.min(rim, origin.z + Math.sin(a) * 3)); }
+    if (this.players.length === 1 && this.arena.id === 'legacy') {
       // Preserve the V4.1 solo spawn route; the two-player search changes seeded runs.
       if (Math.hypot(x - this.player.x, z - this.player.z) < 6) { x = -Math.sign(this.player.x || 1) * 20; z = -Math.sign(this.player.z || 1) * 18; }
-      if (OBSTACLES.some(o => Math.hypot(x - o.x, z - o.z) < o.radius + 2)) { x = 20; z = -18; }
+      if (this.arena.obstacles.some(o => Math.hypot(x - o.x, z - o.z) < o.radius + 2)) { x = 20; z = -18; }
     } else {
-      const safe = (px: number, pz: number) => this.players.every(p => p.health <= 0 || Math.hypot(px - p.x, pz - p.z) >= 6) && !OBSTACLES.some(o => Math.hypot(px - o.x, pz - o.z) < o.radius + 2);
+      const safe = (px: number, pz: number) => this.players.every(p => p.health <= 0 || Math.hypot(px - p.x, pz - p.z) >= 6) && !this.arena.obstacles.some(o => Math.hypot(px - o.x, pz - o.z) < o.radius + 2);
       if (!safe(x, z)) {
         let found = false;
-        for (let i = 0; i < 16; i++) { const angle = a + i * Math.PI / 8, px = Math.cos(angle) * 20, pz = Math.sin(angle) * 20; if (safe(px, pz)) { x = px; z = pz; found = true; break; } }
+        for (let i = 0; i < 16; i++) { const angle = a + i * Math.PI / 8, px = Math.cos(angle) * rim, pz = Math.sin(angle) * rim; if (safe(px, pz)) { x = px; z = pz; found = true; break; } }
         if (!found) return false;
       }
     }
@@ -201,7 +202,7 @@ export class GameSimulation {
     if (id === 'flame') {
       for (const e of this.grid.near(p.x, p.z, 7)) {
         const dx = e.x - p.x, dz = e.z - p.z, d = Math.hypot(dx, dz);
-        if (e.state === 'ADVANCING' && d <= 6 + e.radius && (dx * Math.cos(a) + dz * Math.sin(a)) / Math.max(.01, d) > Math.cos(w.spread) && firstBlockTime(p.x, p.z, e.x, e.z) === Infinity) { this.hit(e, w.damage); e.burn = 2; }
+        if (e.state === 'ADVANCING' && d <= 6 + e.radius && (dx * Math.cos(a) + dz * Math.sin(a)) / Math.max(.01, d) > Math.cos(w.spread) && firstBlockTime(p.x, p.z, e.x, e.z, 0, this.arena.halfExtent, this.arena.obstacles) === Infinity) { this.hit(e, w.damage); e.burn = 2; }
       }
     } else for (let i = 0; i < w.pellets; i++) {
       const spread = id === 'shotgun' ? (i / (w.pellets - 1) - .5) * w.spread * 2 : (this.random() - .5) * w.spread;
@@ -209,8 +210,8 @@ export class GameSimulation {
     }
   }
   private resolveObstacles(entity: { x: number; z: number }, radius: number) {
-    entity.x = Math.max(-CONFIG.arena + radius, Math.min(CONFIG.arena - radius, entity.x)); entity.z = Math.max(-CONFIG.arena + radius, Math.min(CONFIG.arena - radius, entity.z));
-    for (const o of OBSTACLES) { const dx = entity.x - o.x, dz = entity.z - o.z, d = Math.hypot(dx, dz), r = radius + o.radius; if (d < r) { entity.x = o.x + (d ? dx / d : 1) * r; entity.z = o.z + (d ? dz / d : 0) * r; } }
+    entity.x = Math.max(-this.arena.halfExtent + radius, Math.min(this.arena.halfExtent - radius, entity.x)); entity.z = Math.max(-this.arena.halfExtent + radius, Math.min(this.arena.halfExtent - radius, entity.z));
+    for (const o of this.arena.obstacles) { const dx = entity.x - o.x, dz = entity.z - o.z, d = Math.hypot(dx, dz), r = radius + o.radius; if (d < r) { entity.x = o.x + (d ? dx / d : 1) * r; entity.z = o.z + (d ? dz / d : 0) * r; } }
   }
   private enemyStep(e: Enemy, dt: number) {
     e.age += dt; e.hitFlash = Math.max(0, e.hitFlash - dt); e.vx = e.vz = 0;
@@ -240,7 +241,7 @@ export class GameSimulation {
       const ox = e.x - other.x, oz = e.z - other.z, od = Math.hypot(ox, oz), separation = e.radius + other.radius + .15;
       if (od > .01 && od < separation) { vx += ox / od * (separation - od) * 3; vz += oz / od * (separation - od) * 3; }
     }
-    if (!charging) for (const obstacle of OBSTACLES) {
+    if (!charging) for (const obstacle of this.arena.obstacles) {
       const ox = e.x - obstacle.x, oz = e.z - obstacle.z;
       if (Math.hypot(ox + vx * .25, oz + vz * .25) < obstacle.radius + e.radius + .25) {
         const side = ox * dz - oz * dx >= 0 ? 1 : -1, n = Math.max(.01, Math.hypot(ox, oz));
@@ -252,7 +253,7 @@ export class GameSimulation {
   }
   private projectileStep(p: Projectile, dt: number) {
     const ax = p.x, az = p.z; p.x += p.vx * dt; p.z += p.vz * dt; p.life -= dt;
-    const wallTime = firstBlockTime(ax, az, p.x, p.z, p.radius, CONFIG.arena);
+    const wallTime = firstBlockTime(ax, az, p.x, p.z, p.radius, this.arena.halfExtent, this.arena.obstacles);
     let stopTime = wallTime;
     if (p.hostile) {
       const targets = this.players.filter(m => m.health > 0).map(m => ({ marine: m, t: segmentCircleEntry(m.x, m.z, .55 + p.radius, ax, az, p.x, p.z) })).filter(hit => hit.t < wallTime).sort((a, b) => a.t - b.t || a.marine.id - b.marine.id);
@@ -300,8 +301,8 @@ export class GameSimulation {
     this.grid.rebuild(this.enemies); for (const p of this.players) if (p.health > 0) {
       const locked = p.targetId; p.targetId = null;
       if (p.aimMode === 'assisted' && p.aim === null) {
-        const target = selectAimTarget(p.x, p.z, p.equipped, this.enemies, locked);
-        if (target) { const w = WEAPONS[p.equipped]; p.targetId = target.id; p.fireAngle = interceptAngle(p.x, p.z, target, w.speed, w.life); }
+        const target = selectAimTarget(p.x, p.z, p.equipped, this.enemies, locked, this.arena);
+        if (target) { const w = WEAPONS[p.equipped]; p.targetId = target.id; p.fireAngle = interceptAngle(p.x, p.z, target, w.speed, w.life, this.arena); }
       }
       this.fire(p);
     }
@@ -330,7 +331,7 @@ export class GameSimulation {
     const activeEnemies = this.enemies.filter(e => e.state === 'SPAWNING' || e.state === 'ADVANCING').length;
     const pendingEnemies = Math.max(0, this.waveSize - this.spawned) + (this.wave % 5 === 0 && !this.bossSpawned ? 1 : 0);
     const nextEncounter = nextBossEncounter(this.wave, this.bossSpawned && !boss);
-    return { phase: this.phase, health: Math.ceil(this.health), score: this.score, wave: this.wave, kills: this.kills, elapsed: this.elapsed, cooldown: this.cooldown, weapon: this.equipped, ammo: this.ammo[this.equipped], unlocked: [...this.progress.unlocked], bossesKilled: this.bossesKilled, boss: boss ? { name: boss.kind as keyof typeof BOSSES, hp: boss.hp, maxHp: boss.maxHp, warning: boss.warning > 0, phase: boss.hp <= boss.maxHp / 2 ? 2 : 1 } : null, shield: this.player.shield, haste: this.player.haste, progressRevision: this.progressRevision, unlockedThisRun: [...this.unlockedThisRun], playerCount: this.players.length, marines: this.players.map(p => ({ id: p.id, health: Math.ceil(p.health), alive: p.health > 0, weapon: p.equipped, ammo: p.ammo[p.equipped], cooldown: p.cooldown, shield: p.shield, haste: p.haste })), activeEnemies, pendingEnemies, nextEncounter };
+    return { arena: this.arena.id, phase: this.phase, health: Math.ceil(this.health), score: this.score, wave: this.wave, kills: this.kills, elapsed: this.elapsed, cooldown: this.cooldown, weapon: this.equipped, ammo: this.ammo[this.equipped], unlocked: [...this.progress.unlocked], bossesKilled: this.bossesKilled, boss: boss ? { name: boss.kind as keyof typeof BOSSES, hp: boss.hp, maxHp: boss.maxHp, warning: boss.warning > 0, phase: boss.hp <= boss.maxHp / 2 ? 2 : 1 } : null, shield: this.player.shield, haste: this.player.haste, progressRevision: this.progressRevision, unlockedThisRun: [...this.unlockedThisRun], playerCount: this.players.length, marines: this.players.map(p => ({ id: p.id, health: Math.ceil(p.health), alive: p.health > 0, weapon: p.equipped, ammo: p.ammo[p.equipped], cooldown: p.cooldown, shield: p.shield, haste: p.haste })), activeEnemies, pendingEnemies, nextEncounter };
   }
   dispose() { this.transition('DISPOSED'); this.clearInput(); this.enemies = []; this.projectiles = []; this.pickups = []; this.events = []; this.explosions = []; for (const p of this.players) p.shockHits.clear(); this.grid.rebuild([]); }
 }

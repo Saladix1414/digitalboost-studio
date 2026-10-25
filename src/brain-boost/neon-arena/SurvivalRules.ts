@@ -1,3 +1,4 @@
+import { LEGACY_ARENA } from './ArenaDefinition.ts';
 export type WeaponId = 'machinegun' | 'shotgun' | 'flame' | 'cascade' | 'rail';
 export const WEAPONS: Record<WeaponId, { name: string; interval: number; damage: number; speed: number; life: number; pellets: number; spread: number; pierce: number; reserve: number }> = {
   machinegun: { name: 'Ametralladora', interval: .105, damage: 18, speed: 37, life: .9, pellets: 1, spread: .035, pierce: 1, reserve: 0 },
@@ -25,11 +26,7 @@ export function saveProgress(progress: Progress, storage?: Pick<Storage, 'getIte
   try { storage?.setItem(PROGRESS_KEY, JSON.stringify(merged)); } catch { /* In-memory progress remains valid. */ }
   return merged;
 }
-export const OBSTACLES = [
-  { x: -11, z: -8, radius: 1.7 }, { x: 10, z: -10, radius: 1.5 },
-  { x: -12, z: 10, radius: 1.6 }, { x: 12, z: 9, radius: 1.5 },
-  { x: -4, z: -15, radius: 1.2 }, { x: 5, z: 15, radius: 1.2 },
-];
+export const OBSTACLES = LEGACY_ARENA.obstacles;
 export type PickupKind = 'medkit' | 'ammo' | 'grenade' | 'shield' | 'haste';
 export function supplyForRoll(roll: number, unlocked: readonly WeaponId[]): PickupKind {
   const available: PickupKind[] = ['medkit', 'shield', 'haste'];
@@ -66,7 +63,7 @@ export function segmentCircleEntry(cx: number, cz: number, radius: number, ax: n
   return t >= 0 && t <= 1 ? t : Infinity;
 }
 
-export function firstBlockTime(ax: number, az: number, bx: number, bz: number, radius = 0, arena = 21) {
+export function firstBlockTime(ax: number, az: number, bx: number, bz: number, radius = 0, arena = 21, obstacles = OBSTACLES) {
   const edge = arena - radius;
   if (Math.abs(ax) >= edge || Math.abs(az) >= edge) return 0;
   let first = Infinity;
@@ -74,6 +71,6 @@ export function firstBlockTime(ax: number, az: number, bx: number, bz: number, r
   if (bx < -edge) first = Math.min(first, (-edge - ax) / (bx - ax));
   if (bz > edge) first = Math.min(first, (edge - az) / (bz - az));
   if (bz < -edge) first = Math.min(first, (-edge - az) / (bz - az));
-  for (const o of OBSTACLES) first = Math.min(first, segmentCircleEntry(o.x, o.z, o.radius + radius, ax, az, bx, bz));
+  for (const o of obstacles) first = Math.min(first, segmentCircleEntry(o.x, o.z, o.radius + radius, ax, az, bx, bz));
   return first;
 }

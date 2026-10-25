@@ -1,9 +1,9 @@
 /** Deterministic input-only pilot. No health/position/spawn mutations or debug invulnerability. */
 import assert from 'node:assert/strict';
 import { GameSimulation, CONFIG } from '../../src/brain-boost/neon-arena/GameSimulation.ts';
-import { OBSTACLES } from '../../src/brain-boost/neon-arena/SurvivalRules.ts';
-export function playthrough(seed, { seconds = 1200, maxEnemies = 120, useArsenal = true, classic = false } = {}) {
-  const s = new GameSimulation(seed, null, maxEnemies); s.ready(); s.start();
+import { LEGACY_ARENA } from '../../src/brain-boost/neon-arena/ArenaDefinition.ts';
+export function playthrough(seed, { seconds = 1200, maxEnemies = 120, useArsenal = true, classic = false, arena = LEGACY_ARENA, assisted = false } = {}) {
+  const s = new GameSimulation(seed, null, maxEnemies, 1, arena); s.ready(); s.start(); if (assisted) s.setAimMode('assisted');
   const trace = []; let lastWave = 0, lastKillTick = 0, oldKills = 0;
   for (let tick = 0; tick < 60 * seconds && s.phase !== 'GAME_OVER' && s.wave < 16; tick++) {
     if (s.phase === 'WAVE_TRANSITION') { s.step(); continue; }
@@ -18,7 +18,7 @@ export function playthrough(seed, { seconds = 1200, maxEnemies = 120, useArsenal
     let near = 0;
     for (const e of enemies) { const dx = p.x - e.x, dz = p.z - e.z, d = Math.hypot(dx, dz); if (d < 5) { const force = (5 - d) * .65; vx += dx / (d || 1) * force; vz += dz / (d || 1) * force; near++; } }
     for (const b of s.projectiles) if (b.hostile) { const dx = p.x - b.x, dz = p.z - b.z, d = Math.hypot(dx, dz); if (d < 3) { vx += dx / (d || 1) * (3 - d); vz += dz / (d || 1) * (3 - d); } }
-    for (const o of OBSTACLES) { const dx = p.x - o.x, dz = p.z - o.z, d = Math.hypot(dx, dz); if (d < o.radius + 2) { vx += dx / (d || 1) * 2; vz += dz / (d || 1) * 2; } }
+    for (const o of s.arena.obstacles) { const dx = p.x - o.x, dz = p.z - o.z, d = Math.hypot(dx, dz); if (d < o.radius + 2) { vx += dx / (d || 1) * 2; vz += dz / (d || 1) * 2; } }
     if (Math.abs(p.x) > 16) vx -= p.x * .2; if (Math.abs(p.z) > 16) vz -= p.z * .2;
     if (near >= 2 || boss && distance(boss) < 6) s.shock();
     if (useArsenal && tick % 30 === 0) {
@@ -28,7 +28,7 @@ export function playthrough(seed, { seconds = 1200, maxEnemies = 120, useArsenal
         : range < 8 && s.progress.unlocked.includes('shotgun') && s.ammo.shotgun > 0 && s.cooldowns.shotgun === 0 ? 'shotgun' : 'machinegun';
       s.equip(id);
     }
-    s.setInput(vx, vz, true, classic || !target ? null : Math.atan2(target.z - p.z, target.x - p.x)); s.step();
+    s.setInput(vx, vz, true, assisted || classic || !target ? null : Math.atan2(target.z - p.z, target.x - p.x)); s.step();
     if (s.wave !== lastWave) { trace.push({ wave: s.wave, time: Math.floor(s.elapsed), health: +s.health.toFixed(1), kills: s.kills }); lastWave = s.wave; }
     if (s.kills !== oldKills) { oldKills = s.kills; lastKillTick = tick; }
     if (tick - lastKillTick > 60 * 100) return { seed, phase: s.phase, stalled: true, wave: s.wave, time: s.elapsed, health: s.health, trace };

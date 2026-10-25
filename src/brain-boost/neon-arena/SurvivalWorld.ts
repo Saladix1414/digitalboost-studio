@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CONFIG, type GameSimulation } from './GameSimulation';
 import { splitViewports, type Viewport } from './LocalControls';
-import { OBSTACLES } from './SurvivalRules';
+import { LEGACY_ARENA, type ArenaDefinition } from './ArenaDefinition';
 
 /** All world geometry is shared or instanced; combat is read-only here. */
 export class SurvivalWorld {
@@ -24,7 +24,7 @@ export class SurvivalWorld {
   private corpses: { x: number; z: number; born: number; id: number }[] = []; private lastEvent = 0;
   private remains = true; private followTarget = new THREE.Vector2();
   private up = new THREE.Vector3(0, 1, 0); private flameAxis = new THREE.Vector3();
-  constructor(private reduced: boolean) { this.build(); }
+  constructor(private reduced: boolean, private arena: ArenaDefinition = LEGACY_ARENA) { this.build(); }
   private geo<T extends THREE.BufferGeometry>(g: T) { this.geometries.add(g); return g; }
   private mat<T extends THREE.Material>(m: T) { this.materials.add(m); return m; }
   private standard(color: number, emissive = 0, intensity = 0) { return this.mat(new THREE.MeshStandardMaterial({ color, roughness: .8, metalness: .12, emissive, emissiveIntensity: intensity })); }
@@ -55,10 +55,10 @@ export class SurvivalWorld {
     const shell = this.standard(0xffffff), olive = this.standard(0x5d6733), metal = this.standard(0x3b4c49), dark = this.standard(0x17221b);
     const cyan = this.standard(0x88e7ff, 0x00bfff, .8), amber = this.standard(0xffc86c, 0xff6313, 1);
     const floor = this.mat(new THREE.MeshStandardMaterial({ map: this.groundTexture(), color: 0xb0bba0, roughness: .87, metalness: .04 }));
-    const ground = this.mesh(this.geo(new THREE.PlaneGeometry(49, 49)), floor, this.scene); ground.rotation.x = -Math.PI / 2;
+    const ground = this.mesh(this.geo(new THREE.PlaneGeometry(this.arena.floorSize, this.arena.floorSize)), floor, this.scene); ground.rotation.x = -Math.PI / 2;
     const rubble = this.pool(this.geo(new THREE.IcosahedronGeometry(1, 0)), olive, 420);
     for (let i = 0; i < 420; i++) {
-      const a = i * 2.39996, r = i < 240 ? 22 + i % 3 * .5 : 3 + (i * 17 % 190) / 10;
+      const a = i * 2.39996, r = i < 240 ? this.arena.wall + i % 3 * .5 : 3 + (i * 17 % 190) / 10;
       const x = Math.cos(a) * r, z = Math.sin(a) * r;
       const boundary = i < 240, scale = boundary ? .5 + i % 7 * .14 : .08 + i % 5 * .035;
       this.instance(rubble, i, x, boundary ? .4 : .04, z, scale, boundary ? scale : .08, scale, a);
@@ -66,14 +66,14 @@ export class SurvivalWorld {
     rubble.count = 420; rubble.instanceMatrix.needsUpdate = true;
     for (let i = 0; i < 4; i++) {
       const wall = new THREE.Group(); wall.rotation.y = i * Math.PI / 2; this.scene.add(wall);
-      this.mesh(box, metal, wall, 0, .5, -22, 44, 1, .8);
+      this.mesh(box, metal, wall, 0, .5, -this.arena.wall, this.arena.wall * 2, 1, .8);
       for (let j = -2; j <= 2; j++) {
-        this.mesh(box, dark, wall, j * 9, 1.1, -22, 1.4, 2.2, 1.4);
-        this.mesh(box, amber, wall, j * 9, 2.1, -21.9, .5, .12, .5);
+        this.mesh(box, dark, wall, j * 9, 1.1, -this.arena.wall, 1.4, 2.2, 1.4);
+        this.mesh(box, amber, wall, j * 9, 2.1, -this.arena.wall + .1, .5, .12, .5);
       }
     }
     // These exact circles also define simulation collision: visible debris never hides a different collider.
-    for (const o of OBSTACLES) {
+    for (const o of this.arena.obstacles) {
       this.mesh(sphere, olive, this.scene, o.x, .45, o.z, o.radius, .8, o.radius);
       this.mesh(box, metal, this.scene, o.x, .6, o.z, o.radius * 1.2, .7, o.radius * 1.1).rotation.y = o.x;
       this.mesh(sphere, this.standard(0x596f32, 0x315711, .15), this.scene, o.x + .3, 1, o.z, o.radius * .55, .55, o.radius * .65);
@@ -131,7 +131,7 @@ export class SurvivalWorld {
       if (!rect.width || !rect.height) return;
       const aspect = rect.width / rect.height, frame = this.frames[i], camera = this.cameras[i];
       frame.width = count === 2 ? Math.min(32, Math.max(20, 28 * aspect)) : Math.min(46, Math.max(27, 42 * aspect)); frame.height = frame.width / aspect;
-      const maxX = Math.max(0, 22 - frame.width / 2), maxZ = Math.max(0, 22 - frame.height / 2);
+      const maxX = Math.max(0, this.arena.wall - frame.width / 2), maxZ = Math.max(0, this.arena.wall - frame.height / 2);
       frame.follow.x = Math.max(-maxX, Math.min(maxX, frame.follow.x)); frame.follow.y = Math.max(-maxZ, Math.min(maxZ, frame.follow.y));
       camera.left = -frame.width / 2; camera.right = frame.width / 2; camera.top = frame.height / 2; camera.bottom = -frame.height / 2; camera.updateProjectionMatrix();
     });
@@ -143,7 +143,7 @@ export class SurvivalWorld {
       const p = s.players[i]; view.body.visible = !!p; view.torch.visible = !!p; view.flash.visible = !!p;
       if (!p) { view.flame.visible = view.shock.visible = false; return; }
       const follow = p.health > 0 ? p : s.nearestPlayer(p.x, p.z), frame = this.frames[i], camera = this.cameras[i];
-      const maxX = Math.max(0, 22 - frame.width / 2), maxZ = Math.max(0, 22 - frame.height / 2);
+      const maxX = Math.max(0, this.arena.wall - frame.width / 2), maxZ = Math.max(0, this.arena.wall - frame.height / 2);
       const targetX = Math.max(-maxX, Math.min(maxX, follow.x)), targetZ = Math.max(-maxZ, Math.min(maxZ, follow.z));
       frame.follow.lerp(this.followTarget.set(targetX, targetZ), this.reduced ? 1 : 1 - Math.exp(-dt * 9));
       const shake = !this.reduced && p.invulnerable > .45 ? Math.sin(t * 91) * .06 : 0;

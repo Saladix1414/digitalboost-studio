@@ -3,7 +3,7 @@ import test from 'node:test';
 import { playthrough } from './neonArena.playthrough.mjs';
 import { GameSimulation } from '../../src/brain-boost/neon-arena/GameSimulation.ts';
 
-test('input-only modern pilot completes the actual default seed through all three bosses', () => {
+test('legacy input-only modern pilot preserves the accepted seed through all three bosses', () => {
   const first = playthrough(42819);
   assert.equal(first.stalled, undefined); assert.equal(first.wave, 16); assert.equal(first.bosses, 3);
   assert.deepEqual(first.unlocked, ['machinegun', 'shotgun', 'flame', 'cascade', 'rail']);

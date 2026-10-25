@@ -1,3 +1,4 @@
+import { DEFAULT_ARENA } from './ArenaDefinition';
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -23,14 +24,14 @@ export class NeonArenaEngine {
   private progressRevision = 0; private lastEvent = 0; private badFrames = 0; private resolution = 1; private low: boolean; private reduced: boolean; private width = 1; private height = 1; private needsRender = true;
   constructor(private host: HTMLDivElement, private notify: (snapshot: Snapshot) => void, private fail: (message: string) => void, private options: Options = {}) {
     this.reduced = matchMedia('(prefers-reduced-motion: reduce)').matches; this.low = matchMedia('(pointer: coarse)').matches || this.reduced;
-    this.simulation = new GameSimulation(42819, options.progress, this.low ? 120 : 240, options.playerCount ?? 1);
+    this.simulation = new GameSimulation(42819, options.progress, this.low ? 120 : 240, options.playerCount ?? 1, DEFAULT_ARENA);
     try {
       const canvas = document.createElement('canvas'), context = canvas.getContext('webgl2', { antialias: !this.low });
       if (!context) throw new Error('WebGL 2 no está disponible en este navegador.');
       this.renderer = new THREE.WebGLRenderer({ canvas, context, antialias: !this.low });
       this.renderer.outputColorSpace = THREE.SRGBColorSpace; this.renderer.toneMapping = THREE.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.15;
       canvas.tabIndex = 0; canvas.setAttribute('aria-label', 'Arena 3D. P1: WASD, F y espacio. P2 cooperativo: flechas, J y K. P: pausa.'); host.append(canvas);
-      this.world = new SurvivalWorld(this.reduced); this.configureComposer(); this.bind(canvas);
+      this.world = new SurvivalWorld(this.reduced, this.simulation.arena); this.configureComposer(); this.bind(canvas);
       this.observer = new ResizeObserver(() => this.resize()); this.observer.observe(host); this.resize();
       this.modes.forEach((mode, i) => this.simulation.setAimMode(mode, i)); this.simulation.ready(); this.world.draw(this.simulation); this.notify(this.simulation.snapshot()); this.raf = requestAnimationFrame(this.frame);
     } catch (error) { this.dispose(); throw error; }
