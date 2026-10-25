@@ -18,7 +18,7 @@ export class SurvivalWorld {
   private items!: THREE.InstancedMesh; private crosses!: THREE.InstancedMesh; private bullets!: THREE.InstancedMesh; private warnings!: THREE.InstancedMesh;
   private stains!: THREE.InstancedMesh; private blasts!: THREE.InstancedMesh; private trails!: THREE.LineSegments; private flame!: THREE.Mesh; private shock!: THREE.Mesh;
   private torch = new THREE.PointLight(0xbde9cf, 12, 14, 1.8); private flash = new THREE.PointLight(0xff9c35, 0, 9, 2);
-  private lastTime = 0;
+  private lastTime = 0; private steam!: THREE.Points; private contact!: THREE.InstancedMesh;
   private frames = Array.from({ length: 2 }, () => ({ width: 44, height: 44, follow: new THREE.Vector2(), lastPlayer: new THREE.Vector2(0, 3) }));
   private marineViews: { body: THREE.Group; gun: THREE.Group; boots: THREE.Mesh[]; suit: THREE.MeshStandardMaterial; torch: THREE.PointLight; flash: THREE.PointLight; flame: THREE.Mesh; shock: THREE.Mesh }[] = [];
   private corpses: { x: number; z: number; born: number; id: number }[] = []; private lastEvent = 0;
@@ -35,52 +35,101 @@ export class SurvivalWorld {
   private instance(pool: THREE.InstancedMesh, i: number, x: number, y: number, z: number, sx: number, sy: number, sz: number, angle = 0, tilt = 0) {
     this.dummy.position.set(x, y, z); this.dummy.rotation.set(tilt, angle, 0); this.dummy.scale.set(sx, sy, sz); this.dummy.updateMatrix(); pool.setMatrixAt(i, this.dummy.matrix);
   }
-  private groundTexture() {
-    const canvas = document.createElement('canvas'); canvas.width = canvas.height = 256; const ctx = canvas.getContext('2d')!;
-    ctx.fillStyle = '#161c12'; ctx.fillRect(0, 0, 256, 256);
+  private groundTextures() {
+    const size = 512, canvas = document.createElement('canvas'); canvas.width = canvas.height = size; const ctx = canvas.getContext('2d')!;
     let seed = 8192; const random = () => { seed = Math.imul(seed, 1664525) + 1013904223 | 0; return (seed >>> 0) / 4294967296; };
-    for (let i = 0; i < 16000; i++) {
-      const n = Math.floor(random() * 28); ctx.fillStyle = `rgb(${20 + n},${28 + n},${15 + n * .6})`;
-      ctx.fillRect(random() * 256, random() * 256, 1 + random() * 4, 1 + random() * 3);
+    ctx.fillStyle = '#273338'; ctx.fillRect(0, 0, size, size);
+    for (let row = 0; row < 4; row++) for (let col = 0; col < 4; col++) {
+      const x = col * 128, y = row * 128, shade = 34 + Math.floor(random() * 9);
+      ctx.fillStyle = `rgb(${shade},${shade + 10},${shade + 13})`; ctx.fillRect(x + 3, y + 3, 122, 122);
+      ctx.strokeStyle = '#142025'; ctx.lineWidth = 3; ctx.strokeRect(x + 2, y + 2, 124, 124);
+      ctx.strokeStyle = '#4a595b'; ctx.lineWidth = 1; ctx.strokeRect(x + 5, y + 5, 118, 118);
+      for (const dx of [11, 117]) for (const dy of [11, 117]) { ctx.fillStyle = '#10191d'; ctx.beginPath(); ctx.arc(x + dx, y + dy, 2, 0, 7); ctx.fill(); ctx.fillStyle = '#67716c'; ctx.fillRect(x + dx, y + dy - 1, 1, 1); }
+      if ((row + col) % 3 === 0) { ctx.fillStyle = '#5c5938'; ctx.fillRect(x + 18, y + 17, 35, 3); ctx.fillStyle = '#171e20'; for (let i = 0; i < 7; i++) ctx.fillRect(x + 20 + i * 5, y + 17, 2, 3); }
     }
-    ctx.strokeStyle = '#303a20'; ctx.lineWidth = 2;
-    for (let i = 0; i < 60; i++) { ctx.beginPath(); const x = random() * 256, y = random() * 256; ctx.moveTo(x, y); ctx.bezierCurveTo(x + 15, y - 30, x - 30, y + 15, x + 40, y + 20); ctx.stroke(); }
-    const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.repeat.set(6, 6); this.textures.add(texture); return texture;
+    for (let i = 0; i < 22000; i++) { const v = Math.floor(random() * 40); ctx.fillStyle = `rgba(${65 + v},${61 + v},${50 + v},.09)`; ctx.fillRect(random() * size, random() * size, 1, 1 + random() * 3); }
+    ctx.strokeStyle = '#69634b33'; ctx.lineWidth = .5;
+    for (let i = 0; i < 180; i++) { const x = random() * size, y = random() * size; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + random() * 24, y + random() * 8); ctx.stroke(); }
+    const map = new THREE.CanvasTexture(canvas); map.colorSpace = THREE.SRGBColorSpace;
+    const normals = new Uint8Array(size * size * 4), rough = new Uint8Array(size * size * 4);
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      const i = (y * size + x) * 4, seamX = x % 128, seamY = y % 128;
+      normals[i] = seamX < 4 ? 90 : seamX > 123 ? 165 : 127 + Math.floor(random() * 4);
+      normals[i + 1] = seamY < 4 ? 90 : seamY > 123 ? 165 : 127 + Math.floor(random() * 4); normals[i + 2] = 248; normals[i + 3] = 255;
+      rough[i] = rough[i + 1] = rough[i + 2] = seamX < 6 || seamY < 6 ? 235 : 155 + Math.floor(random() * 50); rough[i + 3] = 255;
+    }
+    const normalMap = new THREE.DataTexture(normals, size, size), roughnessMap = new THREE.DataTexture(rough, size, size);
+    for (const texture of [map, normalMap, roughnessMap]) { texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.repeat.set(7, 7); texture.minFilter = THREE.LinearMipmapLinearFilter; texture.magFilter = THREE.LinearFilter; texture.generateMipmaps = true; texture.needsUpdate = true; this.textures.add(texture); }
+    return { map, normalMap, roughnessMap };
   }
   private build() {
-    this.scene.background = new THREE.Color(0x050907); this.scene.fog = new THREE.FogExp2(0x080e09, .009);
-    this.scene.add(new THREE.HemisphereLight(0xa6c9b5, 0x33301e, 2.1));
-    const key = new THREE.DirectionalLight(0xffe5b4, 2.4); key.position.set(-12, 30, 9); this.scene.add(key, this.torch, this.flash);
+    this.scene.background = new THREE.Color(0x03090f); this.scene.fog = new THREE.FogExp2(0x06111a, .008);
+    this.scene.add(new THREE.HemisphereLight(0xa9c9d7, 0x202a24, 1.6));
+    const key = new THREE.DirectionalLight(0xc2e4f5, 2.6); key.position.set(-12, 30, 9); this.scene.add(key, this.torch, this.flash);
     const box = this.geo(new THREE.BoxGeometry(1, 1, 1)), sphere = this.geo(new THREE.SphereGeometry(1, 10, 7));
     const shell = this.standard(0xffffff), olive = this.standard(0x5d6733), metal = this.standard(0x3b4c49), dark = this.standard(0x17221b);
     const cyan = this.standard(0x88e7ff, 0x00bfff, .8), amber = this.standard(0xffc86c, 0xff6313, 1);
-    const floor = this.mat(new THREE.MeshStandardMaterial({ map: this.groundTexture(), color: 0xb0bba0, roughness: .87, metalness: .04 }));
+    const floor = this.mat(new THREE.MeshStandardMaterial({ ...this.groundTextures(), color: 0x98acb0, roughness: .92, metalness: .22, normalScale: new THREE.Vector2(.45, .45) }));
     const ground = this.mesh(this.geo(new THREE.PlaneGeometry(this.arena.floorSize, this.arena.floorSize)), floor, this.scene); ground.rotation.x = -Math.PI / 2;
     const rubble = this.pool(this.geo(new THREE.IcosahedronGeometry(1, 0)), olive, 420);
     for (let i = 0; i < 420; i++) {
-      const a = i * 2.39996, r = i < 240 ? this.arena.wall + i % 3 * .5 : 3 + (i * 17 % 190) / 10;
-      const x = Math.cos(a) * r, z = Math.sin(a) * r;
-      const boundary = i < 240, scale = boundary ? .5 + i % 7 * .14 : .08 + i % 5 * .035;
+      const a = i * 2.39996;
+      const boundary = i < 240, side = i % 4, along = (Math.floor(i / 4) / 59 * 2 - 1) * this.arena.wall;
+      const x = boundary ? side === 0 || side === 2 ? along : (side === 1 ? 1 : -1) * (this.arena.wall + .6) : (this.arena.obstacles[i % 6].x + Math.cos(a) * (1.9 + i % 4 * .12));
+      const z = boundary ? side === 1 || side === 3 ? along : (side === 2 ? 1 : -1) * (this.arena.wall + .6) : (this.arena.obstacles[i % 6].z + Math.sin(a) * (1.9 + i % 4 * .12));
+      const scale = boundary ? .5 + i % 7 * .14 : .08 + i % 5 * .035;
       this.instance(rubble, i, x, boundary ? .4 : .04, z, scale, boundary ? scale : .08, scale, a);
     }
     rubble.count = 420; rubble.instanceMatrix.needsUpdate = true;
+    const ribs = this.pool(box, this.standard(0x42535d), 80), lamps = this.pool(box, this.standard(0xffffff, 0x589cac, .7), 80);
+    const wallDistance = this.arena.wall;
     for (let i = 0; i < 4; i++) {
       const wall = new THREE.Group(); wall.rotation.y = i * Math.PI / 2; this.scene.add(wall);
-      this.mesh(box, metal, wall, 0, .5, -this.arena.wall, this.arena.wall * 2, 1, .8);
-      for (let j = -2; j <= 2; j++) {
-        this.mesh(box, dark, wall, j * 9, 1.1, -this.arena.wall, 1.4, 2.2, 1.4);
-        this.mesh(box, amber, wall, j * 9, 2.1, -this.arena.wall + .1, .5, .12, .5);
+      this.mesh(box, metal, wall, 0, .9, -wallDistance, wallDistance * 2, 1.8, .8);
+      const pipe = this.mesh(this.geo(new THREE.CylinderGeometry(.18, .18, wallDistance * 2, 8)), dark, wall, 0, 1.3, -wallDistance + .65); pipe.rotation.z = Math.PI / 2;
+      for (let j = 0; j < 20; j++) {
+        const x = -wallDistance + 1.2 + j * (wallDistance * 2 - 2.4) / 19, n = i * 20 + j, angle = i * Math.PI / 2;
+        const wx = Math.cos(angle) * x - Math.sin(angle) * wallDistance, wz = -Math.sin(angle) * x - Math.cos(angle) * wallDistance;
+        this.instance(ribs, n, wx, 1.35, wz, .28, 2.7, 1.05, angle);
+        this.instance(lamps, n, wx, 2.7, wz, .15, .12, .7, angle); lamps.setColorAt(n, this.color.setHex(j % 5 ? 0x62b8cc : 0xe8a64f));
       }
     }
-    // These exact circles also define simulation collision: visible debris never hides a different collider.
-    for (const o of this.arena.obstacles) {
-      this.mesh(sphere, olive, this.scene, o.x, .45, o.z, o.radius, .8, o.radius);
-      this.mesh(box, metal, this.scene, o.x, .6, o.z, o.radius * 1.2, .7, o.radius * 1.1).rotation.y = o.x;
-      this.mesh(sphere, this.standard(0x596f32, 0x315711, .15), this.scene, o.x + .3, 1, o.z, o.radius * .55, .55, o.radius * .65);
+    this.finish(ribs, 80); this.finish(lamps, 80, true);
+    const vents = this.pool(box, this.standard(0x445158), 48), slots = this.pool(box, this.standard(0x0b161a), 192);
+    for (let i = 0; i < 48; i++) {
+      const side = i % 4, a = side * Math.PI / 2, offset = (Math.floor(i / 4) - 5.5) * 4.1;
+      const x = Math.cos(a) * offset - Math.sin(a) * (wallDistance + 1), z = -Math.sin(a) * offset - Math.cos(a) * (wallDistance + 1);
+      this.instance(vents, i, x, .8, z, 2.3, 1.6, 1.2, a);
+      for (let j = 0; j < 4; j++) this.instance(slots, i * 4 + j, x + Math.cos(a) * (j - 1.5) * .4, 1.62, z - Math.sin(a) * (j - 1.5) * .4, .17, .025, .8, a);
     }
-    const veins = this.pool(this.geo(new THREE.CylinderGeometry(.06, .09, 1, 5)), olive, 100);
-    for (let i = 0; i < 100; i++) this.instance(veins, i, Math.sin(i * 5.3) * 21, .08, Math.cos(i * 2.7) * 21, 1, .4 + i % 5 * .3, 1, i * .7, Math.PI / 2);
-    veins.count = 100; veins.instanceMatrix.needsUpdate = true;
+    this.finish(vents, 48); this.finish(slots, 192);
+    const membrane = this.pool(sphere, this.standard(0x435533, 0x1d300d, .15), 90);
+    for (let i = 0; i < 90; i++) {
+      const side = i % 4, a = side * Math.PI / 2, along = Math.sin(i * 12.7) * (wallDistance - 1), inward = 1.3 + i % 4 * .3;
+      const x = Math.cos(a) * along - Math.sin(a) * (wallDistance - inward), z = -Math.sin(a) * along - Math.cos(a) * (wallDistance - inward);
+      this.instance(membrane, i, x, .035, z, .5 + i % 4 * .4, .06, .4 + i % 5 * .3, i);
+    }
+    this.finish(membrane, 90);
+    this.contact = this.pool(this.geo(new THREE.CircleGeometry(1, 24)), this.mat(new THREE.MeshBasicMaterial({ color: 0x020709, transparent: true, opacity: .4, depthWrite: false })), this.arena.obstacles.length + 2);
+    const steamGeometry = this.geo(new THREE.BufferGeometry()); steamGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(32 * 3), 3));
+    this.steam = new THREE.Points(steamGeometry, this.mat(new THREE.PointsMaterial({ color: 0x92c1c7, size: .55, transparent: true, opacity: .12, depthWrite: false, sizeAttenuation: true }))); this.steam.frustumCulled = false; this.scene.add(this.steam);
+    // Circular generator bases match the simulation's cover exactly; fittings stay inside.
+    const pedestal = this.geo(new THREE.CylinderGeometry(1, 1, 1, 16)), coil = this.geo(new THREE.TorusGeometry(1, .045, 5, 28));
+    const casing = this.standard(0x67777b), machinery = this.standard(0x28383c), wiring = this.standard(0x7eb9ac, 0x187d75, .35);
+    for (const o of this.arena.obstacles) {
+      this.mesh(pedestal, machinery, this.scene, o.x, .35, o.z, o.radius, .7, o.radius);
+      this.mesh(pedestal, casing, this.scene, o.x, .76, o.z, o.radius * .87, .15, o.radius * .87);
+      this.mesh(box, metal, this.scene, o.x, .98, o.z, o.radius * 1.05, .35, o.radius * 1.05).rotation.y = .3;
+      const ring = this.mesh(coil, wiring, this.scene, o.x, .86, o.z, o.radius * .8, o.radius * .8, o.radius * .8); ring.rotation.x = Math.PI / 2;
+      for (let j = 0; j < 3; j++) this.mesh(box, dark, this.scene, o.x - o.radius * .3 + j * o.radius * .3, 1.17, o.z, .09, .04, o.radius * .7);
+    }
+    const markings = this.pool(box, this.standard(0x8e9865), 56);
+    for (let i = 0; i < 56; i++) {
+      const side = i % 4, a = side * Math.PI / 2, along = (Math.floor(i / 4) - 6.5) * 2.7;
+      const x = Math.cos(a) * along - Math.sin(a) * 18.5, z = -Math.sin(a) * along - Math.cos(a) * 18.5;
+      this.instance(markings, i, x, .018, z, .65, .012, .085, a + .45);
+    }
+    this.finish(markings, 56);
     this.gun.name = 'weapon';
     this.suit = this.standard(0xb6c8ad); this.scene.add(this.marine); this.marine.add(this.gun);
     this.marine.scale.setScalar(1.15);
@@ -154,6 +203,12 @@ export class SurvivalWorld {
       view.boots.forEach((boot, j) => { boot.position.z = -.45 + (this.reduced || !moving ? 0 : Math.sin(t * 13 + j * Math.PI) * .16); });
       view.torch.position.set(follow.x, 4, follow.z);
     });
+    let shadows = 0;
+    for (const o of this.arena.obstacles) this.instance(this.contact, shadows++, o.x + .15, .025, o.z + .1, o.radius * 1.15, o.radius * 1.15, 1, 0, -Math.PI / 2);
+    for (const p of s.players) this.instance(this.contact, shadows++, p.x, .028, p.z, .65, .65, 1, 0, -Math.PI / 2);
+    this.finish(this.contact, shadows);
+    const steamPosition = this.steam.geometry.getAttribute('position') as THREE.BufferAttribute;
+    for (let i = 0; i < 32; i++) { const side = i % 4, a = side * Math.PI / 2, along = Math.sin(Math.floor(i / 4) * 3.9) * (this.arena.wall - 1), rise = this.reduced ? (i % 5) * .2 : (t * .35 + i * .17) % 2; steamPosition.setXYZ(i, Math.cos(a) * along - Math.sin(a) * (this.arena.wall - .8) + Math.sin(i + rise) * .25, .4 + rise, -Math.sin(a) * along - Math.cos(a) * (this.arena.wall - .8)); } steamPosition.needsUpdate = true;
     let count = 0, lc = 0, pc = 0, wc = 0, bossCount = 0, fc = 0, ec = 0, shellCount = 0;
     for (const e of s.enemies) {
       const scale = e.state === 'DYING' ? Math.max(.01, 1 - e.age / .35) : e.state === 'SPAWNING' ? Math.min(1, e.age / .65) : 1;

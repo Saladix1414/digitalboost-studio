@@ -11,6 +11,7 @@ try {
   await page.evaluate(async()=>{const {GameSimulation}=await import('/src/brain-boost/neon-arena/GameSimulation.ts');const start=GameSimulation.prototype.start;GameSimulation.prototype.start=function(){window.qaRotate=this;return start.call(this)};window.qaNative=HTMLElement.prototype.requestFullscreen;HTMLElement.prototype.requestFullscreen=function(){return Promise.reject(new Error('fixture: denied'))};});
   await page.getByRole('button',{name:'Nightmare Protocolo',exact:true}).click(); await page.getByRole('button',{name:/Neon Arena: Virus Survivor/}).click();await page.waitForSelector('[data-neon-phase="READY"]');
   assert.equal(await page.locator('.na-game').getAttribute('data-neon-fullscreen'),'off');
+  await page.getByLabel('Diagnóstico de rendimiento').check();
   await page.getByRole('button',{name:'Iniciar supervivencia →',exact:true}).click();
   const canvas=await page.locator('.na-canvas canvas').elementHandle(), elapsed=await page.evaluate(()=>window.qaRotate.elapsed);
   const fire=await page.locator('[data-na-fire]').boundingBox(), cdp=await context.newCDPSession(page);
@@ -21,6 +22,7 @@ try {
   assert.ok(await page.evaluate(()=>window.qaRotate.elapsed)>elapsed);
   const stage=await page.locator('.na-stage').boundingBox();assert.ok(stage.height>150&&stage.height<390);assert.ok(stage.y>=0&&stage.y+stage.height<=391);
   await page.getByRole('button',{name:'Pantalla completa',exact:true}).click();assert.equal(await page.locator('.na-game').getAttribute('data-neon-fullscreen'),'viewport');
+  await page.waitForSelector('.na-diagnostics'); assert.match(await page.locator('.na-diagnostics').innerText(), /CPU update.*render.*[1-9]\d* draws/s);
   await page.screenshot({path:'/tmp/neon-v5-landscape.png'});
   await page.evaluate(()=>HTMLElement.prototype.requestFullscreen=window.qaNative);
   await page.getByRole('button',{name:'Pantalla completa',exact:true}).click();await page.waitForSelector('[data-neon-fullscreen="native"]');

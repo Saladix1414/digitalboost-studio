@@ -1,3 +1,4 @@
+import { RenderMetrics, type ArenaDiagnostics } from './RenderMetrics';
 import { DEFAULT_ARENA } from './ArenaDefinition';
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -10,7 +11,7 @@ import { LocalGamepads, keyboardAction, keyboardInput } from './LocalControls';
 import { WEAPON_IDS, type Progress } from './SurvivalRules';
 import type { AimMode } from './AimAssist';
 type Snapshot = ReturnType<GameSimulation['snapshot']>;
-type Options = { progress?: Progress; playerCount?: 1 | 2; onProgress?: (progress: Progress) => void; onCue?: (event: CombatEvent) => void };
+type Options = { progress?: Progress; playerCount?: 1 | 2; onProgress?: (progress: Progress) => void; onCue?: (event: CombatEvent) => void; onDiagnostics?: (value: ArenaDiagnostics | null) => void };
 const controls = () => ({ x: 0, z: 0, mouseFire: false, touchFire: false, aim: null as number | null });
 export class NeonArenaEngine {
   readonly simulation: GameSimulation;
@@ -20,6 +21,7 @@ export class NeonArenaEngine {
   private pointers = new Map<number, { kind: 'stick' | 'fire'; playerId: number; x: number; y: number; element: HTMLElement }>();
   private inputs = [controls(), controls()]; private modes: AimMode[] = ['assisted', 'assisted']; private pads = new LocalGamepads();
   private ray = new THREE.Raycaster(); private plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); private pointer = new THREE.Vector2(); private point = new THREE.Vector3();
+  private diagnostics = false; private metrics = new RenderMetrics(); private metricAt = 0;
   private raf = 0; private disposed = false; private lastTime = 0; private publishAt = 0; private publishedPhase = 'LOADING';
   private progressRevision = 0; private lastEvent = 0; private badFrames = 0; private resolution = 1; private low: boolean; private reduced: boolean; private width = 1; private height = 1; private needsRender = true;
   constructor(private host: HTMLDivElement, private notify: (snapshot: Snapshot) => void, private fail: (message: string) => void, private options: Options = {}) {
@@ -29,6 +31,7 @@ export class NeonArenaEngine {
       const canvas = document.createElement('canvas'), context = canvas.getContext('webgl2', { antialias: !this.low });
       if (!context) throw new Error('WebGL 2 no está disponible en este navegador.');
       this.renderer = new THREE.WebGLRenderer({ canvas, context, antialias: !this.low });
+      this.renderer.info.autoReset = false;
       this.renderer.outputColorSpace = THREE.SRGBColorSpace; this.renderer.toneMapping = THREE.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.15;
       canvas.tabIndex = 0; canvas.setAttribute('aria-label', 'Arena 3D. P1: WASD, F y espacio. P2 cooperativo: flechas, J y K. P: pausa.'); host.append(canvas);
       this.world = new SurvivalWorld(this.reduced, this.simulation.arena); this.configureComposer(); this.bind(canvas);
@@ -41,6 +44,8 @@ export class NeonArenaEngine {
     this.modes.forEach((mode, i) => this.simulation.setAimMode(mode, i)); this.releaseInputs(); this.configureComposer(); this.resize(); this.world.draw(this.simulation); this.notify(this.simulation.snapshot()); return true;
   }
   setMode(mode: AimMode, playerId = 0) { if (playerId < 0 || playerId > 1) return; this.modes[playerId] = mode; this.simulation.setAimMode(mode, playerId); this.releaseInputs(); }
+  setQuality(quality: 'auto' | 'low' | 'high') { this.low = quality === 'low' || quality === 'auto' && matchMedia('(pointer: coarse)').matches || this.reduced; this.resolution = 1; this.configureComposer(); this.resize(); }
+  setDiagnostics(enabled: boolean) { this.diagnostics = enabled; this.metrics.reset(); if (!enabled) this.options.onDiagnostics?.(null); }
   setRemains(enabled: boolean) { this.world.setRemains(enabled); this.needsRender = true; }
   private cycle(playerId: number) {
     const p = this.simulation.players[playerId]; if (!p) return;
@@ -126,6 +131,7 @@ export class NeonArenaEngine {
   togglePause() { this.simulation.phase === 'PAUSED' ? this.simulation.resume() : this.simulation.pause(); this.releaseInputs(); this.resetClock(); this.renderer.domElement.focus({ preventScroll: true }); }
   private resetClock() { this.lastTime = 0; this.clock.reset(); this.needsRender = true; this.notify(this.simulation.snapshot()); }
   private render() {
+    this.renderer.info.reset();
     if (this.composer) try { this.composer.render(); return; } catch { this.disposeComposer(); }
     const r = this.renderer; r.setScissorTest(true);
     try { this.world.viewports.forEach((view, i) => { if (!view.width || !view.height) return; const y = this.height - view.y - view.height; r.setViewport(view.x, y, view.width, view.height); r.setScissor(view.x, y, view.width, view.height); r.render(this.world.scene, this.world.cameras[i]); }); }
@@ -144,12 +150,16 @@ export class NeonArenaEngine {
       else if (pads.inputs.some(p => p.pause)) this.togglePause();
       pads.inputs.forEach((p, i) => { if (p.shock) this.simulation.shock(i); if (p.cycle) this.cycle(i); if (this.modes[i] === 'modern' && p.aim !== null) this.inputs[i].aim = p.aim; });
       const s = this.simulation;
+      const updateStart = performance.now();
       this.clock.advance(delta, () => {
         s.players.forEach((p, i) => { const key = keyboardInput(this.keys, i, s.players.length), input = this.inputs[i], pad = pads.inputs[i]; s.setInput(key.x + input.x + pad.x, key.z + input.z + pad.z, key.firing || input.mouseFire || input.touchFire || pad.firing, this.modes[i] === 'modern' ? input.aim : null, i); });
         s.step(); if (s.progressRevision !== this.progressRevision) { this.progressRevision = s.progressRevision; this.options.onProgress?.(s.progress); }
       });
+      const updateMs = performance.now() - updateStart;
       for (const e of s.events) if (e.id > this.lastEvent) { this.options.onCue?.(e); this.lastEvent = e.id; }
-      if (['PLAYING', 'WAVE_TRANSITION'].includes(s.phase) || this.needsRender || s.phase !== this.publishedPhase) { this.world.draw(s); this.render(); this.needsRender = false; }
+      if (['PLAYING', 'WAVE_TRANSITION'].includes(s.phase) || this.needsRender || s.phase !== this.publishedPhase) { const before = performance.now(); this.world.draw(s); this.render(); if (this.diagnostics && ['PLAYING', 'WAVE_TRANSITION'].includes(s.phase)) this.metrics.observe(delta, updateMs, performance.now() - before); this.needsRender = false; }
+      if (this.diagnostics && time - this.metricAt > 1000) { this.metricAt = time; const info = this.renderer.info; this.options.onDiagnostics?.({ ...this.metrics.read(), calls: info.render.calls, triangles: info.render.triangles, geometries: info.memory.geometries, textures: info.memory.textures, enemies: s.enemies.length }); }
+      if (!['PLAYING', 'WAVE_TRANSITION'].includes(s.phase)) this.metrics.reset();
       if (time - this.publishAt > 100 || s.phase !== this.publishedPhase) { this.publishAt = time; this.publishedPhase = s.phase; this.notify(s.snapshot()); }
       this.raf = requestAnimationFrame(this.frame);
     } catch (error) { this.simulation.transition('ERROR'); this.releaseInputs(); this.notify(this.simulation.snapshot()); this.fail(error instanceof Error ? error.message : 'Error de renderizado'); }
