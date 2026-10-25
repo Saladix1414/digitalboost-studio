@@ -85,7 +85,7 @@ export class SurvivalWorld {
     const wallDistance = this.arena.wall;
     for (let i = 0; i < 4; i++) {
       const wall = new THREE.Group(); wall.rotation.y = i * Math.PI / 2; this.scene.add(wall);
-      this.mesh(box, metal, wall, 0, .9, -wallDistance, wallDistance * 2, 1.8, .8);
+      this.mesh(box, metal, wall, 0, .9, -wallDistance, wallDistance * 2, 1.8, this.arena.wallThickness);
       const pipe = this.mesh(this.geo(new THREE.CylinderGeometry(.18, .18, wallDistance * 2, 8)), dark, wall, 0, 1.3, -wallDistance + .65); pipe.rotation.z = Math.PI / 2;
       for (let j = 0; j < 20; j++) {
         const x = -wallDistance + 1.2 + j * (wallDistance * 2 - 2.4) / 19, n = i * 20 + j, angle = i * Math.PI / 2;

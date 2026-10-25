@@ -76,7 +76,11 @@ try {
     if (mobile) {
       await page.setViewportSize({ width: 844, height: 390 }); await page.waitForTimeout(400);
       await page.waitForFunction(() => { const es = [...document.querySelectorAll('.na-player-pane')].map(e => e.getBoundingClientRect()); return es[1].x > es[0].x; });
+      // The V5 orientation handler can enter native fullscreen; leave it before resizing the test window.
+      const native = await page.evaluate(() => !!document.fullscreenElement);
+      if (native) { await page.evaluate(() => document.exitFullscreen()); await page.waitForSelector('[data-neon-phase="PAUSED"]'); await page.waitForFunction(() => document.fullscreenElement === null); await page.waitForTimeout(200); }
       await page.setViewportSize({ width: 390, height: 844 });
+      if (native) await page.getByRole('button', { name: 'Reanudar partida', exact: true }).click();
     } else {
       const positions = await page.evaluate(() => window.qaTeam.players.map(p => ({ x: p.x, z: p.z })));
       await page.evaluate(() => { window.qaPads = [0, 1].map(index => ({ index, connected: true, axes: index ? [0, -1, 0, 0] : [1, 0, 0, 0], buttons: Array.from({ length: 10 }, (_, i) => ({ pressed: i === 0, value: i === 0 ? 1 : 0 })) })); });

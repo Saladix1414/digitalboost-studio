@@ -58,4 +58,4 @@
  .na-game--immersive .na-team-header .na-boss,.na-game--immersive .na-team-header .na-director{position:relative;inset:auto}
 }
 
-.na-diagnostics{position:absolute;top:30%;right:8px;z-index:3;pointer-events:none;font:9px/1.6 ui-monospace,monospace;color:#c3e4e3;background:#020912d9;padding:6px 8px;border:1px solid #6b969655}
+.na-diagnostics{max-width:calc(100% - 16px);overflow-wrap:anywhere;position:absolute;top:30%;right:8px;z-index:3;pointer-events:none;font:9px/1.6 ui-monospace,monospace;color:#c3e4e3;background:#020912d9;padding:6px 8px;border:1px solid #6b969655}

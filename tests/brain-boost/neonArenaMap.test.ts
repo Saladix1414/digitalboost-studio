@@ -6,6 +6,7 @@ import { firstBlockTime } from '../../src/brain-boost/neon-arena/SurvivalRules.t
 import { playthrough } from './neonArena.playthrough.mjs';
 test('default colony defines a shared immutable 50x50 arena while legacy stays 42x42',()=>{
  assert.equal(DEFAULT_ARENA.halfExtent*2,50);assert.equal(LEGACY_ARENA.halfExtent*2,42);
+ assert.ok(Math.abs(DEFAULT_ARENA.wall-DEFAULT_ARENA.wallThickness/2-DEFAULT_ARENA.halfExtent)<1e-8);
  assert.ok(Object.isFrozen(DEFAULT_ARENA));assert.ok(Object.isFrozen(DEFAULT_ARENA.obstacles));assert.ok(Object.isFrozen(DEFAULT_ARENA.obstacles[0]));
 });
 test('colony player, swept bullets and LOS agree on the expanded edge',()=>{
@@ -22,6 +23,6 @@ test('expanded spawn positions remain inside the map and away from both living m
 });
 test('actual default colony + assisted input-only pilot reaches all three bosses without cheats',()=>{
  const options={arena:DEFAULT_ARENA,assisted:true};const result=playthrough(42819,options);
- assert.equal(result.wave,16);assert.equal(result.bosses,3);assert.ok(result.health>0);assert.ok(result.time<650);assert.equal(result.stalled,undefined);
- assert.deepEqual(result.unlocked,['machinegun','shotgun','flame','cascade','rail']);assert.deepEqual(playthrough(42819,options),result);
+ assert.equal(result.wave,16);assert.equal(result.bosses,3);assert.ok(result.health>0);assert.ok(result.time<600);assert.equal(result.stalled,undefined);
+ assert.deepEqual(result.unlocked,['machinegun','shotgun','flame','cascade','rail']);assert.deepEqual(playthrough(42819,options),result);assert.deepEqual(playthrough(42819,{...options,maxEnemies:240}),result);
 });

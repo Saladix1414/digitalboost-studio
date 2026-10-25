@@ -1,5 +1,7 @@
 # MASTER PROMPT V5 — NEON ARENA / NIGHTMARE PROTOCOLO
 
+> Especificación original previa al desarrollo. La implementación y sus límites verificados se documentan en [la entrega V5](neon-arena-v5-release.md).
+
 ## Misión
 
 Evolucioná el Neon Arena existente de DigitalBoost Studio en tres frentes: escenario 3D con mayor calidad visual, mapa moderadamente más grande y experiencia inmersiva al girar el teléfono; acompañalos con una banda sonora original más elaborada y adaptativa.

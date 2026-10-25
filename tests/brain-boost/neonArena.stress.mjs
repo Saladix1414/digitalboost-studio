@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
+import { DEFAULT_ARENA } from '../../src/brain-boost/neon-arena/ArenaDefinition.ts';
 import { performance } from 'node:perf_hooks';
 import { GameSimulation, CONFIG, createEnemy } from '../../src/brain-boost/neon-arena/GameSimulation.ts';
 for (const count of [120, 240]) {
-  const s = new GameSimulation(72, null, count); s.ready(); s.start();
+  const s = new GameSimulation(72, null, count, 1, DEFAULT_ARENA); s.ready(); s.start(); s.setAimMode('assisted');
   for (let i = 0; i < count; i++) { const a = i * 2.39996, r = 4 + i % 14; s.enemies.push(createEnemy(i % 5 ? 'skitter' : 'spitter', 10000 + i, Math.cos(a) * r, Math.sin(a) * r)); }
   const timings = [];
   for (let tick = 0; tick < 3600; tick++) {
