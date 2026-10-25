@@ -25,6 +25,7 @@
 [data-brain-boost-window="spatial"][role="dialog"],
 [data-brain-boost-window="focus"][role="dialog"],
 [data-brain-boost-window="tests"][role="dialog"],
+[data-brain-boost-window="nightmare"][role="dialog"],
 [data-brain-boost-window="daily"][role="dialog"] {
   min-height: min(76dvh, 820px);
   border-color: var(--cat-main) !important;
@@ -167,3 +168,21 @@
     padding: 3px;
   }
 }
+
+/* Nightmare Protocolo uses the same catalog/portal as the existing disciplines. */
+[data-brain-boost-window="nightmare"] {
+  --cat-main: #c4b5fd; --cat-second: #fb7185; --cat-glow: rgba(167,139,250,.24);
+}
+[data-brain-boost-window="nightmare"][role="dialog"] {
+  border-radius: 24px 8px 24px 8px;
+  background-image: radial-gradient(ellipse at 10% 0,rgba(139,92,246,.23),transparent 55%),radial-gradient(ellipse at 100% 100%,rgba(190,24,93,.12),transparent 50%),linear-gradient(145deg,#160d2c,#080b1c 70%,#200d25);
+}
+[data-brain-boost-window="nightmare"] #brain-boost-dialog-title {
+  color: var(--cat-main); text-shadow: 0 0 22px var(--cat-glow);
+}
+[data-brain-boost-category-emblem="nightmare"]::after { content: "◬"; }
+[data-brain-boost-stage="nightmare"] {
+  border-color: #a78bfa !important;
+  background-image: radial-gradient(ellipse at 50% 0,rgba(139,92,246,.2),transparent 65%),linear-gradient(145deg,#170d2c,#080b1c) !important;
+}
+[data-brain-boost-mode-list="nightmare"] > button { border-left: 4px solid #c4b5fd !important; }

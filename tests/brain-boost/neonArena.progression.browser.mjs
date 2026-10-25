@@ -23,7 +23,7 @@ try {
       this.enemies = [enemy]; window.qaEncounter = this; return result;
     };
   });
-  await page.getByRole('button', { name: 'Abrir disciplina Focus Lab', exact: true }).click();
+  await page.getByRole('button', { name: 'Nightmare Protocolo', exact: true }).click();
   const select = () => page.getByRole('button', { name: /Neon Arena: Virus Survivor/ }).click();
   for (const [boss, weapon] of [['brood', 'flame'], ['maw', 'cascade'], ['sovereign', 'rail']]) {
     await page.evaluate(value => { window.qaBoss = value; }, boss);
@@ -70,7 +70,7 @@ try {
     window.qaAudioRms = () => { if (!window.qaAnalyser) return 0; const data = new Float32Array(2048); window.qaAnalyser.getFloatTimeDomainData(data); return Math.sqrt(data.reduce((n, v) => n + v * v, 0) / data.length); };
   });
   await sound.goto('http://127.0.0.1:5181/', { waitUntil: 'networkidle' });
-  await sound.getByRole('button', { name: 'Abrir disciplina Focus Lab', exact: true }).click();
+  await sound.getByRole('button', { name: 'Nightmare Protocolo', exact: true }).click();
   await sound.getByRole('button', { name: /Neon Arena: Virus Survivor/ }).click(); await sound.waitForSelector('[data-neon-phase="READY"]');
   await sound.getByRole('button', { name: 'Iniciar supervivencia →', exact: true }).click();
   await sound.waitForFunction(() => window.qaAudioRms() > .001);

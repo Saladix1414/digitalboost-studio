@@ -22,7 +22,7 @@ try {
     GameSimulation.prototype.start = function () { const result = original.call(this); if (result) { window.qaAim = this; const e = createEnemy('skitter', 900000, -5, 3); e.speed = 0; this.enemies = [e]; } return result; };
     SurvivalWorld.prototype.draw = function (s) { draw.call(this, s); window.qaWorld = this; };
   });
-  await page.getByRole('button', { name: 'Abrir disciplina Focus Lab', exact: true }).click();
+  await page.getByRole('button', { name: 'Nightmare Protocolo', exact: true }).click();
   await page.getByRole('button', { name: /Neon Arena: Virus Survivor/ }).click(); await page.waitForSelector('[data-neon-phase="READY"]');
   assert.equal(await page.getByRole('combobox', { name: 'Modo de apuntado', exact: true }).inputValue(), 'assisted');
   await page.getByRole('button', { name: 'Iniciar supervivencia →', exact: true }).click();

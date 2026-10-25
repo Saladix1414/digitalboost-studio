@@ -30,7 +30,7 @@ try {
       const { GameSimulation } = await import('/src/brain-boost/neon-arena/GameSimulation.ts'); const original = GameSimulation.prototype.start;
       GameSimulation.prototype.start = function () { const ok = original.call(this); if (ok) window.qaTeam = this; return ok; };
     });
-    await page.getByRole('button', { name: 'Abrir disciplina Focus Lab', exact: true }).click();
+    await page.getByRole('button', { name: 'Nightmare Protocolo', exact: true }).click();
     await page.getByRole('button', { name: /Neon Arena: Virus Survivor/ }).click(); await page.waitForSelector('[data-neon-phase="READY"]');
     await page.getByRole('combobox', { name: 'Cantidad de jugadores', exact: true }).selectOption('2');
     await page.waitForSelector('[data-neon-players="2"]'); assert.equal(await page.locator('.na-canvas canvas').count(), 1); assert.equal(await page.evaluate(() => window.qaCoopFrames()), 1);

@@ -93,7 +93,6 @@ const categories: Category[] = [
     games: [
       { id: "targets", title: "Focus Protocol", description: "Identificá el objetivo correcto entre señales visuales.", area: "Atención" },
       { id: "signals", title: "Signal Hunt", description: "Encontrá la señal correcta entre distractores.", area: "Atención" },
-      { id: "neon-arena", title: "Neon Arena: Virus Survivor", description: "Controlá a un marine, sobreviví a las hordas alienígenas y desbloqueá armas en combate 3D.", area: "Arcade / Atención" },
     ],
   },
   {
@@ -107,6 +106,17 @@ const categories: Category[] = [
     ],
   },
 ];
+
+// Recreational horror/survival catalog; independent of the five cognitive disciplines.
+const nightmareCategory: Category = {
+  id: "nightmare",
+  name: "Nightmare Protocolo",
+  description: "HORROR · SUPERVIVENCIA · PSICOLÓGICO",
+  symbol: "◬",
+  games: [
+    { id: "neon-arena", title: "Neon Arena: Virus Survivor", description: "Controlá a un marine, sobreviví a las hordas alienígenas y desbloqueá armas en combate 3D.", area: "Horror / Supervivencia" },
+  ],
+};
 
 const dailyCategory: Category = {
   id: "daily",
@@ -383,15 +393,17 @@ export default function BrainBoostLandingSection() {
               ))}
             </div>
             <div className="mt-4 border-t border-white/10 pt-4">
-              <button
-                type="button"
-                onClick={() => openCategory(dailyCategory)}
-                className="relative w-full overflow-hidden rounded-xl border border-violet-300/50 bg-gradient-to-br from-violet-500/[0.24] via-violet-500/[0.12] to-fuchsia-500/[0.18] p-4 text-left transition duration-200 hover:border-violet-300/55 hover:bg-violet-400/[0.14] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 motion-reduce:transition-none shadow-[0_0_24px_rgba(139,92,246,.13)] hover:shadow-[0_0_32px_rgba(217,70,239,.22)]"
-              >
-                <span className="text-xs font-bold uppercase tracking-wider text-violet-300">✦ DAILY QUEST / SESIÓN MIXTA</span>
-                <span className="mt-2 block text-sm font-bold">Daily Neural Run</span>
-                <span className="mt-1 block text-xs leading-5 text-slate-400">Cinco etapas, cinco áreas.</span>
-              </button>
+              <div data-brain-boost-nightmare="" className="relative w-full overflow-hidden rounded-xl border border-violet-300/50 bg-gradient-to-br from-violet-500/[0.24] via-violet-500/[0.12] to-fuchsia-500/[0.18] p-4 shadow-[0_0_24px_rgba(139,92,246,.13)]">
+                <button
+                  type="button"
+                  aria-describedby="nightmare-protocolo-label"
+                  onClick={() => openCategory(nightmareCategory)}
+                  className="w-full rounded-lg border border-violet-200/40 bg-violet-300/[0.08] px-3 py-3 text-sm font-black text-violet-100 transition duration-200 hover:border-violet-200 hover:bg-violet-300/[0.16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 motion-reduce:transition-none"
+                >
+                  Nightmare Protocolo
+                </button>
+                <span id="nightmare-protocolo-label" className="mt-3 block text-center text-[9px] font-bold uppercase leading-5 tracking-wider text-violet-200">HORROR · SUPERVIVENCIA · PSICOLÓGICO</span>
+              </div>
             </div>
           </nav>
 
@@ -582,7 +594,7 @@ export default function BrainBoostLandingSection() {
           >
             <div className="relative z-10 flex items-start justify-between gap-4">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-200">{activeGame?.id === "neon-arena" ? "NEURAL ARCADE / NEON ARENA" : activeGame?.id === "baseline" ? "NEURAL ARCADE / NEURAL BASELINE" : activeGame?.id === "routes" ? "NEURAL ARCADE / VECTOR ROUTES" : activeGame?.id === "signals" ? "NEURAL ARCADE / SIGNAL HUNT" : activeGame?.id === "targets" ? "NEURAL ARCADE / FOCUS PROTOCOL" : activeGame?.id === "rotation" ? "NEURAL ARCADE / SPATIAL RIFT" : activeGame?.id === "number" ? "NEURAL ARCADE / NUMBER PATTERNS" : activeGame?.id === "deduction" ? "NEURAL ARCADE / LOGIC REACTOR" : activeGame?.id === "sequence" ? "NEURAL ARCADE / MEMORY MATRIX" : activeGame?.id === "pairs" ? "NEURAL ARCADE / OCEAN ECHOES" : activeGame?.id === "originx-dragons" ? "ORIGIN X / DRAGON RELICS" : activeCategory.id === "daily" ? "NEURAL ARCADE / DAILY RUN" : "NEURAL ARCADE / MODE SELECT"}</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-200">{activeGame?.id === "neon-arena" ? "NIGHTMARE PROTOCOLO / NEON ARENA" : activeGame?.id === "baseline" ? "NEURAL ARCADE / NEURAL BASELINE" : activeGame?.id === "routes" ? "NEURAL ARCADE / VECTOR ROUTES" : activeGame?.id === "signals" ? "NEURAL ARCADE / SIGNAL HUNT" : activeGame?.id === "targets" ? "NEURAL ARCADE / FOCUS PROTOCOL" : activeGame?.id === "rotation" ? "NEURAL ARCADE / SPATIAL RIFT" : activeGame?.id === "number" ? "NEURAL ARCADE / NUMBER PATTERNS" : activeGame?.id === "deduction" ? "NEURAL ARCADE / LOGIC REACTOR" : activeGame?.id === "sequence" ? "NEURAL ARCADE / MEMORY MATRIX" : activeGame?.id === "pairs" ? "NEURAL ARCADE / OCEAN ECHOES" : activeGame?.id === "originx-dragons" ? "ORIGIN X / DRAGON RELICS" : activeCategory.id === "nightmare" ? "HORROR · SUPERVIVENCIA · PSICOLÓGICO" : activeCategory.id === "daily" ? "NEURAL ARCADE / DAILY RUN" : "NEURAL ARCADE / MODE SELECT"}</p>
                 <h3 id="brain-boost-dialog-title" className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">{activeGame ? activeGame.title : activeCategory.name}</h3>
                 <p className={activeGame?.id === "neon-arena" ? "hidden sm:mt-2 sm:block sm:text-sm sm:leading-6 sm:text-slate-400" : "mt-2 text-sm leading-6 text-slate-400"}>{activeGame ? activeGame.description : activeCategory.description}</p>
               </div>
@@ -698,8 +710,8 @@ export default function BrainBoostLandingSection() {
                         <circle cx="32" cy="32" r="4" fill="#A5F3FC"/>
                       </svg>
                     </div>
-                    <p className="text-[9px] font-black uppercase tracking-[0.22em] text-cyan-300">Neural Core / Ready</p>
-                    <h4 className="mt-3 text-xl font-black tracking-tight text-white sm:text-2xl">Seleccioná tu modo</h4>
+                    <p className="text-[9px] font-black uppercase tracking-[0.22em] text-cyan-300">{activeCategory.id === "nightmare" ? "Nightmare Protocolo" : "Neural Core / Ready"}</p>
+                    <h4 className="mt-3 text-xl font-black tracking-tight text-white sm:text-2xl">{activeCategory.id === "nightmare" ? "Elegí tu próxima pesadilla" : "Seleccioná tu modo"}</h4>
                     <p className="mt-3 max-w-xs text-sm leading-6 text-slate-400">
                       Elegí una actividad para entrar a su experiencia. Cada nodo tiene su propio desafío.
                     </p>
