@@ -844,3 +844,18 @@ export function setBrainBoostMusicVolume(value: number): void {
   graph.music.gain.cancelScheduledValues(now);
   graph.music.gain.setTargetAtTime(volume, now, 0.035);
 }
+
+// Original procedural creature voices share the existing effects bus and mute control.
+// One global voice gate keeps dense hordes from scheduling hundreds of nodes.
+export function playNeonCreatureSfx(kind: 'skitter' | 'carapace' | 'spitter' | 'stalker' | 'brood' | 'maw' | 'sovereign', cue: 'death' | 'attack' | 'boss'): void {
+  if (!isBrainBoostAudioEnabled()) return;
+  const audio = getGraph(); if (!audio) return;
+  const c = audio.context, at = c.currentTime + .005, key = `creature:${kind}:${cue}`;
+  if (at - (survivalSfxTimes.get('creature') ?? -Infinity) < .14 || at - (survivalSfxTimes.get(key) ?? -Infinity) < .45) return;
+  survivalSfxTimes.set('creature', at); survivalSfxTimes.set(key, at); resume(c);
+  const pitch = { skitter: 82, carapace: 40, spitter: 65, stalker: 75, brood: 32, maw: 27, sovereign: 48 }[kind];
+  const duration = cue === 'boss' ? .28 : cue === 'death' ? .09 : .14;
+  cyberNoise(c, audio.effects, at, duration, .018, kind === 'spitter' ? 1500 : kind === 'carapace' || kind === 'maw' ? 400 : 2600);
+  cyberTone(c, audio.effects, pitch, at, duration, .016, kind === 'spitter' ? 'sine' : 'sawtooth');
+  if (cue !== 'death') cyberTone(c, audio.effects, pitch - 7, at + .065, duration * .65, .012, 'triangle');
+}

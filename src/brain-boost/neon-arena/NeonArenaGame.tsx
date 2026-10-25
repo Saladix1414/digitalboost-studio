@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { NeonArenaEngine } from './NeonArenaEngine';
+import type { AimMode } from './AimAssist';
 import { GameSimulation } from './GameSimulation';
 import { BOSSES, WEAPONS, WEAPON_IDS, readProgress, saveProgress, type WeaponId } from './SurvivalRules';
-import { isBrainBoostAudioEnabled, playBrainBoostSfx, playNeonSurvivalSfx, setBrainBoostAudioEnabled, subscribeBrainBoostAudioEnabled, startBrainBoostMusic, stopBrainBoostMusic, setNeonSurvivalMood } from '../brainBoostAudio';
+import { isBrainBoostAudioEnabled, playBrainBoostSfx, playNeonSurvivalSfx, playNeonCreatureSfx, setBrainBoostAudioEnabled, subscribeBrainBoostAudioEnabled, startBrainBoostMusic, stopBrainBoostMusic, setNeonSurvivalMood } from '../brainBoostAudio';
 import './NeonArenaGame.css';
 const initial = new GameSimulation().snapshot();
 type Snapshot = typeof initial;
@@ -15,14 +16,14 @@ const unlockDescriptions: Record<WeaponId, string> = { machinegun: 'Disponible',
 function MarineControls({ marine, active, onShock, coop }: { marine: Snapshot['marines'][number]; active: boolean; onShock: () => void; coop: boolean }) {
   return <div className="na-combat-controls" hidden={!active || !marine.alive}>
     <div className="na-joystick" data-na-stick="" data-na-player={marine.id} aria-label={`Joystick de movimiento P${marine.id + 1}`}><span /><small>MOVER {coop ? `P${marine.id + 1}` : ''}</small></div>
-    <div className="na-right-controls"><button type="button" className="na-shock-button" aria-label={`SHOCKWAVE P${marine.id + 1}`} onPointerDown={e => e.preventDefault()} disabled={marine.cooldown > 0} onClick={onShock}>◉ {coop ? '' : 'SHOCKWAVE '}{marine.cooldown > 0 ? `${Math.ceil(marine.cooldown)}s` : 'LISTA'}</button><button type="button" data-na-fire="" data-na-player={marine.id} className="na-fire-button" aria-label={coop ? `Mantener para disparar P${marine.id + 1}` : 'Mantener para disparar'}>FUEGO {coop ? `P${marine.id + 1}` : ''}</button></div>
+    <div className="na-right-controls"><button type="button" className="na-shock-button" aria-label={`SHOCKWAVE P${marine.id + 1}`} onPointerDown={e => e.preventDefault()} disabled={marine.cooldown > 0} onClick={onShock}>◉ {coop ? '' : 'SHOCKWAVE '}{marine.cooldown > 0 ? `${Math.ceil(marine.cooldown)}s` : 'LISTA'}</button><button type="button" data-na-fire="" data-na-player={marine.id} className="na-fire-button" aria-label={coop ? `Mantener para disparar P${marine.id + 1}` : 'Mantener para disparar'}><span className="na-aim-knob" />FUEGO {coop ? `P${marine.id + 1}` : ''}</button></div>
   </div>;
 }
 export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
   const host = useRef<HTMLDivElement>(null), engine = useRef<NeonArenaEngine | null>(null), startButton = useRef<HTMLButtonElement>(null);
   const [snapshot, setSnapshot] = useState(initial), [error, setError] = useState(''), [session, setSession] = useState(0);
   const [playerCount, setPlayerCount] = useState<1 | 2>(1), [best, setBest] = useState(() => readBest(1)), [audio, setAudio] = useState(isBrainBoostAudioEnabled), [expanded, setExpanded] = useState(false);
-  const [progress, setProgress] = useState(() => readProgress(storage())), [modes, setModes] = useState<('classic' | 'modern')[]>(['classic', 'classic']);
+  const [progress, setProgress] = useState(() => readProgress(storage())), [modes, setModes] = useState<AimMode[]>(['assisted', 'assisted']);
   const [remains, setRemains] = useState(true), [notice, setNotice] = useState('');
   const progressRef = useRef(progress), resultSaved = useRef(false);
   const coop = playerCount === 2, musicActive = snapshot.phase === 'PLAYING' || snapshot.phase === 'WAVE_TRANSITION';
@@ -36,6 +37,8 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
         onProgress: p => { const merged = saveProgress(p, storage()); progressRef.current = merged; setProgress(merged); },
         onCue: e => {
           if (e.kind === 'shot' || e.kind === 'flame') playNeonSurvivalSfx(e.weapon || 'machinegun');
+          if (e.creature && ['kill', 'creature', 'boss'].includes(e.kind)) playNeonCreatureSfx(e.creature, e.kind === 'kill' ? 'death' : e.kind === 'boss' ? 'boss' : 'attack');
+          if (e.kind === 'boss' && e.creature && e.creature in BOSSES) setNotice(`JEFE ENTRANTE · ${BOSSES[e.creature as keyof typeof BOSSES].name}`);
           if (e.kind === 'pickup') playNeonSurvivalSfx('pickup'); if (e.kind === 'impact') playNeonSurvivalSfx('impact');
           if (e.kind === 'shock') playBrainBoostSfx('neon-arena', 'advance');
           if (e.kind === 'revive') { setNotice(`P${(e.playerId ?? 0) + 1} RECUPERADO · 35 DE SALUD`); playBrainBoostSfx('neon-arena', 'complete'); }
@@ -95,10 +98,11 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
         <p className="na-eyebrow">{error ? 'SISTEMA GRÁFICO' : snapshot.phase === 'GAME_OVER' ? coop ? 'ESCUADRÓN PERDIDO' : 'SEÑAL DEL MARINE PERDIDA' : 'DIGITALBOOST / ALIEN HORDE SURVIVAL'}</p>
         <h4>{error ? 'Escena no disponible' : snapshot.phase === 'PAUSED' ? 'En pausa' : snapshot.phase === 'GAME_OVER' ? 'La horda ganó' : coop ? 'SOBREVIVAN JUNTOS' : 'SOBREVIVÍ AL NIDO'}</h4>
         <p>{error || (snapshot.phase === 'GAME_OVER' ? `${snapshot.score} puntos · ${snapshot.kills} criaturas · oleada ${snapshot.wave} · ${Math.floor(snapshot.elapsed)}s · ${snapshot.bossesKilled} jefes derrotados` : snapshot.phase === 'PAUSED' ? 'Combate y música detenidos. Reanudá cuando estés listo.' : coop ? 'Dos marines en el mismo dispositivo. Salud y munición individuales, progreso compartido. Sin fuego amigo. Si caen ambos, termina la partida.' : 'Sos el último marine. Rodeá las hordas, recogé suministros y derrotá a los jefes para ampliar tu arsenal.')}</p>
+        {!error && snapshot.phase === 'GAME_OVER' && <p className="na-run-unlocks">{snapshot.unlockedThisRun.length ? `ARMAS OBTENIDAS · ${snapshot.unlockedThisRun.map(id => WEAPONS[id].name).join(' · ')}` : 'Sin armas nuevas en esta partida · tu arsenal sigue disponible.'}</p>}
         {!error && <>
           <label className="na-mode">Jugadores <select aria-label="Cantidad de jugadores" value={playerCount} disabled={snapshot.phase !== 'READY'} onChange={e => changeCount(Number(e.target.value) as 1 | 2)}><option value={1}>Individual</option><option value={2}>Cooperativo local · 2 jugadores</option></select></label>
-          <p className="na-controls">{coop ? <>P1: WASD · F dispara · Espacio Shockwave · Q cambia arma<br />P2: flechas · J / Ctrl derecho dispara · K / Shift derecho Shockwave · L / Enter cambia arma<br />También dos gamepads o los controles táctiles de cada vista. En móvil conviene girar la pantalla.</> : <>WASD / flechas o joystick: moverse · F / ratón / FUEGO: disparar · Espacio: Shockwave · P: pausa</>}<br />Clásico: el arma dispara 45° a la derecha de tu orientación. La línea del suelo indica la dirección.</p>
-          {snapshot.marines.map(marine => <label key={marine.id} className="na-mode">Apuntado {coop ? `P${marine.id + 1}` : ''}<select aria-label={coop ? `Modo de apuntado P${marine.id + 1}` : 'Modo de apuntado'} value={modes[marine.id]} onChange={e => { const next = e.target.value as 'classic' | 'modern'; setModes(old => old.map((mode, i) => i === marine.id ? next : mode)); engine.current?.setMode(next, marine.id); }}><option value="classic">Clásico · diagonal 45°</option><option value="modern">Moderno · ratón / stick derecho / FUEGO</option></select></label>)}
+          <p className="na-controls">{coop ? <>P1: WASD · F dispara · Espacio Shockwave · Q cambia arma<br />P2: flechas · J / Ctrl derecho dispara · K / Shift derecho Shockwave · L / Enter cambia arma<br />También dos gamepads o los controles táctiles de cada vista. En móvil conviene girar la pantalla.</> : <>WASD / flechas o joystick: moverse · F / ratón / FUEGO: disparar · Espacio: Shockwave · P: pausa</>}<br />Asistido: mantené FUEGO para seguir objetivos en 360°. Arrastrá FUEGO, usá el ratón o el stick derecho para apuntar manualmente. El aro marca el objetivo.</p>
+          {snapshot.marines.map(marine => <label key={marine.id} className="na-mode">Apuntado {coop ? `P${marine.id + 1}` : ''}<select aria-label={coop ? `Modo de apuntado P${marine.id + 1}` : 'Modo de apuntado'} value={modes[marine.id]} onChange={e => { const next = e.target.value as AimMode; setModes(old => old.map((mode, i) => i === marine.id ? next : mode)); engine.current?.setMode(next, marine.id); }}><option value="assisted">Asistido · seguimiento 360°</option><option value="classic">Clásico · diagonal 45°</option><option value="modern">Moderno · ratón / stick derecho / FUEGO</option></select></label>)}
           <label className="na-mode"><input type="checkbox" checked={remains} onChange={e => { setRemains(e.target.checked); engine.current?.setRemains(e.target.checked); }} /> Restos de combate en el suelo</label>
           {snapshot.phase === 'READY' && (coop ? <div className="na-coop-loadout">{snapshot.marines.map(marine => <label className="na-mode" key={marine.id}>Arma P{marine.id + 1}<select aria-label={`Arma inicial P${marine.id + 1}`} value={marine.weapon} onChange={e => choose(e.target.value as WeaponId, marine.id)}>{WEAPON_IDS.map(id => <option key={id} value={id} disabled={!progress.unlocked.includes(id)}>{WEAPONS[id].name}{!progress.unlocked.includes(id) ? ' · bloqueada' : ''}</option>)}</select></label>)}</div> : <div className="na-loadout" aria-label="Arsenal inicial">{WEAPON_IDS.map(id => <button type="button" key={id} disabled={!progress.unlocked.includes(id)} aria-pressed={snapshot.weapon === id} title={unlockDescriptions[id]} onClick={() => choose(id)}>{WEAPONS[id].name}{!progress.unlocked.includes(id) && <small>{unlockDescriptions[id]}</small>}</button>)}</div>)}
           <p className="na-controls">Récord {coop ? 'cooperativo' : 'individual'} {best} · {progress.unlocked.length}/5 armas · Progreso local recreativo{coop && <><br />Gamepad: A / RT dispara · B Shockwave · LB cambia arma · Start pausa. Los caídos regresan en la siguiente oleada.</>}</p>

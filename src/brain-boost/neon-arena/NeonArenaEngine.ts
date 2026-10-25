@@ -7,6 +7,7 @@ import { CONFIG, FixedClock, GameSimulation, type CombatEvent } from './GameSimu
 import { SurvivalWorld } from './SurvivalWorld';
 import { LocalGamepads, keyboardAction, keyboardInput } from './LocalControls';
 import { WEAPON_IDS, type Progress } from './SurvivalRules';
+import type { AimMode } from './AimAssist';
 type Snapshot = ReturnType<GameSimulation['snapshot']>;
 type Options = { progress?: Progress; playerCount?: 1 | 2; onProgress?: (progress: Progress) => void; onCue?: (event: CombatEvent) => void };
 const controls = () => ({ x: 0, z: 0, mouseFire: false, touchFire: false, aim: null as number | null });
@@ -16,7 +17,7 @@ export class NeonArenaEngine {
   private composer?: EffectComposer; private observer?: ResizeObserver;
   private cleanup: (() => void)[] = []; private clock = new FixedClock(); private keys = new Set<string>();
   private pointers = new Map<number, { kind: 'stick' | 'fire'; playerId: number; x: number; y: number; element: HTMLElement }>();
-  private inputs = [controls(), controls()]; private modes: ('classic' | 'modern')[] = ['classic', 'classic']; private pads = new LocalGamepads();
+  private inputs = [controls(), controls()]; private modes: AimMode[] = ['assisted', 'assisted']; private pads = new LocalGamepads();
   private ray = new THREE.Raycaster(); private plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); private pointer = new THREE.Vector2(); private point = new THREE.Vector3();
   private raf = 0; private disposed = false; private lastTime = 0; private publishAt = 0; private publishedPhase = 'LOADING';
   private progressRevision = 0; private lastEvent = 0; private badFrames = 0; private resolution = 1; private low: boolean; private reduced: boolean; private width = 1; private height = 1; private needsRender = true;
@@ -31,14 +32,14 @@ export class NeonArenaEngine {
       canvas.tabIndex = 0; canvas.setAttribute('aria-label', 'Arena 3D. P1: WASD, F y espacio. P2 cooperativo: flechas, J y K. P: pausa.'); host.append(canvas);
       this.world = new SurvivalWorld(this.reduced); this.configureComposer(); this.bind(canvas);
       this.observer = new ResizeObserver(() => this.resize()); this.observer.observe(host); this.resize();
-      this.simulation.ready(); this.world.draw(this.simulation); this.notify(this.simulation.snapshot()); this.raf = requestAnimationFrame(this.frame);
+      this.modes.forEach((mode, i) => this.simulation.setAimMode(mode, i)); this.simulation.ready(); this.world.draw(this.simulation); this.notify(this.simulation.snapshot()); this.raf = requestAnimationFrame(this.frame);
     } catch (error) { this.dispose(); throw error; }
   }
   setPlayerCount(count: 1 | 2) {
     if (!this.simulation.setPlayerCount(count)) return false;
-    this.releaseInputs(); this.configureComposer(); this.resize(); this.world.draw(this.simulation); this.notify(this.simulation.snapshot()); return true;
+    this.modes.forEach((mode, i) => this.simulation.setAimMode(mode, i)); this.releaseInputs(); this.configureComposer(); this.resize(); this.world.draw(this.simulation); this.notify(this.simulation.snapshot()); return true;
   }
-  setMode(mode: 'classic' | 'modern', playerId = 0) { if (playerId < 0 || playerId > 1) return; this.modes[playerId] = mode; this.releaseInputs(); }
+  setMode(mode: AimMode, playerId = 0) { if (playerId < 0 || playerId > 1) return; this.modes[playerId] = mode; this.simulation.setAimMode(mode, playerId); this.releaseInputs(); }
   setRemains(enabled: boolean) { this.world.setRemains(enabled); this.needsRender = true; }
   private cycle(playerId: number) {
     const p = this.simulation.players[playerId]; if (!p) return;
@@ -66,7 +67,7 @@ export class NeonArenaEngine {
         if (!this.simulation.players[playerId]?.health || [...this.pointers.values()].some(p => p.kind === kind && p.playerId === playerId)) return;
         e.preventDefault(); canvas.focus({ preventScroll: true }); control.setPointerCapture(e.pointerId);
         const rect = control.getBoundingClientRect(); this.pointers.set(e.pointerId, { kind, playerId, x: rect.x + rect.width / 2, y: rect.y + rect.height / 2, element: control });
-        if (kind === 'fire') this.inputs[playerId].touchFire = true; control.dataset.active = 'true'; return;
+        if (kind === 'fire') { this.inputs[playerId].touchFire = true; this.inputs[playerId].aim = null; } control.dataset.active = 'true'; return;
       }
       if (target === canvas && e.button === 0 && e.pointerType === 'mouse') {
         const playerId = playerAt(e); if (!this.simulation.players[playerId]?.health) return;
@@ -75,17 +76,18 @@ export class NeonArenaEngine {
       }
     }) as EventListener);
     listen(stage, 'pointermove', ((e: PointerEvent) => {
+      if (this.simulation.phase !== 'PLAYING') return;
       const active = this.pointers.get(e.pointerId);
       if (active?.kind === 'stick') {
         const dx = e.clientX - active.x, dz = e.clientY - active.y, distance = Math.max(38, Math.hypot(dx, dz)), input = this.inputs[active.playerId]; input.x = dx / distance; input.z = dz / distance;
         active.element.style.setProperty('--stick-x', `${input.x * 24}px`); active.element.style.setProperty('--stick-y', `${input.z * 24}px`);
-      } else if (active?.element.hasAttribute('data-na-fire') && this.modes[active.playerId] === 'modern') {
-        const dx = e.clientX - active.x, dz = e.clientY - active.y; if (Math.hypot(dx, dz) > 8) this.inputs[active.playerId].aim = Math.atan2(dz, dx);
+      } else if (active?.element.hasAttribute('data-na-fire') && this.modes[active.playerId] !== 'classic') {
+        const dx = e.clientX - active.x, dz = e.clientY - active.y; const input = this.inputs[active.playerId], d = Math.hypot(dx, dz); input.aim = d > 8 ? Math.atan2(dz, dx) : null; active.element.style.setProperty('--stick-x', `${dx / Math.max(38, d) * 20}px`); active.element.style.setProperty('--stick-y', `${dz / Math.max(38, d) * 20}px`);
       } else if (e.pointerType === 'mouse') aimAt(e, active?.playerId ?? playerAt(e));
     }) as EventListener);
     const release = ((e: PointerEvent) => {
       const active = this.pointers.get(e.pointerId); if (!active) return; this.pointers.delete(e.pointerId); const input = this.inputs[active.playerId];
-      if (active.kind === 'stick') input.x = input.z = 0; else input.mouseFire = input.touchFire = false;
+      if (active.kind === 'stick') input.x = input.z = 0; else { input.mouseFire = input.touchFire = false; if (active.element.hasAttribute('data-na-fire')) input.aim = null; }
       active.element.dataset.active = 'false'; active.element.style.setProperty('--stick-x', '0px'); active.element.style.setProperty('--stick-y', '0px');
       if (active.element.hasPointerCapture(e.pointerId)) active.element.releasePointerCapture(e.pointerId);
     }) as EventListener;
@@ -138,10 +140,10 @@ export class NeonArenaEngine {
       const pads = this.pads.sample(rawPads, this.simulation.players.length);
       if (pads.disconnected && ['PLAYING', 'WAVE_TRANSITION'].includes(this.simulation.phase)) this.pause();
       else if (pads.inputs.some(p => p.pause)) this.togglePause();
-      pads.inputs.forEach((p, i) => { if (p.shock) this.simulation.shock(i); if (p.cycle) this.cycle(i); if (p.aim !== null) this.inputs[i].aim = p.aim; });
+      pads.inputs.forEach((p, i) => { if (p.shock) this.simulation.shock(i); if (p.cycle) this.cycle(i); if (p.aim !== null || p.firing && this.modes[i] === 'assisted') this.inputs[i].aim = p.aim; });
       const s = this.simulation;
       this.clock.advance(delta, () => {
-        s.players.forEach((p, i) => { const key = keyboardInput(this.keys, i, s.players.length), input = this.inputs[i], pad = pads.inputs[i]; s.setInput(key.x + input.x + pad.x, key.z + input.z + pad.z, key.firing || input.mouseFire || input.touchFire || pad.firing, this.modes[i] === 'modern' ? input.aim : null, i); });
+        s.players.forEach((p, i) => { const key = keyboardInput(this.keys, i, s.players.length), input = this.inputs[i], pad = pads.inputs[i]; s.setInput(key.x + input.x + pad.x, key.z + input.z + pad.z, key.firing || input.mouseFire || input.touchFire || pad.firing, this.modes[i] === 'classic' || this.modes[i] === 'assisted' && !input.mouseFire && !input.touchFire && pad.aim === null ? null : input.aim, i); });
         s.step(); if (s.progressRevision !== this.progressRevision) { this.progressRevision = s.progressRevision; this.options.onProgress?.(s.progress); }
       });
       for (const e of s.events) if (e.id > this.lastEvent) { this.options.onCue?.(e); this.lastEvent = e.id; }
