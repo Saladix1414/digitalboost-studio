@@ -1,3 +1,4 @@
+import { ContainmentTransport, loadContainmentScore, releaseContainmentScore, setContainmentStatus, type ScoreMood } from './neon-arena/ContainmentScore';
 export type BrainBoostGame =
   | "neon-arena"
   | "memory-matrix"
@@ -370,6 +371,7 @@ type BrainBoostMusicState = {
   timer: number;
   step: number;
   nextAt: number;
+  score?: ContainmentTransport; scoreBuffers?: AudioBuffer[]; neonStarted?: number; neonOffset?: number;
 };
 
 type MusicPattern = {
@@ -540,7 +542,7 @@ function scheduleCyberStep(
 
 const MUSIC_PATTERNS: Partial<Record<BrainBoostGame, MusicPattern>> = {
   "neon-arena": {
-    bpm: 116,
+    bpm: 128,
     melody: [50, null, 57, 53, null, 62, 57, null, 50, 53, null, 56, 57, null, 53, null],
     bass: [26, 26, 29, 25], shifts: [0, 0, 3, -1], wave: "sawtooth", style: "survival",
   },
@@ -687,7 +689,10 @@ function schedulePatternStep(
   }
 }
 
-export type NeonSurvivalMood = "start" | "horde" | "danger" | "boss" | "victory";
+export type NeonSurvivalMood = ScoreMood;
+let neonPlayhead = 0;
+export function resetNeonSurvivalScore() { neonPlayhead = 0; }
+export function releaseNeonSurvivalScore() { stopBrainBoostMusic('neon-arena'); if (graph) releaseContainmentScore(graph.context); neonPlayhead = 0; }
 let survivalMood: NeonSurvivalMood = "start";
 let scheduledSurvivalMood: NeonSurvivalMood = "start";
 export function setNeonSurvivalMood(mood: NeonSurvivalMood): void { survivalMood = mood; }
@@ -780,6 +785,10 @@ export function startBrainBoostMusic(game: BrainBoostGame): void {
     nextAt: now + 0.04,
   };
   activeMusic = state;
+  if (game === 'neon-arena') {
+    state.neonStarted = state.nextAt; state.neonOffset = neonPlayhead;
+    void loadContainmentScore(context).then(buffers => { if (activeMusic === state) state.scoreBuffers = buffers; }).catch(() => { if (activeMusic === state) setContainmentStatus('fallback'); });
+  }
 
   const bpm = game === "memory-matrix"
     ? 112
@@ -795,7 +804,11 @@ export function startBrainBoostMusic(game: BrainBoostGame): void {
     if (state.game === "neon-arena" && state.nextAt < context.currentTime - 0.2) state.nextAt = context.currentTime + 0.04;
     const horizon = context.currentTime + 0.12;
     while (state.nextAt < horizon) {
-      scheduleBrainBoostMusicStep(state, state.step, state.nextAt);
+      if (state.game === 'neon-arena' && state.scoreBuffers && state.step % 16 === 0 && !state.score) {
+        state.score = new ContainmentTransport(context, envelope, state.scoreBuffers, state.nextAt, (state.neonOffset ?? 0) + state.nextAt - (state.neonStarted ?? now)); setContainmentStatus('score');
+      }
+      if (state.score) state.score.tick(state.nextAt, survivalMood);
+      else scheduleBrainBoostMusicStep(state, state.step, state.nextAt);
       state.step = (state.step + 1) % 64;
       state.nextAt += stepDuration;
     }
@@ -811,6 +824,8 @@ export function stopBrainBoostMusic(game?: BrainBoostGame): void {
   if (!state || (game && state.game !== game)) return;
 
   activeMusic = null;
+  if (state.game === 'neon-arena') neonPlayhead = ((state.neonOffset ?? 0) + state.context.currentTime - (state.neonStarted ?? state.context.currentTime)) % 60;
+  state.score?.stop();
   window.clearInterval(state.timer);
   if (state.context.state === "closed") return;
 
@@ -830,6 +845,7 @@ export function stopBrainBoostMusic(game?: BrainBoostGame): void {
   }, 380);
 }
 
+export function getBrainBoostMusicVolume() { return readStoredVolume(MUSIC_VOLUME_KEY, .58); }
 export function setBrainBoostMusicVolume(value: number): void {
   const volume = Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0;
 

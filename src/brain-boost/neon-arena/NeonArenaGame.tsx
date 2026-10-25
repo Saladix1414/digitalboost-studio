@@ -1,10 +1,11 @@
+import { getContainmentStatus, subscribeContainmentStatus } from './ContainmentScore';
 import type { ArenaDiagnostics } from './RenderMetrics';
 import { useEffect, useRef, useState } from 'react';
 import { NeonArenaEngine } from './NeonArenaEngine';
 import type { AimMode } from './AimAssist';
 import { GameSimulation } from './GameSimulation';
 import { BOSSES, WEAPONS, WEAPON_IDS, readProgress, saveProgress, type WeaponId } from './SurvivalRules';
-import { isBrainBoostAudioEnabled, playBrainBoostSfx, playNeonSurvivalSfx, playNeonCreatureSfx, setBrainBoostAudioEnabled, subscribeBrainBoostAudioEnabled, startBrainBoostMusic, stopBrainBoostMusic, setNeonSurvivalMood } from '../brainBoostAudio';
+import { getBrainBoostMusicVolume, setBrainBoostMusicVolume, resetNeonSurvivalScore, releaseNeonSurvivalScore, isBrainBoostAudioEnabled, playBrainBoostSfx, playNeonSurvivalSfx, playNeonCreatureSfx, setBrainBoostAudioEnabled, subscribeBrainBoostAudioEnabled, startBrainBoostMusic, stopBrainBoostMusic, setNeonSurvivalMood } from '../brainBoostAudio';
 import { useImmersiveArena } from './useImmersiveArena';
 import './NeonArenaGame.css';
 const initial = new GameSimulation().snapshot();
@@ -26,6 +27,7 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
   const [snapshot, setSnapshot] = useState(initial), [error, setError] = useState(''), [session, setSession] = useState(0);
   const [playerCount, setPlayerCount] = useState<1 | 2>(1), [best, setBest] = useState(() => readBest(1)), [audio, setAudio] = useState(isBrainBoostAudioEnabled);
   const [progress, setProgress] = useState(() => readProgress(storage())), [modes, setModes] = useState<AimMode[]>(['assisted', 'assisted']);
+  const [musicStatus, setMusicStatus] = useState(getContainmentStatus), [musicVolume, setMusicVolume] = useState(getBrainBoostMusicVolume);
   const [quality, setQuality] = useState<'auto' | 'low' | 'high'>('auto'), [diagnostics, setDiagnostics] = useState(false), [metrics, setMetrics] = useState<ArenaDiagnostics | null>(null);
   const [remains, setRemains] = useState(true), [notice, setNotice] = useState('');
   const progressRef = useRef(progress), resultSaved = useRef(false);
@@ -34,6 +36,7 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
   const exit = () => { view.leave(false); onExit(); };
   const danger = snapshot.marines.some(p => p.alive && p.health <= 30);
   useEffect(() => subscribeBrainBoostAudioEnabled(setAudio), []);
+  useEffect(() => subscribeContainmentStatus(setMusicStatus), []);
   useEffect(() => {
     let current: NeonArenaEngine | null = null; resultSaved.current = false; setError(''); setSnapshot(initial); setNotice('');
     try {
@@ -52,7 +55,7 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
       });
       modes.forEach((mode, i) => current!.setMode(mode, i)); current.setRemains(remains); current.setQuality(quality); current.setDiagnostics(diagnostics); engine.current = current;
     } catch (e) { setError(e instanceof Error ? e.message : 'No se pudo iniciar la escena.'); }
-    return () => { stopBrainBoostMusic('neon-arena'); engine.current = null; current?.dispose(); };
+    return () => { releaseNeonSurvivalScore(); engine.current = null; current?.dispose(); };
   }, [session]);
   useEffect(() => {
     if (!audio || !musicActive || error) { stopBrainBoostMusic('neon-arena'); return; }
@@ -70,7 +73,7 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
     stopBrainBoostMusic('neon-arena'); playBrainBoostSfx('neon-arena', 'game-over');
   }, [snapshot.phase, snapshot.score, playerCount]);
   const changeCount = (count: 1 | 2) => { if (engine.current?.setPlayerCount(count)) { setPlayerCount(count); setBest(readBest(count)); } };
-  const start = () => { view.arm(); setNeonSurvivalMood('start'); if (audio) startBrainBoostMusic('neon-arena'); engine.current?.start(); playBrainBoostSfx('neon-arena', 'start'); };
+  const start = () => { resetNeonSurvivalScore(); view.arm(); setNeonSurvivalMood('start'); if (audio) startBrainBoostMusic('neon-arena'); engine.current?.start(); playBrainBoostSfx('neon-arena', 'start'); };
   const restart = () => setSession(n => n + 1);
   const choose = (id: WeaponId, playerId = 0) => { if (engine.current?.simulation.equip(id, playerId)) { setSnapshot(engine.current.simulation.snapshot()); if (snapshot.phase === 'PLAYING') host.current?.querySelector('canvas')?.focus({ preventScroll: true }); } };
   const active = snapshot.phase === 'PLAYING' && !error;
@@ -109,6 +112,8 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
           <label className="na-mode">Jugadores <select aria-label="Cantidad de jugadores" value={playerCount} disabled={snapshot.phase !== 'READY'} onChange={e => changeCount(Number(e.target.value) as 1 | 2)}><option value={1}>Individual</option><option value={2}>Cooperativo local · 2 jugadores</option></select></label>
           <p className="na-controls">{coop ? <>P1: WASD · F dispara · Espacio Shockwave · Q cambia arma<br />P2: flechas · J / Ctrl derecho dispara · K / Shift derecho Shockwave · L / Enter cambia arma<br />También dos gamepads o los controles táctiles de cada vista. En móvil conviene girar la pantalla.</> : <>WASD / flechas o joystick: moverse · F / ratón / FUEGO: disparar · Espacio: Shockwave · P: pausa</>}<br />Asistido: mantené FUEGO para seguir objetivos automáticamente en 360°, incluso al mover el dedo o el ratón. El aro marca el objetivo. Para apuntar manualmente con ratón, arrastrando FUEGO o con stick derecho, elegí Moderno.</p>
           {snapshot.marines.map(marine => <label key={marine.id} className="na-mode">Apuntado {coop ? `P${marine.id + 1}` : ''}<select aria-label={coop ? `Modo de apuntado P${marine.id + 1}` : 'Modo de apuntado'} value={modes[marine.id]} onChange={e => { const next = e.target.value as AimMode; setModes(old => old.map((mode, i) => i === marine.id ? next : mode)); engine.current?.setMode(next, marine.id); }}><option value="assisted">Asistido · seguimiento 360°</option><option value="classic">Clásico · diagonal 45°</option><option value="modern">Moderno · ratón / stick derecho / FUEGO</option></select></label>)}
+          <label className="na-mode">Música <input aria-label="Volumen de música" type="range" min={0} max={1} step={.05} value={musicVolume} onChange={e => { const volume = Number(e.target.value); setMusicVolume(volume); setBrainBoostMusicVolume(volume); }} /></label>
+          <p className="na-music-status" data-score-status={musicStatus}>{musicStatus === 'fallback' ? 'Música: síntesis de respaldo · recursos no disponibles' : musicStatus === 'loading' ? 'Cargando banda sonora…' : 'Containment Breach · banda sonora original'}</p>
           <label className="na-mode">Gráficos <select aria-label="Calidad gráfica" value={quality} onChange={e => { const q = e.target.value as typeof quality; setQuality(q); engine.current?.setQuality(q); }}><option value="auto">Automático</option><option value="low">Bajo · sin bloom</option><option value="high">Alto</option></select></label>
           <label className="na-mode"><input type="checkbox" checked={diagnostics} onChange={e => { setDiagnostics(e.target.checked); engine.current?.setDiagnostics(e.target.checked); }} /> Diagnóstico de rendimiento</label>
           <label className="na-mode"><input type="checkbox" checked={remains} onChange={e => { setRemains(e.target.checked); engine.current?.setRemains(e.target.checked); }} /> Restos de combate en el suelo</label>

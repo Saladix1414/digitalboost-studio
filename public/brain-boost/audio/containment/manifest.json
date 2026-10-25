@@ -1,0 +1,54 @@
+{
+  "title": "Containment Breach",
+  "composer": "Original composition created for DigitalBoost Studio",
+  "provenance": "Generated from the committed deterministic numpy composition; no external samples",
+  "bpm": 128,
+  "meter": "4/4",
+  "key": "D minor, A major dominant",
+  "bars": 8,
+  "loopSeconds": 15.0,
+  "sampleRate": 32000,
+  "usage": "Project-original audio; no third-party sample licenses required",
+  "stems": [
+    {
+      "name": "atmosphere",
+      "channels": 2,
+      "peak": 0.5379767553015312,
+      "rms": 0.14331908256618864,
+      "formats": [
+        "ogg",
+        "mp3"
+      ]
+    },
+    {
+      "name": "bass",
+      "channels": 1,
+      "peak": 0.3066314303910611,
+      "rms": 0.09666964004440953,
+      "formats": [
+        "ogg",
+        "mp3"
+      ]
+    },
+    {
+      "name": "percussion",
+      "channels": 1,
+      "peak": 0.62,
+      "rms": 0.12370087206778121,
+      "formats": [
+        "ogg",
+        "mp3"
+      ]
+    },
+    {
+      "name": "tension",
+      "channels": 1,
+      "peak": 0.14289657939881792,
+      "rms": 0.0373263446431332,
+      "formats": [
+        "ogg",
+        "mp3"
+      ]
+    }
+  ]
+}
