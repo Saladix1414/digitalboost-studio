@@ -1,4 +1,4 @@
-import { OBSTACLES, WEAPONS, normalizeProgress, segmentDistance, type Progress, type WeaponId } from './SurvivalRules.ts';
+import { OBSTACLES, WEAPONS, firstBlockTime, normalizeProgress, segmentCircleEntry, type Progress, type WeaponId } from './SurvivalRules.ts';
 export type Phase = 'LOADING' | 'READY' | 'PLAYING' | 'PAUSED' | 'WAVE_TRANSITION' | 'GAME_OVER' | 'ERROR' | 'DISPOSED';
 export type EnemyKind = 'skitter' | 'carapace' | 'spitter' | 'stalker' | 'brood' | 'maw' | 'sovereign';
 export type Enemy = { id: number; kind: EnemyKind; x: number; z: number; hp: number; maxHp: number; radius: number; speed: number; damage: number; value: number; age: number; state: 'SPAWNING' | 'ADVANCING' | 'DYING' | 'REMOVED'; boss: boolean; attackClock: number; warning: number; aimX: number; aimZ: number; burn: number; burnClock: number };
@@ -131,7 +131,7 @@ export class GameSimulation {
     if (id === 'flame') {
       for (const e of this.grid.near(p.x, p.z, 7)) {
         const dx = e.x - p.x, dz = e.z - p.z, d = Math.hypot(dx, dz);
-        if (e.state === 'ADVANCING' && d <= 6 + e.radius && (dx * Math.cos(a) + dz * Math.sin(a)) / Math.max(.01, d) > Math.cos(w.spread)) { this.hit(e, w.damage); e.burn = 2; }
+        if (e.state === 'ADVANCING' && d <= 6 + e.radius && (dx * Math.cos(a) + dz * Math.sin(a)) / Math.max(.01, d) > Math.cos(w.spread) && firstBlockTime(p.x, p.z, e.x, e.z) === Infinity) { this.hit(e, w.damage); e.burn = 2; }
       }
     } else for (let i = 0; i < w.pellets; i++) {
       const spread = id === 'shotgun' ? (i / (w.pellets - 1) - .5) * w.spread * 2 : (this.random() - .5) * w.spread;
@@ -181,14 +181,16 @@ export class GameSimulation {
   }
   private projectileStep(p: Projectile, dt: number) {
     const ax = p.x, az = p.z; p.x += p.vx * dt; p.z += p.vz * dt; p.life -= dt;
-    const wall = Math.abs(p.x) > CONFIG.arena || Math.abs(p.z) > CONFIG.arena || OBSTACLES.some(o => segmentDistance(o.x, o.z, ax, az, p.x, p.z).distance < o.radius);
+    const wallTime = firstBlockTime(ax, az, p.x, p.z, p.radius, CONFIG.arena);
+    let stopTime = wallTime;
     if (p.hostile) {
-      if (segmentDistance(this.player.x, this.player.z, ax, az, p.x, p.z).distance < .55 + p.radius) { this.hurt(p.damage); p.life = -1; }
+      const playerTime = segmentCircleEntry(this.player.x, this.player.z, .55 + p.radius, ax, az, p.x, p.z);
+      if (playerTime < wallTime) { this.hurt(p.damage); p.life = -1; stopTime = playerTime; }
     } else if (p.weapon !== 'cascade') {
-      const targets = [...this.grid.near((ax + p.x) / 2, (az + p.z) / 2, Math.hypot(p.x - ax, p.z - az) / 2 + 3)].filter(e => e.state === 'ADVANCING' && !p.hits.has(e.id)).map(e => ({ e, ...segmentDistance(e.x, e.z, ax, az, p.x, p.z) })).filter(h => h.distance <= h.e.radius + p.radius).sort((a, b) => a.t - b.t || a.e.id - b.e.id);
-      if (!wall) for (const { e } of targets) { this.hit(e, p.damage); p.hits.add(e.id); if (--p.remaining <= 0) { p.life = -1; break; } }
+      const targets = [...this.grid.near((ax + p.x) / 2, (az + p.z) / 2, Math.hypot(p.x - ax, p.z - az) / 2 + 3)].filter(e => e.state === 'ADVANCING' && !p.hits.has(e.id)).map(e => ({ e, t: segmentCircleEntry(e.x, e.z, e.radius + p.radius, ax, az, p.x, p.z) })).filter(h => h.t < wallTime).sort((a, b) => a.t - b.t || a.e.id - b.e.id);
+      for (const { e, t } of targets) { this.hit(e, p.damage); p.hits.add(e.id); if (--p.remaining <= 0) { p.life = -1; stopTime = t; break; } }
     }
-    if (wall) p.life = -1;
+    if (stopTime !== Infinity) { p.x = ax + (p.x - ax) * stopTime; p.z = az + (p.z - az) * stopTime; p.life = -1; }
     if (p.weapon === 'cascade' && !p.hostile && p.life <= 0) {
       this.queueExplosion(p.x, p.z, 0, 75, 3.2);
       for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2; this.queueExplosion(p.x + Math.cos(a) * 3, p.z + Math.sin(a) * 3, .18 + i * .09, 45, 2.4); }

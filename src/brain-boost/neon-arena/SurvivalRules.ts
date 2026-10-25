@@ -35,3 +35,27 @@ export function segmentDistance(px: number, pz: number, ax: number, az: number, 
   const t = d ? Math.max(0, Math.min(1, ((px - ax) * dx + (pz - az) * dz) / d)) : 0;
   return { distance: Math.hypot(px - ax - dx * t, pz - az - dz * t), t };
 }
+
+/** First intersection along a swept segment; Infinity means no intersection. */
+export function segmentCircleEntry(cx: number, cz: number, radius: number, ax: number, az: number, bx: number, bz: number) {
+  const dx = bx - ax, dz = bz - az, ox = ax - cx, oz = az - cz;
+  const c = ox * ox + oz * oz - radius * radius;
+  if (c <= 0) return 0;
+  const a = dx * dx + dz * dz; if (a < 1e-12) return Infinity;
+  const b = ox * dx + oz * dz, discriminant = b * b - a * c;
+  if (discriminant < 0) return Infinity;
+  const t = (-b - Math.sqrt(discriminant)) / a;
+  return t >= 0 && t <= 1 ? t : Infinity;
+}
+
+export function firstBlockTime(ax: number, az: number, bx: number, bz: number, radius = 0, arena = 21) {
+  const edge = arena - radius;
+  if (Math.abs(ax) >= edge || Math.abs(az) >= edge) return 0;
+  let first = Infinity;
+  if (bx > edge) first = Math.min(first, (edge - ax) / (bx - ax));
+  if (bx < -edge) first = Math.min(first, (-edge - ax) / (bx - ax));
+  if (bz > edge) first = Math.min(first, (edge - az) / (bz - az));
+  if (bz < -edge) first = Math.min(first, (-edge - az) / (bz - az));
+  for (const o of OBSTACLES) first = Math.min(first, segmentCircleEntry(o.x, o.z, o.radius + radius, ax, az, bx, bz));
+  return first;
+}

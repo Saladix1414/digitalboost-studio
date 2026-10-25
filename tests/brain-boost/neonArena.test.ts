@@ -98,3 +98,17 @@ test('ranged attacks have a wind-up and preserve the announced attack direction'
   run(s, .4); assert.equal(s.projectiles.filter(b => b.hostile).length, 0); assert.ok(e.warning > 0);
   s.player.z = 10; run(s, .6); const bullet = s.projectiles.find(b => b.hostile); assert.ok(bullet); assert.ok(bullet.vx < 0); assert.ok(Math.abs(bullet.vz) < .001);
 });
+test('solid debris blocks hostile projectiles before they can damage the marine', () => {
+  const s = game(); s.player.x = -8.4; s.player.z = -8;
+  s.projectiles.push({ id: 55555, x: -16, z: -8, vx: 600, vz: 0, life: 2, damage: 25, radius: .1, weapon: 'machinegun', hostile: true, hits: new Set(), remaining: 1 });
+  s.step(); assert.equal(s.health, 100); assert.equal(s.projectiles.length, 0);
+});
+test('rail hits a creature before an obstacle but cannot hit another behind it in the same step', () => {
+  const s = game(); s.player.x = 0; s.player.z = 0;
+  for (const [id, x] of [[50000, -14.5], [50001, -8.4]]) { const e = createEnemy('skitter', id, x, -8); e.speed = 0; e.hp = 100; s.enemies.push(e); }
+  s.projectiles.push({ id: 55555, x: -16, z: -8, vx: 600, vz: 0, life: 2, damage: 20, radius: .1, weapon: 'rail', hostile: false, hits: new Set(), remaining: 4 });
+  s.step(); assert.equal(s.enemies[0].hp, 80); assert.equal(s.enemies[1].hp, 100);
+});
+test('flame damage respects cover instead of burning through a solid nest', () => {
+  const s = game(all); s.player.x = -14; s.player.z = -8; const e = createEnemy('skitter', 50000, -8.4, -8); e.speed = 0; s.enemies.push(e); s.equip('flame'); s.setInput(0, 0, true, 0); s.step(); assert.equal(e.hp, e.maxHp); assert.equal(e.burn, 0);
+});
