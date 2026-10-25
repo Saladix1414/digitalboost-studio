@@ -121,7 +121,11 @@ export class NeonArenaEngine {
     try { this.composer = new EffectComposer(this.renderer); this.composer.addPass(new RenderPass(this.world.scene, this.world.camera)); this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(1, 1), .18, .15, 1.5)); this.composer.addPass(new OutputPass()); } catch { this.disposeComposer(); }
   }
   private resize() {
-    if (this.disposed) return; this.releaseInputs(); this.clock.reset(); this.lastTime = 0; this.needsRender = true; this.width = Math.max(1, this.host.clientWidth); this.height = Math.max(1, this.host.clientHeight);
+    if (this.disposed) return;
+    const width = Math.max(1, this.host.clientWidth), height = Math.max(1, this.host.clientHeight);
+    // Rotation/layout changes invalidate pointer geometry. A DPR-only quality drop does not.
+    if (width !== this.width || height !== this.height) { this.releaseInputs(); this.clock.reset(); this.lastTime = 0; }
+    this.needsRender = true; this.width = width; this.height = height;
     this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, this.low || this.simulation.players.length === 2 ? 1.25 : 1.75) * this.resolution);
     this.renderer.setSize(this.width, this.height); this.world.resize(this.width, this.height, this.simulation.players.length);
     if (this.composer) { this.composer.setPixelRatio(this.renderer.getPixelRatio()); this.composer.setSize(this.width, this.height); }

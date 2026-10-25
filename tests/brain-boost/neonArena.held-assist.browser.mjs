@@ -12,6 +12,7 @@ try {
     await page.addInitScript(() => { localStorage.setItem('digitalboost_app_screen', 'main'); localStorage.setItem('digitalboost:brain-boost:audio-enabled:v1', 'false'); });
     await page.goto('http://127.0.0.1:5187/', { waitUntil: 'networkidle' });
     await page.evaluate(async () => {
+      const { NeonArenaEngine } = await import('/src/brain-boost/neon-arena/NeonArenaEngine.ts'); const launch = NeonArenaEngine.prototype.start; NeonArenaEngine.prototype.start = function () { window.qaHeldEngine = this; return launch.call(this); };
       const { GameSimulation } = await import('/src/brain-boost/neon-arena/GameSimulation.ts'); const start = GameSimulation.prototype.start;
       GameSimulation.prototype.start = function () { const ok = start.call(this); if (ok) window.qaHeld = this; return ok; };
     });
@@ -22,6 +23,7 @@ try {
       const { createEnemy } = await import('/src/brain-boost/neon-arena/GameSimulation.ts'); const s = window.qaHeld;
       s.enemies = [-5, 5].map((x, i) => { const e = createEnemy('skitter', 990000 + i, x, 3); e.hp = e.maxHp = 36; e.speed = 0; return e; }); s.projectiles = []; s.clearInput();
     });
+    const forceResolutionDrop = async () => { await page.evaluate(() => { window.qaHeldEngine.resolution = 1; window.qaHeldEngine.badFrames = 110; }); await page.waitForFunction(() => window.qaHeldEngine.resolution < 1); };
     const assertRetarget = async () => {
       await page.waitForFunction(() => window.qaHeld.enemies.filter(e => e.id >= 990000).every(e => e.hp === 0), { }, { timeout: 15000 });
       assert.equal(await page.evaluate(() => window.qaHeld.player.aim), null, 'held fire cannot inject a manual heading in assisted mode');
@@ -31,16 +33,16 @@ try {
     if (!touch) {
       await fixture(); const canvas = await page.locator('.na-canvas canvas').boundingBox();
       await page.mouse.move(canvas.x + canvas.width * .8, canvas.y + canvas.height * .7); await page.mouse.down();
-      await assertRetarget(); await page.mouse.up(); console.log('held mouse on canvas kills left/right targets without losing assist PASS');
+      await forceResolutionDrop(); await assertRetarget(); await page.mouse.up(); console.log('held mouse on canvas kills left/right targets without losing assist PASS');
     }
     await fixture(); const fire = await page.locator('[data-na-fire]').boundingBox(); const x = fire.x + fire.width * .7, y = fire.y + fire.height * .5;
     if (touch) {
       const cdp = await context.newCDPSession(page);
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y, id: 1 }] });
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x + 10, y: y + 10, id: 1 }] });
-      await assertRetarget(); await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await forceResolutionDrop(); await assertRetarget(); await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     } else {
-      await page.mouse.move(x, y); await page.mouse.down(); await page.mouse.move(x + 10, y + 10); await assertRetarget(); await page.mouse.up();
+      await page.mouse.move(x, y); await page.mouse.down(); await page.mouse.move(x + 10, y + 10); await forceResolutionDrop(); await assertRetarget(); await page.mouse.up();
     }
     await page.waitForFunction(() => window.qaHeld.player.input.firing === false);
     assert.equal(await page.locator('[data-na-fire]').getAttribute('data-active'), 'false');
