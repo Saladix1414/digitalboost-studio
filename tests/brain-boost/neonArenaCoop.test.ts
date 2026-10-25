@@ -88,3 +88,8 @@ test('pausing a shared match freezes both resources and invalid player IDs have 
   const s = coop(); s.setInput(1, 0, true, null, 0); s.setInput(0, -1, true, null, 1); run(s, .5); s.shock(0); s.shock(1); s.pause();
   const before = JSON.stringify(s); run(s, 10); s.setInput(1, 0, true, null, 1); s.setInput(1, 0, true, null, 100); assert.equal(s.shock(100), false); assert.equal(s.equip('rail', 100), false); assert.equal(JSON.stringify(s), before);
 });
+test('solo spawn relocation preserves the accepted V4.1 route instead of using the co-op ring search', () => {
+  const s = new GameSimulation(42819); s.ready(); s.start(); s.player.x = 0; s.player.z = -11;
+  for (let i = 0; i < 20; i++) s.step();
+  assert.equal(s.enemies.length, 1); assert.equal(s.enemies[0].x, -20); assert.equal(s.enemies[0].z, 18);
+});

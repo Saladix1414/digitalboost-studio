@@ -71,3 +71,11 @@ Browser QA used Chromium 153 with SwiftShader and emulated touch/gamepads. Physi
 This is local split-screen on one device. No online multiplayer, networking, remote identity or extra backend was introduced. Device-local recreational unlocks are not server-trusted authority or cognitive measurements.
 
 Historical backups/untracked data remain preserved. New pre-migration copies are under `.phase-backups/neon-coop`, excluded from implementation commits.
+
+## Solo compatibility hotfix
+
+A user reported that the default campaign pilot stopped at wave 10 on Termux/Node 26.4.0 ARM64. The same failure was not reproduced on Node 24.22.1 or Node 26.4.0 x64. Inspection did identify a genuine compatibility regression: the new two-player safe-ring relocation had also replaced the accepted V4.1 solo relocation route.
+
+The relocation paths are now separated by participant count: individual play uses the V4.1 fallback, while two-player mode retains the safe search around both living marines. The campaign completion assertions remain unchanged. A new regression test fails before this fix and passes afterward by checking a known V4.1 relocation case.
+
+Validation: 77/77 Brain Boost tests PASS on Node 24.22.1 and 26.4.0 x64; strict TypeScript and build PASS. A side-by-side run against the published V4.1 reference produces identical complete default-seed pilot output/trace (wave 16, three bosses, 444.47 seconds, health 100). ARM64 validation still requires rerunning on the user's device; this hotfix addresses the identified regression without claiming the hardware-specific report was reproduced locally.

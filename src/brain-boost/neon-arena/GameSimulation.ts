@@ -166,11 +166,17 @@ export class GameSimulation {
     let x = Math.cos(a) * 20, z = Math.sin(a) * 20;
     if (!origin && this.wave === 1 && this.spawned < 6) { x = Math.cos(a) * 11; z = Math.sin(a) * 11; }
     if (origin) { x = Math.max(-20, Math.min(20, origin.x + Math.cos(a) * 3)); z = Math.max(-20, Math.min(20, origin.z + Math.sin(a) * 3)); }
-    const safe = (px: number, pz: number) => this.players.every(p => p.health <= 0 || Math.hypot(px - p.x, pz - p.z) >= 6) && !OBSTACLES.some(o => Math.hypot(px - o.x, pz - o.z) < o.radius + 2);
-    if (!safe(x, z)) {
-      let found = false;
-      for (let i = 0; i < 16; i++) { const angle = a + i * Math.PI / 8, px = Math.cos(angle) * 20, pz = Math.sin(angle) * 20; if (safe(px, pz)) { x = px; z = pz; found = true; break; } }
-      if (!found) return false;
+    if (this.players.length === 1) {
+      // Preserve the V4.1 solo spawn route; the two-player search changes seeded runs.
+      if (Math.hypot(x - this.player.x, z - this.player.z) < 6) { x = -Math.sign(this.player.x || 1) * 20; z = -Math.sign(this.player.z || 1) * 18; }
+      if (OBSTACLES.some(o => Math.hypot(x - o.x, z - o.z) < o.radius + 2)) { x = 20; z = -18; }
+    } else {
+      const safe = (px: number, pz: number) => this.players.every(p => p.health <= 0 || Math.hypot(px - p.x, pz - p.z) >= 6) && !OBSTACLES.some(o => Math.hypot(px - o.x, pz - o.z) < o.radius + 2);
+      if (!safe(x, z)) {
+        let found = false;
+        for (let i = 0; i < 16; i++) { const angle = a + i * Math.PI / 8, px = Math.cos(angle) * 20, pz = Math.sin(angle) * 20; if (safe(px, pz)) { x = px; z = pz; found = true; break; } }
+        if (!found) return false;
+      }
     }
     const selected = kind ?? (this.wave >= 4 && this.spawned % 8 === 6 ? 'stalker' : this.wave >= 3 && this.spawned % 6 === 3 ? 'spitter' : this.wave >= 2 && this.spawned % 5 === 4 ? 'carapace' : 'skitter');
     const e = createEnemy(selected, this.nextId++, x, z, this.wave); if (e.boss && this.players.length === 2) e.hp = e.maxHp = e.maxHp * 1.5; e.state = 'SPAWNING'; this.enemies.push(e); return true;
