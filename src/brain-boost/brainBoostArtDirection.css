@@ -197,3 +197,164 @@
 [data-brain-boost-window="mode-select"] {
   border-radius: 30px 12px 30px 12px !important;
 }
+
+/* Identidades de los modos incorporados recientemente. */
+
+/* VECTOR ROUTES: cartografía táctica y nodos de navegación. */
+[data-brain-boost-window="routes"],
+[data-brain-boost-stage="routes"] {
+  --bb-frame: rgba(34, 211, 238, .78);
+  border-radius: 14px 28px 14px 8px !important;
+}
+
+[data-brain-boost-window="routes"]::before,
+[data-brain-boost-stage="routes"]::before {
+  background-image:
+    radial-gradient(circle at 16% 24%, rgba(34,211,238,.75) 0 2px, transparent 3px),
+    radial-gradient(circle at 78% 32%, rgba(96,165,250,.75) 0 2px, transparent 3px),
+    radial-gradient(circle at 58% 78%, rgba(34,211,238,.65) 0 2px, transparent 3px),
+    linear-gradient(32deg, transparent 49.5%, rgba(34,211,238,.12) 49.8% 50%, transparent 50.3%),
+    linear-gradient(145deg, rgba(8,48,67,.22), transparent 68%);
+}
+
+/* SIGNAL HUNT: señales y trazas de decodificación. */
+[data-brain-boost-window="signals"],
+[data-brain-boost-stage="signals"] {
+  --bb-frame: rgba(251, 113, 133, .76);
+  border-radius: 6px 20px 6px 20px !important;
+}
+
+[data-brain-boost-window="signals"]::before,
+[data-brain-boost-stage="signals"]::before {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(251,113,133,.045) 0 1px, transparent 1px 18px),
+    linear-gradient(90deg, transparent 24%, rgba(251,113,133,.16) 24.3%, transparent 24.7%),
+    radial-gradient(ellipse at 76% 18%, rgba(251,191,36,.16), transparent 48%),
+    linear-gradient(145deg, rgba(43,17,36,.28), transparent 75%);
+}
+
+/* NEURAL BASELINE: cámara de calibración precisa y contenida. */
+[data-brain-boost-window="baseline"],
+[data-brain-boost-stage="baseline"] {
+  --bb-frame: rgba(196, 181, 253, .66);
+  border-radius: 18px !important;
+}
+
+[data-brain-boost-window="baseline"]::before,
+[data-brain-boost-stage="baseline"]::before {
+  background-image:
+    linear-gradient(rgba(196,181,253,.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(103,232,249,.055) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 0%, rgba(103,232,249,.13), transparent 56%);
+  background-size: 32px 32px, 32px 32px, auto;
+}
+
+/* DIGITALBOOST ARCADE EVOLUTION — portrait game shell v1 */
+@media (max-aspect-ratio: 3/4) {
+  /* La partida se presenta como escenario, no como ventana flotante. */
+  [data-brain-boost-overlay="game"] {
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #020611 !important;
+    backdrop-filter: none !important;
+  }
+
+  [data-brain-boost-overlay="game"] > [data-brain-boost-window] {
+    width: 100% !important;
+    max-width: none !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    padding: max(12px, env(safe-area-inset-top)) 12px
+      max(12px, env(safe-area-inset-bottom)) !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background-image: none !important;
+  }
+
+  [data-brain-boost-overlay="game"] > [data-brain-boost-window]::before {
+    opacity: .14 !important;
+    mix-blend-mode: normal !important;
+  }
+
+  [data-brain-boost-overlay="game"] > [data-brain-boost-window]::after {
+    display: none !important;
+  }
+
+  [data-brain-boost-window] > div:first-of-type {
+    flex: 0 0 auto;
+  }
+
+  /* El área activa absorbe el espacio restante de la pantalla. */
+  [data-brain-boost-window] > [data-brain-boost-game-layout="active"] {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    margin-top: 12px !important;
+    gap: 0 !important;
+  }
+
+  [data-brain-boost-window] > [data-brain-boost-game-layout="active"]
+    > [data-brain-boost-mode-list] {
+    display: none !important;
+  }
+
+  /* Elimina el marco ornamental redundante alrededor del juego real. */
+  [data-brain-boost-window] > [data-brain-boost-game-layout="active"]
+    > [data-brain-boost-stage] {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  [data-brain-boost-stage]::before {
+    display: none !important;
+  }
+
+  /* El componente de juego real conserva sus controles y su identidad. */
+  [data-brain-boost-stage] > section {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    padding: clamp(12px, 1.8vh, 22px) !important;
+    border-radius: 18px !important;
+  }
+
+  /* Evita que las etiquetas de diagnóstico resulten microscópicas. */
+  [data-brain-boost-stage] .text-\[8px\] {
+    font-size: 10px !important;
+  }
+
+  [data-brain-boost-stage] .text-\[9px\] {
+    font-size: 11px !important;
+  }
+
+  /* Evita cuadrículas de seis elementos diminutos en modo vertical. */
+  [data-brain-boost-stage="number"] .grid.grid-cols-3,
+  [data-brain-boost-stage="pairs"] .grid.grid-cols-3,
+  [data-brain-boost-stage="originx-dragons"] .grid.grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+

@@ -44,6 +44,9 @@ const gameArtDirections: Record<string, GameArtDirection> = {
   deduction: { primary: "#a3e635", secondary: "#60a5fa", surface: "#0a2020", glow: "rgba(163,230,53,.22)" },
   rotation: { primary: "#e879f9", secondary: "#22d3ee", surface: "#160d35", glow: "rgba(217,70,239,.24)" },
   targets: { primary: "#34d399", secondary: "#67e8f9", surface: "#071b22", glow: "rgba(52,211,153,.22)" },
+  routes: { primary: "#22d3ee", secondary: "#60a5fa", surface: "#071525", glow: "rgba(34,211,238,.20)" },
+  signals: { primary: "#fb7185", secondary: "#fbbf24", surface: "#1b101c", glow: "rgba(251,113,133,.20)" },
+  baseline: { primary: "#c4b5fd", secondary: "#67e8f9", surface: "#101329", glow: "rgba(196,181,253,.18)" },
 };
 
 const categories: Category[] = [
@@ -547,6 +550,7 @@ export default function BrainBoostLandingSection() {
 
       {activeCategory && createPortal((
         <div
+          data-brain-boost-overlay={activeGame ? "game" : "catalog"}
           className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-[#01040c]/90 p-3 backdrop-blur-lg sm:p-4"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) closeWindow();
@@ -584,7 +588,7 @@ export default function BrainBoostLandingSection() {
               </div>
             </div>
 
-            <div className={`relative z-10 mt-6 grid flex-1 content-start gap-5 ${
+            <div data-brain-boost-game-layout={activeGame ? "active" : "catalog"} className={`relative z-10 mt-6 grid flex-1 content-start gap-5 ${
               activeGame ? "grid-cols-1" : "md:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]"
             }`}>
               <div data-brain-boost-mode-list={activeCategory.id} className={activeGame ? "hidden" : "grid content-start gap-3 sm:grid-cols-2 md:grid-cols-1"}>
