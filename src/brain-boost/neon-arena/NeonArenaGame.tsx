@@ -4,6 +4,7 @@ import type { AimMode } from './AimAssist';
 import { GameSimulation } from './GameSimulation';
 import { BOSSES, WEAPONS, WEAPON_IDS, readProgress, saveProgress, type WeaponId } from './SurvivalRules';
 import { isBrainBoostAudioEnabled, playBrainBoostSfx, playNeonSurvivalSfx, playNeonCreatureSfx, setBrainBoostAudioEnabled, subscribeBrainBoostAudioEnabled, startBrainBoostMusic, stopBrainBoostMusic, setNeonSurvivalMood } from '../brainBoostAudio';
+import { useImmersiveArena } from './useImmersiveArena';
 import './NeonArenaGame.css';
 const initial = new GameSimulation().snapshot();
 type Snapshot = typeof initial;
@@ -20,13 +21,15 @@ function MarineControls({ marine, active, onShock, coop }: { marine: Snapshot['m
   </div>;
 }
 export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
-  const host = useRef<HTMLDivElement>(null), engine = useRef<NeonArenaEngine | null>(null), startButton = useRef<HTMLButtonElement>(null);
+  const root = useRef<HTMLDivElement>(null), host = useRef<HTMLDivElement>(null), engine = useRef<NeonArenaEngine | null>(null), startButton = useRef<HTMLButtonElement>(null);
   const [snapshot, setSnapshot] = useState(initial), [error, setError] = useState(''), [session, setSession] = useState(0);
-  const [playerCount, setPlayerCount] = useState<1 | 2>(1), [best, setBest] = useState(() => readBest(1)), [audio, setAudio] = useState(isBrainBoostAudioEnabled), [expanded, setExpanded] = useState(false);
+  const [playerCount, setPlayerCount] = useState<1 | 2>(1), [best, setBest] = useState(() => readBest(1)), [audio, setAudio] = useState(isBrainBoostAudioEnabled);
   const [progress, setProgress] = useState(() => readProgress(storage())), [modes, setModes] = useState<AimMode[]>(['assisted', 'assisted']);
   const [remains, setRemains] = useState(true), [notice, setNotice] = useState('');
   const progressRef = useRef(progress), resultSaved = useRef(false);
   const coop = playerCount === 2, musicActive = snapshot.phase === 'PLAYING' || snapshot.phase === 'WAVE_TRANSITION';
+  const view = useImmersiveArena(root, musicActive, () => engine.current?.pause());
+  const exit = () => { view.leave(false); onExit(); };
   const danger = snapshot.marines.some(p => p.alive && p.health <= 30);
   useEffect(() => subscribeBrainBoostAudioEnabled(setAudio), []);
   useEffect(() => {
@@ -65,7 +68,7 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
     stopBrainBoostMusic('neon-arena'); playBrainBoostSfx('neon-arena', 'game-over');
   }, [snapshot.phase, snapshot.score, playerCount]);
   const changeCount = (count: 1 | 2) => { if (engine.current?.setPlayerCount(count)) { setPlayerCount(count); setBest(readBest(count)); } };
-  const start = () => { setNeonSurvivalMood('start'); if (audio) startBrainBoostMusic('neon-arena'); engine.current?.start(); playBrainBoostSfx('neon-arena', 'start'); };
+  const start = () => { view.arm(); setNeonSurvivalMood('start'); if (audio) startBrainBoostMusic('neon-arena'); engine.current?.start(); playBrainBoostSfx('neon-arena', 'start'); };
   const restart = () => setSession(n => n + 1);
   const choose = (id: WeaponId, playerId = 0) => { if (engine.current?.simulation.equip(id, playerId)) { setSnapshot(engine.current.simulation.snapshot()); if (snapshot.phase === 'PLAYING') host.current?.querySelector('canvas')?.focus({ preventScroll: true }); } };
   const active = snapshot.phase === 'PLAYING' && !error;
@@ -78,9 +81,9 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
     {active && !snapshot.boss && <div className="na-director" data-na-director=""><span>EN CAMPO <b>{snapshot.activeEnemies}</b> · LLEGANDO <b>{snapshot.pendingEnemies}</b></span><span>JEFE · OLA {snapshot.nextEncounter.wave}</span></div>}
     {snapshot.boss && <div className="na-boss" role="status"><b>{BOSSES[snapshot.boss.name].name} · FASE {snapshot.boss.phase}</b><span className="na-meter" role="progressbar" aria-label="Salud del jefe" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.ceil(snapshot.boss.hp / snapshot.boss.maxHp * 100)}><i style={{ width: `${snapshot.boss.hp / snapshot.boss.maxHp * 100}%` }} /></span><small>{snapshot.boss.warning ? '¡ATAQUE INMINENTE! MOVETE FUERA DE LA SEÑAL' : 'Buscá una ventana para atacar'}</small></div>}
   </>;
-  return <div className={`na-game${expanded ? ' na-game--expanded' : ''}${coop ? ' na-game--coop' : ''}`} data-neon-phase={error ? 'ERROR' : snapshot.phase} data-neon-players={playerCount}>
+  return <div ref={root} className={`na-game${view.immersive ? ' na-game--immersive' : ''}${coop ? ' na-game--coop' : ''}`} data-neon-fullscreen={view.native ? 'native' : view.immersive ? 'viewport' : 'off'} data-neon-phase={error ? 'ERROR' : snapshot.phase} data-neon-players={playerCount}>
     <div className="na-toolbar"><span><b>NEON ARENA</b><small>{coop ? 'COOPERATIVO LOCAL / PANTALLA DIVIDIDA' : 'NIGHTMARE PROTOCOLO / ALIEN HORDE SURVIVAL'}</small></span><div>
-      <button type="button" aria-pressed={audio} onClick={() => setBrainBoostAudioEnabled(!audio)}>{audio ? 'Sonido ON' : 'Sonido OFF'}</button><button type="button" aria-pressed={expanded} onClick={() => setExpanded(v => !v)}>{expanded ? 'Reducir' : 'Expandir'}</button><button type="button" onClick={onExit}>Salir</button>
+      <button type="button" aria-pressed={audio} onClick={() => setBrainBoostAudioEnabled(!audio)}>{audio ? 'Sonido ON' : 'Sonido OFF'}</button><button type="button" aria-pressed={view.immersive} onClick={() => view.immersive ? view.leave() : view.enter()}>{view.immersive ? 'Reducir' : 'Expandir'}</button>{view.immersive && !view.native && <button type="button" onClick={view.enter}>Pantalla completa</button>}<button type="button" onClick={exit}>Salir</button>
     </div></div>
     {coop && <div className="na-team-header">{hud}{encounter}</div>}
     <div className="na-stage" data-playing={active}>
@@ -108,7 +111,7 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
           <p className="na-controls">Récord {coop ? 'cooperativo' : 'individual'} {best} · {progress.unlocked.length}/5 armas · Progreso local recreativo{coop && <><br />Gamepad: A / RT dispara · B Shockwave · LB cambia arma · Start pausa. Los caídos regresan en la siguiente oleada.</>}</p>
         </>}
         {!error && <p className="na-objective">PRÓXIMO JEFE · {snapshot.nextEncounter.name} · OLA {snapshot.nextEncounter.wave}<small>{progress.unlocked.includes(snapshot.nextEncounter.reward) ? 'Arma obtenida · superá tu marca de supervivencia' : `Desbloquea ${WEAPONS[snapshot.nextEncounter.reward].name}`}</small></p>}
-        <div className="na-menu-actions"><button ref={startButton} type="button" className="na-primary" disabled={!error && snapshot.phase === 'LOADING'} onClick={error || snapshot.phase === 'GAME_OVER' ? restart : snapshot.phase === 'PAUSED' ? () => engine.current?.togglePause() : start}>{error ? 'Reintentar escena' : snapshot.phase === 'GAME_OVER' ? 'Nueva partida' : snapshot.phase === 'PAUSED' ? 'Reanudar partida' : snapshot.phase === 'LOADING' ? 'Cargando escena…' : 'Iniciar supervivencia →'}</button><button type="button" onClick={onExit}>Volver a Nightmare Protocolo</button></div>
+        <div className="na-menu-actions"><button ref={startButton} type="button" className="na-primary" disabled={!error && snapshot.phase === 'LOADING'} onClick={error || snapshot.phase === 'GAME_OVER' ? restart : snapshot.phase === 'PAUSED' ? () => engine.current?.togglePause() : start}>{error ? 'Reintentar escena' : snapshot.phase === 'GAME_OVER' ? 'Nueva partida' : snapshot.phase === 'PAUSED' ? 'Reanudar partida' : snapshot.phase === 'LOADING' ? 'Cargando escena…' : 'Iniciar supervivencia →'}</button><button type="button" onClick={exit}>Volver a Nightmare Protocolo</button></div>
       </div></div>}
     </div>
     <div className="na-arsenal-rows">{snapshot.marines.map(marine => <div className="na-weapon-bar" key={marine.id} data-arsenal-player={marine.id}><span><b>{coop ? `P${marine.id + 1} · ` : ''}{WEAPONS[marine.weapon].name}</b> · {marine.weapon === 'machinegun' ? '∞' : marine.ammo}{marine.shield > 0 ? ' · ESCUDO' : ''}{marine.haste > 0 ? ' · CADENCIA +' : ''}{!marine.alive ? ' · CAÍDO' : ''}</span><div>{snapshot.unlocked.map(id => <button type="button" key={id} onPointerDown={e => e.preventDefault()} aria-label={`Equipar ${WEAPONS[id].name}${coop ? ` P${marine.id + 1}` : ''}`} aria-pressed={marine.weapon === id} disabled={!marine.alive || !['READY', 'PLAYING', 'WAVE_TRANSITION'].includes(snapshot.phase)} onClick={() => choose(id, marine.id)}>{WEAPON_IDS.indexOf(id) + 1}</button>)}</div></div>)}</div>

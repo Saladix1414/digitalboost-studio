@@ -1,0 +1,37 @@
+import assert from 'node:assert/strict';
+import { createServer } from 'vite';
+const { chromium } = await import(process.env.NEON_PLAYWRIGHT_MODULE || 'playwright');
+const server = await createServer({ server: { host: '127.0.0.1', port: 5191, strictPort: true } }); let browser;
+try {
+  await server.listen(); browser = await chromium.launch({ executablePath: process.env.NEON_BROWSER_EXECUTABLE, args: ['--no-sandbox','--disable-dev-shm-usage','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'] });
+  const context = await browser.newContext({ viewport: {width:390,height:844}, hasTouch:true, isMobile:true, reducedMotion:'reduce' }), page=await context.newPage(), errors=[];
+  page.on('pageerror', e=>errors.push(e.message));
+  await page.addInitScript(()=>{localStorage.setItem('digitalboost_app_screen','main');localStorage.setItem('digitalboost:brain-boost:audio-enabled:v1','false');});
+  await page.goto('http://127.0.0.1:5191/',{waitUntil:'networkidle'});
+  await page.evaluate(async()=>{const {GameSimulation}=await import('/src/brain-boost/neon-arena/GameSimulation.ts');const start=GameSimulation.prototype.start;GameSimulation.prototype.start=function(){window.qaRotate=this;return start.call(this)};window.qaNative=HTMLElement.prototype.requestFullscreen;HTMLElement.prototype.requestFullscreen=function(){return Promise.reject(new Error('fixture: denied'))};});
+  await page.getByRole('button',{name:'Nightmare Protocolo',exact:true}).click(); await page.getByRole('button',{name:/Neon Arena: Virus Survivor/}).click();await page.waitForSelector('[data-neon-phase="READY"]');
+  assert.equal(await page.locator('.na-game').getAttribute('data-neon-fullscreen'),'off');
+  await page.getByRole('button',{name:'Iniciar supervivencia →',exact:true}).click();
+  const canvas=await page.locator('.na-canvas canvas').elementHandle(), elapsed=await page.evaluate(()=>window.qaRotate.elapsed);
+  const fire=await page.locator('[data-na-fire]').boundingBox(), cdp=await context.newCDPSession(page);
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:fire.x+fire.width/2,y:fire.y+fire.height/2,id:1}]});
+  await page.setViewportSize({width:844,height:390});await page.waitForSelector('[data-neon-fullscreen="viewport"]');
+  await page.waitForFunction(()=>window.qaRotate.player.input.firing===false);
+  assert.equal(await page.locator('.na-canvas canvas').evaluate((c,old)=>c===old,canvas),true);
+  assert.ok(await page.evaluate(()=>window.qaRotate.elapsed)>elapsed);
+  const stage=await page.locator('.na-stage').boundingBox();assert.ok(stage.height>150&&stage.height<390);assert.ok(stage.y>=0&&stage.y+stage.height<=391);
+  await page.getByRole('button',{name:'Pantalla completa',exact:true}).click();assert.equal(await page.locator('.na-game').getAttribute('data-neon-fullscreen'),'viewport');
+  await page.screenshot({path:'/tmp/neon-v5-landscape.png'});
+  await page.evaluate(()=>HTMLElement.prototype.requestFullscreen=window.qaNative);
+  await page.getByRole('button',{name:'Pantalla completa',exact:true}).click();await page.waitForSelector('[data-neon-fullscreen="native"]');
+  assert.equal(await page.evaluate(()=>document.fullscreenElement?.classList.contains('na-game')),true);
+  await page.evaluate(()=>document.exitFullscreen());await page.waitForSelector('[data-neon-phase="PAUSED"]');
+  assert.equal(await page.locator('.na-game').getAttribute('data-neon-fullscreen'),'off');
+  await page.getByRole('button',{name:'Reanudar partida',exact:true}).click();
+  await page.getByRole('button',{name:'Expandir',exact:true}).click();await page.keyboard.press('Escape');await page.waitForSelector('[data-neon-phase="PAUSED"]');
+  assert.equal(await page.locator('[data-brain-boost-window="neon-arena"]').count(),1,'Escape leaves immersive before closing the game');
+  await page.waitForTimeout(200); await page.waitForFunction(()=>document.fullscreenElement===null);
+  await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'Salir',exact:true}).click();
+  assert.equal(await page.locator('[data-neon-immersive]').count(),0);assert.equal(await page.evaluate(()=>document.body.style.overflow),'');assert.deepEqual(errors,[]);
+  console.log('rotation preserves canvas/state; held touch cancels; rejected fullscreen falls back; native entry/exit; Escape pauses; cleanup PASS');await context.close();
+}finally{await browser?.close();await server.close();}
