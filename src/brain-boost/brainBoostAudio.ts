@@ -378,7 +378,7 @@ type MusicPattern = {
   bass: number[];
   shifts: number[];
   wave: OscillatorType;
-  style: "relics" | "ocean" | "reactor" | "number" | "rift" | "focus" | "signal" | "vector" | "baseline";
+  style: "survival" | "relics" | "ocean" | "reactor" | "number" | "rift" | "focus" | "signal" | "vector" | "baseline";
 };
 
 let activeMusic: BrainBoostMusicState | null = null;
@@ -539,6 +539,11 @@ function scheduleCyberStep(
 }
 
 const MUSIC_PATTERNS: Partial<Record<BrainBoostGame, MusicPattern>> = {
+  "neon-arena": {
+    bpm: 116,
+    melody: [50, null, 57, 53, null, 62, 57, null, 50, 53, null, 56, 57, null, 53, null],
+    bass: [26, 26, 29, 25], shifts: [0, 0, 3, -1], wave: "sawtooth", style: "survival",
+  },
   "memory-pairs": {
     bpm: 96,
     melody: [60, null, 67, 72, 71, null, 67, 64, 60, null, 64, 67, 69, null, 67, null],
@@ -682,12 +687,61 @@ function schedulePatternStep(
   }
 }
 
+export type NeonSurvivalMood = "start" | "horde" | "danger" | "boss" | "victory";
+let survivalMood: NeonSurvivalMood = "start";
+let scheduledSurvivalMood: NeonSurvivalMood = "start";
+export function setNeonSurvivalMood(mood: NeonSurvivalMood): void { survivalMood = mood; }
+
+function scheduleSurvivalStep(state: BrainBoostMusicState, step: number, at: number): void {
+  const pos = step % 16, bar = Math.floor(step / 16) % 4;
+  // Layer changes occur at bar boundaries, with note envelopes providing crossfades.
+  if (pos === 0) scheduledSurvivalMood = survivalMood;
+  const mood = scheduledSurvivalMood, c = state.context, out = state.envelope;
+  const roots = [26, 26, 29, 25], root = roots[bar];
+  if (pos % 4 === 0) {
+    cyberKick(c, out, at);
+    cyberTone(c, out, root, at, .22, .065, "sawtooth");
+    cyberTone(c, out, root + 12, at + .012, .3, .022, "triangle");
+  }
+  if (pos === 4 || pos === 12) cyberNoise(c, out, at, .1, .022, 1900);
+  if (pos % 2 === 0 || mood === "boss") cyberNoise(c, out, at, .022, .004, 6500);
+  const riff: Array<number | null> = [50, null, 57, 53, null, 62, 57, null, 50, 53, null, 56, 57, null, 53, null];
+  const note = riff[pos];
+  if (note !== null && mood !== "start") cyberTone(c, out, note + (root - 26), at, .1, .025, "square");
+  if (pos === 0 || pos === 8) {
+    cyberTone(c, out, root + 24, at, .65, .012, "triangle");
+    cyberTone(c, out, root + 31, at, .65, .008, "sine");
+  }
+  if (mood === "danger" && pos % 4 === 2) cyberTone(c, out, 74 + (pos % 8 ? 1 : 0), at, .16, .02, "sine");
+  if (mood === "boss" && pos % 2 === 1) cyberTone(c, out, root + (pos % 4 === 1 ? 12 : 19), at, .075, .04, "sawtooth");
+  if (mood === "victory" && pos % 4 === 0) cyberTone(c, out, [62, 65, 69, 74][pos / 4], at, .3, .035, "triangle");
+}
+
+const survivalSfxTimes = new Map<string, number>();
+export function playNeonSurvivalSfx(kind: "machinegun" | "shotgun" | "flame" | "cascade" | "rail" | "pickup" | "impact" | "warning"): void {
+  if (!isBrainBoostAudioEnabled()) return;
+  const audio = getGraph(); if (!audio) return; resume(audio.context);
+  const c = audio.context, out = audio.effects, at = c.currentTime + .005;
+  const gap = kind === "warning" ? .4 : kind === "impact" ? .2 : .06;
+  if (at - (survivalSfxTimes.get(kind) ?? -Infinity) < gap) return;
+  survivalSfxTimes.set(kind, at);
+  if (kind === "machinegun") { cyberNoise(c, out, at, .035, .025, 2100); cyberTone(c, out, 38, at, .045, .025, "square"); }
+  else if (kind === "shotgun" || kind === "cascade") { cyberNoise(c, out, at, .18, .065, 850); cyberKick(c, out, at); }
+  else if (kind === "flame") cyberNoise(c, out, at, .15, .03, 1100);
+  else if (kind === "rail") { cyberTone(c, out, 86, at, .13, .045, "sawtooth"); cyberNoise(c, out, at, .08, .03, 3800); }
+  else if (kind === "impact") cyberNoise(c, out, at, .1, .035, 650);
+  else if (kind === "warning") cyberTone(c, out, 61, at, .2, .025, "triangle");
+  else { cyberTone(c, out, 76, at, .12, .03, "sine"); cyberTone(c, out, 83, at + .06, .16, .025, "sine"); }
+}
+
 function scheduleBrainBoostMusicStep(
   state: BrainBoostMusicState,
   step: number,
   at: number,
 ): void {
-  if (state.game === "memory-matrix") {
+  if (state.game === "neon-arena") {
+    scheduleSurvivalStep(state, step, at);
+  } else if (state.game === "memory-matrix") {
     scheduleCyberStep(state, step, at);
   } else {
     schedulePatternStep(state, step, at);
@@ -738,6 +792,7 @@ export function startBrainBoostMusic(game: BrainBoostGame): void {
       return;
     }
 
+    if (state.game === "neon-arena" && state.nextAt < context.currentTime - 0.2) state.nextAt = context.currentTime + 0.04;
     const horizon = context.currentTime + 0.12;
     while (state.nextAt < horizon) {
       scheduleBrainBoostMusicStep(state, state.step, state.nextAt);

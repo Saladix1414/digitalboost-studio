@@ -1,5 +1,7 @@
 # Neon Arena — integration audit and verification
 
+Historical V3 report. Current gameplay and verification: [V4 Alien Horde Survival](neon-arena-v4-survival.md).
+
 Date: 2026-10-25. Scope: received MASTER PROMPT V3.0, ending at section 19, “Escritorio: Arena”. The original visual reference was not attached to this session. Fidelity to that image and requirements beyond the supplied text cannot be certified.
 
 ## Repository evidence

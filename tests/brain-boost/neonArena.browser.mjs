@@ -32,20 +32,26 @@ try {
     await select(); await page.waitForSelector('[data-neon-phase="READY"]');
     assert.equal(await page.locator('.na-canvas canvas').count(), 1, 'StrictMode must leave one canvas');
     assert.equal(await page.evaluate(() => window.neonPendingFrames()), 1, 'one owned frame loop');
-    await page.getByRole('button', { name: 'Iniciar defensa →', exact: true }).click();
+    await page.getByRole('button', { name: 'Iniciar supervivencia →', exact: true }).click();
     await page.waitForSelector('[data-neon-phase="PLAYING"]');
     await page.waitForTimeout(1600);
     const canvas = await page.locator('.na-canvas canvas').elementHandle();
     if (mobile) {
       const bounds = await canvas.boundingBox();
       const cdp = await context.newCDPSession(page);
-      const x = bounds.x + bounds.width * .7, y = bounds.y + bounds.height * .65;
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x - 35, y: y - 20 }] });
+      const stick = await page.locator('[data-na-stick]').boundingBox();
+      const fire = await page.locator('[data-na-fire]').boundingBox();
+      const x = stick.x + stick.width / 2, y = stick.y + stick.height / 2;
+      const fx = fire.x + fire.width / 2, fy = fire.y + fire.height / 2;
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y, id: 1 }, { x: fx, y: fy, id: 2 }] });
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x + 35, y: y - 20, id: 1 }, { x: fx, y: fy, id: 2 }] });
+      await page.waitForTimeout(450);
+      assert.equal(await page.locator('[data-na-stick]').getAttribute('data-active'), 'true');
+      assert.equal(await page.locator('[data-na-fire]').getAttribute('data-active'), 'true');
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
       assert.equal(await canvas.evaluate(c => getComputedStyle(c).touchAction), 'none');
     } else {
-      await canvas.focus(); await page.keyboard.down('ArrowRight'); await page.waitForTimeout(250); await page.keyboard.up('ArrowRight');
+      await canvas.focus(); await page.keyboard.down('ArrowRight'); await page.keyboard.down('f'); await page.waitForTimeout(250); await page.keyboard.up('ArrowRight'); await page.keyboard.up('f');
     }
     await page.getByRole('button', { name: 'Pausa', exact: true }).click();
     await page.waitForSelector('[data-neon-phase="PAUSED"]');
@@ -53,7 +59,7 @@ try {
     await page.waitForTimeout(1100); assert.equal(await page.locator('.na-footer').innerText(), frozen);
     await page.getByRole('button', { name: 'Reanudar partida', exact: true }).click();
     await page.getByRole('button', { name: /SHOCKWAVE/ }).click();
-    await page.waitForFunction(() => document.querySelector('.na-combat-bar button')?.disabled === true);
+    await page.waitForFunction(() => document.querySelector('.na-shock-button')?.disabled === true);
     assert.equal(await page.locator('.na-stage').evaluate(e => e.scrollWidth <= e.clientWidth), true);
     await page.screenshot({ path: `/tmp/neon-${mobile ? 'touch' : 'desktop'}-verified.png` });
     await page.getByRole('button', { name: 'Salir', exact: true }).click();

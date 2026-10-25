@@ -93,7 +93,7 @@ const categories: Category[] = [
     games: [
       { id: "targets", title: "Focus Protocol", description: "Identificá el objetivo correcto entre señales visuales.", area: "Atención" },
       { id: "signals", title: "Signal Hunt", description: "Encontrá la señal correcta entre distractores.", area: "Atención" },
-      { id: "neon-arena", title: "Neon Arena: Virus Survivor", description: "Defendé el reactor de enjambres de virus en una arena 3D. Acción y atención en tiempo real.", area: "Arcade / Atención" },
+      { id: "neon-arena", title: "Neon Arena: Virus Survivor", description: "Controlá a un marine, sobreviví a las hordas alienígenas y desbloqueá armas en combate 3D.", area: "Arcade / Atención" },
     ],
   },
   {
@@ -174,10 +174,11 @@ function GameMiniature({ id }: { id: string }) {
       >
         {kind === "arena" ? (
           <>
-            <path d="M9 47L60 22L111 47L60 71Z" stroke="#168bff" fill="#06142d" />
-            <ellipse cx="60" cy="44" rx="16" ry="7" stroke="#00f3ff" strokeWidth="2" />
-            <path d="M53 44V17L60 9L67 17V44M25 50L53 35M95 50L67 35" stroke="#00f3ff" strokeWidth="3" />
-            <path d="M23 36L28 41L23 46L18 41ZM96 32L101 37L96 42L91 37Z" fill="#ff1744" />
+            <ellipse cx="60" cy="39" rx="48" ry="30" fill="#152315" stroke="#6c8543" />
+            <path d="M52 46L55 34H65L68 46M55 46V55M65 46V55M65 35L83 20" stroke="#d5e4b8" strokeWidth="4" />
+            <circle cx="60" cy="28" r="6" fill="#9fdce6" />
+            <path d="M21 24L32 34L21 44M17 34H38M89 43L100 53L89 63M85 53H106M83 8L94 18L83 28M79 18H100" stroke="#c4a96c" strokeWidth="2" />
+            <ellipse cx="28" cy="34" rx="5" ry="8" fill="#9da15c" /><ellipse cx="96" cy="53" rx="5" ry="8" fill="#9da15c" />
           </>
         ) : kind === "memory" ? (
           <>
