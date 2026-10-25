@@ -393,12 +393,12 @@ export default function BrainBoostLandingSection() {
               ))}
             </div>
             <div className="mt-4 border-t border-white/10 pt-4">
-              <div data-brain-boost-nightmare="" className="relative w-full overflow-hidden rounded-xl border border-violet-300/50 bg-gradient-to-br from-violet-500/[0.24] via-violet-500/[0.12] to-fuchsia-500/[0.18] p-4 shadow-[0_0_24px_rgba(139,92,246,.13)]">
+              <div data-brain-boost-nightmare="" className="relative w-full overflow-hidden rounded-xl border border-violet-300/50 bg-gradient-to-br from-violet-500/[0.24] via-violet-500/[0.12] to-fuchsia-500/[0.18] p-4 lg:px-0 shadow-[0_0_24px_rgba(139,92,246,.13)]">
                 <button
                   type="button"
                   aria-describedby="nightmare-protocolo-label"
                   onClick={() => openCategory(nightmareCategory)}
-                  className="w-full rounded-lg border border-violet-200/40 bg-violet-300/[0.08] px-3 py-3 text-sm font-black text-violet-100 transition duration-200 hover:border-violet-200 hover:bg-violet-300/[0.16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 motion-reduce:transition-none"
+                  className="mx-auto block min-h-[66px] w-[206px] max-w-full rounded-lg border border-violet-200/40 bg-violet-300/[0.08] px-3 py-3 text-sm font-black text-violet-100 transition duration-200 hover:border-violet-200 hover:bg-violet-300/[0.16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 motion-reduce:transition-none"
                 >
                   Nightmare Protocolo
                 </button>

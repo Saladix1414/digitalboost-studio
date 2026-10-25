@@ -25,3 +25,10 @@ Se preserva la barra violeta de la referencia. El botón tiene foco visible y la
 - Regresión de disparo sostenido asistido desde la nueva entrada: PASS con ratón y táctil; modo Moderno táctil conserva apuntado manual.
 
 Las pruebas de navegador existentes de Neon Arena se actualizan para entrar desde Nightmare Protocolo. La prueba de integración verifica texto exacto, catálogo sin iniciar renderer, entrada única, lanzamiento/pausa/retorno, cancelación de RAF y liberación GPU, recuperación de contexto, apertura de Focus Protocol y acceso al Daily conservado.
+
+
+## Botón compacto
+
+Por pedido del usuario se conserva la barra violeta completa y se centra un botón compacto, con referencia a los modos superiores: 206 × 66 px en móvil, ajustado al espacio del sidebar en escritorio. La etiqueta permanece debajo. No cambia la navegación.
+
+Verificación de este ajuste visual: build PASS y medición real en Chromium a 390px (botón 206×66, barra 332px) y 1280px (botón 192×66, barra 194px). En ambas vistas se comprobó que el botón abre Nightmare Protocolo y su tarjeta de Neon Arena. Se mantiene el ancho completo de la barra, sin desbordes.
