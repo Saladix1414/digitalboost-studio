@@ -78,3 +78,23 @@ test('stress remains bounded and reproducible for seeded input; catch-up is capp
   const a = game(all), b = game(all); for (let i = 0; i < 12000; i++) { if (i % 90 === 0) { for (const s of [a, b]) { s.setInput(Math.cos(i), Math.sin(i), true); s.shock(); } } a.step(); b.step(); assert.ok(a.enemies.length <= a.maxEnemies); assert.ok(a.projectiles.length <= CONFIG.maxProjectiles); assert.ok(a.events.length <= CONFIG.maxEvents); assert.ok(a.pickups.length <= CONFIG.maxPickups); }
   assert.deepEqual(a.snapshot(), b.snapshot()); const clock = new FixedClock(); let ticks = 0; clock.advance(500, () => ticks++); assert.equal(ticks, 6); assert.ok(WEAPONS.rail.pierce <= 4);
 });
+test('boss phase two increases capped brood pressure and exposes a phase indicator', () => {
+  const counts: number[] = [];
+  for (const phaseTwo of [false, true]) {
+    const s = game(); const boss = createEnemy('brood', 9999, 9, 0); boss.speed = 0; boss.attackClock = 0; if (phaseTwo) boss.hp = boss.maxHp / 2;
+    s.enemies.push(boss); run(s, 1.2); counts.push(s.enemies.filter(e => e.kind === 'skitter').length); assert.equal(s.snapshot().boss?.phase, phaseTwo ? 2 : 1);
+  }
+  assert.equal(counts[1] - counts[0], 2);
+});
+test('Maw armor has an explicit vulnerability window rather than requiring its own locked reward', () => {
+  const health: number[] = [];
+  for (const exposed of [false, true]) {
+    const s = game(); const boss = createEnemy('maw', 9999, 3, 3); boss.speed = 0; boss.hp = 1000; boss.warning = exposed ? 1 : 0; s.enemies.push(boss); s.shock(); run(s, .3); health.push(boss.hp);
+  }
+  assert.equal(health[0], 968.5); assert.equal(health[1], 910);
+});
+test('ranged attacks have a wind-up and preserve the announced attack direction', () => {
+  const s = game(); const e = createEnemy('spitter', 9999, 8, 3); e.attackClock = 0; e.speed = 0; s.enemies.push(e);
+  run(s, .4); assert.equal(s.projectiles.filter(b => b.hostile).length, 0); assert.ok(e.warning > 0);
+  s.player.z = 10; run(s, .6); const bullet = s.projectiles.find(b => b.hostile); assert.ok(bullet); assert.ok(bullet.vx < 0); assert.ok(Math.abs(bullet.vz) < .001);
+});

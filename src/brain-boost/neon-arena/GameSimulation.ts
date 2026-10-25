@@ -48,7 +48,7 @@ export class GameSimulation {
   cooldowns: Record<WeaponId, number> = { machinegun: 0, shotgun: 0, flame: 0, cascade: 0, rail: 0 };
   cooldown = 0; shockAge = -1; shockOrigin = { x: 0, z: 0 };
   private shockHits = new Set<number>(); private grid = new EnemyGrid(); private nextId = 1;
-  private seed: number; private spawned = 0; private spawnClock = .7; private transitionClock = 0; private bossSpawned = false;
+  private seed: number; private spawned = 0; private spawnClock = .3; private transitionClock = 0; private bossSpawned = false;
   private resumePhase: 'PLAYING' | 'WAVE_TRANSITION' = 'PLAYING';
   private input = { x: 0, z: 0, firing: false }; private aim: number | null = null;
   private explosions: { x: number; z: number; delay: number; damage: number; radius: number }[] = [];
@@ -109,6 +109,7 @@ export class GameSimulation {
     if (this.enemies.length >= this.maxEnemies) return false;
     const a = this.random() * Math.PI * 2;
     let x = Math.cos(a) * 20, z = Math.sin(a) * 20;
+    if (!origin && this.wave === 1 && this.spawned < 6) { x = Math.cos(a) * 11; z = Math.sin(a) * 11; }
     if (origin) { x = Math.max(-20, Math.min(20, origin.x + Math.cos(a) * 3)); z = Math.max(-20, Math.min(20, origin.z + Math.sin(a) * 3)); }
     if (Math.hypot(x - this.player.x, z - this.player.z) < 6) { x = -Math.sign(this.player.x || 1) * 20; z = -Math.sign(this.player.z || 1) * 18; }
     if (OBSTACLES.some(o => Math.hypot(x - o.x, z - o.z) < o.radius + 2)) { x = 20; z = -18; }
@@ -151,13 +152,13 @@ export class GameSimulation {
     e.attackClock -= dt;
     const ranged = e.kind === 'spitter' || e.kind === 'sovereign';
     const charger = e.kind === 'stalker' || e.kind === 'maw';
-    if ((ranged || charger || e.kind === 'brood') && e.attackClock <= 0 && e.warning <= 0) { e.warning = .9; e.aimX = dx / d; e.aimZ = dz / d; }
+    if ((ranged || charger || e.kind === 'brood') && e.attackClock <= 0 && e.warning <= 0) { e.warning = e.boss && e.hp <= e.maxHp / 2 ? .7 : .9; e.aimX = dx / d; e.aimZ = dz / d; }
     if (e.warning > 0) {
       e.warning -= dt;
       if (e.warning <= 0) {
-        if (e.kind === 'brood') { for (let i = 0; i < 4; i++) this.spawn('skitter', e); }
+        if (e.kind === 'brood') { for (let i = 0; i < (e.hp <= e.maxHp / 2 ? 6 : 4); i++) this.spawn('skitter', e); }
         if (ranged) { const angle = Math.atan2(e.aimZ, e.aimX), n = e.boss ? (e.hp < e.maxHp / 2 ? 9 : 5) : 1; for (let i = 0; i < n; i++) this.projectile(e.x, e.z, angle + (i - (n - 1) / 2) * .2, 'machinegun', true, e.damage); }
-        e.attackClock = charger ? .38 : e.boss ? 3.8 : 2.7;
+        e.attackClock = charger ? .38 : e.boss ? (e.hp <= e.maxHp / 2 ? 2.8 : 3.8) : 2.7;
       } else return;
     }
     const charging = charger && e.attackClock < .38 && e.attackClock > 0;
@@ -167,6 +168,13 @@ export class GameSimulation {
       if (other.id === e.id) continue;
       const ox = e.x - other.x, oz = e.z - other.z, od = Math.hypot(ox, oz), separation = e.radius + other.radius + .15;
       if (od > .01 && od < separation) { vx += ox / od * (separation - od) * 3; vz += oz / od * (separation - od) * 3; }
+    }
+    if (!charging) for (const obstacle of OBSTACLES) {
+      const ox = e.x - obstacle.x, oz = e.z - obstacle.z;
+      if (Math.hypot(ox + vx * .25, oz + vz * .25) < obstacle.radius + e.radius + .25) {
+        const side = ox * dz - oz * dx >= 0 ? 1 : -1, n = Math.max(.01, Math.hypot(ox, oz));
+        vx = -oz / n * side * e.speed; vz = ox / n * side * e.speed; break;
+      }
     }
     e.x += vx * dt; e.z += vz * dt; this.resolveObstacles(e, e.radius);
     if (Math.hypot(this.player.x - e.x, this.player.z - e.z) < e.radius + .5) this.hurt(e.damage);
