@@ -1,5 +1,7 @@
 # Neon Arena V4.1 — cover, supplies and full-run verification
 
+Continuation: [V4.2 local cooperative split-screen](neon-arena-v4-2-coop.md).
+
 Date: 2026-10-25. Base: V4 tree at `14e8d21`. Branch: `feat/neon-arena-v4-balance`. This continues the accepted V4 master; no second game, backend, runtime dependency, rendering engine, multiplayer system or remote publication was introduced.
 
 ## Changes and evidence

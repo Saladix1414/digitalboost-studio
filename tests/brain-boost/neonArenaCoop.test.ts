@@ -73,3 +73,18 @@ test('two gamepads keep stable seats, dead zones and edge-triggered abilities ac
   sample = pads.sample([b], 2); assert.equal(sample.disconnected, true); assert.equal(pads.slots[0], null); assert.equal(pads.slots[1], 7); assert.equal(sample.inputs[0].firing, false);
   pads.sample([a, b], 2); assert.deepEqual(pads.slots, [2, 7]);
 });
+test('spawn locations stay clear of both marines and co-op bosses use bounded team scaling', () => {
+  const s = coop(); s.players[0].x = 20; s.players[0].z = 0; s.players[1].x = -20; s.players[1].z = 0;
+  for (let i = 0; i < 600 && s.phase === 'PLAYING'; i++) { s.step(); for (const e of s.enemies) if (e.state === 'SPAWNING' && e.age <= CONFIG.step * 1.01) for (const p of s.players) if (p.health > 0) assert.ok(Math.hypot(e.x - p.x, e.z - p.z) >= 6); }
+  const hp: number[] = [];
+  for (const count of [1, 2] as const) {
+    const game = new GameSimulation(72, null, 120, count); game.ready(); game.start(); game.wave = 5;
+    for (let i = 0; i < 1800 && !game.enemies.some(e => e.boss); i++) { for (const e of game.enemies) e.state = 'REMOVED'; game.step(); }
+    const boss = game.enemies.find(e => e.boss); assert.ok(boss); hp.push(boss.maxHp);
+  }
+  assert.deepEqual(hp, [700, 1050]);
+});
+test('pausing a shared match freezes both resources and invalid player IDs have no authority', () => {
+  const s = coop(); s.setInput(1, 0, true, null, 0); s.setInput(0, -1, true, null, 1); run(s, .5); s.shock(0); s.shock(1); s.pause();
+  const before = JSON.stringify(s); run(s, 10); s.setInput(1, 0, true, null, 1); s.setInput(1, 0, true, null, 100); assert.equal(s.shock(100), false); assert.equal(s.equip('rail', 100), false); assert.equal(JSON.stringify(s), before);
+});
