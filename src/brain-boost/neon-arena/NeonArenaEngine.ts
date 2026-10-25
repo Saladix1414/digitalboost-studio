@@ -53,6 +53,7 @@ export class NeonArenaEngine {
       const i = this.world.viewports.findIndex(v => x >= v.x && x < v.x + v.width && y >= v.y && y < v.y + v.height); return Math.max(0, i);
     };
     const aimAt = (e: PointerEvent, playerId: number) => {
+      if (this.modes[playerId] !== 'modern') return;
       const rect = canvas.getBoundingClientRect(), view = this.world.viewports[playerId], p = this.simulation.players[playerId];
       if (!view?.width || !view.height || !p) return;
       this.pointer.set((e.clientX - rect.left - view.x) / view.width * 2 - 1, -(e.clientY - rect.top - view.y) / view.height * 2 + 1);
@@ -81,7 +82,7 @@ export class NeonArenaEngine {
       if (active?.kind === 'stick') {
         const dx = e.clientX - active.x, dz = e.clientY - active.y, distance = Math.max(38, Math.hypot(dx, dz)), input = this.inputs[active.playerId]; input.x = dx / distance; input.z = dz / distance;
         active.element.style.setProperty('--stick-x', `${input.x * 24}px`); active.element.style.setProperty('--stick-y', `${input.z * 24}px`);
-      } else if (active?.element.hasAttribute('data-na-fire') && this.modes[active.playerId] !== 'classic') {
+      } else if (active?.element.hasAttribute('data-na-fire') && this.modes[active.playerId] === 'modern') {
         const dx = e.clientX - active.x, dz = e.clientY - active.y; const input = this.inputs[active.playerId], d = Math.hypot(dx, dz); input.aim = d > 8 ? Math.atan2(dz, dx) : null; active.element.style.setProperty('--stick-x', `${dx / Math.max(38, d) * 20}px`); active.element.style.setProperty('--stick-y', `${dz / Math.max(38, d) * 20}px`);
       } else if (e.pointerType === 'mouse') aimAt(e, active?.playerId ?? playerAt(e));
     }) as EventListener);
@@ -140,10 +141,10 @@ export class NeonArenaEngine {
       const pads = this.pads.sample(rawPads, this.simulation.players.length);
       if (pads.disconnected && ['PLAYING', 'WAVE_TRANSITION'].includes(this.simulation.phase)) this.pause();
       else if (pads.inputs.some(p => p.pause)) this.togglePause();
-      pads.inputs.forEach((p, i) => { if (p.shock) this.simulation.shock(i); if (p.cycle) this.cycle(i); if (p.aim !== null || p.firing && this.modes[i] === 'assisted') this.inputs[i].aim = p.aim; });
+      pads.inputs.forEach((p, i) => { if (p.shock) this.simulation.shock(i); if (p.cycle) this.cycle(i); if (this.modes[i] === 'modern' && p.aim !== null) this.inputs[i].aim = p.aim; });
       const s = this.simulation;
       this.clock.advance(delta, () => {
-        s.players.forEach((p, i) => { const key = keyboardInput(this.keys, i, s.players.length), input = this.inputs[i], pad = pads.inputs[i]; s.setInput(key.x + input.x + pad.x, key.z + input.z + pad.z, key.firing || input.mouseFire || input.touchFire || pad.firing, this.modes[i] === 'classic' || this.modes[i] === 'assisted' && !input.mouseFire && !input.touchFire && pad.aim === null ? null : input.aim, i); });
+        s.players.forEach((p, i) => { const key = keyboardInput(this.keys, i, s.players.length), input = this.inputs[i], pad = pads.inputs[i]; s.setInput(key.x + input.x + pad.x, key.z + input.z + pad.z, key.firing || input.mouseFire || input.touchFire || pad.firing, this.modes[i] === 'modern' ? input.aim : null, i); });
         s.step(); if (s.progressRevision !== this.progressRevision) { this.progressRevision = s.progressRevision; this.options.onProgress?.(s.progress); }
       });
       for (const e of s.events) if (e.id > this.lastEvent) { this.options.onCue?.(e); this.lastEvent = e.id; }
