@@ -151,7 +151,10 @@ export class NeonArenaEngine {
       const delta = this.lastTime ? (time - this.lastTime) / 1000 : 0; this.lastTime = time;
       if (document.hidden) { this.clock.reset(); this.raf = requestAnimationFrame(this.frame); return; }
       this.badFrames = !['PLAYING', 'WAVE_TRANSITION'].includes(this.simulation.phase) ? 0 : delta > .03 ? this.badFrames + 1 : Math.max(0, this.badFrames - 1);
-      if (this.badFrames > 100 && this.resolution > .65) { this.resolution *= .8; this.disposeComposer(); this.resize(); this.badFrames = 0; }
+      // Mobile GPUs can fall behind only when a horde and effects overlap;
+      // lower DPR before the browser starts dropping touch frames. Never
+      // reduce below a readable 60% internal resolution.
+      if (this.badFrames > 72 && this.resolution > .6) { this.resolution = Math.max(.6, this.resolution * .82); this.disposeComposer(); this.resize(); this.badFrames = 0; }
       let rawPads: (Gamepad | null)[] = []; try { rawPads = [...(navigator.getGamepads?.() ?? [])]; } catch { /* Keyboard/touch stay available when the browser restricts gamepads. */ }
       const pads = this.pads.sample(rawPads, this.simulation.players.length);
       if (pads.disconnected && ['PLAYING', 'WAVE_TRANSITION'].includes(this.simulation.phase)) this.pause();
