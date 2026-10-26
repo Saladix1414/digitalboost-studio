@@ -2,10 +2,10 @@
 import assert from 'node:assert/strict';
 import { GameSimulation, CONFIG } from '../../src/brain-boost/neon-arena/GameSimulation.ts';
 import { LEGACY_ARENA } from '../../src/brain-boost/neon-arena/ArenaDefinition.ts';
-export function playthrough(seed, { seconds = 1200, maxEnemies = 120, useArsenal = true, classic = false, arena = LEGACY_ARENA, assisted = false, assistedEvasion = 1 } = {}) {
+export function playthrough(seed, { seconds = 1200, maxEnemies = 120, useArsenal = true, classic = false, arena = LEGACY_ARENA, assisted = false, assistedEvasion = 1, targetWave = 16 } = {}) {
   const s = new GameSimulation(seed, null, maxEnemies, 1, arena); s.ready(); s.start(); if (assisted) s.setAimMode('assisted');
   const trace = []; let lastWave = 0, lastKillTick = 0, oldKills = 0;
-  for (let tick = 0; tick < 60 * seconds && s.phase !== 'GAME_OVER' && s.wave < 16; tick++) {
+  for (let tick = 0; tick < 60 * seconds && s.phase !== 'GAME_OVER' && s.wave < targetWave; tick++) {
     if (s.phase === 'WAVE_TRANSITION') { s.step(); continue; }
     const p = s.player, enemies = s.enemies.filter(e => e.state === 'ADVANCING');
     const distance = e => Math.hypot(e.x - p.x, e.z - p.z);

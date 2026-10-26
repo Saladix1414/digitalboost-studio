@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { DEFAULT_ARENA, LEGACY_ARENA } from '../../src/brain-boost/neon-arena/ArenaDefinition.ts';
 import { GameSimulation } from '../../src/brain-boost/neon-arena/GameSimulation.ts';
-import { firstBlockTime } from '../../src/brain-boost/neon-arena/SurvivalRules.ts';
+import { firstBlockTime, isBossWave, nextBossEncounter } from '../../src/brain-boost/neon-arena/SurvivalRules.ts';
 import { playthrough } from './neonArena.playthrough.mjs';
 test('default colony defines a shared immutable 50x50 arena while legacy stays 42x42',()=>{
  assert.equal(DEFAULT_ARENA.halfExtent*2,50);assert.equal(LEGACY_ARENA.halfExtent*2,42);
@@ -21,6 +21,14 @@ test('expanded spawn positions remain inside the map and away from both living m
  for(let i=0;i<180;i++)s.step();
  assert.ok(s.enemies.length>0);for(const e of s.enemies){assert.ok(Math.abs(e.x)<=25&&Math.abs(e.z)<=25);if(e.state==='SPAWNING')for(const p of s.players)assert.ok(Math.hypot(e.x-p.x,e.z-p.z)>=6)}
 });
+test('colony boss cadence gives the new weapons breathing room after wave five',()=>{
+ assert.deepEqual([5,12,20,29,39,50].map(w=>isBossWave(w,DEFAULT_ARENA)),[true,true,true,true,true,true]);
+ assert.equal(isBossWave(10,DEFAULT_ARENA),false); assert.equal(isBossWave(15,DEFAULT_ARENA),false);
+ assert.equal(nextBossEncounter(5,true,DEFAULT_ARENA).wave,12);
+ assert.equal(nextBossEncounter(12,true,DEFAULT_ARENA).wave,20);
+ assert.equal(nextBossEncounter(16,false,DEFAULT_ARENA).wave,20);
+ assert.equal(nextBossEncounter(5,true,LEGACY_ARENA).wave,10);
+});
 test('actual default colony + assisted input-only pilots reach all three bosses without cheats',()=>{
  // Floating-point trajectories can diverge between ARM64 and x64. Use a fixed
  // portfolio of ordinary evasive input policies, not one lucky exact trajectory.
@@ -28,13 +36,13 @@ test('actual default colony + assisted input-only pilots reach all three bosses 
  let winner;
  const attempts=[];
  for(const assistedEvasion of [1,1.4,3]) {
-  const options={arena:DEFAULT_ARENA,assisted:true,assistedEvasion};
+  const options={arena:DEFAULT_ARENA,assisted:true,assistedEvasion,targetWave:21};
   const result=playthrough(42819,options);attempts.push({assistedEvasion,...result});
-  if(result.wave===16){winner={options,result};break;}
+  if(result.wave===21&&result.bosses===3&&result.health>0&&result.time<780){winner={options,result};break;}
  }
  assert.ok(winner,`No input-only policy completed the colony: ${JSON.stringify(attempts)}`);
  const {options,result}=winner;
- assert.equal(result.wave,16);assert.equal(result.bosses,3);assert.ok(result.health>0);assert.ok(result.time<600);assert.equal(result.stalled,undefined);
+ assert.equal(result.wave,21);assert.equal(result.bosses,3);assert.ok(result.health>0);assert.ok(result.time<780);assert.equal(result.stalled,undefined);
  assert.deepEqual(result.unlocked,['machinegun','shotgun','flame','cascade','rail']);assert.deepEqual(playthrough(42819,options),result);assert.deepEqual(playthrough(42819,{...options,maxEnemies:240}),result);
 });
 test('assisted campaign portfolio tolerates last-bit distance rounding',()=>{
@@ -44,8 +52,8 @@ test('assisted campaign portfolio tolerates last-bit distance rounding',()=>{
   Math.hypot=(...values:number[])=>hypot(...values)*(1+Number.EPSILON);
   const results=[];
   for(const assistedEvasion of [1,1.4,3]) {
-   const result=playthrough(42819,{arena:DEFAULT_ARENA,assisted:true,assistedEvasion});results.push(result);
-   if(result.wave===16&&result.bosses===3&&result.health>0&&result.time<600)return;
+  const result=playthrough(42819,{arena:DEFAULT_ARENA,assisted:true,assistedEvasion,targetWave:21});results.push(result);
+   if(result.wave===21&&result.bosses===3&&result.health>0&&result.time<780)return;
   }
   assert.fail(`Distance-rounding regression: ${JSON.stringify(results)}`);
  } finally { Math.hypot=hypot; }

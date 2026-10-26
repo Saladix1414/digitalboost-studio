@@ -1,5 +1,5 @@
 import { LEGACY_ARENA, type ArenaDefinition } from './ArenaDefinition.ts';
-import { BOSSES, WEAPONS, bossForWave, firstBlockTime, nextBossEncounter, normalizeProgress, segmentCircleEntry, supplyForRoll, type PickupKind, type Progress, type WeaponId } from './SurvivalRules.ts';
+import { BOSSES, WEAPONS, bossForWave, firstBlockTime, isBossWave, nextBossEncounter, normalizeProgress, segmentCircleEntry, supplyForRoll, type PickupKind, type Progress, type WeaponId } from './SurvivalRules.ts';
 import { interceptAngle, selectAimTarget, type AimMode } from './AimAssist.ts';
 export type Phase = 'LOADING' | 'READY' | 'PLAYING' | 'PAUSED' | 'WAVE_TRANSITION' | 'GAME_OVER' | 'ERROR' | 'DISPOSED';
 export type EnemyKind = 'skitter' | 'carapace' | 'spitter' | 'stalker' | 'brood' | 'maw' | 'sovereign';
@@ -295,7 +295,7 @@ export class GameSimulation {
     }
     this.spawnClock -= dt;
     if (this.spawned < this.waveSize && this.spawnClock <= 0 && this.spawn()) { this.spawned++; this.spawnClock = Math.max(.12, .42 - this.wave * .016); }
-    if (this.wave % 5 === 0 && !this.bossSpawned && this.spawned >= this.waveSize / 2) this.bossSpawned = this.spawn(bossForWave(this.wave));
+    if (isBossWave(this.wave, this.arena) && !this.bossSpawned && this.spawned >= this.waveSize / 2) this.bossSpawned = this.spawn(bossForWave(this.wave, this.arena));
     this.grid.rebuild(this.enemies);
     for (const e of this.enemies.slice()) { this.enemyStep(e, dt); if (this.phase === 'GAME_OVER') return; }
     this.grid.rebuild(this.enemies); for (const p of this.players) if (p.health > 0) {
@@ -324,13 +324,13 @@ export class GameSimulation {
       item.life = -1; this.emit('pickup', item.x, item.z, undefined, undefined, recipient.id);
     }
     this.pickups = this.pickups.filter(i => i.life > 0); this.enemies = this.enemies.filter(e => e.state !== 'REMOVED');
-    if (this.spawned === this.waveSize && this.enemies.length === 0 && (this.wave % 5 !== 0 || this.bossSpawned)) { this.clearInput(); this.transitionClock = 2; for (const p of this.players) p.shockAge = -1; this.projectiles = []; this.transition('WAVE_TRANSITION'); }
+    if (this.spawned === this.waveSize && this.enemies.length === 0 && (!isBossWave(this.wave, this.arena) || this.bossSpawned)) { this.clearInput(); this.transitionClock = 2; for (const p of this.players) p.shockAge = -1; this.projectiles = []; this.transition('WAVE_TRANSITION'); }
   }
   snapshot() {
     const boss = this.enemies.find(e => e.boss && e.state !== 'DYING' && e.state !== 'REMOVED');
     const activeEnemies = this.enemies.filter(e => e.state === 'SPAWNING' || e.state === 'ADVANCING').length;
-    const pendingEnemies = Math.max(0, this.waveSize - this.spawned) + (this.wave % 5 === 0 && !this.bossSpawned ? 1 : 0);
-    const nextEncounter = nextBossEncounter(this.wave, this.bossSpawned && !boss);
+    const pendingEnemies = Math.max(0, this.waveSize - this.spawned) + (isBossWave(this.wave, this.arena) && !this.bossSpawned ? 1 : 0);
+    const nextEncounter = nextBossEncounter(this.wave, this.bossSpawned && !boss, this.arena);
     return { arena: this.arena.id, phase: this.phase, health: Math.ceil(this.health), score: this.score, wave: this.wave, kills: this.kills, elapsed: this.elapsed, cooldown: this.cooldown, weapon: this.equipped, ammo: this.ammo[this.equipped], unlocked: [...this.progress.unlocked], bossesKilled: this.bossesKilled, boss: boss ? { name: boss.kind as keyof typeof BOSSES, hp: boss.hp, maxHp: boss.maxHp, warning: boss.warning > 0, phase: boss.hp <= boss.maxHp / 2 ? 2 : 1 } : null, shield: this.player.shield, haste: this.player.haste, progressRevision: this.progressRevision, unlockedThisRun: [...this.unlockedThisRun], playerCount: this.players.length, marines: this.players.map(p => ({ id: p.id, health: Math.ceil(p.health), alive: p.health > 0, weapon: p.equipped, ammo: p.ammo[p.equipped], cooldown: p.cooldown, shield: p.shield, haste: p.haste })), activeEnemies, pendingEnemies, nextEncounter };
   }
   dispose() { this.transition('DISPOSED'); this.clearInput(); this.enemies = []; this.projectiles = []; this.pickups = []; this.events = []; this.explosions = []; for (const p of this.players) p.shockHits.clear(); this.grid.rebuild([]); }

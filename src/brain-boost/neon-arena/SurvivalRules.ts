@@ -1,4 +1,4 @@
-import { LEGACY_ARENA } from './ArenaDefinition.ts';
+import { LEGACY_ARENA, type ArenaDefinition } from './ArenaDefinition.ts';
 export type WeaponId = 'machinegun' | 'shotgun' | 'flame' | 'cascade' | 'rail';
 export const WEAPONS: Record<WeaponId, { name: string; interval: number; damage: number; speed: number; life: number; pellets: number; spread: number; pierce: number; reserve: number }> = {
   machinegun: { name: 'Ametralladora', interval: .105, damage: 18, speed: 37, life: .9, pellets: 1, spread: .035, pierce: 1, reserve: 0 },
@@ -41,13 +41,31 @@ export const BOSSES = {
   maw: { name: 'IRON MAW', reward: 'cascade' },
   sovereign: { name: 'HIVE SOVEREIGN', reward: 'rail' },
 } as const;
-export function bossForWave(wave: number): keyof typeof BOSSES {
+const EXTENDED_BOSS_START = 5;
+export function isBossWave(wave: number, arena: ArenaDefinition = LEGACY_ARENA) {
+  if (!Number.isSafeInteger(wave) || wave < EXTENDED_BOSS_START) return false;
+  if (arena.id === 'legacy') return wave % 5 === 0;
+  let encounter = EXTENDED_BOSS_START, gap = 7;
+  while (encounter < wave) { encounter += gap; gap++; }
+  return encounter === wave;
+}
+function colonyBossIndex(wave: number) {
+  let encounter = EXTENDED_BOSS_START, gap = 7, index = 0;
+  while (encounter < wave) { encounter += gap; gap++; index++; }
+  return index;
+}
+export function bossForWave(wave: number, arena: ArenaDefinition = LEGACY_ARENA): keyof typeof BOSSES {
+  if (arena.id === 'colony') return (['brood', 'maw', 'sovereign'] as const)[colonyBossIndex(wave) % 3];
   return wave % 15 === 0 ? 'sovereign' : wave % 10 === 0 ? 'maw' : 'brood';
 }
-export function nextBossEncounter(wave: number, clearedCurrent = false) {
+export function nextBossEncounter(wave: number, clearedCurrent = false, arena: ArenaDefinition = LEGACY_ARENA) {
   const safeWave = Number.isSafeInteger(wave) && wave > 0 ? wave : 1;
-  const encounterWave = safeWave % 5 === 0 && clearedCurrent ? safeWave + 5 : Math.ceil(safeWave / 5) * 5;
-  const kind = bossForWave(encounterWave);
+  let encounterWave: number;
+  if (arena.id === 'colony') {
+    encounterWave = EXTENDED_BOSS_START; let gap = 7;
+    while (encounterWave < safeWave || encounterWave === safeWave && clearedCurrent) { encounterWave += gap; gap++; }
+  } else encounterWave = safeWave % 5 === 0 && clearedCurrent ? safeWave + 5 : Math.ceil(safeWave / 5) * 5;
+  const kind = bossForWave(encounterWave, arena);
   return { wave: encounterWave, kind, ...BOSSES[kind] };
 }
 
