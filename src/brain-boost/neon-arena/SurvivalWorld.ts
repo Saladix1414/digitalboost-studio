@@ -14,7 +14,7 @@ export class SurvivalWorld {
   private gun = new THREE.Group(); private boots: THREE.Mesh[] = []; private suit!: THREE.MeshStandardMaterial;
   private body!: THREE.InstancedMesh; private heads!: THREE.InstancedMesh; private legs!: THREE.InstancedMesh; private plates!: THREE.InstancedMesh;
   private bossParts!: THREE.InstancedMesh;
-  private thoraxes!: THREE.InstancedMesh; private feelers!: THREE.InstancedMesh; private eyes!: THREE.InstancedMesh; private elytra!: THREE.InstancedMesh; private reticles!: THREE.InstancedMesh; private fragments!: THREE.InstancedMesh;
+  private thoraxes!: THREE.InstancedMesh; private feelers!: THREE.InstancedMesh; private eyes!: THREE.InstancedMesh; private elytra!: THREE.InstancedMesh; private cores!: THREE.InstancedMesh; private fangs!: THREE.InstancedMesh; private reticles!: THREE.InstancedMesh; private fragments!: THREE.InstancedMesh;
   private items!: THREE.InstancedMesh; private crosses!: THREE.InstancedMesh; private bullets!: THREE.InstancedMesh; private warnings!: THREE.InstancedMesh;
   private stains!: THREE.InstancedMesh; private blasts!: THREE.InstancedMesh; private trails!: THREE.LineSegments; private flame!: THREE.Mesh; private shock!: THREE.Mesh;
   private torch = new THREE.PointLight(0xbde9cf, 12, 14, 1.8); private flash = new THREE.PointLight(0xff9c35, 0, 9, 2);
@@ -174,6 +174,8 @@ export class SurvivalWorld {
     this.feelers = this.pool(box, this.standard(0xd9c695), CONFIG.maxEnemies * 6);
     this.eyes = this.pool(sphere, this.mat(new THREE.MeshBasicMaterial({ color: 0xffffff })), CONFIG.maxEnemies * 4);
     this.elytra = this.pool(sphere, this.mat(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .38, metalness: .25 })), CONFIG.maxEnemies * 2);
+    this.cores = this.pool(sphere, this.mat(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .28, metalness: .08, emissive: 0xffffff, emissiveIntensity: .85 })), CONFIG.maxEnemies);
+    this.fangs = this.pool(this.geo(new THREE.ConeGeometry(1, 1, 5)), this.mat(new THREE.MeshStandardMaterial({ color: 0xe6d9b1, roughness: .45, metalness: .05 })), CONFIG.maxEnemies * 2);
     this.reticles = this.pool(this.geo(new THREE.RingGeometry(.85, 1, 24)), this.mat(new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .8, side: THREE.DoubleSide, depthWrite: false })), 2);
     this.fragments = this.pool(this.geo(new THREE.TetrahedronGeometry(1)), this.mat(new THREE.MeshBasicMaterial({ color: 0xffffff })), CONFIG.maxEvents * 6);
     this.plates = this.pool(this.geo(new THREE.ConeGeometry(1, 1, 5)), metal, CONFIG.maxEnemies * 3);
@@ -231,7 +233,7 @@ export class SurvivalWorld {
     this.finish(this.contact, shadows);
     const steamPosition = this.steam.geometry.getAttribute('position') as THREE.BufferAttribute;
     for (let i = 0; i < 32; i++) { const side = i % 4, a = side * Math.PI / 2, along = Math.sin(Math.floor(i / 4) * 3.9) * (this.arena.wall - 1), rise = this.reduced ? (i % 5) * .2 : (t * .35 + i * .17) % 2; steamPosition.setXYZ(i, Math.cos(a) * along - Math.sin(a) * (this.arena.wall - .8) + Math.sin(i + rise) * .25, .4 + rise, -Math.sin(a) * along - Math.cos(a) * (this.arena.wall - .8)); } steamPosition.needsUpdate = true;
-    let count = 0, lc = 0, pc = 0, wc = 0, bossCount = 0, fc = 0, ec = 0, shellCount = 0;
+    let count = 0, lc = 0, pc = 0, wc = 0, bossCount = 0, fc = 0, fangCount = 0, ec = 0, shellCount = 0;
     for (const e of s.enemies) {
       const scale = e.state === 'DYING' ? Math.max(.01, 1 - e.age / .35) : e.state === 'SPAWNING' ? Math.min(1, e.age / .65) : 1;
       const target = s.nearestPlayer(e.x, e.z);
@@ -250,6 +252,13 @@ export class SurvivalWorld {
       this.thoraxes.setColorAt(count, this.color.setHex(flash ? 0xfff3d3 : beetle ? 0x544733 : 0x655b3b));
       part(this.heads, count, 0, .57, 1.02, mantis ? .7 : .48, .36, mantis ? .3 : .48);
       this.heads.setColorAt(count, this.color.setHex(flash ? 0xffffff : beetle ? 0xb49a65 : 0xc9b282));
+      const coreColor = flash ? 0xffffff : acid ? (e.kind === 'brood' ? 0xd6ff55 : 0x9dff62) : mantis ? 0xff4b55 : e.boss ? 0xf08cff : 0xffbd52;
+      part(this.cores, count, 0, e.boss ? .74 : .7, acid ? .82 : .96, e.boss ? .26 : acid ? .18 : .14, e.boss ? .3 : .16, e.boss ? .26 : .14);
+      this.cores.setColorAt(count, this.color.setHex(coreColor));
+      for (const side of [-1, 1]) {
+        const jaw = mantis || beetle;
+        if (jaw) this.instance(this.fangs, fangCount++, e.x + Math.cos(a) * side * r * .2 + Math.sin(a) * r * 1.48, r * .42, e.z - Math.sin(a) * side * r * .2 + Math.cos(a) * r * 1.48, r * (mantis ? .11 : .16), r * (mantis ? .42 : .28), r * .11, a + side * .38, mantis ? -.35 : -.15);
+      }
       for (const side of [-1, 1]) {
         // Bright compound eyes remain readable against the dark floor.
         part(this.eyes, ec, side * (mantis ? .5 : .3), .78, 1.27, .13, .12, .16);
@@ -286,7 +295,7 @@ export class SurvivalWorld {
       }
       if (e.warning > 0) { this.instance(this.warnings, wc++, e.x, .09, e.z, r * 1.8, r * 1.8, r * 1.8, 0, -Math.PI / 2); }
     }
-    this.finish(this.body, count, true); this.finish(this.heads, count, true); this.finish(this.legs, lc); this.finish(this.plates, pc); this.finish(this.warnings, wc);
+    this.finish(this.body, count, true); this.finish(this.heads, count, true); this.finish(this.cores, count, true); this.finish(this.fangs, fangCount); this.finish(this.legs, lc); this.finish(this.plates, pc); this.finish(this.warnings, wc);
     this.finish(this.bossParts, bossCount, true); this.finish(this.thoraxes, count, true); this.finish(this.feelers, fc); this.finish(this.eyes, ec, true); this.finish(this.elytra, shellCount, true);
     let rc = 0;
     for (const p of s.players) {
