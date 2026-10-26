@@ -282,8 +282,9 @@ export class SurvivalWorld {
       const r = e.radius * scale * visualScale, a = Math.atan2(target.x - e.x, target.z - e.z);
       this.instance(this.enemyShadows, shadowCount++, e.x, .025, e.z, r * 1.3, r * .42, r * 1.3, a, -Math.PI / 2);
       const skitter = e.kind === 'skitter', beetle = e.kind === 'carapace' || e.kind === 'maw', mantis = e.kind === 'stalker', acid = e.kind === 'spitter' || e.kind === 'brood';
+      const bossPhase = e.boss && e.hp <= e.maxHp / 2 ? 2 : 1;
       const flash = !this.reduced && e.hitFlash > 0;
-      const color = flash ? 0xfff3d3 : e.burn > 0 ? 0xe68524 : beetle ? 0x6d1f35 : acid ? 0x287d4c : mantis ? 0x8b2456 : e.boss ? 0x64247e : skitter ? 0x9b4b28 : 0x754034;
+      const color = flash ? 0xfff3d3 : e.burn > 0 ? 0xe68524 : e.boss && bossPhase === 2 ? 0x9e315e : beetle ? 0x6d1f35 : acid ? 0x287d4c : mantis ? 0x8b2456 : e.boss ? 0x64247e : skitter ? 0x9b4b28 : 0x754034;
       const part = (pool: THREE.InstancedMesh, index: number, lx: number, y: number, lz: number, sx: number, sy: number, sz: number, turn = 0) => {
         this.instance(pool, index, e.x + Math.cos(a) * lx * r + Math.sin(a) * lz * r, y * r, e.z - Math.sin(a) * lx * r + Math.cos(a) * lz * r, sx * r, sy * r, sz * r, a + turn);
       };
@@ -298,7 +299,7 @@ export class SurvivalWorld {
       this.thoraxes.setColorAt(count, this.color.setHex(flash ? 0xfff3d3 : beetle ? 0x351522 : acid ? 0x17452c : mantis ? 0x3d1437 : skitter ? 0x542314 : 0x3e2524));
       part(this.heads, count, 0, .57 + bob * 1.15, 1.02, mantis ? .7 : skitter ? .36 : .48, mantis ? .36 : skitter ? .27 : .36, mantis ? .3 : skitter ? .34 : .48, -twist);
       this.heads.setColorAt(count, this.color.setHex(flash ? 0xffffff : beetle ? 0x8e2842 : acid ? 0x58b83d : mantis ? 0xc23567 : skitter ? 0xc06b31 : 0xa64f38));
-      const coreColor = flash ? 0xffffff : acid ? (e.kind === 'brood' ? 0xd6ff55 : 0x9dff62) : mantis ? 0xff4b55 : e.boss ? 0xf08cff : 0xffbd52;
+      const coreColor = flash ? 0xffffff : e.boss && bossPhase === 2 ? 0xfff06a : acid ? (e.kind === 'brood' ? 0xd6ff55 : 0x9dff62) : mantis ? 0xff4b55 : e.boss ? 0xf08cff : 0xffbd52;
       part(this.cores, count, 0, e.boss ? .74 : .7, acid ? .82 : .96, e.boss ? .26 : acid ? .18 : .14, e.boss ? .3 : .16, e.boss ? .26 : .14);
       this.cores.setColorAt(count, this.color.setHex(coreColor));
       if (acid) {
@@ -352,11 +353,13 @@ export class SurvivalWorld {
         this.plates.setColorAt(pc - 1, this.color.setHex(flash ? 0xffffff : stalkerBlade ? 0xc23567 : spitterCrest ? 0x75e84e : e.boss ? 0x8d3151 : 0x4a2930));
       }
       if (e.boss) for (let j = 0; j < 6; j++) {
-        const angle = j * Math.PI / 3 + (e.kind === 'sovereign' && !this.reduced ? t * .7 : a);
-        const distance = r * (e.kind === 'sovereign' ? 1.85 : 1.1);
+        const bossPhase = e.hp <= e.maxHp / 2 ? 2 : 1;
+        const phasePulse = bossPhase === 2 && !this.reduced ? 1 + Math.sin(t * 9 + j) * .1 : 1;
+        const angle = j * Math.PI / 3 + (e.kind === 'sovereign' && !this.reduced ? t * (bossPhase === 2 ? 1.25 : .7) : a);
+        const distance = r * (e.kind === 'sovereign' ? (bossPhase === 2 ? 2.25 : 1.85) : (bossPhase === 2 ? 1.35 : 1.1));
         const jaw = e.kind === 'maw';
-        this.instance(this.bossParts, bossCount, e.x + Math.sin(angle) * distance, jaw ? .35 : r * .7, e.z + Math.cos(angle) * distance, r * (jaw ? .18 : .38), r * .3, r * (jaw ? .85 : .5), angle);
-        this.bossParts.setColorAt(bossCount++, this.color.setHex(e.warning > 0 ? 0xffc36b : e.kind === 'sovereign' ? 0xbb668b : jaw ? 0xd5bc7c : 0x769b43));
+        this.instance(this.bossParts, bossCount, e.x + Math.sin(angle) * distance, jaw ? .35 : r * (.7 + (bossPhase === 2 ? .1 : 0)), e.z + Math.cos(angle) * distance, r * (jaw ? .18 : .38) * phasePulse, r * .3 * phasePulse, r * (jaw ? .85 : .5), angle);
+        this.bossParts.setColorAt(bossCount++, this.color.setHex(e.warning > 0 ? 0xffc36b : bossPhase === 2 ? (e.kind === 'sovereign' ? 0xff3d82 : jaw ? 0xff704f : 0xb9d94a) : e.kind === 'sovereign' ? 0xbb668b : jaw ? 0xd5bc7c : 0x769b43));
       }
       if (e.warning > 0) { this.instance(this.warnings, wc++, e.x, .09, e.z, r * 1.8, r * 1.8, r * 1.8, 0, -Math.PI / 2); }
     }
