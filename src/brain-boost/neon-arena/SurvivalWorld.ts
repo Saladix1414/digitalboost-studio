@@ -234,9 +234,21 @@ export class SurvivalWorld {
       { floor: 0x887e9a, glow: 0x32164c, bg: 0x100716, fog: 0x21102a, torch: 0xd1a3ff },
       { floor: 0x707983, glow: 0x102b42, bg: 0x030711, fog: 0x0a1524, torch: 0x83d8ff },
     ][next % 4];
-    this.floorMaterial.color.setHex(palette.floor); this.floorMaterial.emissive.setHex(palette.glow); this.floorMaterial.emissiveIntensity = .08;
+    this.floorMaterial.color.setHex(palette.floor); this.floorMaterial.emissive.setHex(palette.glow); this.floorMaterial.emissiveIntensity = next === 0 ? .08 : .12 + (next % 3) * .025;
     this.scene.background = new THREE.Color(palette.bg); this.scene.fog = new THREE.FogExp2(palette.fog, .008); this.torch.color.setHex(palette.torch);
     this.contamination.visible = next > 0; this.roots.visible = next > 0; this.eggs.visible = next > 0;
+    const contaminationMaterial = this.contamination.material as THREE.MeshBasicMaterial;
+    const rootsMaterial = this.roots.material as THREE.MeshStandardMaterial;
+    const eggsMaterial = this.eggs.material as THREE.MeshStandardMaterial;
+    const organicPalette = [
+      { stain: 0x18351f, root: 0x263a25, egg: 0x526d3b, emissive: 0x153f25 },
+      { stain: 0x234c2c, root: 0x31542e, egg: 0x7a9b48, emissive: 0x2d6a2b },
+      { stain: 0x442246, root: 0x4f2854, egg: 0xa356c0, emissive: 0x6b1f73 },
+      { stain: 0x183b58, root: 0x244b60, egg: 0x55a7c2, emissive: 0x1b6680 },
+    ][next % 4];
+    contaminationMaterial.color.setHex(organicPalette.stain);
+    rootsMaterial.color.setHex(organicPalette.root); rootsMaterial.emissive.setHex(organicPalette.emissive);
+    eggsMaterial.color.setHex(organicPalette.egg); eggsMaterial.emissive.setHex(organicPalette.emissive);
   }
   draw(s: GameSimulation) {
     this.setMapPhase(s.mapPhase);
