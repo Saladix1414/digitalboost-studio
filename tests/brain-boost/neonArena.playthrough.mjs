@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { GameSimulation, CONFIG } from '../../src/brain-boost/neon-arena/GameSimulation.ts';
 import { LEGACY_ARENA } from '../../src/brain-boost/neon-arena/ArenaDefinition.ts';
-export function playthrough(seed, { seconds = 1200, maxEnemies = 120, useArsenal = true, classic = false, arena = LEGACY_ARENA, assisted = false } = {}) {
+export function playthrough(seed, { seconds = 1200, maxEnemies = 120, useArsenal = true, classic = false, arena = LEGACY_ARENA, assisted = false, assistedEvasion = 1 } = {}) {
   const s = new GameSimulation(seed, null, maxEnemies, 1, arena); s.ready(); s.start(); if (assisted) s.setAimMode('assisted');
   const trace = []; let lastWave = 0, lastKillTick = 0, oldKills = 0;
   for (let tick = 0; tick < 60 * seconds && s.phase !== 'GAME_OVER' && s.wave < 16; tick++) {
@@ -15,8 +15,11 @@ export function playthrough(seed, { seconds = 1200, maxEnemies = 120, useArsenal
     const desired = s.pickups.filter(item => item.kind === 'medkit' ? s.health < 80 : useArsenal && item.kind === 'ammo').sort((a, b) => distance(a) - distance(b))[0];
     if (desired) { vx = desired.x - p.x; vz = desired.z - p.z; }
     const magnitude = Math.hypot(vx, vz) || 1; vx /= magnitude; vz /= magnitude;
+    // Assisted fire chooses its own target: begin evasion earlier instead of relying
+    // on frame-perfect close passes through the horde. Legacy/manual pilot is unchanged.
+    const evadeRadius = assisted ? 6 : 5, evadeForce = assisted ? assistedEvasion : .65;
     let near = 0;
-    for (const e of enemies) { const dx = p.x - e.x, dz = p.z - e.z, d = Math.hypot(dx, dz); if (d < 5) { const force = (5 - d) * .65; vx += dx / (d || 1) * force; vz += dz / (d || 1) * force; near++; } }
+    for (const e of enemies) { const dx = p.x - e.x, dz = p.z - e.z, d = Math.hypot(dx, dz); if (d < evadeRadius) { const force = (evadeRadius - d) * evadeForce; vx += dx / (d || 1) * force; vz += dz / (d || 1) * force; near++; } }
     for (const b of s.projectiles) if (b.hostile) { const dx = p.x - b.x, dz = p.z - b.z, d = Math.hypot(dx, dz); if (d < 3) { vx += dx / (d || 1) * (3 - d); vz += dz / (d || 1) * (3 - d); } }
     for (const o of s.arena.obstacles) { const dx = p.x - o.x, dz = p.z - o.z, d = Math.hypot(dx, dz); if (d < o.radius + 2) { vx += dx / (d || 1) * 2; vz += dz / (d || 1) * 2; } }
     if (Math.abs(p.x) > 16) vx -= p.x * .2; if (Math.abs(p.z) > 16) vz -= p.z * .2;
