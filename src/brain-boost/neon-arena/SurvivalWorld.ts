@@ -19,6 +19,7 @@ export class SurvivalWorld {
   private stains!: THREE.InstancedMesh; private blasts!: THREE.InstancedMesh; private trails!: THREE.LineSegments; private flame!: THREE.Mesh; private shock!: THREE.Mesh;
   private torch = new THREE.PointLight(0xbde9cf, 12, 14, 1.8); private flash = new THREE.PointLight(0xff9c35, 0, 9, 2);
   private lastTime = 0; private steam!: THREE.Points; private contact!: THREE.InstancedMesh;
+  private contamination!: THREE.InstancedMesh; private roots!: THREE.InstancedMesh; private eggs!: THREE.InstancedMesh;
   private frames = Array.from({ length: 2 }, () => ({ width: 44, height: 44, follow: new THREE.Vector2(), lastPlayer: new THREE.Vector2(0, 3) }));
   private marineViews: { body: THREE.Group; gun: THREE.Group; boots: THREE.Mesh[]; suit: THREE.MeshStandardMaterial; torch: THREE.PointLight; flash: THREE.PointLight; flame: THREE.Mesh; shock: THREE.Mesh }[] = [];
   private corpses: { x: number; z: number; born: number; id: number }[] = []; private lastEvent = 0;
@@ -110,6 +111,27 @@ export class SurvivalWorld {
       this.instance(membrane, i, x, .035, z, .5 + i % 4 * .4, .06, .4 + i % 5 * .3, i);
     }
     this.finish(membrane, 90);
+    // Organic sectors stay low and peripheral so they add material variety
+    // without hiding advancing enemies or changing the logical arena.
+    const contamination = this.pool(this.geo(new THREE.CircleGeometry(1, 18)), this.mat(new THREE.MeshBasicMaterial({ color: 0x18351f, transparent: true, opacity: .42, depthWrite: false })), 18);
+    const roots = this.pool(box, this.standard(0x263a25, 0x153f25, .16), 48);
+    const eggs = this.pool(this.geo(new THREE.SphereGeometry(1, 8, 5)), this.standard(0x526d3b, 0x2a521f, .28), 24);
+    for (let i = 0; i < 18; i++) {
+      const side = i % 4, a = side * Math.PI / 2, along = (Math.floor(i / 4) - 1.5) * 5.1;
+      const x = Math.cos(a) * along - Math.sin(a) * (wallDistance - 2.1), z = -Math.sin(a) * along - Math.cos(a) * (wallDistance - 2.1);
+      this.instance(contamination, i, x, .022, z, 1.2 + i % 3 * .35, 1.2 + i % 3 * .35, 1, a + .2, -Math.PI / 2);
+      for (let j = 0; j < 2; j++) {
+        const n = i * 2 + j, offset = (j ? 1 : -1) * (.28 + i % 3 * .08);
+        this.instance(roots, n, x + Math.cos(a) * offset, .1, z - Math.sin(a) * offset, .11 + i % 2 * .04, .16 + j * .1, .72 + i % 3 * .15, a + (j ? .5 : -.5), j ? -.18 : .18);
+      }
+    }
+    for (let i = 0; i < 24; i++) {
+      const o = this.arena.obstacles[i % this.arena.obstacles.length], a = i * 2.39996, radius = o.radius + 1.8 + (i % 3) * .25;
+      this.instance(eggs, i, o.x + Math.cos(a) * radius, .16 + i % 2 * .04, o.z + Math.sin(a) * radius, .16 + i % 3 * .05, .22 + i % 2 * .06, .16 + i % 3 * .04, a);
+      eggs.setColorAt(i, this.color.setHex(i % 4 === 0 ? 0x7a9b48 : 0x4b6739));
+    }
+    this.finish(contamination, 18); this.finish(roots, 48); this.finish(eggs, 24, true);
+    this.contamination = contamination; this.roots = roots; this.eggs = eggs;
     this.contact = this.pool(this.geo(new THREE.CircleGeometry(1, 24)), this.mat(new THREE.MeshBasicMaterial({ color: 0x020709, transparent: true, opacity: .4, depthWrite: false })), this.arena.obstacles.length + 2);
     const steamGeometry = this.geo(new THREE.BufferGeometry()); steamGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(32 * 3), 3));
     this.steam = new THREE.Points(steamGeometry, this.mat(new THREE.PointsMaterial({ color: 0x92c1c7, size: .55, transparent: true, opacity: .12, depthWrite: false, sizeAttenuation: true }))); this.steam.frustumCulled = false; this.scene.add(this.steam);
