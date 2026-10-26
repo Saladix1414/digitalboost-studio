@@ -65,6 +65,28 @@ No se hizo push. Backups y datos previos se conservaron.
 
 ## Evidencia adicional
 
+## V5.1 — pulido de colonia y resolución musical
+
+La colonia incorpora sectores orgánicos periféricos instanciados: manchas de
+contaminación, raíces bajas y huevos alrededor de los generadores. Son detalles
+cosméticos sin colisión ni bloqueo de líneas de combate; las rutas y la autoridad
+de la simulación siguen siendo las mismas. La geometría repetitiva se mantiene
+agrupada para no convertir cada detalle en un draw call independiente.
+
+La música agrega un estado explícito de derrota. Al entrar en `GAME_OVER`, las
+capas cambian en el siguiente límite musical a una mezcla contenida, con silencio
+en percusión y un motivo descendente de cierre en el fallback sintetizado. El
+transporte sigue siendo único por partida, y el test de audio valida que la nueva
+mezcla mantiene ganancia finita y margen de headroom.
+
+Commit visual: `930c477`.
+
+Commit musical: `b027c26`.
+
+Validación posterior: 93/93 pruebas, typecheck y build PASS. El build conserva el
+aviso existente de chunks grandes. La escucha en un teléfono y la prueba de
+temperatura siguen requiriendo validación física.
+
 El stress lógico de 3600 pasos usó el mapa colony. Para mantener vivo el harness aplica invulnerabilidad explícita, exclusivamente en el benchmark; no es el piloto de aceptación. Con 120 enemigos iniciales se midió media 0.146ms / p95 0.44ms de step; con 240, media 0.674ms / p95 1.25ms en este host x64. Son tiempos CPU de simulación, no tiempos GPU, FPS Android ni una prueba térmica.
 
 Las capturas adjuntas usan una galería controlada con las mismas especies y encuadre comparable. No representan una campaña real con siete jefes simultáneos. Sirven para revisar materiales y composición antes/después.

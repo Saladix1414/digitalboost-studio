@@ -6,7 +6,9 @@
 
 Evolucioná el Neon Arena existente de DigitalBoost Studio en tres frentes: escenario 3D con mayor calidad visual, mapa moderadamente más grande y experiencia inmersiva al girar el teléfono; acompañalos con una banda sonora original más elaborada y adaptativa.
 
-Este documento es una especificación para la próxima implementación. Estas mejoras todavía no están implementadas. Trabajá sobre el repositorio real; no construyas una aplicación ni una demo independiente.
+La implementación V5 y el pulido V5.1 ya están integrados. Este documento funciona
+como contrato de mantenimiento y QA para los siguientes incrementos. Trabajá sobre
+el repositorio real; no construyas una aplicación ni una demo independiente.
 
 Asumí los roles de arquitecto de integración React/TypeScript, desarrollador de gameplay, artista de entornos 3D, ingeniero Three.js/WebGL móvil, diseñador de UX táctil, compositor/diseñador de audio e ingeniero de QA. Tomá decisiones concretas y entregá incrementos ejecutables y verificables.
 
