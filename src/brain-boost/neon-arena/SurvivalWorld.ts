@@ -17,12 +17,12 @@ export class SurvivalWorld {
   private bossParts!: THREE.InstancedMesh;
   private thoraxes!: THREE.InstancedMesh; private feelers!: THREE.InstancedMesh; private eyes!: THREE.InstancedMesh; private elytra!: THREE.InstancedMesh; private cores!: THREE.InstancedMesh; private fangs!: THREE.InstancedMesh; private spines!: THREE.InstancedMesh; private sacs!: THREE.InstancedMesh; private reticles!: THREE.InstancedMesh; private fragments!: THREE.InstancedMesh;
   private items!: THREE.InstancedMesh; private crosses!: THREE.InstancedMesh; private dropMedkits!: THREE.InstancedMesh; private dropArmor!: THREE.InstancedMesh; private dropAmmo!: THREE.InstancedMesh; private dropGrenades!: THREE.InstancedMesh; private bullets!: THREE.InstancedMesh; private warnings!: THREE.InstancedMesh;
-  private stains!: THREE.InstancedMesh; private enemyShadows!: THREE.InstancedMesh; private blasts!: THREE.InstancedMesh; private trails!: THREE.LineSegments; private flame!: THREE.Mesh; private shock!: THREE.Mesh;
+  private stains!: THREE.InstancedMesh; private enemyShadows!: THREE.InstancedMesh; private blasts!: THREE.InstancedMesh; private trails!: THREE.LineSegments; private flame!: THREE.Group; private shock!: THREE.Mesh;
   private torch = new THREE.PointLight(0xbde9cf, 12, 14, 1.8); private flash = new THREE.PointLight(0xff9c35, 0, 9, 2);
   private lastTime = 0; private steam!: THREE.Points; private contact!: THREE.InstancedMesh;
   private contamination!: THREE.InstancedMesh; private roots!: THREE.InstancedMesh; private eggs!: THREE.InstancedMesh;
   private frames = Array.from({ length: 2 }, () => ({ width: 44, height: 44, follow: new THREE.Vector2(), lastPlayer: new THREE.Vector2(0, 3) }));
-  private marineViews: { body: THREE.Group; gun: THREE.Group; boots: THREE.Mesh[]; suit: THREE.MeshStandardMaterial; torch: THREE.PointLight; flash: THREE.PointLight; flame: THREE.Mesh; shock: THREE.Mesh }[] = [];
+  private marineViews: { body: THREE.Group; gun: THREE.Group; boots: THREE.Mesh[]; suit: THREE.MeshStandardMaterial; torch: THREE.PointLight; flash: THREE.PointLight; flame: THREE.Group; shock: THREE.Mesh }[] = [];
   private corpses: { x: number; z: number; born: number; id: number }[] = []; private lastEvent = 0;
   private remains = true; private followTarget = new THREE.Vector2();
   private up = new THREE.Vector3(0, 1, 0); private flameAxis = new THREE.Vector3();
@@ -196,7 +196,12 @@ export class SurvivalWorld {
     this.enemyShadows = this.pool(this.geo(new THREE.CircleGeometry(1, 16)), this.mat(new THREE.MeshBasicMaterial({ color: 0x020608, transparent: true, opacity: .38, depthWrite: false })), CONFIG.maxEnemies);
     this.blasts = this.pool(sphere, this.mat(new THREE.MeshBasicMaterial({ color: 0xff9922, transparent: true, opacity: .4, depthWrite: false, blending: THREE.AdditiveBlending })), CONFIG.maxEvents);
     this.shock = this.mesh(this.geo(new THREE.TorusGeometry(1, .04, 5, 64)), cyan, this.scene); this.shock.rotation.x = Math.PI / 2;
-    this.flame = this.mesh(this.geo(new THREE.ConeGeometry(2.8, 6, 12, 1, true)), this.mat(new THREE.MeshBasicMaterial({ color: 0xff8d24, transparent: true, opacity: .36, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })), this.scene);
+    // Layered flame: orange pressure envelope, hot yellow body and white core.
+    // Separate meshes make the fire read as volume instead of a flat triangle.
+    this.flame = new THREE.Group(); this.flame.name = 'flamethrower-fire'; this.scene.add(this.flame);
+    this.mesh(this.geo(new THREE.ConeGeometry(2.8, 6, 14, 1, true)), this.mat(new THREE.MeshBasicMaterial({ color: 0xff3d12, transparent: true, opacity: .22, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })), this.flame);
+    this.mesh(this.geo(new THREE.ConeGeometry(1.95, 4.9, 12, 1, true)), this.mat(new THREE.MeshBasicMaterial({ color: 0xff9d18, transparent: true, opacity: .48, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })), this.flame);
+    this.mesh(this.geo(new THREE.ConeGeometry(.92, 3.7, 10, 1, true)), this.mat(new THREE.MeshBasicMaterial({ color: 0xfff2a0, transparent: true, opacity: .78, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })), this.flame);
     const lineGeo = this.geo(new THREE.BufferGeometry()); lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array((CONFIG.maxProjectiles + CONFIG.maxEnemies + 2) * 6), 3));
     this.trails = new THREE.LineSegments(lineGeo, this.mat(new THREE.LineBasicMaterial({ color: 0xe4db9a, transparent: true, opacity: .65 }))); this.trails.frustumCulled = false; this.scene.add(this.trails);
     this.marineViews.push({ body: this.marine, gun: this.gun, boots: this.boots, suit: this.suit, torch: this.torch, flash: this.flash, flame: this.flame, shock: this.shock });
@@ -264,20 +269,20 @@ export class SurvivalWorld {
       const visualScale = e.boss ? 1.14 : 1.28;
       const r = e.radius * scale * visualScale, a = Math.atan2(target.x - e.x, target.z - e.z);
       this.instance(this.enemyShadows, shadowCount++, e.x, .025, e.z, r * 1.3, r * .42, r * 1.3, a, -Math.PI / 2);
-      const beetle = e.kind === 'carapace' || e.kind === 'maw', mantis = e.kind === 'stalker', acid = e.kind === 'spitter' || e.kind === 'brood';
+      const skitter = e.kind === 'skitter', beetle = e.kind === 'carapace' || e.kind === 'maw', mantis = e.kind === 'stalker', acid = e.kind === 'spitter' || e.kind === 'brood';
       const flash = !this.reduced && e.hitFlash > 0;
-      const color = flash ? 0xfff3d3 : e.burn > 0 ? 0xe68524 : beetle ? 0x75413d : acid ? 0x4f873c : mantis ? 0x71364d : e.boss ? 0x60306f : 0x8c7656;
+      const color = flash ? 0xfff3d3 : e.burn > 0 ? 0xe68524 : beetle ? 0x6d1f35 : acid ? 0x287d4c : mantis ? 0x8b2456 : e.boss ? 0x64247e : skitter ? 0x9b4b28 : 0x754034;
       const part = (pool: THREE.InstancedMesh, index: number, lx: number, y: number, lz: number, sx: number, sy: number, sz: number, turn = 0) => {
         this.instance(pool, index, e.x + Math.cos(a) * lx * r + Math.sin(a) * lz * r, y * r, e.z - Math.sin(a) * lx * r + Math.cos(a) * lz * r, sx * r, sy * r, sz * r, a + turn);
       };
       // Abdomen, narrow thorax and head are separate volumes, not one generic blob.
       const pulse = acid && !this.reduced ? 1 + Math.sin(t * 5 + e.id) * .06 : 1;
-      part(this.body, count, 0, .58, -.42, acid ? 1.02 * pulse : mantis ? .53 : .79, acid ? .8 : .56, mantis ? 1.2 : .92);
+      part(this.body, count, 0, .58, -.42, acid ? 1.02 * pulse : mantis ? .53 : skitter ? .58 : .79, acid ? .8 : skitter ? .4 : .56, mantis ? 1.2 : skitter ? .78 : .92);
       this.body.setColorAt(count, this.color.setHex(color));
-      part(this.thoraxes, count, 0, .5, .46, mantis ? .3 : .5, .4, mantis ? .88 : .55);
-      this.thoraxes.setColorAt(count, this.color.setHex(flash ? 0xfff3d3 : beetle ? 0x544733 : 0x655b3b));
-      part(this.heads, count, 0, .57, 1.02, mantis ? .7 : .48, .36, mantis ? .3 : .48);
-      this.heads.setColorAt(count, this.color.setHex(flash ? 0xffffff : beetle ? 0x9e6652 : acid ? 0x77b44b : mantis ? 0x9b4660 : 0xb78e63));
+      part(this.thoraxes, count, 0, .5, .46, mantis ? .3 : skitter ? .36 : .5, mantis ? .4 : skitter ? .3 : .4, mantis ? .88 : skitter ? .46 : .55);
+      this.thoraxes.setColorAt(count, this.color.setHex(flash ? 0xfff3d3 : beetle ? 0x351522 : acid ? 0x17452c : mantis ? 0x3d1437 : skitter ? 0x542314 : 0x3e2524));
+      part(this.heads, count, 0, .57, 1.02, mantis ? .7 : skitter ? .36 : .48, mantis ? .36 : skitter ? .27 : .36, mantis ? .3 : skitter ? .34 : .48);
+      this.heads.setColorAt(count, this.color.setHex(flash ? 0xffffff : beetle ? 0x8e2842 : acid ? 0x58b83d : mantis ? 0xc23567 : skitter ? 0xc06b31 : 0xa64f38));
       const coreColor = flash ? 0xffffff : acid ? (e.kind === 'brood' ? 0xd6ff55 : 0x9dff62) : mantis ? 0xff4b55 : e.boss ? 0xf08cff : 0xffbd52;
       part(this.cores, count, 0, e.boss ? .74 : .7, acid ? .82 : .96, e.boss ? .26 : acid ? .18 : .14, e.boss ? .3 : .16, e.boss ? .26 : .14);
       this.cores.setColorAt(count, this.color.setHex(coreColor));
@@ -304,10 +309,10 @@ export class SurvivalWorld {
         part(this.feelers, fc++, side * (beetle ? .35 : .23), .4, beetle ? 2.23 : 1.72, .075, .12, beetle ? .36 : .15, side * .8);
         if (beetle) {
           part(this.elytra, shellCount, side * .38, .7, -.37, .46, .62, 1.06);
-          this.elytra.setColorAt(shellCount++, this.color.setHex(flash ? 0xfff3d3 : 0xb58a54));
+          this.elytra.setColorAt(shellCount++, this.color.setHex(flash ? 0xfff3d3 : e.boss ? 0x8d3151 : 0x6d263e));
         } else if (acid) {
           part(this.elytra, shellCount, side * .74, .69, -.55, .37 * pulse, .42 * pulse, .63);
-          this.elytra.setColorAt(shellCount++, this.color.setHex(flash ? 0xfff3d3 : 0xa3d84a));
+          this.elytra.setColorAt(shellCount++, this.color.setHex(flash ? 0xfff3d3 : e.kind === 'brood' ? 0xb7e943 : 0x4dcc55));
         }
       }
       count++;
