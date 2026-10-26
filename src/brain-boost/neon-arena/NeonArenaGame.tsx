@@ -15,7 +15,8 @@ const COOP_BEST_KEY = 'digitalboost:brain-boost:neon-arena:best:coop:v1';
 const bestKey = (count: number) => count === 2 ? COOP_BEST_KEY : BEST_KEY;
 function storage() { try { return window.localStorage; } catch { return undefined; } }
 function readBest(count = 1) { try { const n = Number(storage()?.getItem(bestKey(count))); return Number.isSafeInteger(n) && n >= 0 ? n : 0; } catch { return 0; } }
-const unlockDescriptions: Record<WeaponId, string> = { machinegun: 'Disponible', shotgun: 'Eliminá 30 criaturas en una partida', flame: 'Derrotá a Brood Mother · oleada 5', cascade: 'Derrotá a Iron Maw · oleada 10', rail: 'Derrotá a Hive Sovereign · oleada 15' };
+const unlockDescriptions: Record<WeaponId, string> = { machinegun: 'Disponible', shotgun: 'Eliminá 30 criaturas en una partida', flame: 'Derrotá a Brood Mother · oleada 5', cascade: 'Derrotá a Iron Maw · oleada 12', rail: 'Derrotá a Hive Sovereign · oleada 20' };
+const mapNames = ['COLONIA INDUSTRIAL', 'NIDO CONTAMINADO', 'CÁMARA DE CRÍA', 'NÚCLEO EN PENUMBRA'];
 function MarineControls({ marine, active, onShock, coop }: { marine: Snapshot['marines'][number]; active: boolean; onShock: () => void; coop: boolean }) {
   return <div className="na-combat-controls" hidden={!active || !marine.alive}>
     <div className="na-joystick" data-na-stick="" data-na-player={marine.id} aria-label={`Joystick de movimiento P${marine.id + 1}`}><span /><small>MOVER {coop ? `P${marine.id + 1}` : ''}</small></div>
@@ -47,6 +48,7 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
           if (e.kind === 'shot' || e.kind === 'flame') playNeonSurvivalSfx(e.weapon || 'machinegun');
           if (e.creature && ['kill', 'creature', 'boss'].includes(e.kind)) playNeonCreatureSfx(e.creature, e.kind === 'kill' ? 'death' : e.kind === 'boss' ? 'boss' : 'attack');
           if (e.kind === 'boss' && e.creature && e.creature in BOSSES) setNotice(`JEFE ENTRANTE · ${BOSSES[e.creature as keyof typeof BOSSES].name}`);
+          if (e.kind === 'kill' && e.creature && e.creature in BOSSES) setNotice('SECTOR ALTERADO · LA COLONIA CAMBIÓ');
           if (e.kind === 'pickup') playNeonSurvivalSfx('pickup'); if (e.kind === 'impact') playNeonSurvivalSfx('impact');
           if (e.kind === 'shock') playBrainBoostSfx('neon-arena', 'advance');
           if (e.kind === 'revive') { setNotice(`P${(e.playerId ?? 0) + 1} RECUPERADO · 35 DE SALUD`); playBrainBoostSfx('neon-arena', 'complete'); }
@@ -78,7 +80,7 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
   const choose = (id: WeaponId, playerId = 0) => { if (engine.current?.simulation.equip(id, playerId)) { setSnapshot(engine.current.simulation.snapshot()); if (snapshot.phase === 'PLAYING') host.current?.querySelector('canvas')?.focus({ preventScroll: true }); } };
   const active = snapshot.phase === 'PLAYING' && !error;
   const hud = <div className="na-hud" aria-label="Estado de partida">
-    <span><small>{coop ? 'TEAM SCORE' : 'SCORE'}</small><b>{String(snapshot.score).padStart(5, '0')}</b></span><span><small>WAVE</small><b>{String(snapshot.wave).padStart(2, '0')}</b></span>
+    <span><small>{coop ? 'TEAM SCORE' : 'SCORE'}</small><b>{String(snapshot.score).padStart(5, '0')}</b></span><span><small>WAVE</small><b>{String(snapshot.wave).padStart(2, '0')}</b></span><span><small>SECTOR</small><b>{mapNames[snapshot.mapPhase % mapNames.length]}</b></span>
     {coop ? <span className="na-team-badge">COOP LOCAL · 2P</span> : <span className={`na-health${danger ? ' na-critical' : ''}`}><small>MARINE · {snapshot.health}%</small><span role="progressbar" aria-label="Salud del marine" aria-valuenow={snapshot.health} aria-valuemin={0} aria-valuemax={100} className="na-meter"><i style={{ width: `${snapshot.health}%` }} /></span></span>}
     <button type="button" disabled={!['PLAYING', 'WAVE_TRANSITION', 'PAUSED'].includes(snapshot.phase) || !!error} onClick={() => engine.current?.togglePause()}>{snapshot.phase === 'PAUSED' ? 'Reanudar' : 'Pausa'}</button>
   </div>;

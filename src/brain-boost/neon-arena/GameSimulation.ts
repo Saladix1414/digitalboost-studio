@@ -63,7 +63,7 @@ export class GameSimulation {
   get cooldown() { return this.player.cooldown; }
   get shockAge() { return this.player.shockAge; }
   get shockOrigin() { return this.player.shockOrigin; }
-  score = 0; wave = 1; kills = 0; elapsed = 0; bossesKilled = 0;
+  score = 0; wave = 1; kills = 0; elapsed = 0; bossesKilled = 0; mapPhase = 0;
   enemies: Enemy[] = []; projectiles: Projectile[] = []; pickups: Pickup[] = []; events: CombatEvent[] = [];
   progress: Progress; progressRevision = 0; unlockedThisRun: WeaponId[] = [];
   private grid = new EnemyGrid(); private nextId = 1;
@@ -137,7 +137,7 @@ export class GameSimulation {
     if (e.boss) {
       // A confirmed boss death also proves that this wave's encounter appeared.
       this.bossSpawned = true;
-      this.bossesKilled++; this.unlock(BOSSES[e.kind as keyof typeof BOSSES].reward, e.kind);
+      this.bossesKilled++; this.mapPhase = this.bossesKilled; this.unlock(BOSSES[e.kind as keyof typeof BOSSES].reward, e.kind);
       this.drop('medkit', e.x, e.z); this.drop('ammo', e.x + 1, e.z);
     } else if (this.kills % 5 === 0) {
       this.drop(supplyForRoll(this.random(), this.progress.unlocked), e.x, e.z);
@@ -331,7 +331,7 @@ export class GameSimulation {
     const activeEnemies = this.enemies.filter(e => e.state === 'SPAWNING' || e.state === 'ADVANCING').length;
     const pendingEnemies = Math.max(0, this.waveSize - this.spawned) + (isBossWave(this.wave, this.arena) && !this.bossSpawned ? 1 : 0);
     const nextEncounter = nextBossEncounter(this.wave, this.bossSpawned && !boss, this.arena);
-    return { arena: this.arena.id, phase: this.phase, health: Math.ceil(this.health), score: this.score, wave: this.wave, kills: this.kills, elapsed: this.elapsed, cooldown: this.cooldown, weapon: this.equipped, ammo: this.ammo[this.equipped], unlocked: [...this.progress.unlocked], bossesKilled: this.bossesKilled, boss: boss ? { name: boss.kind as keyof typeof BOSSES, hp: boss.hp, maxHp: boss.maxHp, warning: boss.warning > 0, phase: boss.hp <= boss.maxHp / 2 ? 2 : 1 } : null, shield: this.player.shield, haste: this.player.haste, progressRevision: this.progressRevision, unlockedThisRun: [...this.unlockedThisRun], playerCount: this.players.length, marines: this.players.map(p => ({ id: p.id, health: Math.ceil(p.health), alive: p.health > 0, weapon: p.equipped, ammo: p.ammo[p.equipped], ammoByWeapon: { ...p.ammo }, cooldown: p.cooldown, shield: p.shield, haste: p.haste })), activeEnemies, pendingEnemies, nextEncounter };
+    return { arena: this.arena.id, phase: this.phase, health: Math.ceil(this.health), score: this.score, wave: this.wave, kills: this.kills, elapsed: this.elapsed, cooldown: this.cooldown, weapon: this.equipped, ammo: this.ammo[this.equipped], unlocked: [...this.progress.unlocked], bossesKilled: this.bossesKilled, mapPhase: this.mapPhase, boss: boss ? { name: boss.kind as keyof typeof BOSSES, hp: boss.hp, maxHp: boss.maxHp, warning: boss.warning > 0, phase: boss.hp <= boss.maxHp / 2 ? 2 : 1 } : null, shield: this.player.shield, haste: this.player.haste, progressRevision: this.progressRevision, unlockedThisRun: [...this.unlockedThisRun], playerCount: this.players.length, marines: this.players.map(p => ({ id: p.id, health: Math.ceil(p.health), alive: p.health > 0, weapon: p.equipped, ammo: p.ammo[p.equipped], ammoByWeapon: { ...p.ammo }, cooldown: p.cooldown, shield: p.shield, haste: p.haste })), activeEnemies, pendingEnemies, nextEncounter };
   }
   dispose() { this.transition('DISPOSED'); this.clearInput(); this.enemies = []; this.projectiles = []; this.pickups = []; this.events = []; this.explosions = []; for (const p of this.players) p.shockHits.clear(); this.grid.rebuild([]); }
 }

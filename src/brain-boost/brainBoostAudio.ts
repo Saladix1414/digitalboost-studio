@@ -728,12 +728,17 @@ export function playNeonSurvivalSfx(kind: "machinegun" | "shotgun" | "flame" | "
   if (!isBrainBoostAudioEnabled()) return;
   const audio = getGraph(); if (!audio) return; resume(audio.context);
   const c = audio.context, out = audio.effects, at = c.currentTime + .005;
-  const gap = kind === "warning" ? .4 : kind === "impact" ? .2 : .06;
+  const gap = kind === "warning" ? .4 : kind === "impact" ? .2 : kind === "flame" ? .1 : .06;
   if (at - (survivalSfxTimes.get(kind) ?? -Infinity) < gap) return;
   survivalSfxTimes.set(kind, at);
   if (kind === "machinegun") { cyberNoise(c, out, at, .035, .025, 2100); cyberTone(c, out, 38, at, .045, .025, "square"); }
   else if (kind === "shotgun" || kind === "cascade") { cyberNoise(c, out, at, .18, .065, 850); cyberKick(c, out, at); }
-  else if (kind === "flame") cyberNoise(c, out, at, .15, .03, 1100);
+  else if (kind === "flame") {
+    // Low pressurized roar plus ignition hiss, distinct from a gunshot.
+    cyberNoise(c, out, at, .13, .045, 260);
+    cyberTone(c, out, 34, at, .13, .03, "sawtooth");
+    cyberNoise(c, out, at + .012, .08, .018, 3200);
+  }
   else if (kind === "rail") { cyberTone(c, out, 86, at, .13, .045, "sawtooth"); cyberNoise(c, out, at, .08, .03, 3800); }
   else if (kind === "impact") cyberNoise(c, out, at, .1, .035, 650);
   else if (kind === "warning") cyberTone(c, out, 61, at, .2, .025, "triangle");

@@ -9,19 +9,20 @@ Estado de trabajo al auditar: cambios del usuario sin tocar en `.phase-backups/`
 La integración está estable: Neon Arena vive dentro de Nightmare Protocolo, usa el
 renderer Three.js/WebGL2 existente, comparte una simulación determinista con la
 representación, mantiene cinco armas, tres jefes, cooperativo local y un solo loop.
-La línea actual pasa typecheck y 93/93 pruebas de Brain Boost.
+La línea actual pasa typecheck y 94/94 pruebas de Brain Boost.
 
 La escena ya tiene suelo industrial PBR, cobertura física compartida, maquinaria,
 membranas, contaminación, raíces y huevos periféricos. Los enemigos se dibujan con
 volúmenes separados para abdomen, tórax, cabeza, ojos, antenas, mandíbulas,
-élitros, placas y patas. El resultado es legible y estilizado, pero todavía tiene
-una silueta low poly común: falta que cada especie parezca una criatura distinta
-antes de que el jugador lea su color o nombre.
+élitros, placas y patas. Ahora suma núcleos por familia, colmillos, espinas
+dorsales, sacos ácidos pulsantes y paletas orgánicas distintas, manteniendo un
+presupuesto instanciado; la captura final en dispositivo sigue siendo necesaria
+para calibrar contraste.
 
-El sistema actual de oleadas genera un jefe cuando `wave % 5 === 0`. La función
-`bossForWave` asigna BROOD MOTHER a la primera aparición, IRON MAW a la décima y
-HIVE SOVEREIGN a la decimoquinta. Esto contradice la nueva intención de dejar más
-espacio entre la primera pelea y el siguiente jefe.
+La colonia usa encuentros en las oleadas `5, 12, 20, 29, 39, 50...`; Legacy
+conserva la cadencia histórica para sus regresiones. Tras cada muerte de jefe,
+`mapPhase` cambia el perfil visual del sector: industrial, contaminado, cámara de
+cría y núcleo oscuro.
 
 El cambio de armas ya está disponible durante una partida: los botones del arsenal
 inferior llaman a `simulation.equip`, las teclas `1–5` equipan directamente, `Q`
@@ -126,7 +127,7 @@ munición ni crear una autoridad de estado paralela en React.
    dos jugadores.
 4. Mejorar anatomía y materiales de skitter, spitter/stalker y jefes usando pools
    compartidos.
-5. Comparar capturas con la misma cámara y correr 93 pruebas más las nuevas de
+5. Comparar capturas con la misma cámara y correr 94 pruebas más las nuevas de
    progresión, rendimiento y legibilidad.
 
 No se propone crear una aplicación nueva, otro renderer, un segundo motor de
@@ -142,6 +143,11 @@ La primera unidad V6 ya está integrada:
   activa durante el combate, con soporte táctil y cooperativo.
 - `465ad80`: las criaturas reciben núcleos luminosos por familia y colmillos
   instanciados para reforzar sus siluetas de ataque.
+- `1ae01b3`: cada boss cambia el sector visual; los drops usan geometría legible
+  para botiquín, armadura, munición y granada; se añadieron espinas y sacos ácidos.
+- `396d4b8`: se regeneró la música original con capas de subgrave, percusión y
+  tensión más agresivas; el lanzallamas usa un rugido presurizado independiente
+  de la ametralladora y su fuego tiene pulsación visual.
 
 La campaña Colony se extendió a la oleada 21 para comprobar los tres primeros
 jefes en la nueva cadencia. La validación actual es 94/94 pruebas, typecheck y

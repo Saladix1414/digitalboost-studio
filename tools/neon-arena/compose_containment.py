@@ -33,15 +33,15 @@ def drum(kind):
 tracks={name:np.zeros(N) for name in ['atmosphere','bass','percussion','tension']}
 for bar,chord in enumerate(chords):
  at=bar*4*BEAT
- for note in chord[1:]:add(tracks['atmosphere'],tone(note,4*BEAT+1.1),at,.09)
- for beat in [0,.75,1.5,2,2.75,3.5]:add(tracks['bass'],tone(chord[0]-12,.37,'bass'),at+beat*BEAT,.29 if beat in [0,2] else .18)
- for beat in ([0,1.5,2,3.5] if bar%2==0 else [0,2,2.75]):add(tracks['percussion'],drum('kick'),at+beat*BEAT,.62)
- for beat in [1,3]:add(tracks['percussion'],drum('snare'),at+beat*BEAT,.55)
- for i in range(8):add(tracks['percussion'],drum('hat'),at+i*.5*BEAT,.5 if i%2 else .3)
- if bar in [1,3,7]:add(tracks['percussion'],drum('metal'),at+3.5*BEAT,.8)
+ for note in chord[1:]:add(tracks['atmosphere'],tone(note,4*BEAT+1.1),at,.12)
+ for beat in [0,.75,1.5,2,2.75,3.5]:add(tracks['bass'],tone(chord[0]-12,.37,'bass'),at+beat*BEAT,.36 if beat in [0,2] else .24)
+ for beat in ([0,1.5,2,3.5] if bar%2==0 else [0,2,2.75]):add(tracks['percussion'],drum('kick'),at+beat*BEAT,.78)
+ for beat in [1,3]:add(tracks['percussion'],drum('snare'),at+beat*BEAT,.7)
+ for i in range(8):add(tracks['percussion'],drum('hat'),at+i*.5*BEAT,.58 if i%2 else .36)
+ if bar in [1,3,7]:add(tracks['percussion'],drum('metal'),at+3.5*BEAT,1.0)
  motif=[chord[1]+12,chord[2]+12,chord[3]+12,chord[2]+12,chord[1]+14,chord[1]+13]
- for i,note in enumerate(motif):add(tracks['tension'],tone(note,.65,'lead'),at+(i*.5+.25)*BEAT,.10 if i in [0,4] else .065)
- if bar in [3,7]:add(tracks['tension'],tone(chord[3]+24,.9,'lead'),at+3.25*BEAT,.07)
+ for i,note in enumerate(motif):add(tracks['tension'],tone(note,.65,'lead'),at+(i*.5+.25)*BEAT,.15 if i in [0,4] else .10)
+ if bar in [3,7]:add(tracks['tension'],tone(chord[3]+24,.9,'lead'),at+3.25*BEAT,.11)
 # Circular, tempo-locked delays: no gaps/tails at the loop boundary.
 for name in ['atmosphere','tension']:
  x=tracks[name]; wet=x.copy()
