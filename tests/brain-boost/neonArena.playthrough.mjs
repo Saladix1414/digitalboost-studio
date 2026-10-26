@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { GameSimulation, CONFIG } from '../../src/brain-boost/neon-arena/GameSimulation.ts';
 import { LEGACY_ARENA } from '../../src/brain-boost/neon-arena/ArenaDefinition.ts';
-export function playthrough(seed, { seconds = 1200, maxEnemies = 120, useArsenal = true, classic = false, arena = LEGACY_ARENA, assisted = false, assistedEvasion = 1, targetWave = 16 } = {}) {
+export function playthrough(seed, { seconds = 1200, maxEnemies = 120, useArsenal = true, classic = false, arena = LEGACY_ARENA, assisted = false, assistedEvasion = 1, assistedRadius = 6, assistedOrbit = 9, targetWave = 16 } = {}) {
   const s = new GameSimulation(seed, null, maxEnemies, 1, arena); s.ready(); s.start(); if (assisted) s.setAimMode('assisted');
   const trace = []; let lastWave = 0, lastKillTick = 0, oldKills = 0;
   for (let tick = 0; tick < 60 * seconds && s.phase !== 'GAME_OVER' && s.wave < targetWave; tick++) {
@@ -11,13 +11,13 @@ export function playthrough(seed, { seconds = 1200, maxEnemies = 120, useArsenal
     const distance = e => Math.hypot(e.x - p.x, e.z - p.z);
     const nearest = enemies.reduce((best, e) => !best || distance(e) < distance(best) ? e : best, null);
     const boss = enemies.find(e => e.boss), target = boss && (!nearest || distance(nearest) > 5) ? boss : nearest;
-    const orbit = tick / 300; let vx = Math.cos(orbit) * 9 - p.x, vz = Math.sin(orbit) * 9 - p.z;
+    const orbit = tick / 300; let vx = Math.cos(orbit) * assistedOrbit - p.x, vz = Math.sin(orbit) * assistedOrbit - p.z;
     const desired = s.pickups.filter(item => item.kind === 'medkit' ? s.health < 80 : useArsenal && item.kind === 'ammo').sort((a, b) => distance(a) - distance(b))[0];
     if (desired) { vx = desired.x - p.x; vz = desired.z - p.z; }
     const magnitude = Math.hypot(vx, vz) || 1; vx /= magnitude; vz /= magnitude;
     // Assisted fire chooses its own target: begin evasion earlier instead of relying
     // on frame-perfect close passes through the horde. Legacy/manual pilot is unchanged.
-    const evadeRadius = assisted ? 6 : 5, evadeForce = assisted ? assistedEvasion : .65;
+    const evadeRadius = assisted ? assistedRadius : 5, evadeForce = assisted ? assistedEvasion : .65;
     let near = 0;
     for (const e of enemies) { const dx = p.x - e.x, dz = p.z - e.z, d = Math.hypot(dx, dz); if (d < evadeRadius) { const force = (evadeRadius - d) * evadeForce; vx += dx / (d || 1) * force; vz += dz / (d || 1) * force; near++; } }
     for (const b of s.projectiles) if (b.hostile) { const dx = p.x - b.x, dz = p.z - b.z, d = Math.hypot(dx, dz); if (d < 3) { vx += dx / (d || 1) * (3 - d); vz += dz / (d || 1) * (3 - d); } }

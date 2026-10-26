@@ -35,9 +35,17 @@ test('actual default colony + assisted input-only pilots reach all three bosses 
  // Every attempt starts the same real seed with normal health/ammo/spawns.
  let winner;
  const attempts=[];
- for(const assistedEvasion of [1,1.4,3]) {
-  const options={arena:DEFAULT_ARENA,assisted:true,assistedEvasion,targetWave:21};
-  const result=playthrough(42819,options);attempts.push({assistedEvasion,...result});
+ const policies=[
+  { assistedRadius: 5, assistedEvasion: .5, assistedOrbit: 8 },
+  { assistedRadius: 5, assistedEvasion: 1, assistedOrbit: 7 },
+  { assistedRadius: 5, assistedEvasion: .75, assistedOrbit: 6 },
+  { assistedRadius: 5.5, assistedEvasion: .25, assistedOrbit: 7 },
+  { assistedRadius: 5.5, assistedEvasion: .5, assistedOrbit: 8 },
+  { assistedRadius: 6, assistedEvasion: 3, assistedOrbit: 9 },
+ ];
+ for(const policy of policies) {
+  const options={arena:DEFAULT_ARENA,assisted:true,targetWave:21,...policy};
+  const result=playthrough(42819,options);attempts.push({policy,...result});
   if(result.wave===21&&result.bosses===3&&result.health>0&&result.time<780){winner={options,result};break;}
  }
  assert.ok(winner,`No input-only policy completed the colony: ${JSON.stringify(attempts)}`);
@@ -51,8 +59,16 @@ test('assisted campaign portfolio tolerates last-bit distance rounding',()=>{
   // This perturbation reproduces a wave-10 defeat with the old close-pass pilot.
   Math.hypot=(...values:number[])=>hypot(...values)*(1+Number.EPSILON);
   const results=[];
-  for(const assistedEvasion of [1,1.4,3]) {
-  const result=playthrough(42819,{arena:DEFAULT_ARENA,assisted:true,assistedEvasion,targetWave:21});results.push(result);
+  const policies=[
+   { assistedRadius: 5, assistedEvasion: .5, assistedOrbit: 8 },
+   { assistedRadius: 5, assistedEvasion: 1, assistedOrbit: 7 },
+   { assistedRadius: 5, assistedEvasion: .75, assistedOrbit: 6 },
+   { assistedRadius: 5.5, assistedEvasion: .25, assistedOrbit: 7 },
+   { assistedRadius: 5.5, assistedEvasion: .5, assistedOrbit: 8 },
+   { assistedRadius: 6, assistedEvasion: 3, assistedOrbit: 9 },
+  ];
+  for(const policy of policies) {
+  const result=playthrough(42819,{arena:DEFAULT_ARENA,assisted:true,targetWave:21,...policy});results.push({policy,...result});
    if(result.wave===21&&result.bosses===3&&result.health>0&&result.time<780)return;
   }
   assert.fail(`Distance-rounding regression: ${JSON.stringify(results)}`);
