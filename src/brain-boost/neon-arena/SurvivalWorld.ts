@@ -330,7 +330,17 @@ export class SurvivalWorld {
         this.instance(this.legs, lc++, x, r * (claw ? .72 : .32), z, r * (claw ? 1.2 : .9), r * (claw ? .18 : .12), r * .14, a + side * (claw ? -.8 : .35 + row * .35));
         this.instance(this.legs, lc++, x + Math.cos(a) * side * r * .45, r * .13, z - Math.sin(a) * side * r * .45, r * (claw ? .85 : .48), r * .13, r * (claw ? .22 : .13), a - side * (claw ? 1.3 : .5));
       }
-      for (let j = 0; j < 3; j++) this.instance(this.plates, pc++, e.x + Math.sin(a) * (j - 1) * r * .6, r * 1.1, e.z + Math.cos(a) * (j - 1) * r * .6, r * .45, r * (e.boss ? 1.2 : .5), r * .5, a);
+      for (let j = 0; j < 3; j++) {
+        const dorsal = j - 1;
+        const stalkerBlade = mantis && j > 0;
+        const spitterCrest = acid && j !== 1;
+        const plateY = stalkerBlade ? .58 + Math.abs(dorsal) * .12 : spitterCrest ? .98 : 1.1;
+        const plateX = stalkerBlade ? dorsal * .72 : dorsal * .6;
+        const plateZ = stalkerBlade ? -.05 : dorsal * .6;
+        const plateScale = stalkerBlade ? .26 : spitterCrest ? .3 : .45;
+        this.instance(this.plates, pc++, e.x + Math.cos(a) * plateX * r + Math.sin(a) * plateZ * r, plateY * r + bob, e.z - Math.sin(a) * plateX * r + Math.cos(a) * plateZ * r, plateScale * r, r * (stalkerBlade ? .9 : e.boss ? 1.2 : .5), (stalkerBlade ? .18 : spitterCrest ? .32 : .5) * r, a + (stalkerBlade ? (dorsal < 0 ? -.55 : .55) : 0), stalkerBlade ? (dorsal < 0 ? -.35 : .35) : 0);
+        this.plates.setColorAt(pc - 1, this.color.setHex(flash ? 0xffffff : stalkerBlade ? 0xc23567 : spitterCrest ? 0x75e84e : e.boss ? 0x8d3151 : 0x4a2930));
+      }
       if (e.boss) for (let j = 0; j < 6; j++) {
         const angle = j * Math.PI / 3 + (e.kind === 'sovereign' && !this.reduced ? t * .7 : a);
         const distance = r * (e.kind === 'sovereign' ? 1.85 : 1.1);
@@ -340,7 +350,7 @@ export class SurvivalWorld {
       }
       if (e.warning > 0) { this.instance(this.warnings, wc++, e.x, .09, e.z, r * 1.8, r * 1.8, r * 1.8, 0, -Math.PI / 2); }
     }
-    this.finish(this.body, count, true); this.finish(this.heads, count, true); this.finish(this.cores, count, true); this.finish(this.fangs, fangCount); this.finish(this.legs, lc); this.finish(this.plates, pc); this.finish(this.warnings, wc);
+    this.finish(this.body, count, true); this.finish(this.heads, count, true); this.finish(this.cores, count, true); this.finish(this.fangs, fangCount); this.finish(this.legs, lc); this.finish(this.plates, pc, true); this.finish(this.warnings, wc);
     this.finish(this.bossParts, bossCount, true); this.finish(this.thoraxes, count, true); this.finish(this.feelers, fc); this.finish(this.eyes, ec, true); this.finish(this.elytra, shellCount, true); this.finish(this.spines, spineCount, true); this.finish(this.sacs, sacCount, true);
     this.finish(this.enemyShadows, shadowCount);
     let rc = 0;
