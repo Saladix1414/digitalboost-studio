@@ -241,6 +241,13 @@ export class SurvivalWorld {
   draw(s: GameSimulation) {
     this.setMapPhase(s.mapPhase);
     const t = s.elapsed, dt = Math.max(0, Math.min(.1, t - this.lastTime)); this.lastTime = t;
+    const living = s.players.filter(p => p.health > 0);
+    const critical = living.length > 0 && living.some(p => p.health < 32);
+    const fog = this.scene.fog;
+    if (fog instanceof THREE.FogExp2) {
+      const tension = critical ? .0019 : s.phase === 'GAME_OVER' ? .0012 : 0;
+      fog.density = .008 + tension + (!this.reduced ? Math.sin(t * .7) * .00035 : 0);
+    }
     this.marineViews.forEach((view, i) => {
       const p = s.players[i]; view.body.visible = !!p; view.torch.visible = !!p; view.flash.visible = !!p;
       if (!p) { view.flame.visible = view.shock.visible = false; return; }
@@ -254,7 +261,10 @@ export class SurvivalWorld {
       view.suit.emissive.setHex(p.health <= 0 ? 0 : p.invulnerable > 0 ? 0x993311 : p.shield > 0 ? 0x116677 : 0); view.suit.emissiveIntensity = .5;
       const moving = s.phase === 'PLAYING' && p.health > 0 && Math.hypot(p.x - frame.lastPlayer.x, p.z - frame.lastPlayer.y) > .001; frame.lastPlayer.set(p.x, p.z);
       view.boots.forEach((boot, j) => { boot.position.z = -.45 + (this.reduced || !moving ? 0 : Math.sin(t * 13 + j * Math.PI) * .16); });
+      const flicker = this.reduced ? 1 : 1 + Math.sin(t * 17 + i * 2.7) * .045 + Math.sin(t * 31 + i) * .025;
       view.torch.position.set(follow.x, 4, follow.z);
+      view.torch.intensity = (critical ? 15 : 11) * flicker;
+      view.torch.distance = critical ? 11.5 : 14;
     });
     let shadows = 0;
     for (const o of this.arena.obstacles) this.instance(this.contact, shadows++, o.x + .15, .025, o.z + .1, o.radius * 1.15, o.radius * 1.15, 1, 0, -Math.PI / 2);
