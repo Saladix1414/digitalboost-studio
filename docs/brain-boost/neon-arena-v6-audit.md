@@ -131,3 +131,20 @@ munición ni crear una autoridad de estado paralela en React.
 
 No se propone crear una aplicación nueva, otro renderer, un segundo motor de
 simulación, multijugador en red ni un selector de biomas prematuro.
+
+## Estado de implementación V6
+
+La primera unidad V6 ya está integrada:
+
+- `38789bd`: la colonia usa encuentros en `5, 12, 20, 29, 39, 50...`; Legacy
+  conserva la cadencia histórica para sus regresiones.
+- `e68d97f`: la barra de armas muestra tecla, nombre corto, munición y selección
+  activa durante el combate, con soporte táctil y cooperativo.
+- `465ad80`: las criaturas reciben núcleos luminosos por familia y colmillos
+  instanciados para reforzar sus siluetas de ataque.
+
+La campaña Colony se extendió a la oleada 21 para comprobar los tres primeros
+jefes en la nueva cadencia. La validación actual es 94/94 pruebas, typecheck y
+build PASS. El aviso de chunks grandes existente se conserva. La comprobación
+visual final en el teléfono sigue siendo necesaria para ajustar tamaño de la barra,
+legibilidad de las criaturas y rendimiento sostenido.
