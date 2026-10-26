@@ -393,16 +393,25 @@ export default function BrainBoostLandingSection() {
               ))}
             </div>
             <div className="mt-4 border-t border-white/10 pt-4">
-              <div data-brain-boost-nightmare="" className="relative w-full overflow-hidden rounded-xl border border-violet-300/50 bg-gradient-to-br from-violet-500/[0.24] via-violet-500/[0.12] to-fuchsia-500/[0.18] p-4 lg:px-0 shadow-[0_0_24px_rgba(139,92,246,.13)]">
+              <div data-brain-boost-nightmare="" className="relative w-full overflow-hidden rounded-xl border border-rose-300/55 bg-gradient-to-br from-[#2b1020] via-[#17122d] to-[#071b2f] p-4 shadow-[0_0_30px_rgba(255,23,68,.16),inset_0_1px_0_rgba(255,255,255,.08)]">
+                <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-rose-500/20 blur-2xl" />
+                <div className="relative flex items-center gap-3">
+                  <GameMiniature id="neon-arena" />
+                  <div className="min-w-0">
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-rose-200">FOCUS LAB / FLAGSHIP MODE</p>
+                    <p className="mt-1 text-xs font-black uppercase tracking-wide text-white">Nightmare Protocolo</p>
+                    <p className="mt-1 text-[9px] leading-4 text-rose-100/75">Horda alienígena · armas · bosses · sectores</p>
+                  </div>
+                </div>
                 <button
                   type="button"
                   aria-describedby="nightmare-protocolo-label"
                   onClick={() => openCategory(nightmareCategory)}
-                  className="mx-auto block min-h-[66px] w-[206px] max-w-full rounded-lg border border-violet-200/40 bg-violet-300/[0.08] px-3 py-3 text-sm font-black text-violet-100 transition duration-200 hover:border-violet-200 hover:bg-violet-300/[0.16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 motion-reduce:transition-none"
+                  className="relative mt-4 block min-h-[48px] w-full rounded-lg border border-rose-200/55 bg-rose-300/[0.10] px-3 py-3 text-left text-xs font-black uppercase tracking-[0.12em] text-rose-50 transition duration-200 hover:border-rose-100 hover:bg-rose-300/[0.18] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-200 motion-reduce:transition-none"
                 >
-                  Nightmare Protocolo
+                  Entrar en Nightmare Protocolo <span className="float-right text-rose-200">→</span>
                 </button>
-                <span id="nightmare-protocolo-label" className="mt-3 block text-center text-[9px] font-bold uppercase leading-5 tracking-wider text-violet-200">HORROR · SUPERVIVENCIA · PSICOLÓGICO</span>
+                <span id="nightmare-protocolo-label" className="mt-3 block text-center text-[9px] font-bold uppercase leading-5 tracking-wider text-rose-200">HORROR · SUPERVIVENCIA · PSICOLÓGICO</span>
               </div>
             </div>
           </nav>

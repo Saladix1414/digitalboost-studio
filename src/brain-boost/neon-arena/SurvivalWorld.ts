@@ -17,7 +17,7 @@ export class SurvivalWorld {
   private bossParts!: THREE.InstancedMesh;
   private thoraxes!: THREE.InstancedMesh; private feelers!: THREE.InstancedMesh; private eyes!: THREE.InstancedMesh; private elytra!: THREE.InstancedMesh; private cores!: THREE.InstancedMesh; private fangs!: THREE.InstancedMesh; private spines!: THREE.InstancedMesh; private sacs!: THREE.InstancedMesh; private reticles!: THREE.InstancedMesh; private fragments!: THREE.InstancedMesh;
   private items!: THREE.InstancedMesh; private crosses!: THREE.InstancedMesh; private dropMedkits!: THREE.InstancedMesh; private dropArmor!: THREE.InstancedMesh; private dropAmmo!: THREE.InstancedMesh; private dropGrenades!: THREE.InstancedMesh; private bullets!: THREE.InstancedMesh; private warnings!: THREE.InstancedMesh;
-  private stains!: THREE.InstancedMesh; private blasts!: THREE.InstancedMesh; private trails!: THREE.LineSegments; private flame!: THREE.Mesh; private shock!: THREE.Mesh;
+  private stains!: THREE.InstancedMesh; private enemyShadows!: THREE.InstancedMesh; private blasts!: THREE.InstancedMesh; private trails!: THREE.LineSegments; private flame!: THREE.Mesh; private shock!: THREE.Mesh;
   private torch = new THREE.PointLight(0xbde9cf, 12, 14, 1.8); private flash = new THREE.PointLight(0xff9c35, 0, 9, 2);
   private lastTime = 0; private steam!: THREE.Points; private contact!: THREE.InstancedMesh;
   private contamination!: THREE.InstancedMesh; private roots!: THREE.InstancedMesh; private eggs!: THREE.InstancedMesh;
@@ -193,6 +193,7 @@ export class SurvivalWorld {
     this.bullets = this.pool(sphere, this.mat(new THREE.MeshBasicMaterial({ color: 0xffffff })), CONFIG.maxProjectiles);
     this.warnings = this.pool(this.geo(new THREE.RingGeometry(.88, 1, 32)), this.mat(new THREE.MeshBasicMaterial({ color: 0xff4a25, side: THREE.DoubleSide, transparent: true, opacity: .8 })), CONFIG.maxEnemies);
     this.stains = this.pool(this.geo(new THREE.CircleGeometry(1, 9)), this.mat(new THREE.MeshBasicMaterial({ color: 0x542c1e, transparent: true, opacity: .48, depthWrite: false })), 80);
+    this.enemyShadows = this.pool(this.geo(new THREE.CircleGeometry(1, 16)), this.mat(new THREE.MeshBasicMaterial({ color: 0x020608, transparent: true, opacity: .38, depthWrite: false })), CONFIG.maxEnemies);
     this.blasts = this.pool(sphere, this.mat(new THREE.MeshBasicMaterial({ color: 0xff9922, transparent: true, opacity: .4, depthWrite: false, blending: THREE.AdditiveBlending })), CONFIG.maxEvents);
     this.shock = this.mesh(this.geo(new THREE.TorusGeometry(1, .04, 5, 64)), cyan, this.scene); this.shock.rotation.x = Math.PI / 2;
     this.flame = this.mesh(this.geo(new THREE.ConeGeometry(2.8, 6, 12, 1, true)), this.mat(new THREE.MeshBasicMaterial({ color: 0xff8d24, transparent: true, opacity: .36, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })), this.scene);
@@ -254,7 +255,7 @@ export class SurvivalWorld {
     this.finish(this.contact, shadows);
     const steamPosition = this.steam.geometry.getAttribute('position') as THREE.BufferAttribute;
     for (let i = 0; i < 32; i++) { const side = i % 4, a = side * Math.PI / 2, along = Math.sin(Math.floor(i / 4) * 3.9) * (this.arena.wall - 1), rise = this.reduced ? (i % 5) * .2 : (t * .35 + i * .17) % 2; steamPosition.setXYZ(i, Math.cos(a) * along - Math.sin(a) * (this.arena.wall - .8) + Math.sin(i + rise) * .25, .4 + rise, -Math.sin(a) * along - Math.cos(a) * (this.arena.wall - .8)); } steamPosition.needsUpdate = true;
-    let count = 0, lc = 0, pc = 0, wc = 0, bossCount = 0, fc = 0, fangCount = 0, ec = 0, shellCount = 0, spineCount = 0, sacCount = 0;
+    let count = 0, lc = 0, pc = 0, wc = 0, bossCount = 0, fc = 0, fangCount = 0, ec = 0, shellCount = 0, spineCount = 0, sacCount = 0, shadowCount = 0;
     for (const e of s.enemies) {
       const scale = e.state === 'DYING' ? Math.max(.01, 1 - e.age / .35) : e.state === 'SPAWNING' ? Math.min(1, e.age / .65) : 1;
       const target = s.nearestPlayer(e.x, e.z);
@@ -262,6 +263,7 @@ export class SurvivalWorld {
       // spines and acid sacs remain readable beside the HUD.
       const visualScale = e.boss ? 1.14 : 1.28;
       const r = e.radius * scale * visualScale, a = Math.atan2(target.x - e.x, target.z - e.z);
+      this.instance(this.enemyShadows, shadowCount++, e.x, .025, e.z, r * 1.3, r * .42, r * 1.3, a, -Math.PI / 2);
       const beetle = e.kind === 'carapace' || e.kind === 'maw', mantis = e.kind === 'stalker', acid = e.kind === 'spitter' || e.kind === 'brood';
       const flash = !this.reduced && e.hitFlash > 0;
       const color = flash ? 0xfff3d3 : e.burn > 0 ? 0xe68524 : beetle ? 0x75413d : acid ? 0x4f873c : mantis ? 0x71364d : e.boss ? 0x60306f : 0x8c7656;
@@ -289,7 +291,7 @@ export class SurvivalWorld {
         this.spines.setColorAt(spineCount++, this.color.setHex(flash ? 0xffffff : e.boss ? 0xa95a76 : 0x4a2930));
       }
       for (const side of [-1, 1]) {
-        const jaw = mantis || beetle;
+        const jaw = mantis || beetle || e.kind === 'skitter';
         if (jaw) this.instance(this.fangs, fangCount++, e.x + Math.cos(a) * side * r * .2 + Math.sin(a) * r * 1.48, r * .42, e.z - Math.sin(a) * side * r * .2 + Math.cos(a) * r * 1.48, r * (mantis ? .11 : .16), r * (mantis ? .42 : .28), r * .11, a + side * .38, mantis ? -.35 : -.15);
       }
       for (const side of [-1, 1]) {
@@ -330,6 +332,7 @@ export class SurvivalWorld {
     }
     this.finish(this.body, count, true); this.finish(this.heads, count, true); this.finish(this.cores, count, true); this.finish(this.fangs, fangCount); this.finish(this.legs, lc); this.finish(this.plates, pc); this.finish(this.warnings, wc);
     this.finish(this.bossParts, bossCount, true); this.finish(this.thoraxes, count, true); this.finish(this.feelers, fc); this.finish(this.eyes, ec, true); this.finish(this.elytra, shellCount, true); this.finish(this.spines, spineCount, true); this.finish(this.sacs, sacCount, true);
+    this.finish(this.enemyShadows, shadowCount);
     let rc = 0;
     for (const p of s.players) {
       const target = s.enemies.find(e => e.id === p.targetId && e.state === 'ADVANCING');
