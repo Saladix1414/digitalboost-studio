@@ -720,6 +720,7 @@ function scheduleSurvivalStep(state: BrainBoostMusicState, step: number, at: num
   if (mood === "danger" && pos % 4 === 2) cyberTone(c, out, 74 + (pos % 8 ? 1 : 0), at, .16, .02, "sine");
   if (mood === "boss" && pos % 2 === 1) cyberTone(c, out, root + (pos % 4 === 1 ? 12 : 19), at, .075, .04, "sawtooth");
   if (mood === "victory" && pos % 4 === 0) cyberTone(c, out, [62, 65, 69, 74][pos / 4], at, .3, .035, "triangle");
+  if (mood === "defeat" && pos % 4 === 0) cyberTone(c, out, [62, 58, 53, 50][pos / 4], at, .42, .028, "sine");
 }
 
 const survivalSfxTimes = new Map<string, number>();

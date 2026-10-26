@@ -61,7 +61,7 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
     if (!audio || !musicActive || error) { stopBrainBoostMusic('neon-arena'); return; }
     startBrainBoostMusic('neon-arena'); return () => stopBrainBoostMusic('neon-arena');
   }, [audio, musicActive, error]);
-  useEffect(() => { setNeonSurvivalMood(snapshot.boss ? 'boss' : danger ? 'danger' : snapshot.phase === 'WAVE_TRANSITION' ? 'victory' : snapshot.wave >= 2 ? 'horde' : 'start'); }, [snapshot.boss?.name, danger, snapshot.phase, snapshot.wave]);
+  useEffect(() => { setNeonSurvivalMood(snapshot.phase === 'GAME_OVER' ? 'defeat' : snapshot.boss ? 'boss' : danger ? 'danger' : snapshot.phase === 'WAVE_TRANSITION' ? 'victory' : snapshot.wave >= 2 ? 'horde' : 'start'); }, [snapshot.boss?.name, danger, snapshot.phase, snapshot.wave]);
   const warning = snapshot.boss?.warning;
   useEffect(() => { if (warning && musicActive) playNeonSurvivalSfx('warning'); }, [warning, musicActive]);
   useEffect(() => { if (!notice) return; const id = window.setTimeout(() => setNotice(''), 4500); return () => clearTimeout(id); }, [notice]);

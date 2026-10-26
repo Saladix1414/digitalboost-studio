@@ -1,4 +1,4 @@
-export type ScoreMood = 'start' | 'horde' | 'danger' | 'boss' | 'victory';
+export type ScoreMood = 'start' | 'horde' | 'danger' | 'boss' | 'victory' | 'defeat';
 export type ScoreStatus = 'idle' | 'loading' | 'score' | 'fallback';
 export const SCORE = Object.freeze({ bpm: 128, bars: 8, loopSeconds: 15, names: ['atmosphere', 'bass', 'percussion', 'tension'] as const });
 let status: ScoreStatus = 'idle';
@@ -10,6 +10,7 @@ export function setContainmentStatus(value: ScoreStatus) { if (status === value)
 export function scoreGains(mood: ScoreMood, bar: number) {
   const phrase = Math.floor(Math.max(0, bar) / 8) % 4;
   if (mood === 'start') return [.4, phrase % 2 ? .15 : .08, .12, 0];
+  if (mood === 'defeat') return [.28, .08, 0, .18];
   if (mood === 'victory') return [.36, .12, .06, .08];
   if (mood === 'boss') return [.22, .4, .58, phrase === 2 ? .23 : .36];
   if (mood === 'danger') return [.26, .3, .4, .27];

@@ -3,9 +3,10 @@ import test from 'node:test';
 import { ContainmentTransport, SCORE, scoreGains } from '../../src/brain-boost/neon-arena/ContainmentScore.ts';
 test('score arrangement has finite headroom, meaningful moods and four distinct horde phrases',()=>{
  assert.equal(SCORE.loopSeconds,60/SCORE.bpm*4*SCORE.bars);
- for(const mood of ['start','horde','danger','boss','victory'] as const)for(let bar=0;bar<64;bar++)for(const gain of scoreGains(mood,bar))assert.ok(Number.isFinite(gain)&&gain>=0&&gain<=.6);
+ for(const mood of ['start','horde','danger','boss','victory','defeat'] as const)for(let bar=0;bar<64;bar++)for(const gain of scoreGains(mood,bar))assert.ok(Number.isFinite(gain)&&gain>=0&&gain<=.6);
  assert.equal(new Set([0,8,16,24].map(bar=>JSON.stringify(scoreGains('horde',bar)))).size,4);
  assert.ok(scoreGains('boss',0)[2]>scoreGains('start',0)[2]);assert.ok(scoreGains('danger',0)[3]>scoreGains('start',0)[3]);
+ assert.equal(scoreGains('defeat',0)[2],0);assert.ok(scoreGains('defeat',0)[3]>0);
 });
 test('one transport starts four synchronized loops, retains resume phase, and stops sources once',()=>{
  const starts:number[][]=[],stops:number[][]=[],gains:number[][]=[];
