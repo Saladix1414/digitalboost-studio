@@ -31,7 +31,7 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
   const [musicStatus, setMusicStatus] = useState(getContainmentStatus), [musicVolume, setMusicVolume] = useState(getBrainBoostMusicVolume);
   const [quality, setQuality] = useState<'auto' | 'low' | 'high'>('auto'), [diagnostics, setDiagnostics] = useState(false), [metrics, setMetrics] = useState<ArenaDiagnostics | null>(null);
   const [remains, setRemains] = useState(true), [notice, setNotice] = useState('');
-  const progressRef = useRef(progress), resultSaved = useRef(false);
+  const progressRef = useRef(progress), resultSaved = useRef(false), bossPhaseRef = useRef(0);
   const coop = playerCount === 2, musicActive = snapshot.phase === 'PLAYING' || snapshot.phase === 'WAVE_TRANSITION';
   const view = useImmersiveArena(root, musicActive, () => engine.current?.pause());
   const exit = () => { view.leave(false); onExit(); };
@@ -66,6 +66,15 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
   useEffect(() => { setNeonSurvivalMood(snapshot.phase === 'GAME_OVER' ? 'defeat' : snapshot.boss ? 'boss' : danger ? 'danger' : snapshot.phase === 'WAVE_TRANSITION' ? 'victory' : snapshot.wave >= 2 ? 'horde' : 'start'); }, [snapshot.boss?.name, danger, snapshot.phase, snapshot.wave]);
   const warning = snapshot.boss?.warning;
   useEffect(() => { if (warning && musicActive) playNeonSurvivalSfx('warning'); }, [warning, musicActive]);
+  useEffect(() => {
+    const phase = snapshot.boss?.phase ?? 0;
+    if (phase === 2 && bossPhaseRef.current !== 2 && snapshot.boss && musicActive) {
+      playNeonCreatureSfx(snapshot.boss.name, 'boss'); playNeonSurvivalSfx('warning');
+      setNotice('FASE CRÍTICA · EL JEFE ALTERÓ SU PATRÓN');
+    }
+    bossPhaseRef.current = phase;
+    if (!snapshot.boss) bossPhaseRef.current = 0;
+  }, [snapshot.boss?.name, snapshot.boss?.phase, musicActive]);
   useEffect(() => { if (!notice) return; const id = window.setTimeout(() => setNotice(''), 4500); return () => clearTimeout(id); }, [notice]);
   useEffect(() => {
     if (['READY', 'PAUSED', 'GAME_OVER'].includes(snapshot.phase)) startButton.current?.focus({ preventScroll: true });
