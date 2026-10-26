@@ -432,7 +432,9 @@ export class SurvivalWorld {
     for (const event of s.events) {
       if (event.kind === 'kill' && event.id > this.lastEvent) { this.corpses.push({ x: event.x, z: event.z, born: t, id: event.id }); }
       if (event.kind === 'kill' && event.age < .3) {
-        const age = event.age, pieces = this.reduced ? 2 : 6;
+        // Keep the effect pools visually dense without flooding mobile GPUs
+        // when a late wave already contains a large active horde.
+        const age = event.age, pieces = this.reduced ? 2 : s.enemies.length > 150 ? 3 : s.enemies.length > 90 ? 4 : 6;
         for (let j = 0; j < pieces; j++) {
           const a = j * Math.PI / 3 + event.id, distance = age * (2.5 + j % 3);
           const size = Math.max(.01, .11 * (1 - age / .3));
