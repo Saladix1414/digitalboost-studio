@@ -44,7 +44,7 @@ export class NeonArenaEngine {
     this.modes.forEach((mode, i) => this.simulation.setAimMode(mode, i)); this.releaseInputs(); this.configureComposer(); this.resize(); this.world.draw(this.simulation); this.notify(this.simulation.snapshot()); return true;
   }
   setMode(mode: AimMode, playerId = 0) { if (playerId < 0 || playerId > 1) return; this.modes[playerId] = mode; this.simulation.setAimMode(mode, playerId); this.releaseInputs(); }
-  setQuality(quality: 'auto' | 'low' | 'high') { this.low = quality === 'low' || quality === 'auto' && matchMedia('(pointer: coarse)').matches || this.reduced; this.resolution = 1; this.configureComposer(); this.resize(); }
+  setQuality(quality: 'auto' | 'low' | 'high' | 'horde') { this.low = quality === 'low' || quality === 'horde' || quality === 'auto' && matchMedia('(pointer: coarse)').matches || this.reduced; this.resolution = quality === 'horde' ? .78 : 1; this.configureComposer(); this.resize(); }
   setDiagnostics(enabled: boolean) { this.diagnostics = enabled; this.metrics.reset(); if (!enabled) this.options.onDiagnostics?.(null); }
   setRemains(enabled: boolean) { this.world.setRemains(enabled); this.needsRender = true; }
   private cycle(playerId: number) {
