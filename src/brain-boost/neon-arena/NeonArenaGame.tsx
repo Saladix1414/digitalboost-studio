@@ -113,7 +113,7 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
       {metrics && diagnostics && <output className="na-diagnostics">{Math.round(metrics.fps)} FPS · p95 {metrics.frameP95.toFixed(1)}ms · CPU update {metrics.updateMs.toFixed(1)}ms / render {metrics.renderMs.toFixed(1)}ms<br />{metrics.calls} draws · {metrics.triangles} tris · G {metrics.geometries} / T {metrics.textures} · {metrics.enemies} enemigos</output>}
       {danger && active && <div className="na-warning" role="status">SALUD CRÍTICA · BUSCÁ UN BOTIQUÍN</div>}
       {notice && <div className="na-notice" role="status">{notice}</div>}
-      {snapshot.phase === 'WAVE_TRANSITION' && !error && <div className="na-wave" role="status">OLEADA {snapshot.wave} SUPERADA<small>{coop ? 'Los marines caídos regresan con 35 de salud.' : 'Respirá. La siguiente horda se acerca.'}</small></div>}
+      {snapshot.phase === 'WAVE_TRANSITION' && !error && <div className="na-wave" role="status"><b>OLEADA {snapshot.wave} SUPERADA</b><small>{coop ? 'Los marines caídos regresan con 35 de salud.' : 'Respirá. La siguiente horda se acerca.'}</small><em>REARME DISPONIBLE · REVISÁ TU ARSENAL ABAJO</em></div>}
       {(error || ['LOADING', 'READY', 'PAUSED', 'GAME_OVER'].includes(snapshot.phase)) && <div className="na-overlay"><div className="na-menu">
         <p className="na-eyebrow">{error ? 'SISTEMA GRÁFICO' : snapshot.phase === 'GAME_OVER' ? coop ? 'ESCUADRÓN PERDIDO' : 'SEÑAL DEL MARINE PERDIDA' : 'DIGITALBOOST / ALIEN HORDE SURVIVAL'}</p>
         <h4>{error ? 'Escena no disponible' : snapshot.phase === 'PAUSED' ? 'En pausa' : snapshot.phase === 'GAME_OVER' ? 'La horda ganó' : coop ? 'SOBREVIVAN JUNTOS' : 'SOBREVIVÍ AL NIDO'}</h4>
