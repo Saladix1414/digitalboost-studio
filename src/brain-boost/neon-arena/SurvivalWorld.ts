@@ -258,7 +258,10 @@ export class SurvivalWorld {
     for (const e of s.enemies) {
       const scale = e.state === 'DYING' ? Math.max(.01, 1 - e.age / .35) : e.state === 'SPAWNING' ? Math.min(1, e.age / .65) : 1;
       const target = s.nearestPlayer(e.x, e.z);
-      const r = e.radius * scale, a = Math.atan2(target.x - e.x, target.z - e.z);
+      // Mobile top-down cameras need extra silhouette scale so mandibles,
+      // spines and acid sacs remain readable beside the HUD.
+      const visualScale = e.boss ? 1.14 : 1.28;
+      const r = e.radius * scale * visualScale, a = Math.atan2(target.x - e.x, target.z - e.z);
       const beetle = e.kind === 'carapace' || e.kind === 'maw', mantis = e.kind === 'stalker', acid = e.kind === 'spitter' || e.kind === 'brood';
       const flash = !this.reduced && e.hitFlash > 0;
       const color = flash ? 0xfff3d3 : e.burn > 0 ? 0xe68524 : beetle ? 0x75413d : acid ? 0x4f873c : mantis ? 0x71364d : e.boss ? 0x60306f : 0x8c7656;
@@ -406,6 +409,7 @@ export class SurvivalWorld {
       view.flame.scale.set(.82 * flamePulse, .9 + flamePulse * .18, .82 * flamePulse);
       view.flame.position.set(p.x + Math.cos(p.fireAngle) * flameReach, .7 + (this.reduced ? 0 : Math.sin(t * 42 + i) * .05), p.z + Math.sin(p.fireAngle) * flameReach);
       view.flame.quaternion.setFromUnitVectors(this.up, this.flameAxis.set(-Math.cos(p.fireAngle), 0, -Math.sin(p.fireAngle)));
+      if (!this.reduced && flaming[i]) view.flame.rotateZ(Math.sin(t * 29 + i) * .08);
       view.shock.visible = p.health > 0 && p.shockAge >= 0; view.shock.position.set(p.shockOrigin.x, .1, p.shockOrigin.z); view.shock.scale.setScalar(Math.max(.01, s.shockRadiusFor(p)));
     }
 

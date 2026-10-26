@@ -54,6 +54,10 @@ export class NeonArenaEngine {
   private bind(canvas: HTMLCanvasElement) {
     const stage = this.host.parentElement!;
     const listen = (target: EventTarget, name: string, fn: EventListener) => { target.addEventListener(name, fn); this.cleanup.push(() => target.removeEventListener(name, fn)); };
+    // Long-pressing FIRE on Android must stay inside the game. Without these
+    // guards Chrome opens its page context menu and cancels the held pointer.
+    const consumeBrowserGesture = (e: Event) => { e.preventDefault(); };
+    for (const event of ['contextmenu', 'selectstart', 'dragstart', 'gesturestart']) listen(stage, event, consumeBrowserGesture);
     const playerAt = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
       const i = this.world.viewports.findIndex(v => x >= v.x && x < v.x + v.width && y >= v.y && y < v.y + v.height); return Math.max(0, i);
