@@ -1691,3 +1691,38 @@
   right: 7px;
   transform: none;
 }
+
+/* IA_FORGE_ARCADE_POP_NEAR_ISLANDS_BACKDROP */
+.ia-forge__sidebar-art::before,
+.ia-forge__sidebar-art::after,
+.ia-forge__skyship::before,
+.ia-forge__skyship::after {
+  content: none !important;
+  display: none !important;
+}
+
+@media (max-aspect-ratio: 4 / 5) {
+  .ia-forge__workspace::before {
+    background-image: url("/ia-forge/sky-islands-near.webp") !important;
+    background-size: 100% 100% !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    opacity: 1 !important;
+  }
+
+  .ia-forge__sidebar {
+    background: linear-gradient(
+      180deg,
+      rgba(236, 249, 255, 0.38),
+      rgba(247, 252, 255, 0.5)
+    ) !important;
+  }
+
+  .ia-forge__inspector {
+    background: linear-gradient(
+      180deg,
+      rgba(238, 248, 255, 0.48),
+      rgba(249, 252, 255, 0.62)
+    ) !important;
+  }
+}
