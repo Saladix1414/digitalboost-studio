@@ -1633,3 +1633,61 @@
   bottom: 0 !important;
   height: 34% !important;
 }
+
+/* IA_FORGE_ARCADE_POP_CLOUD_SHAPES */
+.ia-forge__sidebar-art,
+.ia-forge__skyship {
+  overflow: visible !important;
+}
+
+.ia-forge__sidebar-art::before,
+.ia-forge__skyship::before {
+  width: min(92%, 190px);
+  height: 22px;
+  bottom: 2% !important;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffffff 0%, #f2faff 100%);
+  box-shadow:
+    -27px -5px 0 -5px #ffffff,
+    -8px -10px 0 -7px #f8fcff,
+    20px -7px 0 -2px #ffffff,
+    42px -2px 0 -7px #f3faff;
+  filter: drop-shadow(0 -3px 7px rgba(74, 145, 194, 0.32)) !important;
+  opacity: 1 !important;
+}
+
+.ia-forge__sidebar-art::after {
+  width: 76%;
+  height: 13px !important;
+  bottom: 0 !important;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow:
+    -22px -3px 0 -4px #ffffff,
+    18px -4px 0 -3px #f7fcff,
+    39px 0 0 -5px #ffffff;
+}
+
+.ia-forge__skyship::before {
+  width: min(58%, 154px);
+  height: 21px;
+  bottom: 2% !important;
+  left: auto;
+  right: 2px;
+  transform: none;
+}
+
+.ia-forge__skyship::after {
+  width: min(48%, 126px);
+  height: 12px !important;
+  bottom: 0 !important;
+  left: auto;
+  right: 7px;
+  transform: none;
+}
