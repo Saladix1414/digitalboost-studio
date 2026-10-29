@@ -1926,3 +1926,45 @@
     height: 45px;
   }
 }
+
+/* IA_FORGE_ARCADE_POP_RESPONSIVE_TOOLING_V2 */
+.ia-forge__create-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.ia-forge__create-card {
+  grid-column: span 2;
+  touch-action: manipulation;
+}
+
+.ia-forge__create-card:nth-child(4) {
+  grid-column: 2 / span 2;
+}
+
+.ia-forge__create-card:nth-child(5) {
+  grid-column: 4 / span 2;
+}
+
+.ia-forge__nav-item:not(.ia-forge__nav-item--active) {
+  background: rgba(244, 250, 255, 0.68);
+  text-shadow: 0 1px rgba(255, 255, 255, 0.9);
+}
+
+.ia-forge__inspector-head,
+.ia-forge__inspector-block {
+  background-color: rgba(244, 250, 255, 0.78);
+}
+
+@media (max-width: 620px) {
+  .ia-forge__create-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .ia-forge__create-card {
+    grid-column: span 2;
+  }
+
+  .ia-forge__create-card:nth-child(5) {
+    grid-column: 2 / span 2;
+  }
+}
