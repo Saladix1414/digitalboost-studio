@@ -1726,3 +1726,10 @@
     ) !important;
   }
 }
+
+/* IA_FORGE_ARCADE_POP_ROBOT_CITY_VARIANT_2 */
+@media (max-aspect-ratio: 4 / 5) {
+  .ia-forge__workspace::before {
+    background-image: url("/ia-forge/sky-islands-robotic-city-v2.webp") !important;
+  }
+}
