@@ -2020,3 +2020,66 @@
     ) !important;
   }
 }
+
+/* IA_FORGE_ARCADE_POP_DETAIL_POLISH_V1 */
+@media (max-aspect-ratio: 4 / 5) {
+  .ia-forge::before {
+    background-size: 100% 100%;
+    background-position: center;
+    filter: saturate(1.22) contrast(1.1) brightness(1.02);
+  }
+
+  .ia-forge__topbar {
+    background: rgba(239, 249, 255, 0.94);
+    border-bottom-color: rgba(44, 108, 163, 0.2);
+    backdrop-filter: blur(14px);
+  }
+
+  .ia-forge__sidebar,
+  .ia-forge__inspector {
+    background: linear-gradient(
+      180deg,
+      rgba(235, 248, 255, 0.84),
+      rgba(246, 252, 255, 0.9)
+    ) !important;
+    backdrop-filter: blur(8px);
+  }
+
+  .ia-forge__nav-item:not(.ia-forge__nav-item--active) {
+    background: rgba(249, 253, 255, 0.9);
+    border: 1px solid rgba(56, 121, 172, 0.15);
+    box-shadow: 0 1px 2px rgba(34, 74, 116, 0.07);
+  }
+
+  .ia-forge__nav-item--active {
+    background: rgba(241, 224, 255, 0.96);
+    box-shadow: inset 0 0 0 1px rgba(177, 69, 207, 0.22);
+  }
+
+  .ia-forge__inspector-head,
+  .ia-forge__inspector-block {
+    background: rgba(248, 252, 255, 0.94);
+  }
+
+  .ia-forge__canvas {
+    background: linear-gradient(
+      180deg,
+      rgba(244, 251, 255, 0.86) 0%,
+      rgba(250, 253, 250, 0.78) 52%,
+      rgba(255, 254, 249, 0.58) 100%
+    ) !important;
+  }
+
+  .ia-forge__composer,
+  .ia-forge__graph {
+    box-shadow:
+      0 8px 24px rgba(49, 92, 132, 0.08),
+      0 1px 3px rgba(49, 92, 132, 0.06);
+  }
+
+  .ia-forge__create-card {
+    box-shadow:
+      0 3px 0 rgba(41, 73, 117, 0.08),
+      0 5px 16px rgba(54, 83, 126, 0.08);
+  }
+}
