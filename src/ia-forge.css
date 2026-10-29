@@ -1418,3 +1418,63 @@
     padding-right: 7px;
   }
 }
+
+/* IA_FORGE_ARCADE_POP_SKY_ISLANDS_VISIBILITY */
+.ia-forge__workspace {
+  isolation: isolate;
+  background: linear-gradient(180deg, #bfeaff, #eefaff 58%, #fffdf7) !important;
+}
+
+.ia-forge__workspace::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("/ia-forge/sky-islands-backdrop.webp");
+  background-size: 100% auto;
+  background-position: center top;
+  background-repeat: repeat-y;
+  opacity: 0.9;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    #000 0%,
+    #000 21%,
+    transparent 33%,
+    transparent 65%,
+    #000 80%,
+    #000 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    #000 0%,
+    #000 21%,
+    transparent 33%,
+    transparent 65%,
+    #000 80%,
+    #000 100%
+  );
+}
+
+.ia-forge__sidebar,
+.ia-forge__canvas,
+.ia-forge__inspector {
+  position: relative;
+  z-index: 1;
+}
+
+.ia-forge__sidebar {
+  background: linear-gradient(
+    180deg,
+    rgba(236, 249, 255, 0.6),
+    rgba(247, 252, 255, 0.72)
+  ) !important;
+}
+
+.ia-forge__inspector {
+  background: linear-gradient(
+    180deg,
+    rgba(238, 248, 255, 0.72),
+    rgba(249, 252, 255, 0.82)
+  ) !important;
+}
