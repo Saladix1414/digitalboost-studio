@@ -1733,3 +1733,40 @@
     background-image: url("/ia-forge/sky-islands-robotic-city-v2.webp") !important;
   }
 }
+
+/* IA_FORGE_ARCADE_POP_ROBOT_CITY_VARIANT_3 */
+@media (max-aspect-ratio: 4 / 5) {
+  .ia-forge__workspace::before {
+    background-size: 84% 90% !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    opacity: 1 !important;
+  }
+
+  .ia-forge__sidebar {
+    background: linear-gradient(
+      180deg,
+      rgba(236, 249, 255, 0.18),
+      rgba(247, 252, 255, 0.28)
+    ) !important;
+  }
+
+  .ia-forge__inspector {
+    background: linear-gradient(
+      180deg,
+      rgba(238, 248, 255, 0.22),
+      rgba(249, 252, 255, 0.34)
+    ) !important;
+  }
+
+  .ia-forge__canvas {
+    background: linear-gradient(
+      180deg,
+      rgba(249, 253, 255, 0.9) 0%,
+      rgba(255, 254, 249, 0.82) 42%,
+      rgba(255, 254, 249, 0.64) 100%
+    ) !important;
+  }
+}
