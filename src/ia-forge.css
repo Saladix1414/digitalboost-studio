@@ -1493,3 +1493,100 @@
   background-size: 100% 56.25vw, 100% auto;
   background-repeat: repeat-y, repeat-y;
 }
+
+/* IA_FORGE_ARCADE_POP_SKY_CHARACTER_INTEGRATION */
+@keyframes ia-forge-sky-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -3px, 0);
+  }
+}
+
+.ia-forge__sidebar-art,
+.ia-forge__skyship {
+  position: relative !important;
+  isolation: isolate;
+}
+
+.ia-forge__sidebar-art::before,
+.ia-forge__skyship::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 18% 65%, rgba(255, 255, 255, 0.96) 0 12%, transparent 37%),
+    radial-gradient(ellipse at 42% 78%, rgba(244, 252, 255, 0.96) 0 18%, transparent 45%),
+    radial-gradient(ellipse at 72% 66%, rgba(255, 255, 255, 0.92) 0 14%, transparent 40%),
+    radial-gradient(ellipse at 92% 78%, rgba(237, 249, 255, 0.95) 0 15%, transparent 42%);
+  filter: blur(4px);
+  opacity: 0.9;
+}
+
+.ia-forge__sidebar-art::before {
+  left: -8%;
+  right: -8%;
+  bottom: 8%;
+  height: 34%;
+}
+
+.ia-forge__skyship::before {
+  left: -12%;
+  right: -12%;
+  bottom: 5%;
+  height: 55%;
+}
+
+.ia-forge__sidebar-art::after,
+.ia-forge__skyship::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 16% 50%, rgba(255, 255, 255, 0.82) 0 8%, transparent 23%),
+    radial-gradient(ellipse at 49% 60%, rgba(244, 252, 255, 0.8) 0 11%, transparent 29%),
+    radial-gradient(ellipse at 82% 48%, rgba(255, 255, 255, 0.78) 0 9%, transparent 25%);
+  filter: blur(2px);
+  opacity: 0.68;
+}
+
+.ia-forge__sidebar-art::after {
+  left: -4%;
+  right: -4%;
+  bottom: 1%;
+  height: 17%;
+}
+
+.ia-forge__skyship::after {
+  left: -8%;
+  right: -8%;
+  bottom: 0;
+  height: 24%;
+}
+
+.ia-forge__sidebar-art img,
+.ia-forge__skyship img {
+  position: relative;
+  z-index: 1;
+  animation: ia-forge-sky-float 5.8s ease-in-out infinite !important;
+}
+
+.ia-forge__sidebar-art img {
+  filter: drop-shadow(0 13px 17px rgba(38, 73, 121, 0.25)) !important;
+}
+
+.ia-forge__skyship img {
+  animation-delay: -2.4s !important;
+  filter: drop-shadow(0 10px 12px rgba(38, 73, 121, 0.26)) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ia-forge__sidebar-art img,
+  .ia-forge__skyship img {
+    animation: none !important;
+  }
+}
