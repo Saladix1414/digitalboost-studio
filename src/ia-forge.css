@@ -2021,12 +2021,12 @@
   }
 }
 
-/* IA_FORGE_ARCADE_POP_DETAIL_POLISH_V1 */
+/* IA_FORGE_ARCADE_POP_DETAIL_POLISH_V2 */
 @media (max-aspect-ratio: 4 / 5) {
   .ia-forge::before {
     background-size: 100% 100%;
     background-position: center;
-    filter: saturate(1.22) contrast(1.1) brightness(1.02);
+    filter: saturate(1.3) contrast(1.15) brightness(1.02);
   }
 
   .ia-forge__topbar {
@@ -2039,10 +2039,10 @@
   .ia-forge__inspector {
     background: linear-gradient(
       180deg,
-      rgba(235, 248, 255, 0.84),
-      rgba(246, 252, 255, 0.9)
+      rgba(235, 248, 255, 0.28),
+      rgba(246, 252, 255, 0.36)
     ) !important;
-    backdrop-filter: blur(8px);
+    backdrop-filter: none;
   }
 
   .ia-forge__nav-item:not(.ia-forge__nav-item--active) {
@@ -2064,9 +2064,9 @@
   .ia-forge__canvas {
     background: linear-gradient(
       180deg,
-      rgba(244, 251, 255, 0.86) 0%,
-      rgba(250, 253, 250, 0.78) 52%,
-      rgba(255, 254, 249, 0.58) 100%
+      rgba(244, 251, 255, 0.62) 0%,
+      rgba(250, 253, 250, 0.46) 52%,
+      rgba(255, 254, 249, 0.3) 100%
     ) !important;
   }
 
