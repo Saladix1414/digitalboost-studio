@@ -1478,3 +1478,18 @@
     rgba(249, 252, 255, 0.82)
   ) !important;
 }
+
+/* IA_FORGE_ARCADE_POP_SKY_SEAM_BLEND */
+.ia-forge__workspace::before {
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(191, 234, 255, 0.96) 0%,
+      rgba(191, 234, 255, 0) 12%,
+      rgba(191, 234, 255, 0) 88%,
+      rgba(191, 234, 255, 0.96) 100%
+    ),
+    url("/ia-forge/sky-islands-backdrop.webp");
+  background-size: 100% 56.25vw, 100% auto;
+  background-repeat: repeat-y, repeat-y;
+}
