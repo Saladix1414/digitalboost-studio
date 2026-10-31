@@ -1,23 +1,23 @@
 [data-ia-forge="true"] {
-  --forge-bg: #edf8ff;
-  --forge-bg-deep: #fffdf8;
-  --forge-panel: #fffefa;
-  --forge-panel-2: #f5fbff;
-  --forge-panel-3: #edf5ff;
+  --forge-bg: #fff9fc;
+  --forge-bg-deep: #fffdfb;
+  --forge-panel: #fffefd;
+  --forge-panel-2: #fff8fc;
+  --forge-panel-3: #fbf0f8;
 
-  --forge-line: rgba(38, 71, 122, 0.14);
-  --forge-line-strong: rgba(50, 147, 208, 0.3);
+  --forge-line: rgba(91, 40, 83, 0.14);
+  --forge-line-strong: rgba(206, 31, 145, 0.28);
 
-  --forge-text: #172347;
-  --forge-text-2: #435978;
-  --forge-muted: #788aa6;
+  --forge-text: #2c1832;
+  --forge-text-2: #654d6c;
+  --forge-muted: #8c788f;
 
   --forge-plum: #713273;
-  --forge-magenta: #b145cf;
-  --forge-magenta-bright: #cc54e8;
+  --forge-magenta: #d92b9d;
+  --forge-magenta-bright: #ed4cad;
   --forge-lilac: #9b4bb5;
   --forge-mint: #3d9c7a;
-  --forge-coral: #f45a28;
+  --forge-coral: #ee684f;
   --forge-amber: #d9982d;
   --forge-red: #d84b62;
 
@@ -25,12 +25,12 @@
   background:
     radial-gradient(
       circle at 42% -10%,
-      rgba(94, 203, 246, 0.16),
+      rgba(217, 43, 157, 0.08),
       transparent 34%
     ),
     linear-gradient(
       180deg,
-      #f4fbff 0%,
+      #fffafd 0%,
       var(--forge-bg) 38%,
       var(--forge-bg-deep) 100%
     );
@@ -75,7 +75,7 @@
   gap: 18px;
 
   border-bottom: 1px solid var(--forge-line);
-  background: rgba(235, 248, 255, 0.95);
+  background: rgba(255, 252, 254, 0.96);
   backdrop-filter: blur(18px);
   padding: 0 14px 0 16px;
 }
@@ -95,8 +95,8 @@
   place-items: center;
 
   border-radius: 9px;
-  border: 1px solid #bd4bd7;
-  background: linear-gradient(145deg, #cc54e8, #a33ec3);
+  border: 1px solid #e632a5;
+  background: linear-gradient(145deg, #f52eaa, #c51b8c);
   color: #fff;
 
   box-shadow:
@@ -221,7 +221,6 @@
   grid-template-columns: 204px minmax(0, 1fr) 270px;
 
   position: relative;
-  background: url("/ia-forge/sky-islands-backdrop.webp") center / cover no-repeat;
 }
 
 .ia-forge__sidebar {
@@ -236,8 +235,8 @@
   background:
     linear-gradient(
       180deg,
-      rgba(235, 248, 255, 0.83),
-      rgba(248, 252, 255, 0.88)
+      rgba(255, 248, 252, 0.97),
+      rgba(255, 250, 253, 0.99)
     );
 
   padding: 12px 9px 10px;
@@ -272,8 +271,8 @@
 
 .ia-forge__sidebar-art img {
   display: block;
-  width: min(100%, 190px);
-  max-height: 214px;
+  width: min(100%, 186px);
+  max-height: 190px;
   object-fit: contain;
   object-position: center top;
   filter: drop-shadow(0 8px 12px rgba(113, 50, 115, 0.12));
@@ -296,7 +295,7 @@
   border-radius: 7px;
 
   background: transparent;
-  color: #405473;
+  color: #76627d;
 
   font-size: 10px;
   font-weight: 520;
@@ -311,12 +310,12 @@
 }
 
 .ia-forge__nav-item:hover {
-  color: #1d3158;
+  color: #493451;
   background: rgba(145, 69, 121, 0.035);
 }
 
 .ia-forge__nav-item--active {
-  color: #172347;
+  color: #2c1832;
 
   border-color: rgba(217, 43, 157, 0.08);
 
@@ -395,12 +394,12 @@
   padding: 24px 26px 34px;
 
   background:
-    linear-gradient(
-      180deg,
-      rgba(249, 253, 255, 0.97) 0%,
-      rgba(255, 254, 249, 0.88) 58%,
-      rgba(255, 254, 249, 0.76) 100%
-    );
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(217, 43, 157, 0.045),
+      transparent 34rem
+    ),
+    linear-gradient(180deg, #fffafd 0%, #fffdfb 72%);
 
   scrollbar-width: thin;
   scrollbar-color: #ecdeea transparent;
@@ -428,7 +427,7 @@
 .ia-forge__canvas-head h1 {
   margin: 5px 0 0;
 
-  color: #172347;
+  color: #2d1835;
 
   font-size: clamp(21px, 2.35vw, 31px);
   line-height: 1.2;
@@ -468,35 +467,35 @@
 
 .ia-forge__secondary-button {
   border: 1px solid var(--forge-line);
-  color: #263d68;
-  background: rgba(247, 251, 255, 0.9);
+  color: #63496d;
+  background: rgba(145, 69, 121, 0.035);
 }
 
 .ia-forge__primary-button,
 .ia-forge__build-button {
-  border: 1px solid rgba(220, 73, 31, 0.38);
+  border: 1px solid rgba(206, 31, 145, 0.35);
 
   color: #fffafd;
 
   background:
     linear-gradient(
       135deg,
-      rgba(255, 103, 41, 0.96),
-      rgba(232, 72, 31, 0.96)
+      rgba(217, 43, 157, 0.9),
+      rgba(147, 63, 169, 0.82)
     );
 
-  box-shadow: 0 7px 16px rgba(219, 75, 31, 0.2);
+  box-shadow: 0 8px 24px rgba(217, 43, 157, 0.1);
 }
 
 .ia-forge button.ia-forge__primary-button {
   color: #fff;
-  background: linear-gradient(135deg, #ff6429, #ee481f);
-  border-color: #de451f;
-  box-shadow: 0 5px 0 #c93d20, 0 8px 16px rgba(220, 72, 31, 0.2);
+  background: linear-gradient(135deg, #ed2fa4, #bb1688);
+  border-color: #dc258f;
+  box-shadow: 0 6px 16px rgba(201, 28, 139, 0.22);
 }
 
 .ia-forge button.ia-forge__primary-button:hover {
-  background: linear-gradient(135deg, #ff7941, #f45125);
+  background: linear-gradient(135deg, #f33caf, #c11b90);
 }
 
 .ia-forge__secondary-button:hover,
@@ -571,7 +570,7 @@
 
   font-size: 14px;
   font-weight: 540;
-  color: #263351;
+  color: #392441;
 }
 
 .ia-forge__mode-chip {
@@ -677,7 +676,7 @@
   border: 1px solid var(--forge-line);
   border-radius: 9px;
 
-  background: rgba(255, 254, 250, 0.92);
+  background: rgba(255, 253, 255, 0.9);
 
   text-align: left;
 
@@ -687,31 +686,6 @@
     transform 0.16s ease,
     border-color 0.16s ease,
     background 0.16s ease;
-}
-
-.ia-forge__create-card:nth-child(1) {
-  background: rgba(243, 235, 255, 0.96);
-  border-color: rgba(166, 112, 220, 0.24);
-}
-
-.ia-forge__create-card:nth-child(2) {
-  background: rgba(231, 246, 255, 0.96);
-  border-color: rgba(67, 171, 224, 0.22);
-}
-
-.ia-forge__create-card:nth-child(3) {
-  background: rgba(255, 240, 231, 0.96);
-  border-color: rgba(241, 139, 91, 0.24);
-}
-
-.ia-forge__create-card:nth-child(4) {
-  background: rgba(232, 249, 240, 0.96);
-  border-color: rgba(72, 178, 133, 0.22);
-}
-
-.ia-forge__create-card:nth-child(5) {
-  background: rgba(255, 248, 220, 0.96);
-  border-color: rgba(224, 185, 62, 0.24);
 }
 
 .ia-forge__create-card:hover {
@@ -779,13 +753,13 @@
 .ia-forge__create-card strong {
   font-size: 9px;
   font-weight: 670;
-  color: #1d2d51;
+  color: #3a2642;
 }
 
 .ia-forge__create-card > span {
   margin-top: 4px;
 
-  color: #64758f;
+  color: #87748e;
 
   font-size: 8px;
   line-height: 1.45;
@@ -1044,35 +1018,17 @@
 
   overflow-y: auto;
 
-  position: relative;
   border-left: 1px solid var(--forge-line);
 
   background:
     linear-gradient(
       180deg,
-      rgba(238, 248, 255, 0.9),
-      rgba(249, 252, 255, 0.92)
+      rgba(255, 253, 255, 0.98),
+      rgba(255, 248, 252, 0.99)
     );
 
   scrollbar-width: thin;
   scrollbar-color: #ebddec transparent;
-}
-
-.ia-forge__skyship {
-  height: 88px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 2px 12px 0;
-  overflow: hidden;
-}
-
-.ia-forge__skyship img {
-  display: block;
-  width: 112px;
-  max-height: 82px;
-  object-fit: contain;
-  filter: drop-shadow(0 7px 8px rgba(36, 65, 107, 0.18));
 }
 
 .ia-forge__inspector-head {
@@ -1090,7 +1046,7 @@
 .ia-forge__inspector-head h2 {
   margin: 4px 0 0;
 
-  color: #263351;
+  color: #3a2642;
 
   font-size: 10px;
   font-weight: 610;
@@ -1135,7 +1091,7 @@
 }
 
 .ia-forge__inspector-row strong {
-  color: #344a70;
+  color: #63496d;
 
   font-weight: 560;
   text-align: right;
@@ -1360,16 +1316,6 @@
     padding: 16px 12px 28px;
   }
 
-  .ia-forge__skyship {
-    height: 64px;
-    padding-right: 8px;
-  }
-
-  .ia-forge__skyship img {
-    width: 88px;
-    max-height: 60px;
-  }
-
   .ia-forge__canvas-head {
     align-items: center;
   }
@@ -1418,6 +1364,79 @@
     padding-right: 7px;
   }
 }
+
+
+/* IA_FORGE_ARCADE_POP_THEME */
+[data-ia-forge="true"] {
+  --forge-bg: #edf8ff !important;
+  --forge-bg-deep: #fffdf8 !important;
+  --forge-panel: #fffefa !important;
+  --forge-panel-2: #f5fbff !important;
+  --forge-panel-3: #edf5ff !important;
+  --forge-line: rgba(38, 71, 122, .14) !important;
+  --forge-line-strong: rgba(50, 147, 208, .3) !important;
+  --forge-text: #172347 !important;
+  --forge-text-2: #435978 !important;
+  --forge-muted: #788aa6 !important;
+  color: #172347 !important;
+  background: linear-gradient(180deg, #f4fbff, #edf8ff 38%, #fffdf8) !important;
+}
+.ia-forge__topbar { background: rgba(235,248,255,.96) !important; border-color: rgba(38,71,122,.14) !important; }
+.ia-forge__brand-mark { color: #fff !important; background: linear-gradient(145deg,#cc54e8,#a33ec3) !important; border-color: #bd4bd7 !important; box-shadow: 0 5px 14px rgba(163,62,195,.2) !important; }
+.ia-forge__workspace { background: url("/ia-forge/sky-islands-backdrop.webp") center / cover no-repeat !important; }
+.ia-forge__sidebar { background: linear-gradient(180deg,rgba(235,248,255,.82),rgba(248,252,255,.88)) !important; border-color: rgba(38,71,122,.14) !important; }
+.ia-forge__canvas { background: linear-gradient(180deg,rgba(249,253,255,.97),rgba(255,254,249,.88) 58%,rgba(255,254,249,.76)) !important; }
+.ia-forge__inspector { position: relative !important; background: linear-gradient(180deg,rgba(238,248,255,.9),rgba(249,252,255,.93)) !important; border-color: rgba(38,71,122,.14) !important; }
+.ia-forge__nav-item { color: #405473 !important; }
+.ia-forge__nav-item:hover { color: #1d3158 !important; background: rgba(92,168,219,.1) !important; }
+.ia-forge__nav-item--active { color: #172347 !important; background: linear-gradient(90deg,rgba(204,84,232,.13),rgba(204,84,232,.04)) !important; border-color: rgba(177,69,207,.16) !important; }
+.ia-forge__nav-item--active svg { color: #b145cf !important; }
+.ia-forge__canvas-head h1, .ia-forge__composer h2, .ia-forge__inspector-head h2 { color: #172347 !important; }
+.ia-forge__eyebrow { color: #35658f !important; }
+.ia-forge__secondary-button { color: #263d68 !important; background: rgba(247,251,255,.94) !important; border-color: rgba(38,71,122,.18) !important; }
+.ia-forge button.ia-forge__primary-button, .ia-forge__build-button { color: #fff !important; background: linear-gradient(135deg,#ff682e,#ed481f) !important; border-color: #de451f !important; box-shadow: 0 4px 0 #c93d20,0 8px 16px rgba(220,72,31,.2) !important; }
+.ia-forge button.ia-forge__primary-button:hover, .ia-forge__build-button:hover:not(:disabled) { background: linear-gradient(135deg,#ff7941,#f45125) !important; }
+.ia-forge__composer { background: linear-gradient(145deg,rgba(255,254,250,.98),rgba(247,252,255,.98)) !important; border-color: rgba(80,157,201,.22) !important; box-shadow: 0 18px 48px rgba(39,79,120,.08) !important; }
+.ia-forge__composer textarea { color: #263351 !important; background: rgba(255,255,255,.88) !important; border-color: rgba(38,71,122,.18) !important; }
+.ia-forge__composer textarea::placeholder { color: #7b8eaa !important; }
+.ia-forge__mode-chip { color: #8d3fab !important; background: #f5eaff !important; border-color: rgba(177,69,207,.22) !important; }
+.ia-forge__create-card { background: rgba(255,254,250,.96) !important; border-color: rgba(38,71,122,.14) !important; }
+.ia-forge__create-card:nth-child(1) { background: rgba(243,235,255,.97) !important; border-color: rgba(166,112,220,.3) !important; }
+.ia-forge__create-card:nth-child(2) { background: rgba(231,246,255,.97) !important; border-color: rgba(67,171,224,.28) !important; }
+.ia-forge__create-card:nth-child(3) { background: rgba(255,240,231,.97) !important; border-color: rgba(241,139,91,.3) !important; }
+.ia-forge__create-card:nth-child(4) { background: rgba(232,249,240,.97) !important; border-color: rgba(72,178,133,.28) !important; }
+.ia-forge__create-card:nth-child(5) { background: rgba(255,248,220,.97) !important; border-color: rgba(224,185,62,.3) !important; }
+.ia-forge__create-card--active { box-shadow: 0 5px 0 rgba(34,55,96,.18) !important; }
+.ia-forge__create-icon { width: 54px !important; height: 54px !important; border-radius: 13px !important; background: rgba(255,255,255,.7) !important; border-color: rgba(177,69,207,.22) !important; color: #9b4bb5 !important; }
+.ia-forge__create-card strong { color: #1d2d51 !important; }
+.ia-forge__create-card > span { color: #64758f !important; }
+.ia-forge__graph-panel { background: rgba(255,254,250,.96) !important; border-color: rgba(38,71,122,.16) !important; }
+.ia-forge__graph { background: linear-gradient(rgba(70,143,194,.075) 1px,transparent 1px),linear-gradient(90deg,rgba(70,143,194,.075) 1px,transparent 1px),linear-gradient(180deg,rgba(240,249,255,.94),rgba(255,254,250,.96)) !important; background-size: 30px 30px,30px 30px,auto !important; }
+.ia-forge__graph-lines line { stroke: rgba(105,115,209,.4) !important; stroke-width: .34 !important; }
+.ia-forge__graph-node { color: #314466 !important; background: rgba(255,255,255,.96) !important; border-color: rgba(38,71,122,.18) !important; box-shadow: 0 6px 18px rgba(39,79,120,.08) !important; }
+.ia-forge__graph-node--focus { background: linear-gradient(145deg,#f5eaff,#fff) !important; border-color: rgba(177,69,207,.36) !important; }
+.ia-forge__graph-node-dot { background: #60aee0 !important; }
+.ia-forge__graph-node--focus .ia-forge__graph-node-dot { background: #c248d6 !important; }
+.ia-forge__graph-node strong { color: #26385f !important; }
+.ia-forge__graph-node small { color: #7586a0 !important; }
+.ia-forge__inspector-head, .ia-forge__inspector-block { border-color: rgba(38,71,122,.13) !important; }
+.ia-forge__inspector-title { color: #35658f !important; }
+.ia-forge__inspector-row span, .ia-forge__governance span, .ia-forge__inspector-block p { color: #71839d !important; }
+.ia-forge__inspector-row strong { color: #344a70 !important; }
+.ia-forge__governance { background: rgba(248,235,255,.8) !important; border-color: rgba(177,69,207,.2) !important; }
+.ia-forge__governance strong { color: #a53cb7 !important; }
+.ia-forge__runtime-strip { background: rgba(232,246,255,.97) !important; border-color: rgba(38,71,122,.14) !important; }
+.ia-forge__runtime-tab { color: #667a97 !important; }
+.ia-forge__runtime-tab--active { color: #26385f !important; border-color: #f45a28 !important; }
+.ia-forge__runtime-message, .ia-forge__runtime-health { color: #6f829d !important; }
+.ia-forge__sidebar-art { flex: 0 0 auto !important; display: grid !important; place-items: center !important; margin: 10px 2px 8px !important; overflow: hidden !important; }
+.ia-forge__sidebar-art img { display: block !important; width: min(100%,190px) !important; max-height: 214px !important; object-fit: contain !important; object-position: center top !important; filter: drop-shadow(0 8px 12px rgba(33,66,111,.16)) !important; }
+.ia-forge__skyship { height: 88px; display: flex; align-items: center; justify-content: flex-end; padding: 2px 12px 0; overflow: hidden; }
+.ia-forge__skyship img { display: block; width: 112px; max-height: 82px; object-fit: contain; filter: drop-shadow(0 7px 8px rgba(36,65,107,.18)); }
+@media (max-width: 620px) { .ia-forge__skyship { height: 64px; padding-right: 8px; } .ia-forge__skyship img { width: 88px; max-height: 60px; } }
+@media (prefers-reduced-motion: reduce) { .ia-forge *, .ia-forge *::before, .ia-forge *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+
+
 
 /* IA_FORGE_ARCADE_POP_SKY_ISLANDS_VISIBILITY */
 .ia-forge__workspace {
@@ -1734,6 +1753,7 @@
   }
 }
 
+
 /* IA_FORGE_ARCADE_POP_ROBOT_CITY_VARIANT_3 */
 @media (max-aspect-ratio: 4 / 5) {
   .ia-forge__workspace::before {
@@ -1744,54 +1764,16 @@
     mask-image: none !important;
     opacity: 1 !important;
   }
-
-  .ia-forge__sidebar {
-    background: linear-gradient(
-      180deg,
-      rgba(236, 249, 255, 0.18),
-      rgba(247, 252, 255, 0.28)
-    ) !important;
-  }
-
-  .ia-forge__inspector {
-    background: linear-gradient(
-      180deg,
-      rgba(238, 248, 255, 0.22),
-      rgba(249, 252, 255, 0.34)
-    ) !important;
-  }
-
-  .ia-forge__canvas {
-    background: linear-gradient(
-      180deg,
-      rgba(249, 253, 255, 0.9) 0%,
-      rgba(255, 254, 249, 0.82) 42%,
-      rgba(255, 254, 249, 0.64) 100%
-    ) !important;
-  }
+  .ia-forge__sidebar { background: linear-gradient(180deg, rgba(236, 249, 255, 0.18), rgba(247, 252, 255, 0.28)) !important; }
+  .ia-forge__inspector { background: linear-gradient(180deg, rgba(238, 248, 255, 0.22), rgba(249, 252, 255, 0.34)) !important; }
+  .ia-forge__canvas { background: linear-gradient(180deg, rgba(249, 253, 255, 0.9) 0%, rgba(255, 254, 249, 0.82) 42%, rgba(255, 254, 249, 0.64) 100%) !important; }
 }
 
 /* IA_FORGE_ARCADE_POP_ROBOT_CITY_VARIANT_4 */
 @media (max-aspect-ratio: 4 / 5) {
-  .ia-forge__workspace::before {
-    filter: saturate(1.28) contrast(1.12) brightness(1.02) !important;
-  }
-
-  .ia-forge__sidebar {
-    background: linear-gradient(
-      180deg,
-      rgba(236, 249, 255, 0.06),
-      rgba(247, 252, 255, 0.1)
-    ) !important;
-  }
-
-  .ia-forge__inspector {
-    background: linear-gradient(
-      180deg,
-      rgba(238, 248, 255, 0.08),
-      rgba(249, 252, 255, 0.14)
-    ) !important;
-  }
+  .ia-forge__workspace::before { filter: saturate(1.28) contrast(1.12) brightness(1.02) !important; }
+  .ia-forge__sidebar { background: linear-gradient(180deg, rgba(236, 249, 255, 0.06), rgba(247, 252, 255, 0.1)) !important; }
+  .ia-forge__inspector { background: linear-gradient(180deg, rgba(238, 248, 255, 0.08), rgba(249, 252, 255, 0.14)) !important; }
 }
 
 /* IA_FORGE_ARCADE_POP_RESPONSIVE_TOOLING_V1 */
@@ -1928,96 +1910,99 @@
 }
 
 /* IA_FORGE_ARCADE_POP_RESPONSIVE_TOOLING_V2 */
-.ia-forge__create-grid {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-}
-
-.ia-forge__create-card {
-  grid-column: span 2;
-  touch-action: manipulation;
-}
-
-.ia-forge__create-card:nth-child(4) {
-  grid-column: 2 / span 2;
-}
-
-.ia-forge__create-card:nth-child(5) {
-  grid-column: 4 / span 2;
-}
-
-.ia-forge__nav-item:not(.ia-forge__nav-item--active) {
-  background: rgba(244, 250, 255, 0.68);
-  text-shadow: 0 1px rgba(255, 255, 255, 0.9);
-}
-
+.ia-forge__create-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.ia-forge__create-card { grid-column: span 2; touch-action: manipulation; }
+.ia-forge__create-card:nth-child(4) { grid-column: 2 / span 2; }
+.ia-forge__create-card:nth-child(5) { grid-column: 4 / span 2; }
+.ia-forge__nav-item:not(.ia-forge__nav-item--active) { background: rgba(244, 250, 255, 0.68); text-shadow: 0 1px rgba(255, 255, 255, 0.9); }
 .ia-forge__inspector-head,
-.ia-forge__inspector-block {
-  background-color: rgba(244, 250, 255, 0.78);
-}
-
+.ia-forge__inspector-block { background-color: rgba(244, 250, 255, 0.78); }
 @media (max-width: 620px) {
-  .ia-forge__create-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .ia-forge__create-card {
-    grid-column: span 2;
-  }
-
-  .ia-forge__create-card:nth-child(5) {
-    grid-column: 2 / span 2;
-  }
+  .ia-forge__create-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ia-forge__create-card { grid-column: span 2; }
+  .ia-forge__create-card:nth-child(5) { grid-column: 2 / span 2; }
 }
 
 /* IA_FORGE_ARCADE_POP_FULL_SCREEN_ISLANDS_V1 */
 @media (max-aspect-ratio: 4 / 5) {
-  [data-ia-forge="true"] {
-    position: relative;
-    isolation: isolate;
-  }
-
+  [data-ia-forge="true"] { position: relative; isolation: isolate; }
   .ia-forge::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
+    content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
     background-image: url("/ia-forge/sky-islands-robotic-city-v2.webp");
-    background-position: center center;
-    background-size: cover;
-    background-repeat: no-repeat;
+    background-position: center center; background-size: cover; background-repeat: no-repeat;
     filter: saturate(1.28) contrast(1.12) brightness(1.02);
   }
-
   .ia-forge__topbar,
   .ia-forge__workspace,
-  .ia-forge__runtime-strip {
-    position: relative;
-    z-index: 1;
+  .ia-forge__runtime-strip { position: relative; z-index: 1; }
+  .ia-forge__topbar { background: rgba(235, 248, 255, 0.82); backdrop-filter: blur(10px); }
+  .ia-forge__workspace { background: transparent !important; }
+  .ia-forge__workspace::before { content: none !important; display: none !important; background-image: none !important; }
+  .ia-forge__canvas {
+    background: linear-gradient(180deg, rgba(249, 253, 255, 0.76) 0%, rgba(255, 254, 249, 0.58) 44%, rgba(255, 254, 249, 0.38) 100%) !important;
+  }
+}
+
+/* IA_FORGE_ARCADE_POP_DETAIL_POLISH_V1 */
+@media (max-aspect-ratio: 4 / 5) {
+  .ia-forge::before {
+    background-size: 100% 100%;
+    background-position: center;
+    filter: saturate(1.22) contrast(1.1) brightness(1.02);
   }
 
   .ia-forge__topbar {
-    background: rgba(235, 248, 255, 0.82);
-    backdrop-filter: blur(10px);
+    background: rgba(239, 249, 255, 0.94);
+    border-bottom-color: rgba(44, 108, 163, 0.2);
+    backdrop-filter: blur(14px);
   }
 
-  .ia-forge__workspace {
-    background: transparent !important;
+  .ia-forge__sidebar,
+  .ia-forge__inspector {
+    background: linear-gradient(
+      180deg,
+      rgba(235, 248, 255, 0.84),
+      rgba(246, 252, 255, 0.9)
+    ) !important;
+    backdrop-filter: blur(8px);
   }
 
-  .ia-forge__workspace::before {
-    content: none !important;
-    display: none !important;
-    background-image: none !important;
+  .ia-forge__nav-item:not(.ia-forge__nav-item--active) {
+    background: rgba(249, 253, 255, 0.9);
+    border: 1px solid rgba(56, 121, 172, 0.15);
+    box-shadow: 0 1px 2px rgba(34, 74, 116, 0.07);
+  }
+
+  .ia-forge__nav-item--active {
+    background: rgba(241, 224, 255, 0.96);
+    box-shadow: inset 0 0 0 1px rgba(177, 69, 207, 0.22);
+  }
+
+  .ia-forge__inspector-head,
+  .ia-forge__inspector-block {
+    background: rgba(248, 252, 255, 0.94);
   }
 
   .ia-forge__canvas {
     background: linear-gradient(
       180deg,
-      rgba(249, 253, 255, 0.76) 0%,
-      rgba(255, 254, 249, 0.58) 44%,
-      rgba(255, 254, 249, 0.38) 100%
+      rgba(244, 251, 255, 0.86) 0%,
+      rgba(250, 253, 250, 0.78) 52%,
+      rgba(255, 254, 249, 0.58) 100%
     ) !important;
+  }
+
+  .ia-forge__composer,
+  .ia-forge__graph {
+    box-shadow:
+      0 8px 24px rgba(49, 92, 132, 0.08),
+      0 1px 3px rgba(49, 92, 132, 0.06);
+  }
+
+  .ia-forge__create-card {
+    box-shadow:
+      0 3px 0 rgba(41, 73, 117, 0.08),
+      0 5px 16px rgba(54, 83, 126, 0.08);
   }
 }
 
