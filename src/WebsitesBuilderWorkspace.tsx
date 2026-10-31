@@ -24,6 +24,7 @@ import {
 import WebsitesBuilderCanvas from "./WebsitesBuilderCanvas";
 import LocalWebTools from "./websites-builder/LocalWebTools";
 import type { LocalWebsiteTool } from "./websites-builder/LocalWebToolsModel";
+import { applyContrastColorsToBlocks } from "./websites-builder/LocalWebToolsModel";
 
 import "./websites-builder/websites-builder.css";
 import "./websites-builder/sky-workshop-theme.css";
@@ -361,6 +362,13 @@ export default function WebsitesBuilderWorkspace({
     setCanvasBlocks(nextBlocks);
     setWebsiteProject((current) => current ? updateWebsiteProjectFromCanvas(current, nextBlocks, activePageId) : current);
     setNotice(`${asset.kind === "svg" ? "SVG" : "Imagen"} agregado al canvas y guardado localmente.`);
+  }
+
+  function applyLocalContrast(foreground: string, background: string) {
+    const nextBlocks = applyContrastColorsToBlocks(canvasBlocks, foreground, background);
+    handleCanvasBlocksChange(nextBlocks);
+    updateDesignTokens({ foreground, background });
+    setNotice("Colores accesibles aplicados al sistema visual y a las secciones de texto.");
   }
 
   useEffect(() => {
@@ -1362,6 +1370,7 @@ export default function WebsitesBuilderWorkspace({
             setWebsiteProject((current) => current ? updateWebsiteProjectFavicon(current, dataUrl) : current);
             setNotice("Favicon guardado en la configuración local del proyecto.");
           }}
+          onApplyContrast={applyLocalContrast}
           onClose={() => setSelectedLocalTool(null)}
         />
       )}

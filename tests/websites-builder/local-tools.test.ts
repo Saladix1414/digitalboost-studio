@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createSvgIconMarkup, createWebsiteExport, getContrastRatio } from "../../src/websites-builder/LocalWebToolsModel.ts";
+import { applyContrastColorsToBlocks, createSvgIconMarkup, createWebsiteExport, getContrastRatio } from "../../src/websites-builder/LocalWebToolsModel.ts";
 import { createWebsiteProjectFromBrief, createFallbackBrief, createDesignTokens } from "../../src/WebsitesBuilderModel.ts";
 
 test("contrast utility computes WCAG ratios for common colors", () => {
@@ -10,6 +10,22 @@ test("contrast utility computes WCAG ratios for common colors", () => {
 
 test("contrast utility rejects malformed colors", () => {
   assert.throws(() => getContrastRatio("blue", "#ffffff"), /hexadecimal válido/);
+});
+
+test("applying accessible contrast updates text sections while preserving image and button colors", () => {
+  const base = { label: "Test", text: "Contenido", background: "#fff", color: "#111", fontSize: 18, padding: 20, align: "left" as const, width: 100 };
+  const blocks = [
+    { ...base, id: "text", type: "text" as const },
+    { ...base, id: "image", type: "image" as const },
+    { ...base, id: "button", type: "button" as const },
+  ];
+  const next = applyContrastColorsToBlocks(blocks, "#000", "#fff");
+
+  assert.equal(next[0].color, "#000");
+  assert.equal(next[0].background, "#fff");
+  assert.equal(next[1], blocks[1]);
+  assert.equal(next[2], blocks[2]);
+  assert.throws(() => applyContrastColorsToBlocks(blocks, "navy", "#fff"), /hexadecimales válidos/);
 });
 
 test("SVG icon utility returns self-contained vector markup", () => {

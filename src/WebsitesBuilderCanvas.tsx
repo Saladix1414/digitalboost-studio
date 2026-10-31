@@ -1,6 +1,6 @@
 import "./website-builder-v2-light.css";
 import "./websites-builder/websites-builder-canvas.css";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { WebDesignTokens } from "./WebsitesBuilderModel";
 import {
   AlignCenter,
@@ -354,6 +354,21 @@ export default function WebsitesBuilderCanvas({
       return seedBlocks !== undefined ? seedBlocks : initialBlocks;
     }
   });
+  const blocksRef = useRef(blocks);
+
+  useEffect(() => {
+    blocksRef.current = blocks;
+  }, [blocks]);
+
+  useEffect(() => {
+    if (seedBlocks === undefined) return;
+    const current = blocksRef.current;
+    if (JSON.stringify(current) === JSON.stringify(seedBlocks)) return;
+    setHistory((historyNow) => [...historyNow.slice(-29), current]);
+    setFuture([]);
+    blocksRef.current = seedBlocks;
+    setBlocks(seedBlocks);
+  }, [seedBlocks]);
 
   const [selectedId, setSelectedId] = useState<string | null>(
     blocks[0]?.id || null

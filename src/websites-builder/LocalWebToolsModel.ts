@@ -40,6 +40,19 @@ export function getContrastRatio(foreground: string, background: string): number
   return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 }
 
+export function applyContrastColorsToBlocks(
+  blocks: WebCanvasBlockSeed[],
+  foreground: string,
+  background: string
+): WebCanvasBlockSeed[] {
+  if (!/^#[\da-f]{3}(?:[\da-f]{3})?$/i.test(foreground) || !/^#[\da-f]{3}(?:[\da-f]{3})?$/i.test(background)) {
+    throw new Error("Usá colores hexadecimales válidos.");
+  }
+  return blocks.map((block) => block.type === "image" || block.type === "button"
+    ? block
+    : { ...block, color: foreground, background });
+}
+
 export function createSvgIconMarkup(iconId: string, color: string, size = 48): string {
   const icon = LOCAL_WEBSITE_ICONS.find((item) => item.id === iconId);
   if (!icon) throw new Error("Ícono no encontrado.");

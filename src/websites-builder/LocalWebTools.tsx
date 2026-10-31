@@ -11,6 +11,7 @@ type Props = {
   onSeoChange: (patch: { title?: string; description?: string; indexable?: boolean }) => void;
   onInsertMedia: (asset: { dataUrl: string; kind: "image" | "svg"; alt: string }) => void;
   onFaviconChange: (dataUrl: string) => void;
+  onApplyContrast: (foreground: string, background: string) => void;
   onClose: () => void;
 };
 
@@ -111,9 +112,9 @@ function formatBytes(value: number) {
   return value < 1024 * 1024 ? `${(value / 1024).toFixed(1)} KB` : `${(value / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChange, onInsertMedia, onFaviconChange, onClose }: Props) {
-  const [foreground, setForeground] = useState("#17375b");
-  const [background, setBackground] = useState("#ffffff");
+export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChange, onInsertMedia, onFaviconChange, onApplyContrast, onClose }: Props) {
+  const [foreground, setForeground] = useState(project?.designTokens.foreground ?? "#17375b");
+  const [background, setBackground] = useState(project?.designTokens.background ?? "#ffffff");
   const [iconId, setIconId] = useState<string>(LOCAL_WEBSITE_ICONS[0].id);
   const [iconColor, setIconColor] = useState("#1689e8");
   const [notice, setNotice] = useState("");
@@ -174,10 +175,12 @@ export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChan
       {tool === "image-optimizer" && <ImageUtility onInsertMedia={onInsertMedia} onFaviconChange={onFaviconChange}/>}
       {tool === "favicon" && <ImageUtility favicon onInsertMedia={onInsertMedia} onFaviconChange={onFaviconChange}/>}
       {tool === "color-contrast" && <div className="db-tool-content">
-        <p>Comprobación WCAG local de contraste entre texto y fondo.</p>
+        <p>Comprobá el contraste y aplicá el par accesible al fondo y texto del proyecto. Se conservan los colores de botones e imágenes.</p>
         <div className="db-tool-colors"><label className="db-tool-label">Texto<input type="color" value={foreground} onChange={(event) => setForeground(event.target.value)}/></label><label className="db-tool-label">Fondo<input type="color" value={background} onChange={(event) => setBackground(event.target.value)}/></label></div>
         <div className="db-contrast-sample" style={{ color: foreground, backgroundColor: background }}>Texto de muestra · Aa</div>
         <div className="db-tool-message" role="status"><strong>{ratio.toFixed(2)}:1</strong> · {ratio >= 7 ? "AAA · texto normal" : ratio >= 4.5 ? "AA · texto normal" : ratio >= 3 ? "AA · texto grande" : "No alcanza AA"}</div>
+        <button type="button" className="db-tool-primary" disabled={!project || ratio < 4.5} onClick={() => onApplyContrast(foreground, background)}>Aplicar a estilos y secciones de texto</button>
+        {ratio < 4.5 && <small>Para aplicar el par, alcanzá al menos 4,5:1 (WCAG AA).</small>}
       </div>}
       {tool === "svg-icons" && <div className="db-tool-content">
         <p>Elegí un ícono vectorial, personalizá el color y copiá o descargá el SVG.</p>
