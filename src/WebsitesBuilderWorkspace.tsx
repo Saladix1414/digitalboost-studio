@@ -1,7 +1,11 @@
 import {
   useMemo,
+  useRef,
   useState,
-} from "react";
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+  useCallback,
+  useEffect,} from "react";
 
 import {
   CheckCircle2,
@@ -20,6 +24,7 @@ import {
 import WebsitesBuilderCanvas from "./WebsitesBuilderCanvas";
 
 import "./websites-builder/websites-builder.css";
+import "./websites-builder/sky-workshop-theme.css";
 
 import {
   WEB_DESIGN_LANGUAGES,
@@ -33,7 +38,91 @@ import {
   type WebCanvasBlockSeed,
   type WebDesignLanguage,
   type WebDesignTokens,
-} from "./WebsitesBuilderModel";
+  createWebsiteProjectFromBrief,
+  getWebsiteHomePage,
+  updateWebsiteProjectFromCanvas,
+  updateWebsitePageSeo,
+  websiteProjectToCanvasBlocks,
+  type WebsiteProject,} from "./WebsitesBuilderModel";
+
+type SkyIslandPosition = { x: number; y: number };
+type SkyIslandDragStart = { pointerId: number; clientX: number; clientY: number; x: number; y: number };
+
+type SkyDraggableIslandProps = {
+  src: string;
+  label: string;
+  initial: SkyIslandPosition;
+  width: number;
+};
+
+function SkyDraggableIsland({ src, label, initial, width }: SkyDraggableIslandProps) {
+  const [position, setPosition] = useState(initial);
+  const [dragging, setDragging] = useState(false);
+  const dragStart = useRef<SkyIslandDragStart | null>(null);
+
+  function onPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragStart.current = { pointerId: event.pointerId, clientX: event.clientX, clientY: event.clientY, x: position.x, y: position.y };
+    setDragging(true);
+  }
+
+  function onPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    const start = dragStart.current;
+    const stage = event.currentTarget.parentElement?.getBoundingClientRect();
+    if (!start || start.pointerId !== event.pointerId || !stage || stage.width <= 0 || stage.height <= 0) return;
+    const island = event.currentTarget.getBoundingClientRect();
+    const maxX = Math.max(0, 100 - island.width / stage.width * 100);
+    const maxY = Math.max(0, 100 - island.height / stage.height * 100);
+    setPosition({
+      x: Math.max(0, Math.min(maxX, start.x + (event.clientX - start.clientX) / stage.width * 100)),
+      y: Math.max(0, Math.min(maxY, start.y + (event.clientY - start.clientY) / stage.height * 100)),
+    });
+  }
+
+  function onPointerEnd(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    dragStart.current = null;
+    setDragging(false);
+  }
+
+  function onKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
+    const step = event.shiftKey ? 5 : 1;
+    const delta = { x: 0, y: 0 };
+    if (event.key === "ArrowLeft") delta.x = -step;
+    else if (event.key === "ArrowRight") delta.x = step;
+    else if (event.key === "ArrowUp") delta.y = -step;
+    else if (event.key === "ArrowDown") delta.y = step;
+    else return;
+    event.preventDefault();
+    const stage = event.currentTarget.parentElement?.getBoundingClientRect();
+    if (!stage || stage.width <= 0 || stage.height <= 0) return;
+    const island = event.currentTarget.getBoundingClientRect();
+    const maxX = Math.max(0, 100 - island.width / stage.width * 100);
+    const maxY = Math.max(0, 100 - island.height / stage.height * 100);
+    setPosition((current) => ({ x: Math.max(0, Math.min(maxX, current.x + delta.x)), y: Math.max(0, Math.min(maxY, current.y + delta.y)) }));
+  }
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={`${label}. Arrastrá por todo el canvas; también podés usar las flechas.`}
+      title="Arrastrá esta isla por todo el canvas"
+      data-dragging={dragging}
+      className="db-floating-island"
+      style={{ left: `${position.x}%`, top: `${position.y}%`, width: `${width}%`, zIndex: dragging ? 40 : 21 }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerEnd}
+      onPointerCancel={onPointerEnd}
+      onKeyDown={onKeyDown}
+    >
+      <img src={src} alt="" draggable={false} />
+    </div>
+  );
+}
 
 type Props = {
   onBack?: () => void;
@@ -51,6 +140,9 @@ const PROJECT_KEY =
 
 const CANVAS_KEY =
   "digitalboost_websites_builder_canvas_v1";
+
+const MODEL_KEY =
+  "digitalboost_websites_builder_model_v1";
 
 const railItems = [
   ["build", LayoutGrid, "Build"],
@@ -102,6 +194,28 @@ export default function WebsitesBuilderWorkspace({
       }
     });
 
+  const [websiteProject, setWebsiteProject] =
+    useState<WebsiteProject | null>(() => {
+      try {
+        const model = localStorage.getItem(MODEL_KEY);
+        if (model) {
+          const parsed = JSON.parse(model) as WebsiteProject;
+          if (parsed?.schemaVersion === 1 && Array.isArray(parsed.pages) && parsed.pages.length) {
+            return parsed;
+          }
+        }
+
+        const savedProposal = localStorage.getItem(PROJECT_KEY);
+        if (!savedProposal) return null;
+        const parsedProposal = JSON.parse(savedProposal) as Proposal;
+        return parsedProposal?.brief && parsedProposal?.tokens
+          ? createWebsiteProjectFromBrief(parsedProposal.brief, parsedProposal.tokens)
+          : null;
+      } catch {
+        return null;
+      }
+    });
+
   const [
     canvasBlocks,
     setCanvasBlocks,
@@ -114,8 +228,15 @@ export default function WebsitesBuilderWorkspace({
           CANVAS_KEY
         );
 
-      return raw
-        ? JSON.parse(raw)
+      if (raw) {
+        const savedBlocks = JSON.parse(raw) as WebCanvasBlockSeed[];
+        if (Array.isArray(savedBlocks) && savedBlocks.length) {
+          return savedBlocks;
+        }
+      }
+
+      return websiteProject
+        ? websiteProjectToCanvasBlocks(websiteProject)
         : [];
     } catch {
       return [];
@@ -127,6 +248,40 @@ export default function WebsitesBuilderWorkspace({
 
   const [notice, setNotice] =
     useState("");
+
+  const handleCanvasBlocksChange = useCallback(
+    (blocks: WebCanvasBlockSeed[]) => {
+      setCanvasBlocks(blocks);
+      setWebsiteProject((current) => {
+        if (!current) return current;
+        return updateWebsiteProjectFromCanvas(current, blocks);
+      });
+    },
+    []
+  );
+
+  function updateHomeSeo(patch: {
+    title?: string;
+    description?: string;
+    indexable?: boolean;
+  }) {
+    setWebsiteProject((current) => {
+      if (!current) return current;
+      const home = getWebsiteHomePage(current);
+      return updateWebsitePageSeo(current, home.id, patch);
+    });
+  }
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CANVAS_KEY, JSON.stringify(canvasBlocks));
+      if (websiteProject) {
+        localStorage.setItem(MODEL_KEY, JSON.stringify(websiteProject));
+      }
+    } catch {
+      setNotice("No se pudo guardar el proyecto en este dispositivo.");
+    }
+  }, [canvasBlocks, websiteProject]);
 
   const active =
     applied || proposal;
@@ -256,6 +411,12 @@ export default function WebsitesBuilderWorkspace({
     setApplied(proposal);
     setCanvasBlocks(blocks);
 
+    const project = createWebsiteProjectFromBrief(
+      proposal.brief,
+      proposal.tokens
+    );
+    setWebsiteProject(project);
+
     localStorage.setItem(
       PROJECT_KEY,
       JSON.stringify(proposal)
@@ -264,6 +425,11 @@ export default function WebsitesBuilderWorkspace({
     localStorage.setItem(
       CANVAS_KEY,
       JSON.stringify(blocks)
+    );
+
+    localStorage.setItem(
+      MODEL_KEY,
+      JSON.stringify(project)
     );
 
     setProposal(null);
@@ -483,6 +649,44 @@ export default function WebsitesBuilderWorkspace({
                 {notice}
               </div>
             )}
+          </section>
+
+          {/* SKY_WORKSHOP_LOCAL_TOOLS_V1 — mock controls only; no backend */}
+          <section className="db-local-tools" aria-label="Herramientas gratuitas locales">
+            <div className="db-local-tools-heading">
+              <div>
+                <strong>Herramientas gratuitas locales</strong>
+                <small>Termux / Debian · interfaz visual</small>
+              </div>
+              <span className="db-local-tools-count" aria-label="6 herramientas">06</span>
+            </div>
+
+            <div className="db-local-tools-grid">
+              <button type="button" className="db-local-tool" data-tone="sky" disabled aria-label="Image Optimizer, integración pendiente">
+                <span className="db-local-tool-icon"><Sparkles size={15} /></span>
+                <span className="db-local-tool-copy"><strong>Image Optimizer</strong><small>Compresión local</small><span className="db-local-tool-status">Integración pendiente</span></span>
+              </button>
+              <button type="button" className="db-local-tool" data-tone="green" disabled aria-label="SVG e iconos, integración pendiente">
+                <span className="db-local-tool-icon"><Palette size={15} /></span>
+                <span className="db-local-tool-copy"><strong>SVG &amp; Icons</strong><small>Recursos vectoriales</small><span className="db-local-tool-status">Integración pendiente</span></span>
+              </button>
+              <button type="button" className="db-local-tool" data-tone="gold" disabled aria-label="Favicon, integración pendiente">
+                <span className="db-local-tool-icon"><WandSparkles size={15} /></span>
+                <span className="db-local-tool-copy"><strong>Favicon</strong><small>Iconos del sitio</small><span className="db-local-tool-status">Integración pendiente</span></span>
+              </button>
+              <button type="button" className="db-local-tool" data-tone="coral" disabled aria-label="Color Contrast, integración pendiente">
+                <span className="db-local-tool-icon"><Palette size={15} /></span>
+                <span className="db-local-tool-copy"><strong>Color Contrast</strong><small>Accesibilidad visual</small><span className="db-local-tool-status">Integración pendiente</span></span>
+              </button>
+              <button type="button" className="db-local-tool" data-tone="violet" disabled aria-label="SEO Preview, integración pendiente">
+                <span className="db-local-tool-icon"><Search size={15} /></span>
+                <span className="db-local-tool-copy"><strong>SEO Preview</strong><small>Vista previa social</small><span className="db-local-tool-status">Integración pendiente</span></span>
+              </button>
+              <button type="button" className="db-local-tool" data-tone="aqua" disabled aria-label="Export, integración pendiente">
+                <span className="db-local-tool-icon"><FileText size={15} /></span>
+                <span className="db-local-tool-copy"><strong>Export</strong><small>Archivos del proyecto</small><span className="db-local-tool-status">Integración pendiente</span></span>
+              </button>
+            </div>
           </section>
 
           {active && (
@@ -800,21 +1004,38 @@ export default function WebsitesBuilderWorkspace({
                   Title draft
                 </div>
 
-                <div className="mt-2 rounded-xl border border-white/[.06] bg-black/20 p-3 text-xs leading-relaxed text-slate-300">
-                  {active
-                    ? active.brief.headline
-                    : "No title available."}
-                </div>
+                <input
+                  aria-label="SEO title"
+                  disabled={!websiteProject}
+                  value={websiteProject ? getWebsiteHomePage(websiteProject).seo.title : ""}
+                  onChange={(event) => updateHomeSeo({ title: event.target.value })}
+                  placeholder="No title available."
+                  className="db-canvas-control mt-2 w-full rounded-xl p-3 text-xs"
+                />
 
                 <div className="mt-4 text-[9px] font-bold uppercase tracking-[.14em] text-slate-500">
                   Description draft
                 </div>
 
-                <div className="mt-2 rounded-xl border border-white/[.06] bg-black/20 p-3 text-[10px] leading-relaxed text-slate-400">
-                  {active
-                    ? active.brief.subheadline
-                    : "No description available."}
-                </div>
+                <textarea
+                  aria-label="SEO description"
+                  disabled={!websiteProject}
+                  value={websiteProject ? getWebsiteHomePage(websiteProject).seo.description : ""}
+                  onChange={(event) => updateHomeSeo({ description: event.target.value })}
+                  placeholder="No description available."
+                  rows={3}
+                  className="db-canvas-control mt-2 w-full resize-y rounded-xl p-3 text-[10px] leading-relaxed"
+                />
+
+                <label className="mt-4 flex items-center justify-between gap-3 text-[10px] text-slate-400">
+                  <span>Permitir indexación</span>
+                  <input
+                    type="checkbox"
+                    disabled={!websiteProject}
+                    checked={websiteProject ? getWebsiteHomePage(websiteProject).seo.indexable : false}
+                    onChange={(event) => updateHomeSeo({ indexable: event.target.checked })}
+                  />
+                </label>
               </section>
 
               <section className="db-panel p-4">
@@ -932,11 +1153,37 @@ export default function WebsitesBuilderWorkspace({
               studioEyebrow="Visual canvas"
               backLabel="← Operator"
               onBlocksChange={
-                setCanvasBlocks
+                handleCanvasBlocksChange
               }
             />
           ) : (
             <div className="db-empty-stage">
+              <div
+                className="db-floating-islands"
+                aria-label="Islas flotantes movibles por todo el canvas"
+                data-sky-drag-surface="full-canvas"
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", aspectRatio: "auto", overflow: "visible", clipPath: "none", zIndex: 20, pointerEvents: "none" }}
+              >
+                <div className="db-floating-islands-hint">↔ Arrastrá las islas</div>
+                <SkyDraggableIsland
+                  src="/websites-builder/sky-workshop/island-cluster.png"
+                  label="Grupo de islas flotantes"
+                  initial={{ x: 48, y: 32 }}
+                  width={48}
+                />
+                <SkyDraggableIsland
+                  src="/websites-builder/sky-workshop/island-emblem.png"
+                  label="Isla principal con cascada"
+                  initial={{ x: 42, y: 24 }}
+                  width={36}
+                />
+                <SkyDraggableIsland
+                  src="/websites-builder/sky-workshop/island-emblem.png"
+                  label="Isla flotante con cascada"
+                  initial={{ x: 76, y: 10 }}
+                  width={20}
+                />
+              </div>
               <div className="max-w-sm px-8 text-center">
                 <div className="db-neon-orb mx-auto">
                   <Sparkles size={22} />
@@ -960,6 +1207,44 @@ export default function WebsitesBuilderWorkspace({
             </div>
           )}
         </main>
+
+        {!applied && (
+          <aside className="db-empty-inspector" aria-label="Inspector visual del canvas">
+            <div className="db-empty-inspector-head">
+              <div><strong>Inspector</strong><small>Propiedades del elemento</small></div>
+              <span aria-hidden="true">☷</span>
+            </div>
+            <div className="db-empty-inspector-tabs" aria-label="Pestañas del inspector">
+              <span data-active="true">Section</span><span>Style</span><span>Advanced</span>
+            </div>
+            <section className="db-empty-inspector-group">
+              <small>Selected element</small>
+              <div className="db-empty-inspector-field"><span>▣</span><strong>Hero Section</strong><em>Section</em></div>
+            </section>
+            <section className="db-empty-inspector-group">
+              <small>Dimensions</small>
+              <div className="db-empty-inspector-pair"><span>W <b>1200</b> px</span><span>H <b>640</b> px</span></div>
+            </section>
+            <section className="db-empty-inspector-group">
+              <small>Position</small>
+              <div className="db-empty-inspector-pair"><span>X <b>0</b> px</span><span>Y <b>0</b> px</span></div>
+            </section>
+            <section className="db-empty-inspector-group">
+              <small>Layout</small>
+              <div className="db-empty-inspector-field"><span>Content width</span><strong>Full width⌄</strong></div>
+              <div className="db-empty-inspector-range"><span>Vertical padding</span><b>120 px</b><i><u /></i></div>
+              <div className="db-empty-inspector-range"><span>Horizontal padding</span><b>80 px</b><i><u /></i></div>
+            </section>
+            <section className="db-empty-inspector-group">
+              <small>Background</small>
+              <div className="db-empty-inspector-field"><span>Image · Sky islands</span><strong>Change</strong></div>
+              <div className="db-empty-inspector-range"><span>Overlay</span><b>20%</b><i><u /></i></div>
+            </section>
+            <section className="db-empty-inspector-group"><small>Border</small><div className="db-empty-inspector-field"><span>Style</span><strong>None⌄</strong></div></section>
+            <section className="db-empty-inspector-group"><small>Effects <b>＋</b></small></section>
+            <div className="db-empty-inspector-note">Muestra visual · los controles reales aparecen al seleccionar una sección.</div>
+          </aside>
+        )}
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import {
   getWebsiteHomePage,
   normalizeBrief,
   updateWebsiteProjectFromCanvas,
+  updateWebsitePageSeo,
   verifyWebsitesBuilderProject,
   websiteProjectToCanvasBlocks,
 } from "../../src/WebsitesBuilderModel.ts";
@@ -278,4 +279,27 @@ test("canvas order and deletion become canonical project structure", () => {
       "canonical-value",
     ]
   );
+});
+
+test("SEO edits stay attached to the canonical Home page", () => {
+  const brief = createFallbackBrief(
+    "Sitio para estudio creativo",
+    "web",
+    "Digital Editorial"
+  );
+  const project = createWebsiteProjectFromBrief(
+    brief,
+    createDesignTokens(brief.designLanguage)
+  );
+  const home = getWebsiteHomePage(project);
+  const updated = updateWebsitePageSeo(project, home.id, {
+    title: "Estudio creativo | Inicio",
+    description: "Diseño e identidad para marcas.",
+    indexable: false,
+  });
+
+  assert.equal(getWebsiteHomePage(updated).seo.title, "Estudio creativo | Inicio");
+  assert.equal(getWebsiteHomePage(updated).seo.description, "Diseño e identidad para marcas.");
+  assert.equal(getWebsiteHomePage(updated).seo.indexable, false);
+  assert.equal(getWebsiteHomePage(project).seo.indexable, true);
 });

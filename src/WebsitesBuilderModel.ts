@@ -598,6 +598,28 @@ export function updateWebsitePageSections(
   };
 }
 
+export function updateWebsitePageSeo(
+  project: WebsiteProject,
+  pageId: string,
+  patch: Partial<WebsitePage["seo"]>
+): WebsiteProject {
+  if (!project.pages.some((page) => page.id === pageId)) {
+    return project;
+  }
+
+  return {
+    ...project,
+    pages: project.pages.map((page) =>
+      page.id === pageId
+        ? {
+            ...page,
+            seo: { ...page.seo, ...patch },
+          }
+        : page
+    ),
+  };
+}
+
 /* -------------------------------------------------------------------------- */
 /* Website Project <-> Canvas projection                                      */
 /* -------------------------------------------------------------------------- */
