@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { Download, X } from "lucide-react";
 import { getWebsiteHomePage, type WebCanvasBlockSeed, type WebsiteProject } from "../WebsitesBuilderModel";
-import { createSvgIconMarkup, createWebsiteExport, getContrastRatio, LOCAL_WEBSITE_ICONS, type LocalWebsiteTool } from "./LocalWebToolsModel";
+import { createSvgIconMarkup, createWebsiteExport, createWebsitePageHtml, getContrastRatio, LOCAL_WEBSITE_ICONS, type LocalWebsiteTool } from "./LocalWebToolsModel";
 
 type Props = {
   tool: LocalWebsiteTool;
   project: WebsiteProject | null;
+  pageId: string;
   blocks: WebCanvasBlockSeed[];
   onSeoChange: (patch: { title?: string; description?: string; indexable?: boolean }) => void;
   onClose: () => void;
@@ -90,13 +91,14 @@ function formatBytes(value: number) {
   return value < 1024 * 1024 ? `${(value / 1024).toFixed(1)} KB` : `${(value / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-export default function LocalWebTools({ tool, project, blocks, onSeoChange, onClose }: Props) {
+export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChange, onClose }: Props) {
   const [foreground, setForeground] = useState("#17375b");
   const [background, setBackground] = useState("#ffffff");
   const [iconId, setIconId] = useState<string>(LOCAL_WEBSITE_ICONS[0].id);
   const [iconColor, setIconColor] = useState("#1689e8");
   const [notice, setNotice] = useState("");
-  const home = project ? getWebsiteHomePage(project) : null;
+  const page = project?.pages.find((entry) => entry.id === pageId)
+    ?? (project ? getWebsiteHomePage(project) : null);
   const ratio = useMemo(() => {
     try { return getContrastRatio(foreground, background); } catch { return 0; }
   }, [foreground, background]);
@@ -112,6 +114,17 @@ export default function LocalWebTools({ tool, project, blocks, onSeoChange, onCl
     const payload = createWebsiteExport(project, blocks);
     downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }), "digitalboost-website-project.json");
     setNotice("Exportación JSON generada en este dispositivo.");
+  }
+
+  function exportPageHtml() {
+    if (!project) return;
+    try {
+      const output = createWebsitePageHtml(project, pageId, blocks);
+      downloadBlob(new Blob([output.html], { type: "text/html;charset=utf-8" }), output.filename);
+      setNotice("HTML de la página actual generado localmente.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "No se pudo generar el HTML.");
+    }
   }
 
   async function copySvg() {
@@ -144,18 +157,21 @@ export default function LocalWebTools({ tool, project, blocks, onSeoChange, onCl
         <label className="db-tool-label">Código SVG<textarea readOnly rows={4} value={svg}/></label>
       </div>}
       {tool === "seo-preview" && <div className="db-tool-content">
-        {home ? <>
-          <p>Editar título y descripción actualiza los metadatos SEO guardados localmente.</p>
-          <label className="db-tool-label">Título · {home.seo.title.length}/60<input maxLength={60} value={home.seo.title} onChange={(event) => onSeoChange({ title: event.target.value })}/></label>
-          <label className="db-tool-label">Descripción · {home.seo.description.length}/160<textarea maxLength={160} rows={3} value={home.seo.description} onChange={(event) => onSeoChange({ description: event.target.value })}/></label>
-          <label className="db-tool-check"><input type="checkbox" checked={home.seo.indexable} onChange={(event) => onSeoChange({ indexable: event.target.checked })}/> Permitir indexación en la configuración del proyecto</label>
-          <div className="db-seo-preview"><small>VISTA PREVIA DE BÚSQUEDA</small><strong>{home.seo.title || "Título de la página"}</strong><span>digitalboost.local › {home.slug}</span><p>{home.seo.description || "Agregá una descripción para previsualizar el resultado."}</p></div>
+        {page ? <>
+          <p>SEO de la página seleccionada. Los cambios se guardan localmente.</p>
+          <label className="db-tool-label">Título · {page.seo.title.length}/60<input maxLength={60} value={page.seo.title} onChange={(event) => onSeoChange({ title: event.target.value })}/></label>
+          <label className="db-tool-label">Descripción · {page.seo.description.length}/160<textarea maxLength={160} rows={3} value={page.seo.description} onChange={(event) => onSeoChange({ description: event.target.value })}/></label>
+          <label className="db-tool-check"><input type="checkbox" checked={page.seo.indexable} onChange={(event) => onSeoChange({ indexable: event.target.checked })}/> Permitir indexación en la configuración del proyecto</label>
+          <div className="db-seo-preview"><small>VISTA PREVIA DE BÚSQUEDA · {page.name}</small><strong>{page.seo.title || "Título de la página"}</strong><span>digitalboost.local › {page.slug}</span><p>{page.seo.description || "Agregá una descripción para previsualizar el resultado."}</p></div>
         </> : <div className="db-tool-message">Creá o aplicá un proyecto para preparar la vista previa SEO.</div>}
       </div>}
       {tool === "export" && <div className="db-tool-content">
-        <p>Descargá una copia del estado del proyecto y del canvas. Este archivo se genera localmente.</p>
+        <p>Generá una página HTML para previsualizar o una copia JSON del proyecto. Todo se prepara en este dispositivo.</p>
         <div className="db-tool-export-summary"><span>Páginas <strong>{project?.pages.length ?? 0}</strong></span><span>Secciones <strong>{blocks.length}</strong></span><span>Formato <strong>JSON</strong></span></div>
-        <button type="button" className="db-tool-primary" onClick={exportProject}><Download size={15}/> Descargar proyecto</button>
+        <div className="db-tool-actions">
+          <button type="button" className="db-tool-primary" disabled={!project || !page} onClick={exportPageHtml}><Download size={15}/> Descargar HTML de esta página</button>
+          <button type="button" className="db-tool-secondary" onClick={exportProject}><Download size={15}/> Descargar proyecto JSON</button>
+        </div>
         {notice && <div className="db-tool-message" role="status">{notice}</div>}
       </div>}
       {(tool === "svg-icons" && notice) && <div className="db-tool-message" role="status">{notice}</div>}

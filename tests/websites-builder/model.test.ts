@@ -17,6 +17,7 @@ import {
   verifyWebsitesBuilderProject,
   websiteProjectToCanvasBlocks,
 } from "../../src/WebsitesBuilderModel.ts";
+import { createWebsitePageHtml } from "../../src/websites-builder/LocalWebToolsModel.ts";
 
 test("fallback creates four blocks without fake proof", () => {
   const brief = createFallbackBrief(
@@ -375,4 +376,28 @@ test("design token updates are immutable and merge only selected values", () => 
   assert.equal(updated.designTokens.radius, 24);
   assert.equal(updated.designTokens.background, tokens.background);
   assert.equal(project.designTokens.accent, tokens.accent);
+});
+
+test("local HTML export includes active page tokens and escapes authored content", () => {
+  const brief = createFallbackBrief("Sitio de exportación");
+  const project = createWebsiteProjectFromBrief(brief, createDesignTokens(brief.designLanguage));
+  const home = getWebsiteHomePage(project);
+  const output = createWebsitePageHtml(project, home.id, [{
+    id: "hero-safe",
+    type: "hero",
+    label: "Hero <principal>",
+    text: "<script>alert('x')</script> & más",
+    background: "url(javascript:alert(1))",
+    color: "#112233",
+    fontSize: 36,
+    padding: 24,
+    align: "left",
+    width: 100,
+  }]);
+
+  assert.equal(output.filename, "digitalboost-home.html");
+  assert.match(output.html, /&lt;script&gt;alert\(&#39;x&#39;\)&lt;\/script&gt; &amp; más/);
+  assert.doesNotMatch(output.html, /url\(javascript:/);
+  assert.match(output.html, /name="robots" content="index,follow"/);
+  assert.match(output.html, /width:min\(calc\(100% - 40px\),1200px\)/);
 });

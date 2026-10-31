@@ -60,3 +60,87 @@ export function createWebsiteExport(project: WebsiteProject | null, blocks: WebC
     canvas: blocks,
   };
 }
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[character] as string);
+}
+
+function safeColor(value: string, fallback: string): string {
+  return /^#[\da-f]{3}(?:[\da-f]{3})?$/i.test(value) ? value : fallback;
+}
+
+function safeNumber(value: number | undefined, fallback: number, min: number, max: number): number {
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.min(max, Math.max(min, value))
+    : fallback;
+}
+
+export function createWebsitePageHtml(
+  project: WebsiteProject,
+  pageId: string,
+  blocks: WebCanvasBlockSeed[]
+): { filename: string; html: string } {
+  const page = project.pages.find((entry) => entry.id === pageId) ?? project.pages[0];
+  if (!page) throw new Error("El proyecto no tiene páginas para exportar.");
+
+  const tokens = project.designTokens;
+  const background = safeColor(tokens.background, "#f8fafc");
+  const foreground = safeColor(tokens.foreground, "#0f172a");
+  const surface = safeColor(tokens.surface, "#ffffff");
+  const muted = safeColor(tokens.muted, "#64748b");
+  const accent = safeColor(tokens.accent, "#2563eb");
+  const accentForeground = safeColor(tokens.accentForeground, "#ffffff");
+  const radius = safeNumber(tokens.radius, 16, 0, 64);
+  const container = safeNumber(tokens.container, 1200, 320, 2400);
+  const content = blocks.filter((block) => !block.hidden).map((block) => {
+    const blockBackground = safeColor(block.background, surface);
+    const blockColor = safeColor(block.color, foreground);
+    const fontSize = safeNumber(block.fontSize, 18, 10, 96);
+    const paddingY = safeNumber(block.paddingY ?? block.padding, 32, 0, 240);
+    const paddingX = safeNumber(block.paddingX ?? block.padding, 32, 0, 240);
+    const blockRadius = safeNumber(block.borderRadius, radius, 0, 64);
+    const align = block.align === "center" || block.align === "right" ? block.align : "left";
+    const text = escapeHtml(block.text);
+    const label = escapeHtml(block.label);
+    const isButton = block.type === "button";
+    const className = isButton ? "content-block content-cta" : "content-block";
+    return '<section class="' + className + '" aria-label="' + label + '" style="background:' + (isButton ? accent : blockBackground) + ';color:' + (isButton ? accentForeground : blockColor) + ';font-size:' + fontSize + 'px;text-align:' + align + ';padding:' + paddingY + 'px ' + paddingX + 'px;border-radius:' + blockRadius + 'px">' + text + '</section>';
+  }).join("\n");
+
+  const title = escapeHtml(page.seo.title || page.title || page.name);
+  const description = escapeHtml(page.seo.description || page.description);
+  const robots = page.seo.indexable ? "index,follow" : "noindex,nofollow";
+  const safeSlug = page.slug.replace(/^\/+|\/+$/g, "").replace(/[^a-zA-Z0-9-]+/g, "-") || "home";
+  const html = [
+    "<!doctype html>",
+    '<html lang="es">',
+    "<head>",
+    '  <meta charset="utf-8">',
+    '  <meta name="viewport" content="width=device-width, initial-scale=1">',
+    '  <meta name="description" content="' + description + '">',
+    '  <meta name="robots" content="' + robots + '">',
+    "  <title>" + title + "</title>",
+    "  <style>",
+    "    *{box-sizing:border-box}body{margin:0;background:" + background + ";color:" + foreground + ';font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}',
+    "    header,main,footer{width:min(calc(100% - 40px)," + container + "px);margin-inline:auto}",
+    "    header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 0;border-bottom:1px solid " + safeColor(tokens.border, "#e2e8f0") + "}",
+    "    header strong{font-size:18px}main{padding:32px 0 64px}.content-block{margin:14px 0;background:" + surface + ";color:" + foreground + ";box-shadow:0 8px 28px rgba(15,23,42,.06);white-space:pre-wrap;overflow-wrap:anywhere}",
+    "    .content-cta{display:inline-block;font-weight:700;box-shadow:none}footer{padding:20px 0 36px;color:" + muted + ";font-size:13px}",
+    "    @media(max-width:600px){header,main,footer{width:min(calc(100% - 28px)," + container + "px)}header{align-items:flex-start;flex-direction:column}.content-block{padding:24px 18px!important}}",
+    "  </style>",
+    "</head>",
+    "<body>",
+    "  <header><strong>" + escapeHtml(project.name) + "</strong></header>",
+    "  <main><h1>" + escapeHtml(page.title || page.name) + "</h1>" + (content || "<p>" + escapeHtml(page.description || "Esta página todavía no tiene secciones.") + "</p>") + "</main>",
+    "  <footer>" + escapeHtml(project.name) + " · Página " + escapeHtml(page.name) + "</footer>",
+    "</body>",
+    "</html>",
+  ].join("\n");
+  return { filename: "digitalboost-" + safeSlug + ".html", html };
+}
