@@ -330,12 +330,12 @@ export default function WebsitesBuilderCanvas({
 }: Props) {
   const [blocks, setBlocks] = useState<BuilderBlock[]>(() => {
     try {
-      if (seedBlocks?.length) return seedBlocks;
+      if (seedBlocks !== undefined) return seedBlocks;
       const saved = localStorage.getItem(storageKey);
       if (saved) return JSON.parse(saved);
       return initialBlocks;
     } catch {
-      return seedBlocks?.length ? seedBlocks : initialBlocks;
+      return seedBlocks !== undefined ? seedBlocks : initialBlocks;
     }
   });
 

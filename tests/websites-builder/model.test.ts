@@ -6,10 +6,13 @@ import {
   createDesignTokens,
   createFallbackBrief,
   createWebsiteProjectFromBrief,
+  createWebsitePage,
+  deleteWebsitePage,
   getWebsiteHomePage,
   normalizeBrief,
   updateWebsiteProjectFromCanvas,
   updateWebsitePageSeo,
+  updateWebsitePageDetails,
   verifyWebsitesBuilderProject,
   websiteProjectToCanvasBlocks,
 } from "../../src/WebsitesBuilderModel.ts";
@@ -324,4 +327,36 @@ test("SEO edits stay attached to the canonical Home page", () => {
   assert.equal(getWebsiteHomePage(updated).seo.description, "Diseño e identidad para marcas.");
   assert.equal(getWebsiteHomePage(updated).seo.indexable, false);
   assert.equal(getWebsiteHomePage(project).seo.indexable, true);
+});
+
+test("pages can be added, renamed, slugged, and removed without touching Home", () => {
+  const brief = createFallbackBrief("Sitio multipágina");
+  const project = createWebsiteProjectFromBrief(brief, createDesignTokens(brief.designLanguage));
+  const home = getWebsiteHomePage(project);
+  const withPage = createWebsitePage(project, "Servicios");
+  const page = withPage.pages[1];
+
+  assert.equal(page.name, "Servicios");
+  assert.equal(page.slug, "/servicios");
+  assert.equal(page.sections.length, 0);
+  assert.equal(createWebsitePage(withPage, "Servicios").pages[2].slug, "/servicios-2");
+
+  const edited = updateWebsitePageDetails(withPage, page.id, { title: "Nuestros servicios", slug: "solución de negocio" });
+  assert.equal(edited.pages[1].title, "Nuestros servicios");
+  assert.equal(edited.pages[1].slug, "/solucion-de-negocio");
+  assert.equal(deleteWebsitePage(edited, home.id), edited);
+  assert.equal(deleteWebsitePage(edited, page.id).pages.length, 1);
+});
+
+test("canvas projection targets the selected page", () => {
+  const brief = createFallbackBrief("Sitio con páginas");
+  const project = createWebsiteProjectFromBrief(brief, createDesignTokens(brief.designLanguage));
+  const home = getWebsiteHomePage(project);
+  const withPage = createWebsitePage(project, "Contacto");
+  const page = withPage.pages[1];
+  const pageBlocks = [{ id: "contact-hero", type: "hero" as const, label: "Contacto", text: "Escribinos", background: "#fff", color: "#000", fontSize: 32, padding: 24, align: "left" as const, width: 100 }];
+  const updated = updateWebsiteProjectFromCanvas(withPage, pageBlocks, page.id);
+
+  assert.equal(websiteProjectToCanvasBlocks(updated, page.id)[0].id, "contact-hero");
+  assert.equal(updated.pages.find((entry) => entry.id === home.id)?.sections.length, home.sections.length);
 });

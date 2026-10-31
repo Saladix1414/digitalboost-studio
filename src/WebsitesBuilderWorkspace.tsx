@@ -42,7 +42,10 @@ import {
   type WebDesignLanguage,
   type WebDesignTokens,
   createWebsiteProjectFromBrief,
+  createWebsitePage,
+  deleteWebsitePage,
   getWebsiteHomePage,
+  updateWebsitePageDetails,
   updateWebsiteProjectFromCanvas,
   updateWebsitePageSeo,
   websiteProjectToCanvasBlocks,
@@ -146,6 +149,8 @@ const CANVAS_KEY =
 
 const MODEL_KEY =
   "digitalboost_websites_builder_model_v1";
+const ACTIVE_PAGE_KEY =
+  "digitalboost_websites_builder_active_page_v1";
 
 const railItems = [
   ["build", LayoutGrid, "Build"],
@@ -222,6 +227,15 @@ export default function WebsitesBuilderWorkspace({
       }
     });
 
+  const [activePageId, setActivePageId] =
+    useState(() => {
+      if (!websiteProject) return "";
+      const savedId = localStorage.getItem(ACTIVE_PAGE_KEY);
+      return websiteProject.pages.some((page) => page.id === savedId)
+        ? savedId!
+        : getWebsiteHomePage(websiteProject).id;
+    });
+
   const [
     canvasBlocks,
     setCanvasBlocks,
@@ -230,7 +244,7 @@ export default function WebsitesBuilderWorkspace({
   >(() => {
     try {
       if (websiteProject) {
-        return websiteProjectToCanvasBlocks(websiteProject);
+        return websiteProjectToCanvasBlocks(websiteProject, activePageId);
       }
 
       const raw =
@@ -262,11 +276,46 @@ export default function WebsitesBuilderWorkspace({
       setCanvasBlocks(blocks);
       setWebsiteProject((current) => {
         if (!current) return current;
-        return updateWebsiteProjectFromCanvas(current, blocks);
+        return updateWebsiteProjectFromCanvas(current, blocks, activePageId);
       });
     },
-    []
+    [activePageId]
   );
+
+  function selectPage(pageId: string) {
+    if (!websiteProject) return;
+    setActivePageId(pageId);
+    setCanvasBlocks(websiteProjectToCanvasBlocks(websiteProject, pageId));
+  }
+
+  function addPage() {
+    setWebsiteProject((current) => {
+      if (!current) return current;
+      const next = createWebsitePage(current);
+      const page = next.pages[next.pages.length - 1];
+      setActivePageId(page.id);
+      setCanvasBlocks([]);
+      return next;
+    });
+  }
+
+  function updateActivePage(patch: { name?: string; slug?: string; title?: string; description?: string }) {
+    setWebsiteProject((current) => current
+      ? updateWebsitePageDetails(current, activePageId, patch)
+      : current);
+  }
+
+  function removeActivePage() {
+    setWebsiteProject((current) => {
+      if (!current) return current;
+      const next = deleteWebsitePage(current, activePageId);
+      if (next === current) return current;
+      const home = getWebsiteHomePage(next);
+      setActivePageId(home.id);
+      setCanvasBlocks(websiteProjectToCanvasBlocks(next, home.id));
+      return next;
+    });
+  }
 
   function updateHomeSeo(patch: {
     title?: string;
@@ -275,21 +324,27 @@ export default function WebsitesBuilderWorkspace({
   }) {
     setWebsiteProject((current) => {
       if (!current) return current;
-      const home = getWebsiteHomePage(current);
-      return updateWebsitePageSeo(current, home.id, patch);
+      const page = current.pages.find((entry) => entry.id === activePageId)
+        ?? getWebsiteHomePage(current);
+      return updateWebsitePageSeo(current, page.id, patch);
     });
   }
 
   useEffect(() => {
     try {
-      localStorage.setItem(CANVAS_KEY, JSON.stringify(canvasBlocks));
+      const page = websiteProject?.pages.find((entry) => entry.id === activePageId);
+      const canvasStorageKey = page && page.slug !== "/"
+        ? `${CANVAS_KEY}:${page.id}`
+        : CANVAS_KEY;
+      localStorage.setItem(canvasStorageKey, JSON.stringify(canvasBlocks));
       if (websiteProject) {
         localStorage.setItem(MODEL_KEY, JSON.stringify(websiteProject));
       }
+      if (activePageId) localStorage.setItem(ACTIVE_PAGE_KEY, activePageId);
     } catch {
       setNotice("No se pudo guardar el proyecto en este dispositivo.");
     }
-  }, [canvasBlocks, websiteProject]);
+  }, [canvasBlocks, websiteProject, activePageId]);
 
   const active =
     applied || proposal;
@@ -316,6 +371,9 @@ export default function WebsitesBuilderWorkspace({
       canvasBlocks,
       prompt,
     ]);
+
+  const currentPage = websiteProject?.pages.find((page) => page.id === activePageId)
+    ?? (websiteProject ? getWebsiteHomePage(websiteProject) : null);
 
   async function generateProposal() {
     if (!prompt.trim()) {
@@ -424,6 +482,7 @@ export default function WebsitesBuilderWorkspace({
       proposal.tokens
     );
     setWebsiteProject(project);
+    setActivePageId(getWebsiteHomePage(project).id);
 
     localStorage.setItem(
       PROJECT_KEY,
@@ -838,59 +897,45 @@ export default function WebsitesBuilderWorkspace({
                 </p>
               </section>
 
-              <section className="db-panel p-3">
-                <div className="db-page-card" data-active="true">
-                  <div className="flex items-center gap-3">
-                    <div className="db-page-icon">
-                      <FileText size={14} />
+              {websiteProject && currentPage ? (
+                <>
+                  <section className="db-panel p-3">
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      <span className="text-[9px] font-bold uppercase tracking-[.14em] text-slate-500">Project pages · {websiteProject.pages.length}</span>
+                      <button type="button" className="db-secondary px-2.5 py-1.5 text-[9px]" onClick={addPage}>+ New page</button>
                     </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="text-xs font-semibold">
-                        Home
-                      </div>
-
-                      <div className="mt-1 truncate text-[9px] text-slate-600">
-                        /
-                      </div>
+                    <div className="space-y-2">
+                      {websiteProject.pages.map((page) => (
+                        <button key={page.id} type="button" className="db-page-card w-full text-left" data-active={page.id === currentPage.id} onClick={() => selectPage(page.id)}>
+                          <span className="flex items-center gap-3">
+                            <span className="db-page-icon"><FileText size={14} /></span>
+                            <span className="min-w-0 flex-1">
+                              <strong className="block truncate text-xs">{page.name}</strong>
+                              <small className="mt-1 block truncate text-[9px] text-slate-600">{page.slug}</small>
+                            </span>
+                            {page.id === currentPage.id && <span className="db-live-chip">Active</span>}
+                          </span>
+                          <span className="mt-3 grid grid-cols-2 gap-2">
+                            <span className="db-metric-tile"><span>Sections</span><strong>{page.sections.length}</strong></span>
+                            <span className="db-metric-tile"><span>State</span><strong>{page.sections.length ? "Draft" : "Empty"}</strong></span>
+                          </span>
+                        </button>
+                      ))}
                     </div>
+                  </section>
 
-                    <span className="db-live-chip">
-                      Active
-                    </span>
-                  </div>
-
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    <div className="db-metric-tile">
-                      <span>Sections</span>
-                      <strong>
-                        {canvasBlocks.length}
-                      </strong>
-                    </div>
-
-                    <div className="db-metric-tile">
-                      <span>Status</span>
-                      <strong>
-                        {applied
-                          ? "Draft"
-                          : "Empty"}
-                      </strong>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <section className="db-panel p-4">
-                <div className="text-[9px] font-bold uppercase tracking-[.14em] text-slate-500">
-                  Page title
-                </div>
-
-                <div className="mt-2 text-xs leading-relaxed text-slate-300">
-                  {active
-                    ? active.brief.headline
-                    : "No page direction applied yet."}
-                </div>
-              </section>
+                  <section className="db-panel space-y-3 p-4">
+                    <div className="text-[9px] font-bold uppercase tracking-[.14em] text-slate-500">Page settings</div>
+                    <label className="db-tool-label">Page name<input aria-label="Page name" value={currentPage.name} onChange={(event) => updateActivePage({ name: event.target.value })}/></label>
+                    <label className="db-tool-label">URL slug<input aria-label="Page URL slug" disabled={currentPage.slug === "/"} value={currentPage.slug === "/" ? "/" : currentPage.slug.slice(1)} onChange={(event) => updateActivePage({ slug: event.target.value })}/></label>
+                    <label className="db-tool-label">Page title<input aria-label="Page title" value={currentPage.title} onChange={(event) => updateActivePage({ title: event.target.value })}/></label>
+                    <label className="db-tool-label">Page description<textarea aria-label="Page description" rows={3} value={currentPage.description} onChange={(event) => updateActivePage({ description: event.target.value })}/></label>
+                    {currentPage.slug !== "/" && <button type="button" className="db-secondary px-3 py-2 text-[10px]" onClick={removeActivePage}>Delete this page</button>}
+                  </section>
+                </>
+              ) : (
+                <section className="db-panel p-4 text-xs text-slate-500">Aplicá una dirección en Build para crear tu página Home.</section>
+              )}
             </div>
           )}
 
@@ -1151,11 +1196,12 @@ export default function WebsitesBuilderWorkspace({
         <main className="db-workstage">
           {applied ? (
             <WebsitesBuilderCanvas
+              key={activePageId || "home"}
               seedBlocks={
                 canvasBlocks
               }
               storageKey={
-                CANVAS_KEY
+                currentPage?.slug === "/" ? CANVAS_KEY : `${CANVAS_KEY}:${activePageId}`
               }
               studioTitle="DigitalBoost Websites"
               studioEyebrow="Visual canvas"
@@ -1258,6 +1304,7 @@ export default function WebsitesBuilderWorkspace({
         <LocalWebTools
           tool={selectedLocalTool}
           project={websiteProject}
+          pageId={activePageId}
           blocks={canvasBlocks}
           onSeoChange={updateHomeSeo}
           onClose={() => setSelectedLocalTool(null)}

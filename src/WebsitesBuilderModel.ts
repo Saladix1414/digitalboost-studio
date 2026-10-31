@@ -609,6 +609,76 @@ export function updateWebsitePageSections(
   };
 }
 
+export function createWebsitePage(
+  project: WebsiteProject,
+  name = `Page ${project.pages.length + 1}`
+): WebsiteProject {
+  const cleanName = name.trim() || `Page ${project.pages.length + 1}`;
+  const baseSlug = cleanName
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || `page-${project.pages.length + 1}`;
+  const usedSlugs = new Set(project.pages.map((page) => page.slug));
+  let slug = `/${baseSlug}`;
+  let suffix = 2;
+  while (usedSlugs.has(slug)) slug = `/${baseSlug}-${suffix++}`;
+  const usedIds = new Set(project.pages.map((page) => page.id));
+  let id = `${project.id}-${baseSlug}`;
+  suffix = 2;
+  while (usedIds.has(id)) id = `${project.id}-${baseSlug}-${suffix++}`;
+
+  return {
+    ...project,
+    pages: [...project.pages, {
+      id,
+      name: cleanName,
+      slug,
+      title: cleanName,
+      description: "",
+      sections: [],
+      seo: { title: cleanName, description: "", indexable: true },
+    }],
+  };
+}
+
+export function updateWebsitePageDetails(
+  project: WebsiteProject,
+  pageId: string,
+  patch: Partial<Pick<WebsitePage, "name" | "slug" | "title" | "description">>
+): WebsiteProject {
+  const target = project.pages.find((page) => page.id === pageId);
+  if (!target) return project;
+  const slugPart = patch.slug?.trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const nextSlug = patch.slug === undefined
+    ? target.slug
+    : target.slug === "/"
+      ? "/"
+      : `/${slugPart || "page"}`;
+  if (project.pages.some((page) => page.id !== pageId && page.slug === nextSlug)) return project;
+  return {
+    ...project,
+    pages: project.pages.map((page) => page.id === pageId
+      ? { ...page, ...patch, slug: nextSlug }
+      : page),
+  };
+}
+
+export function deleteWebsitePage(
+  project: WebsiteProject,
+  pageId: string
+): WebsiteProject {
+  const page = project.pages.find((entry) => entry.id === pageId);
+  if (!page || page.slug === "/" || project.pages.length <= 1) return project;
+  return { ...project, pages: project.pages.filter((entry) => entry.id !== pageId) };
+}
+
 export function updateWebsitePageSeo(
   project: WebsiteProject,
   pageId: string,
@@ -795,14 +865,14 @@ export function createWebsiteProjectFromBrief(
 
 export function updateWebsiteProjectFromCanvas(
   project: WebsiteProject,
-  blocks: WebCanvasBlockSeed[]
+  blocks: WebCanvasBlockSeed[],
+  pageId?: string
 ): WebsiteProject {
-  const home =
-    getWebsiteHomePage(project);
+  const page = project.pages.find((entry) => entry.id === pageId) ?? getWebsiteHomePage(project);
 
   return updateWebsitePageSections(
     project,
-    home.id,
+    page.id,
     canvasBlocksToWebsiteSections(
       blocks
     )
@@ -810,9 +880,11 @@ export function updateWebsiteProjectFromCanvas(
 }
 
 export function websiteProjectToCanvasBlocks(
-  project: WebsiteProject
+  project: WebsiteProject,
+  pageId?: string
 ): WebCanvasBlockSeed[] {
+  const page = project.pages.find((entry) => entry.id === pageId) ?? getWebsiteHomePage(project);
   return websiteSectionsToCanvasBlocks(
-    getWebsiteHomePage(project).sections
+    page.sections
   );
 }
