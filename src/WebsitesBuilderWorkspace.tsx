@@ -48,6 +48,7 @@ import {
   updateWebsitePageDetails,
   updateWebsiteProjectFromCanvas,
   updateWebsitePageSeo,
+  updateWebsiteProjectDesignTokens,
   websiteProjectToCanvasBlocks,
   type WebsiteProject,} from "./WebsitesBuilderModel";
 
@@ -330,6 +331,16 @@ export default function WebsitesBuilderWorkspace({
     });
   }
 
+  function updateDesignTokens(patch: Partial<WebDesignTokens>) {
+    setWebsiteProject((current) => current
+      ? updateWebsiteProjectDesignTokens(current, patch)
+      : current);
+    setApplied((current) => current ? {
+      ...current,
+      tokens: { ...current.tokens, ...patch },
+    } : current);
+  }
+
   useEffect(() => {
     try {
       const page = websiteProject?.pages.find((entry) => entry.id === activePageId);
@@ -358,7 +369,7 @@ export default function WebsitesBuilderWorkspace({
         prompt ||
           applied.brief.offer,
         applied.brief,
-        applied.tokens,
+        websiteProject?.designTokens ?? applied.tokens,
         canvasBlocks.length
           ? canvasBlocks
           : briefToBuilderBlocks(
@@ -368,6 +379,7 @@ export default function WebsitesBuilderWorkspace({
       );
     }, [
       applied,
+      websiteProject,
       canvasBlocks,
       prompt,
     ]);
@@ -555,7 +567,7 @@ export default function WebsitesBuilderWorkspace({
             </div>
 
             <div className="hidden rounded-full border border-white/10 px-3 py-2 text-[9px] font-bold uppercase tracking-[.14em] text-slate-500 sm:block">
-              Data · Empty
+              Data · {websiteProject?.data.state ?? "EMPTY"}
             </div>
 
             <div className="db-preview-status flex items-center gap-2 px-3 py-2.5 text-[10px]">
@@ -974,12 +986,12 @@ export default function WebsitesBuilderWorkspace({
 
                     <div className="mt-4 space-y-2">
                       {[
-                        ["Background", active.tokens.background],
-                        ["Surface", active.tokens.surface],
-                        ["Foreground", active.tokens.foreground],
-                        ["Muted", active.tokens.muted],
-                        ["Accent", active.tokens.accent],
-                        ["Border", active.tokens.border],
+                        ["Background", websiteProject?.designTokens.background ?? active.tokens.background],
+                        ["Surface", websiteProject?.designTokens.surface ?? active.tokens.surface],
+                        ["Foreground", websiteProject?.designTokens.foreground ?? active.tokens.foreground],
+                        ["Muted", websiteProject?.designTokens.muted ?? active.tokens.muted],
+                        ["Accent", websiteProject?.designTokens.accent ?? active.tokens.accent],
+                        ["Border", websiteProject?.designTokens.border ?? active.tokens.border],
                       ].map(([label, value]) => (
                         <div
                           key={label}
@@ -991,6 +1003,16 @@ export default function WebsitesBuilderWorkspace({
                               background:
                                 value,
                             }}
+                          />
+
+                          <input
+                            aria-label={`${label} color`}
+                            type="color"
+                            value={String(value)}
+                            disabled={!websiteProject}
+                            onChange={(event) => updateDesignTokens({
+                              [String(label).toLowerCase() as "background" | "surface" | "foreground" | "muted" | "accent" | "border"]: event.target.value,
+                            })}
                           />
 
                           <div className="min-w-0 flex-1">
@@ -1012,17 +1034,28 @@ export default function WebsitesBuilderWorkspace({
                       <div className="db-metric-tile">
                         <span>Radius</span>
                         <strong>
-                          {active.tokens.radius}px
+                          {websiteProject?.designTokens.radius ?? active.tokens.radius}px
                         </strong>
                       </div>
 
                       <div className="db-metric-tile">
                         <span>Container</span>
                         <strong>
-                          {active.tokens.container}px
+                          {websiteProject?.designTokens.container ?? active.tokens.container}px
                         </strong>
                       </div>
                     </div>
+                  </section>
+
+                  <section className="db-panel space-y-3 p-4">
+                    <div className="text-[9px] font-bold uppercase tracking-[.14em] text-slate-500">Shape &amp; width</div>
+                    <label className="db-tool-label">Corner radius · {websiteProject?.designTokens.radius ?? active.tokens.radius}px
+                      <input aria-label="Design radius" type="range" min="0" max="40" step="1" disabled={!websiteProject} value={websiteProject?.designTokens.radius ?? active.tokens.radius} onChange={(event) => updateDesignTokens({ radius: Number(event.target.value) })}/>
+                    </label>
+                    <label className="db-tool-label">Content width · {websiteProject?.designTokens.container ?? active.tokens.container}px
+                      <input aria-label="Content width" type="range" min="720" max="1600" step="40" disabled={!websiteProject} value={websiteProject?.designTokens.container ?? active.tokens.container} onChange={(event) => updateDesignTokens({ container: Number(event.target.value) })}/>
+                    </label>
+                    <p className="text-[9px] leading-relaxed text-slate-500">Los cambios se guardan en este dispositivo y se aplican a los bloques nuevos.</p>
                   </section>
                 </>
               ) : (
@@ -1060,7 +1093,7 @@ export default function WebsitesBuilderWorkspace({
                 <input
                   aria-label="SEO title"
                   disabled={!websiteProject}
-                  value={websiteProject ? getWebsiteHomePage(websiteProject).seo.title : ""}
+                  value={currentPage?.seo.title ?? ""}
                   onChange={(event) => updateHomeSeo({ title: event.target.value })}
                   placeholder="No title available."
                   className="db-canvas-control mt-2 w-full rounded-xl p-3 text-xs"
@@ -1073,7 +1106,7 @@ export default function WebsitesBuilderWorkspace({
                 <textarea
                   aria-label="SEO description"
                   disabled={!websiteProject}
-                  value={websiteProject ? getWebsiteHomePage(websiteProject).seo.description : ""}
+                  value={currentPage?.seo.description ?? ""}
                   onChange={(event) => updateHomeSeo({ description: event.target.value })}
                   placeholder="No description available."
                   rows={3}
@@ -1085,7 +1118,7 @@ export default function WebsitesBuilderWorkspace({
                   <input
                     type="checkbox"
                     disabled={!websiteProject}
-                    checked={websiteProject ? getWebsiteHomePage(websiteProject).seo.indexable : false}
+                    checked={currentPage?.seo.indexable ?? false}
                     onChange={(event) => updateHomeSeo({ indexable: event.target.checked })}
                   />
                 </label>
@@ -1130,33 +1163,27 @@ export default function WebsitesBuilderWorkspace({
               <section className="db-panel p-4">
                 <div className="db-setting-row">
                   <span>Project type</span>
-                  <strong>{kind}</strong>
+                  <strong>{websiteProject?.kind ?? kind}</strong>
                 </div>
 
                 <div className="db-setting-row">
                   <span>Data</span>
-                  <strong>EMPTY</strong>
+                  <strong>{websiteProject?.data.state ?? "EMPTY"}</strong>
                 </div>
 
                 <div className="db-setting-row">
                   <span>Authority</span>
-                  <strong>
-                    Proposal only
-                  </strong>
+                  <strong>{websiteProject?.governance.authority ?? "proposal-only"}</strong>
                 </div>
 
                 <div className="db-setting-row">
                   <span>Execution</span>
-                  <strong>
-                    User approved
-                  </strong>
+                  <strong>{websiteProject?.governance.execution ?? "user-approved"}</strong>
                 </div>
 
                 <div className="db-setting-row">
                   <span>Publishing</span>
-                  <strong>
-                    Preview only
-                  </strong>
+                  <strong>{websiteProject?.governance.publishing ?? "preview-only"}</strong>
                 </div>
               </section>
 
@@ -1205,6 +1232,7 @@ export default function WebsitesBuilderWorkspace({
               }
               studioTitle="DigitalBoost Websites"
               studioEyebrow="Visual canvas"
+              designTokens={websiteProject?.designTokens ?? applied.tokens}
               backLabel="← Operator"
               onBlocksChange={
                 handleCanvasBlocksChange

@@ -1,6 +1,7 @@
 import "./website-builder-v2-light.css";
 import "./websites-builder/websites-builder-canvas.css";
 import React, { useEffect, useMemo, useState } from "react";
+import type { WebDesignTokens } from "./WebsitesBuilderModel";
 import {
   AlignCenter,
   AlignLeft,
@@ -70,6 +71,7 @@ type Props = {
   studioEyebrow?: string;
   backLabel?: string;
   onBlocksChange?: (blocks: BuilderBlock[]) => void;
+  designTokens?: WebDesignTokens;
 };
 
 const initialBlocks: BuilderBlock[] = [
@@ -191,7 +193,7 @@ const blockLibrary: Array<{
   },
 ];
 
-function createBlock(type: BlockType, index: number): BuilderBlock {
+function createBlock(type: BlockType, index: number, tokens?: WebDesignTokens): BuilderBlock {
   const defaults: Record<BlockType, Partial<BuilderBlock>> = {
     hero: {
       label: "Hero",
@@ -272,8 +274,18 @@ function createBlock(type: BlockType, index: number): BuilderBlock {
     type,
     label: defaults[type].label || type,
     text: defaults[type].text || "",
-    background: defaults[type].background || "#070b14",
-    color: defaults[type].color || "#ffffff",
+    background: type === "button"
+      ? tokens?.accent || defaults[type].background || "#070b14"
+      : type === "hero"
+        ? tokens?.background || defaults[type].background || "#070b14"
+        : type === "footer"
+          ? tokens?.foreground || defaults[type].background || "#070b14"
+          : tokens?.surface || defaults[type].background || "#070b14",
+    color: type === "button"
+      ? tokens?.accentForeground || defaults[type].color || "#ffffff"
+      : type === "footer"
+        ? tokens?.background || defaults[type].color || "#ffffff"
+        : tokens?.foreground || defaults[type].color || "#ffffff",
     fontSize: defaults[type].fontSize || 18,
     padding: defaults[type].padding || 32,
     align: defaults[type].align || "left",
@@ -285,8 +297,8 @@ function createBlock(type: BlockType, index: number): BuilderBlock {
     paddingY: defaults[type].padding || 32,
     borderStyle: "none",
     borderWidth: 1,
-    borderColor: "#d9e8f7",
-    borderRadius: 0,
+    borderColor: tokens?.border || "#d9e8f7",
+    borderRadius: tokens?.radius || 0,
     shadow: "none",
   };
 }
@@ -327,6 +339,7 @@ export default function WebsitesBuilderCanvas({
   studioEyebrow = "Visual website studio",
   backLabel = "← Websites Builder",
   onBlocksChange,
+  designTokens,
 }: Props) {
   const [blocks, setBlocks] = useState<BuilderBlock[]>(() => {
     try {
@@ -416,7 +429,7 @@ export default function WebsitesBuilderCanvas({
   };
 
   const addBlock = (type: BlockType) => {
-    const block = createBlock(type, blocks.length);
+    const block = createBlock(type, blocks.length, designTokens);
     commit([...blocks, block]);
     setSelectedId(block.id);
   };
@@ -509,7 +522,7 @@ export default function WebsitesBuilderCanvas({
           </button>
         </div>
 
-        <div className="db-canvas-preview-frame">
+        <div className="db-canvas-preview-frame" style={{ maxWidth: designTokens?.container ? `${designTokens.container}px` : undefined }}>
           {blocks.filter(function (block) { return !(block && block.hidden); }).map((block) => (
             <div
               key={block.id}
@@ -810,6 +823,7 @@ export default function WebsitesBuilderCanvas({
           <div className="relative mx-auto flex min-h-[700px] justify-center">
             <div
               className={`${canvasWidth} db-canvas-artboard min-h-[700px] overflow-hidden transition-all`}
+              style={{ maxWidth: designTokens?.container ? `${designTokens.container}px` : undefined, borderRadius: designTokens?.radius ? `${designTokens.radius}px` : undefined }}
             >
               {blocks.map((block, index) => {
                 const selected = selectedId === block.id;

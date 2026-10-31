@@ -566,6 +566,13 @@ export function createWebsiteProject(
   };
 }
 
+export function updateWebsiteProjectDesignTokens(
+  project: WebsiteProject,
+  patch: Partial<WebDesignTokens>
+): WebsiteProject {
+  return { ...project, designTokens: { ...project.designTokens, ...patch } };
+}
+
 export function getWebsiteHomePage(
   project: WebsiteProject
 ): WebsitePage {

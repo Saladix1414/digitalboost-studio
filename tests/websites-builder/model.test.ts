@@ -13,6 +13,7 @@ import {
   updateWebsiteProjectFromCanvas,
   updateWebsitePageSeo,
   updateWebsitePageDetails,
+  updateWebsiteProjectDesignTokens,
   verifyWebsitesBuilderProject,
   websiteProjectToCanvasBlocks,
 } from "../../src/WebsitesBuilderModel.ts";
@@ -359,4 +360,19 @@ test("canvas projection targets the selected page", () => {
 
   assert.equal(websiteProjectToCanvasBlocks(updated, page.id)[0].id, "contact-hero");
   assert.equal(updated.pages.find((entry) => entry.id === home.id)?.sections.length, home.sections.length);
+});
+
+test("design token updates are immutable and merge only selected values", () => {
+  const brief = createFallbackBrief("Sitio con sistema visual");
+  const tokens = createDesignTokens(brief.designLanguage);
+  const project = createWebsiteProjectFromBrief(brief, tokens);
+  const updated = updateWebsiteProjectDesignTokens(project, {
+    accent: "#ff5c35",
+    radius: 24,
+  });
+
+  assert.equal(updated.designTokens.accent, "#ff5c35");
+  assert.equal(updated.designTokens.radius, 24);
+  assert.equal(updated.designTokens.background, tokens.background);
+  assert.equal(project.designTokens.accent, tokens.accent);
 });
