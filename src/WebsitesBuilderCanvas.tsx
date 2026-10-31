@@ -49,6 +49,16 @@ export type BuilderBlock = {
   padding: number;
   align: "left" | "center" | "right";
   width: number;
+  minHeight?: number;
+  offsetX?: number;
+  offsetY?: number;
+  paddingX?: number;
+  paddingY?: number;
+  borderStyle?: "none" | "solid";
+  borderWidth?: number;
+  borderColor?: string;
+  borderRadius?: number;
+  shadow?: "none" | "soft" | "glow";
   hidden?: boolean;
 };
 
@@ -268,6 +278,44 @@ function createBlock(type: BlockType, index: number): BuilderBlock {
     padding: defaults[type].padding || 32,
     align: defaults[type].align || "left",
     width: 100,
+    minHeight: 0,
+    offsetX: 0,
+    offsetY: 0,
+    paddingX: defaults[type].padding || 32,
+    paddingY: defaults[type].padding || 32,
+    borderStyle: "none",
+    borderWidth: 1,
+    borderColor: "#d9e8f7",
+    borderRadius: 0,
+    shadow: "none",
+  };
+}
+
+function getBlockStyle(block: BuilderBlock): React.CSSProperties {
+  const verticalPadding = block.paddingY ?? block.padding;
+  const horizontalPadding = block.paddingX ?? block.padding;
+  const shadow = block.shadow === "glow"
+    ? "0 0 28px rgba(33, 143, 232, .28)"
+    : block.shadow === "soft"
+      ? "0 12px 30px rgba(10, 30, 55, .16)"
+      : undefined;
+
+  return {
+    background: block.background,
+    color: block.color,
+    padding: `${verticalPadding}px ${horizontalPadding}px`,
+    textAlign: block.align,
+    fontSize: `${block.fontSize}px`,
+    width: `${block.width}%`,
+    minHeight: block.minHeight ? `${block.minHeight}px` : undefined,
+    transform: block.offsetX || block.offsetY
+      ? `translate(${block.offsetX ?? 0}px, ${block.offsetY ?? 0}px)`
+      : undefined,
+    borderStyle: block.borderStyle === "solid" ? "solid" : "none",
+    borderWidth: `${block.borderWidth ?? 1}px`,
+    borderColor: block.borderColor ?? "#d9e8f7",
+    borderRadius: `${block.borderRadius ?? 0}px`,
+    boxShadow: shadow,
   };
 }
 
@@ -282,9 +330,9 @@ export default function WebsitesBuilderCanvas({
 }: Props) {
   const [blocks, setBlocks] = useState<BuilderBlock[]>(() => {
     try {
+      if (seedBlocks?.length) return seedBlocks;
       const saved = localStorage.getItem(storageKey);
       if (saved) return JSON.parse(saved);
-      if (seedBlocks?.length) return seedBlocks;
       return initialBlocks;
     } catch {
       return seedBlocks?.length ? seedBlocks : initialBlocks;
@@ -465,14 +513,7 @@ export default function WebsitesBuilderCanvas({
           {blocks.filter(function (block) { return !(block && block.hidden); }).map((block) => (
             <div
               key={block.id}
-              style={{
-                background: block.background,
-                color: block.color,
-                padding: `${block.padding}px`,
-                textAlign: block.align,
-                fontSize: `${block.fontSize}px`,
-                width: `${block.width}%`,
-              }}
+              style={getBlockStyle(block)}
             >
               {block.type === "image" ? (
                 <div className="mx-auto flex min-h-[220px] items-center justify-center rounded-xl border border-dashed border-white/15 bg-white/[.03] text-sm text-slate-500">
@@ -777,14 +818,7 @@ export default function WebsitesBuilderCanvas({
                   <div
                     key={block.id}
                     onClick={() => setSelectedId(block.id)}
-                    style={{
-                      background: block.background,
-                      color: block.color,
-                      padding: `${block.padding}px`,
-                      textAlign: block.align,
-                      fontSize: `${block.fontSize}px`,
-                      width: `${block.width}%`,
-                    }}
+                    style={getBlockStyle(block)}
                     className={`db-canvas-block group relative cursor-pointer border transition ${
                       selected
                         ? ""
@@ -923,9 +957,20 @@ export default function WebsitesBuilderCanvas({
                 <div className="text-[10px] uppercase tracking-wider text-[#e8ff2f]">
                   Elemento
                 </div>
-                <div className="mt-1 text-sm font-semibold">
-                  {selectedBlock.label}
-                </div>
+                <input
+                  aria-label="Nombre de la sección"
+                  value={selectedBlock.label}
+                  onChange={(event) => updateSelected({ label: event.target.value })}
+                  className="db-canvas-control mt-2 w-full rounded-lg px-2 py-2 text-xs"
+                />
+                <label className="mt-3 flex items-center justify-between gap-3 text-[10px] text-slate-400">
+                  <span>Visible en la web</span>
+                  <input
+                    type="checkbox"
+                    checked={!selectedBlock.hidden}
+                    onChange={(event) => updateSelected({ hidden: !event.target.checked })}
+                  />
+                </label>
               </div>
 
               <label className="block">
@@ -941,6 +986,56 @@ export default function WebsitesBuilderCanvas({
                   className="db-canvas-control w-full resize-none rounded-xl px-3 py-2 text-xs"
                 />
               </label>
+
+              <label className="block">
+                <div className="mb-2 flex justify-between">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                    Alto mínimo
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {selectedBlock.minHeight ? `${selectedBlock.minHeight}px` : "Auto"}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1200"
+                  step="20"
+                  value={selectedBlock.minHeight ?? 0}
+                  onChange={(event) => updateSelected({ minHeight: Number(event.target.value) })}
+                  className="w-full"
+                />
+              </label>
+
+              <div>
+                <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  Posición · desplazamiento
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="text-[9px] text-slate-500">
+                    X · {selectedBlock.offsetX ?? 0}px
+                    <input
+                      type="range"
+                      min="-160"
+                      max="160"
+                      value={selectedBlock.offsetX ?? 0}
+                      onChange={(event) => updateSelected({ offsetX: Number(event.target.value) })}
+                      className="mt-2 w-full"
+                    />
+                  </label>
+                  <label className="text-[9px] text-slate-500">
+                    Y · {selectedBlock.offsetY ?? 0}px
+                    <input
+                      type="range"
+                      min="-160"
+                      max="160"
+                      value={selectedBlock.offsetY ?? 0}
+                      onChange={(event) => updateSelected({ offsetY: Number(event.target.value) })}
+                      className="mt-2 w-full"
+                    />
+                  </label>
+                </div>
+              </div>
 
               <label className="block">
                 <div className="mb-2 flex justify-between">
@@ -966,29 +1061,36 @@ export default function WebsitesBuilderCanvas({
                 />
               </label>
 
-              <label className="block">
-                <div className="mb-2 flex justify-between">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                    Espaciado
-                  </span>
-                  <span className="text-[10px] text-slate-400">
-                    {selectedBlock.padding}px
-                  </span>
-                </div>
-
-                <input
-                  type="range"
-                  min="8"
-                  max="120"
-                  value={selectedBlock.padding}
-                  onChange={(event) =>
-                    updateSelected({
-                      padding: Number(event.target.value),
-                    })
-                  }
-                  className="w-full"
-                />
-              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block text-[9px] text-slate-500">
+                  Padding vertical · {selectedBlock.paddingY ?? selectedBlock.padding}px
+                  <input
+                    type="range"
+                    min="8"
+                    max="160"
+                    value={selectedBlock.paddingY ?? selectedBlock.padding}
+                    onChange={(event) => {
+                      const value = Number(event.target.value);
+                      updateSelected({ paddingY: value, padding: value });
+                    }}
+                    className="mt-2 w-full"
+                  />
+                </label>
+                <label className="block text-[9px] text-slate-500">
+                  Padding horizontal · {selectedBlock.paddingX ?? selectedBlock.padding}px
+                  <input
+                    type="range"
+                    min="8"
+                    max="160"
+                    value={selectedBlock.paddingX ?? selectedBlock.padding}
+                    onChange={(event) => {
+                      const value = Number(event.target.value);
+                      updateSelected({ paddingX: value, padding: value });
+                    }}
+                    className="mt-2 w-full"
+                  />
+                </label>
+              </div>
 
               <div>
                 <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
@@ -1041,6 +1143,67 @@ export default function WebsitesBuilderCanvas({
                   }
                   className="w-full"
                 />
+              </label>
+
+              <section className="space-y-3 rounded-xl border border-white/10 p-3">
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  Borde
+                </div>
+                <label className="block text-[9px] text-slate-500">
+                  Estilo
+                  <select
+                    value={selectedBlock.borderStyle ?? "none"}
+                    onChange={(event) => updateSelected({ borderStyle: event.target.value as "none" | "solid" })}
+                    className="db-canvas-control mt-1 w-full rounded-lg px-2 py-2 text-xs"
+                  >
+                    <option value="none">Sin borde</option>
+                    <option value="solid">Sólido</option>
+                  </select>
+                </label>
+                <label className="block text-[9px] text-slate-500">
+                  Color · {selectedBlock.borderColor ?? "#d9e8f7"}
+                  <input
+                    type="color"
+                    value={selectedBlock.borderColor ?? "#d9e8f7"}
+                    onChange={(event) => updateSelected({ borderColor: event.target.value })}
+                    className="db-canvas-control mt-1 h-9 w-full rounded-lg p-1"
+                  />
+                </label>
+                <label className="block text-[9px] text-slate-500">
+                  Grosor · {selectedBlock.borderWidth ?? 1}px
+                  <input
+                    type="range"
+                    min="0"
+                    max="12"
+                    value={selectedBlock.borderWidth ?? 1}
+                    onChange={(event) => updateSelected({ borderWidth: Number(event.target.value) })}
+                    className="mt-2 w-full"
+                  />
+                </label>
+                <label className="block text-[9px] text-slate-500">
+                  Radio · {selectedBlock.borderRadius ?? 0}px
+                  <input
+                    type="range"
+                    min="0"
+                    max="64"
+                    value={selectedBlock.borderRadius ?? 0}
+                    onChange={(event) => updateSelected({ borderRadius: Number(event.target.value) })}
+                    className="mt-2 w-full"
+                  />
+                </label>
+              </section>
+
+              <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                Efecto
+                <select
+                  value={selectedBlock.shadow ?? "none"}
+                  onChange={(event) => updateSelected({ shadow: event.target.value as "none" | "soft" | "glow" })}
+                  className="db-canvas-control mt-2 w-full rounded-lg px-2 py-2 text-xs normal-case"
+                >
+                  <option value="none">Sin efecto</option>
+                  <option value="soft">Sombra suave</option>
+                  <option value="glow">Resplandor</option>
+                </select>
               </label>
 
               <label className="block">

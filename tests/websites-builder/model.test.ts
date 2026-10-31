@@ -195,6 +195,17 @@ test("website project round-trips through the canvas projection", () => {
             text: "Headline editado",
             align: "center" as const,
             fontSize: 52,
+            minHeight: 740,
+            offsetX: 24,
+            offsetY: -12,
+            paddingX: 72,
+            paddingY: 56,
+            borderStyle: "solid" as const,
+            borderWidth: 3,
+            borderColor: "#1a2b3c",
+            borderRadius: 20,
+            shadow: "glow" as const,
+            hidden: true,
           }
         : block
   );
@@ -224,6 +235,17 @@ test("website project round-trips through the canvas projection", () => {
     projected[0].fontSize,
     52
   );
+  assert.equal(projected[0].minHeight, 740);
+  assert.equal(projected[0].offsetX, 24);
+  assert.equal(projected[0].offsetY, -12);
+  assert.equal(projected[0].paddingX, 72);
+  assert.equal(projected[0].paddingY, 56);
+  assert.equal(projected[0].borderStyle, "solid");
+  assert.equal(projected[0].borderWidth, 3);
+  assert.equal(projected[0].borderColor, "#1a2b3c");
+  assert.equal(projected[0].borderRadius, 20);
+  assert.equal(projected[0].shadow, "glow");
+  assert.equal(projected[0].hidden, true);
 
   assert.equal(
     getWebsiteHomePage(updated)

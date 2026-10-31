@@ -63,6 +63,17 @@ export interface WebCanvasBlockSeed {
   padding: number;
   align: "left" | "center" | "right";
   width: number;
+  minHeight?: number;
+  offsetX?: number;
+  offsetY?: number;
+  paddingX?: number;
+  paddingY?: number;
+  borderStyle?: "none" | "solid";
+  borderWidth?: number;
+  borderColor?: string;
+  borderRadius?: number;
+  shadow?: "none" | "soft" | "glow";
+  hidden?: boolean;
 }
 
 export const WEB_DESIGN_LANGUAGES: WebDesignLanguage[] = [
@@ -631,7 +642,7 @@ export function canvasBlocksToWebsiteSections(
     id: block.id,
     type: block.type,
     name: block.label,
-    hidden: false,
+    hidden: Boolean(block.hidden),
 
     components: [
       {
@@ -659,6 +670,16 @@ export function canvasBlocksToWebsiteSections(
       padding: block.padding,
       align: block.align,
       width: block.width,
+      minHeight: block.minHeight ?? 0,
+      offsetX: block.offsetX ?? 0,
+      offsetY: block.offsetY ?? 0,
+      paddingX: block.paddingX ?? block.padding,
+      paddingY: block.paddingY ?? block.padding,
+      borderStyle: block.borderStyle ?? "none",
+      borderWidth: block.borderWidth ?? 1,
+      borderColor: block.borderColor ?? "#d9e8f7",
+      borderRadius: block.borderRadius ?? 0,
+      shadow: block.shadow ?? "none",
     },
   }));
 }
@@ -729,6 +750,17 @@ export function websiteSectionsToCanvasBlocks(
         typeof settings.width === "number"
           ? settings.width
           : 100,
+      minHeight: typeof settings.minHeight === "number" ? settings.minHeight : 0,
+      offsetX: typeof settings.offsetX === "number" ? settings.offsetX : 0,
+      offsetY: typeof settings.offsetY === "number" ? settings.offsetY : 0,
+      paddingX: typeof settings.paddingX === "number" ? settings.paddingX : (typeof settings.padding === "number" ? settings.padding : 32),
+      paddingY: typeof settings.paddingY === "number" ? settings.paddingY : (typeof settings.padding === "number" ? settings.padding : 32),
+      borderStyle: settings.borderStyle === "solid" ? "solid" : "none",
+      borderWidth: typeof settings.borderWidth === "number" ? settings.borderWidth : 1,
+      borderColor: typeof settings.borderColor === "string" ? settings.borderColor : "#d9e8f7",
+      borderRadius: typeof settings.borderRadius === "number" ? settings.borderRadius : 0,
+      shadow: settings.shadow === "soft" || settings.shadow === "glow" ? settings.shadow : "none",
+      hidden: section.hidden,
     };
   });
 }

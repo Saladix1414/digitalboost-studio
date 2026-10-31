@@ -223,6 +223,10 @@ export default function WebsitesBuilderWorkspace({
     WebCanvasBlockSeed[]
   >(() => {
     try {
+      if (websiteProject) {
+        return websiteProjectToCanvasBlocks(websiteProject);
+      }
+
       const raw =
         localStorage.getItem(
           CANVAS_KEY
@@ -235,9 +239,7 @@ export default function WebsitesBuilderWorkspace({
         }
       }
 
-      return websiteProject
-        ? websiteProjectToCanvasBlocks(websiteProject)
-        : [];
+      return [];
     } catch {
       return [];
     }
