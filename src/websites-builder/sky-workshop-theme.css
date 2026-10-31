@@ -218,7 +218,7 @@
   background:#fff;
   text-align:left;
   opacity:1;
-  cursor:not-allowed;
+  cursor:pointer;
   transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
 }
 .db-websites-shell .db-local-tool:hover { transform:translateY(-1px); border-color:#b8dafa; box-shadow:0 6px 16px rgba(36,105,165,.09); }
@@ -233,7 +233,8 @@
 .db-websites-shell .db-local-tool-copy strong { display:block; overflow:hidden; color:#244362; font-size:9px; font-weight:800; text-overflow:ellipsis; white-space:nowrap; }
 .db-websites-shell .db-local-tool-copy small { display:block; margin-top:3px; color:#8596aa; font-size:7px; line-height:1.2; }
 .db-websites-shell .db-local-tool-status { display:block; margin-top:3px; color:#1686df; font-size:7px; font-weight:700; }
-.db-websites-shell .db-local-tool:disabled { opacity:1; }
+.db-websites-shell .db-local-tool:disabled { opacity:1; cursor:not-allowed; }
+.db-websites-shell .db-local-tool:focus-visible { outline:3px solid rgba(22,137,232,.38); outline-offset:2px; }
 
 @media (max-width: 900px) {
   .db-websites-shell .db-local-tools-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }

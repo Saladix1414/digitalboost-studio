@@ -22,9 +22,12 @@ import {
 } from "lucide-react";
 
 import WebsitesBuilderCanvas from "./WebsitesBuilderCanvas";
+import LocalWebTools from "./websites-builder/LocalWebTools";
+import type { LocalWebsiteTool } from "./websites-builder/LocalWebToolsModel";
 
 import "./websites-builder/websites-builder.css";
 import "./websites-builder/sky-workshop-theme.css";
+import "./websites-builder/local-web-tools.css";
 
 import {
   WEB_DESIGN_LANGUAGES,
@@ -166,6 +169,9 @@ export default function WebsitesBuilderWorkspace({
 
   const [activeTool, setActiveTool] =
     useState<RailTool>("build");
+
+  const [selectedLocalTool, setSelectedLocalTool] =
+    useState<LocalWebsiteTool | null>(null);
 
   const [prompt, setPrompt] =
     useState("");
@@ -664,29 +670,29 @@ export default function WebsitesBuilderWorkspace({
             </div>
 
             <div className="db-local-tools-grid">
-              <button type="button" className="db-local-tool" data-tone="sky" disabled aria-label="Image Optimizer, integración pendiente">
+              <button type="button" className="db-local-tool" data-tone="sky" aria-label="Abrir Image Optimizer" onClick={() => setSelectedLocalTool("image-optimizer")}>
                 <span className="db-local-tool-icon"><Sparkles size={15} /></span>
-                <span className="db-local-tool-copy"><strong>Image Optimizer</strong><small>Compresión local</small><span className="db-local-tool-status">Integración pendiente</span></span>
+                <span className="db-local-tool-copy"><strong>Image Optimizer</strong><small>Compresión local</small><span className="db-local-tool-status">Abrir herramienta</span></span>
               </button>
-              <button type="button" className="db-local-tool" data-tone="green" disabled aria-label="SVG e iconos, integración pendiente">
+              <button type="button" className="db-local-tool" data-tone="green" aria-label="Abrir SVG e iconos" onClick={() => setSelectedLocalTool("svg-icons")}>
                 <span className="db-local-tool-icon"><Palette size={15} /></span>
-                <span className="db-local-tool-copy"><strong>SVG &amp; Icons</strong><small>Recursos vectoriales</small><span className="db-local-tool-status">Integración pendiente</span></span>
+                <span className="db-local-tool-copy"><strong>SVG &amp; Icons</strong><small>Recursos vectoriales</small><span className="db-local-tool-status">Abrir herramienta</span></span>
               </button>
-              <button type="button" className="db-local-tool" data-tone="gold" disabled aria-label="Favicon, integración pendiente">
+              <button type="button" className="db-local-tool" data-tone="gold" aria-label="Abrir Favicon Studio" onClick={() => setSelectedLocalTool("favicon")}>
                 <span className="db-local-tool-icon"><WandSparkles size={15} /></span>
-                <span className="db-local-tool-copy"><strong>Favicon</strong><small>Iconos del sitio</small><span className="db-local-tool-status">Integración pendiente</span></span>
+                <span className="db-local-tool-copy"><strong>Favicon</strong><small>Iconos del sitio</small><span className="db-local-tool-status">Crear PNG local</span></span>
               </button>
-              <button type="button" className="db-local-tool" data-tone="coral" disabled aria-label="Color Contrast, integración pendiente">
+              <button type="button" className="db-local-tool" data-tone="coral" aria-label="Abrir Color Contrast" onClick={() => setSelectedLocalTool("color-contrast")}>
                 <span className="db-local-tool-icon"><Palette size={15} /></span>
-                <span className="db-local-tool-copy"><strong>Color Contrast</strong><small>Accesibilidad visual</small><span className="db-local-tool-status">Integración pendiente</span></span>
+                <span className="db-local-tool-copy"><strong>Color Contrast</strong><small>Accesibilidad visual</small><span className="db-local-tool-status">Análisis WCAG local</span></span>
               </button>
-              <button type="button" className="db-local-tool" data-tone="violet" disabled aria-label="SEO Preview, integración pendiente">
+              <button type="button" className="db-local-tool" data-tone="violet" aria-label="Abrir SEO Preview" onClick={() => setSelectedLocalTool("seo-preview")}>
                 <span className="db-local-tool-icon"><Search size={15} /></span>
-                <span className="db-local-tool-copy"><strong>SEO Preview</strong><small>Vista previa social</small><span className="db-local-tool-status">Integración pendiente</span></span>
+                <span className="db-local-tool-copy"><strong>SEO Preview</strong><small>Vista previa social</small><span className="db-local-tool-status">Editar metadatos</span></span>
               </button>
-              <button type="button" className="db-local-tool" data-tone="aqua" disabled aria-label="Export, integración pendiente">
+              <button type="button" className="db-local-tool" data-tone="aqua" aria-label="Abrir exportación del proyecto" onClick={() => setSelectedLocalTool("export")}>
                 <span className="db-local-tool-icon"><FileText size={15} /></span>
-                <span className="db-local-tool-copy"><strong>Export</strong><small>Archivos del proyecto</small><span className="db-local-tool-status">Integración pendiente</span></span>
+                <span className="db-local-tool-copy"><strong>Export</strong><small>Archivos del proyecto</small><span className="db-local-tool-status">Descarga JSON local</span></span>
               </button>
             </div>
           </section>
@@ -1248,6 +1254,15 @@ export default function WebsitesBuilderWorkspace({
           </aside>
         )}
       </div>
+      {selectedLocalTool && (
+        <LocalWebTools
+          tool={selectedLocalTool}
+          project={websiteProject}
+          blocks={canvasBlocks}
+          onSeoChange={updateHomeSeo}
+          onClose={() => setSelectedLocalTool(null)}
+        />
+      )}
     </div>
   );
 }
