@@ -9,7 +9,9 @@ type Props = {
   pageId: string;
   blocks: WebCanvasBlockSeed[];
   onSeoChange: (patch: { title?: string; description?: string; indexable?: boolean }) => void;
-  onInsertMedia: (asset: { dataUrl: string; kind: "image" | "svg"; alt: string }) => void;
+  onInsertMedia: (asset: { dataUrl: string; kind: "image" | "svg"; alt: string }, targetBlockId?: string) => void;
+  selectedImage: { id: string; alt: string } | null;
+  onUpdateMediaAlt: (blockId: string, alt: string) => void;
   onFaviconChange: (dataUrl: string) => void;
   onApplyContrast: (foreground: string, background: string) => void;
   onClose: () => void;
@@ -42,7 +44,7 @@ function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
-function ImageUtility({ favicon = false, onInsertMedia, onFaviconChange }: { favicon?: boolean; onInsertMedia: Props["onInsertMedia"]; onFaviconChange: Props["onFaviconChange"] }) {
+function ImageUtility({ favicon = false, onInsertMedia, onFaviconChange, selectedImage }: { favicon?: boolean; onInsertMedia: (asset: { dataUrl: string; kind: "image" | "svg"; alt: string }, targetBlockId?: string) => void; onFaviconChange: Props["onFaviconChange"]; selectedImage: Props["selectedImage"] }) {
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<string>("");
   const [resultFormat, setResultFormat] = useState(favicon ? "png" : "webp");
@@ -102,7 +104,7 @@ function ImageUtility({ favicon = false, onInsertMedia, onFaviconChange }: { fav
     {result && <a className="db-tool-download" href={result} download={favicon ? "favicon-64.png" : `imagen-optimizada.${resultFormat}`}><Download size={15}/> Descargar {favicon ? "PNG" : resultFormat.toUpperCase()}</a>}
     {resultDataUrl && (favicon
       ? <button className="db-tool-primary" type="button" onClick={() => { onFaviconChange(resultDataUrl); setAppliedMessage("Favicon guardado en el proyecto local."); }}>Usar como favicon del sitio</button>
-      : <button className="db-tool-primary" type="button" onClick={() => { onInsertMedia({ dataUrl: resultDataUrl, kind: "image", alt: file?.name.replace(/\.[^.]+$/, "") || "Imagen optimizada" }); setAppliedMessage("Imagen agregada al canvas."); }}>Agregar imagen al canvas</button>)}
+      : <button className="db-tool-primary" type="button" onClick={() => { onInsertMedia({ dataUrl: resultDataUrl, kind: "image", alt: file?.name.replace(/\.[^.]+$/, "") || "Imagen optimizada" }, selectedImage?.id); setAppliedMessage(selectedImage ? "Imagen reemplazada en el canvas." : "Imagen agregada al canvas."); }}>{selectedImage ? "Reemplazar imagen seleccionada" : "Agregar imagen al canvas"}</button>)}
     {appliedMessage && <div className="db-tool-message" role="status">{appliedMessage}</div>}
     {result && <img className="db-tool-image-result" src={result} alt="Vista previa del resultado" />}
   </div>;
@@ -112,7 +114,15 @@ function formatBytes(value: number) {
   return value < 1024 * 1024 ? `${(value / 1024).toFixed(1)} KB` : `${(value / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChange, onInsertMedia, onFaviconChange, onApplyContrast, onClose }: Props) {
+function MediaAltEditor({ selectedImage, onUpdate }: { selectedImage: NonNullable<Props["selectedImage"]>; onUpdate: Props["onUpdateMediaAlt"] }) {
+  const [alt, setAlt] = useState(selectedImage.alt);
+  return <div className="db-tool-content">
+    <label className="db-tool-label">Texto alternativo · {alt.length}/160<input maxLength={160} value={alt} onChange={(event) => setAlt(event.target.value)} placeholder="Describí la imagen para lectores de pantalla" /></label>
+    <button className="db-tool-secondary" type="button" onClick={() => onUpdate(selectedImage.id, alt)}>Guardar texto alternativo</button>
+  </div>;
+}
+
+export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChange, onInsertMedia, onFaviconChange, onApplyContrast, selectedImage, onUpdateMediaAlt, onClose }: Props) {
   const [foreground, setForeground] = useState(project?.designTokens.foreground ?? "#17375b");
   const [background, setBackground] = useState(project?.designTokens.background ?? "#ffffff");
   const [iconId, setIconId] = useState<string>(LOCAL_WEBSITE_ICONS[0].id);
@@ -172,8 +182,8 @@ export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChan
   return <div className="db-tool-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
     <section className="db-tool-dialog" role="dialog" aria-modal="true" aria-labelledby="db-tool-title">
       <header className="db-tool-dialog-header"><div><span>SKY WORKSHOP · LOCAL</span><h2 id="db-tool-title">{TOOL_TITLE[tool]}</h2></div><button type="button" className="db-tool-close" aria-label="Cerrar herramienta" onClick={onClose}><X size={18}/></button></header>
-      {tool === "image-optimizer" && <ImageUtility onInsertMedia={onInsertMedia} onFaviconChange={onFaviconChange}/>}
-      {tool === "favicon" && <ImageUtility favicon onInsertMedia={onInsertMedia} onFaviconChange={onFaviconChange}/>}
+      {tool === "image-optimizer" && <ImageUtility onInsertMedia={onInsertMedia} onFaviconChange={onFaviconChange} selectedImage={selectedImage}/>}
+      {tool === "favicon" && <ImageUtility favicon onInsertMedia={onInsertMedia} onFaviconChange={onFaviconChange} selectedImage={selectedImage}/>}
       {tool === "color-contrast" && <div className="db-tool-content">
         <p>Comprobá el contraste y aplicá el par accesible al fondo y texto del proyecto. Se conservan los colores de botones e imágenes.</p>
         <div className="db-tool-colors"><label className="db-tool-label">Texto<input type="color" value={foreground} onChange={(event) => setForeground(event.target.value)}/></label><label className="db-tool-label">Fondo<input type="color" value={background} onChange={(event) => setBackground(event.target.value)}/></label></div>
@@ -187,7 +197,8 @@ export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChan
         <label className="db-tool-label">Ícono<select value={iconId} onChange={(event) => setIconId(event.target.value)}>{LOCAL_WEBSITE_ICONS.map((icon) => <option key={icon.id} value={icon.id}>{icon.label}</option>)}</select></label>
         <label className="db-tool-label">Color<input type="color" value={iconColor} onChange={(event) => setIconColor(event.target.value)}/></label>
         <div className="db-svg-preview" dangerouslySetInnerHTML={{ __html: svg }}/>
-        <div className="db-tool-actions"><button type="button" className="db-tool-primary" onClick={copySvg}>Copiar SVG</button><button type="button" className="db-tool-secondary" onClick={() => downloadBlob(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }), `${iconId}.svg`)}>Descargar .svg</button><button type="button" className="db-tool-primary" onClick={() => { const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`; onInsertMedia({ dataUrl, kind: "svg", alt: LOCAL_WEBSITE_ICONS.find((icon) => icon.id === iconId)?.label || "Ícono SVG" }); setNotice("SVG agregado al canvas."); }}>Agregar SVG al canvas</button></div>
+        <div className="db-tool-actions"><button type="button" className="db-tool-primary" onClick={copySvg}>Copiar SVG</button><button type="button" className="db-tool-secondary" onClick={() => downloadBlob(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }), `${iconId}.svg`)}>Descargar .svg</button><button type="button" className="db-tool-primary" onClick={() => { const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`; onInsertMedia({ dataUrl, kind: "svg", alt: LOCAL_WEBSITE_ICONS.find((icon) => icon.id === iconId)?.label || "Ícono SVG" }, selectedImage?.id); setNotice(selectedImage ? "Imagen reemplazada por el SVG en el canvas." : "SVG agregado al canvas."); }}>{selectedImage ? "Reemplazar por SVG" : "Agregar SVG al canvas"}</button></div>
+        {selectedImage && <MediaAltEditor key={selectedImage.id} selectedImage={selectedImage} onUpdate={onUpdateMediaAlt}/>}
         <label className="db-tool-label">Código SVG<textarea readOnly rows={4} value={svg}/></label>
       </div>}
       {tool === "seo-preview" && <div className="db-tool-content">
@@ -199,6 +210,7 @@ export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChan
           <div className="db-seo-preview"><small>VISTA PREVIA DE BÚSQUEDA · {page.name}</small><strong>{page.seo.title || "Título de la página"}</strong><span>digitalboost.local › {page.slug}</span><p>{page.seo.description || "Agregá una descripción para previsualizar el resultado."}</p></div>
         </> : <div className="db-tool-message">Creá o aplicá un proyecto para preparar la vista previa SEO.</div>}
       </div>}
+      {tool === "image-optimizer" && selectedImage && <MediaAltEditor key={selectedImage.id} selectedImage={selectedImage} onUpdate={onUpdateMediaAlt}/>}
       {tool === "export" && <div className="db-tool-content">
         <p>Descargá una vista HTML navegable con todas las páginas, una página individual o el JSON del proyecto. Todo se genera en este dispositivo.</p>
         <div className="db-tool-export-summary"><span>Páginas <strong>{project?.pages.length ?? 0}</strong></span><span>Secciones <strong>{blocks.length}</strong></span><span>Formato <strong>JSON</strong></span></div>

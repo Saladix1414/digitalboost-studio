@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { applyContrastColorsToBlocks, createSvgIconMarkup, createWebsiteExport, getContrastRatio } from "../../src/websites-builder/LocalWebToolsModel.ts";
+import { applyContrastColorsToBlocks, createSvgIconMarkup, createWebsiteExport, getContrastRatio, updateLocalImageAlt, upsertLocalMediaBlock } from "../../src/websites-builder/LocalWebToolsModel.ts";
 import { createWebsiteProjectFromBrief, createFallbackBrief, createDesignTokens } from "../../src/WebsitesBuilderModel.ts";
 
 test("contrast utility computes WCAG ratios for common colors", () => {
@@ -26,6 +26,19 @@ test("applying accessible contrast updates text sections while preserving image 
   assert.equal(next[1], blocks[1]);
   assert.equal(next[2], blocks[2]);
   assert.throws(() => applyContrastColorsToBlocks(blocks, "navy", "#fff"), /hexadecimales válidos/);
+});
+
+test("local media replaces the selected image and keeps its layout settings", () => {
+  const image = { id: "hero-image", type: "image" as const, label: "Hero visual", text: "Antes", mediaAlt: "Antes", mediaDataUrl: "data:image/png;base64,QQ==", mediaKind: "image" as const, background: "#eee", color: "#111", fontSize: 18, padding: 40, align: "center" as const, width: 80 };
+  const next = upsertLocalMediaBlock([image], { dataUrl: "data:image/webp;base64,Qg==", kind: "image", alt: "Bosque" }, image.id);
+
+  assert.equal(next.length, 1);
+  assert.equal(next[0].id, image.id);
+  assert.equal(next[0].mediaAlt, "Bosque");
+  assert.equal(next[0].mediaDataUrl, "data:image/webp;base64,Qg==");
+  assert.equal(next[0].padding, 40);
+  assert.equal(updateLocalImageAlt(next, image.id, "Paisaje verde")[0].mediaAlt, "Paisaje verde");
+  assert.throws(() => upsertLocalMediaBlock([], { dataUrl: "javascript:alert(1)", kind: "image", alt: "X" }), /formato de imagen permitido/);
 });
 
 test("SVG icon utility returns self-contained vector markup", () => {

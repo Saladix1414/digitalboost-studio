@@ -74,6 +74,7 @@ type Props = {
   studioEyebrow?: string;
   backLabel?: string;
   onBlocksChange?: (blocks: BuilderBlock[]) => void;
+  onSelectionChange?: (id: string | null) => void;
   designTokens?: WebDesignTokens;
 };
 
@@ -342,6 +343,7 @@ export default function WebsitesBuilderCanvas({
   studioEyebrow = "Visual website studio",
   backLabel = "← Websites Builder",
   onBlocksChange,
+  onSelectionChange,
   designTokens,
 }: Props) {
   const [blocks, setBlocks] = useState<BuilderBlock[]>(() => {
@@ -396,6 +398,10 @@ export default function WebsitesBuilderCanvas({
     () => blocks.find((block) => block.id === selectedId) || null,
     [blocks, selectedId]
   );
+
+  useEffect(() => {
+    onSelectionChange?.(selectedId);
+  }, [selectedId, onSelectionChange]);
 
   const filteredLibrary = useMemo(() => {
     const query =

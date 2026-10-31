@@ -24,7 +24,7 @@ import {
 import WebsitesBuilderCanvas from "./WebsitesBuilderCanvas";
 import LocalWebTools from "./websites-builder/LocalWebTools";
 import type { LocalWebsiteTool } from "./websites-builder/LocalWebToolsModel";
-import { applyContrastColorsToBlocks } from "./websites-builder/LocalWebToolsModel";
+import { applyContrastColorsToBlocks, updateLocalImageAlt, upsertLocalMediaBlock } from "./websites-builder/LocalWebToolsModel";
 
 import "./websites-builder/websites-builder.css";
 import "./websites-builder/sky-workshop-theme.css";
@@ -180,6 +180,7 @@ export default function WebsitesBuilderWorkspace({
 
   const [selectedLocalTool, setSelectedLocalTool] =
     useState<LocalWebsiteTool | null>(null);
+  const [selectedCanvasBlockId, setSelectedCanvasBlockId] = useState<string | null>(null);
 
   const [prompt, setPrompt] =
     useState("");
@@ -343,26 +344,19 @@ export default function WebsitesBuilderWorkspace({
     } : current);
   }
 
-  function insertLocalMedia(asset: { dataUrl: string; kind: "image" | "svg"; alt: string }) {
-    const nextBlocks: WebCanvasBlockSeed[] = [...canvasBlocks, {
-      id: `local-media-${Date.now()}`,
-      type: "image",
-      label: asset.kind === "svg" ? "SVG local" : "Imagen optimizada",
-      text: asset.alt,
-      mediaAlt: asset.alt,
-      mediaDataUrl: asset.dataUrl,
-      mediaKind: asset.kind,
-      background: "#ffffff",
-      color: "#17375b",
-      fontSize: 18,
-      padding: 24,
-      align: "center",
-      width: 100,
-    }];
-    setCanvasBlocks(nextBlocks);
-    setWebsiteProject((current) => current ? updateWebsiteProjectFromCanvas(current, nextBlocks, activePageId) : current);
-    setNotice(`${asset.kind === "svg" ? "SVG" : "Imagen"} agregado al canvas y guardado localmente.`);
+  function insertLocalMedia(asset: { dataUrl: string; kind: "image" | "svg"; alt: string }, targetBlockId?: string) {
+    const replacing = canvasBlocks.some((block) => block.id === targetBlockId && block.type === "image");
+    const nextBlocks = upsertLocalMediaBlock(canvasBlocks, asset, targetBlockId);
+    handleCanvasBlocksChange(nextBlocks);
+    setNotice(replacing ? "Recurso reemplazado en el bloque seleccionado." : "Recurso agregado al canvas y guardado localmente.");
   }
+
+  function updateSelectedImageAlt(blockId: string, alt: string) {
+    handleCanvasBlocksChange(updateLocalImageAlt(canvasBlocks, blockId, alt));
+    setNotice("Texto alternativo guardado en el proyecto local.");
+  }
+
+  const handleCanvasSelectionChange = useCallback((id: string | null) => setSelectedCanvasBlockId(id), []);
 
   function applyLocalContrast(foreground: string, background: string) {
     const nextBlocks = applyContrastColorsToBlocks(canvasBlocks, foreground, background);
@@ -1267,6 +1261,7 @@ export default function WebsitesBuilderWorkspace({
               onBlocksChange={
                 handleCanvasBlocksChange
               }
+              onSelectionChange={handleCanvasSelectionChange}
             />
           ) : (
             <div className="db-empty-stage">
@@ -1371,6 +1366,11 @@ export default function WebsitesBuilderWorkspace({
             setNotice("Favicon guardado en la configuración local del proyecto.");
           }}
           onApplyContrast={applyLocalContrast}
+          selectedImage={(() => {
+            const selected = canvasBlocks.find((block) => block.id === selectedCanvasBlockId && block.type === "image");
+            return selected ? { id: selected.id, alt: selected.mediaAlt ?? selected.text ?? selected.label } : null;
+          })()}
+          onUpdateMediaAlt={updateSelectedImageAlt}
           onClose={() => setSelectedLocalTool(null)}
         />
       )}

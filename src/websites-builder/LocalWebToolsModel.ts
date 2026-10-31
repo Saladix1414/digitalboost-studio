@@ -8,6 +8,43 @@ export type LocalWebsiteTool =
   | "seo-preview"
   | "export";
 
+export function upsertLocalMediaBlock(
+  blocks: WebCanvasBlockSeed[],
+  asset: { dataUrl: string; kind: "image" | "svg"; alt: string },
+  targetBlockId?: string
+): WebCanvasBlockSeed[] {
+  if (!/^data:image\/(?:png|jpeg|webp|gif|svg\+xml);base64,[A-Za-z0-9+/]+=*$/.test(asset.dataUrl)) {
+    throw new Error("El recurso local no tiene un formato de imagen permitido.");
+  }
+  const target = blocks.find((block) => block.id === targetBlockId && block.type === "image");
+  if (target) {
+    return blocks.map((block) => block.id === target.id
+      ? { ...block, text: asset.alt, mediaAlt: asset.alt, mediaDataUrl: asset.dataUrl, mediaKind: asset.kind }
+      : block);
+  }
+  return [...blocks, {
+    id: `local-media-${Date.now()}`,
+    type: "image",
+    label: asset.kind === "svg" ? "SVG local" : "Imagen optimizada",
+    text: asset.alt,
+    mediaAlt: asset.alt,
+    mediaDataUrl: asset.dataUrl,
+    mediaKind: asset.kind,
+    background: "#ffffff",
+    color: "#17375b",
+    fontSize: 18,
+    padding: 24,
+    align: "center",
+    width: 100,
+  }];
+}
+
+export function updateLocalImageAlt(blocks: WebCanvasBlockSeed[], blockId: string, alt: string): WebCanvasBlockSeed[] {
+  return blocks.map((block) => block.id === blockId && block.type === "image"
+    ? { ...block, mediaAlt: alt.slice(0, 160), text: alt.slice(0, 160) }
+    : block);
+}
+
 export const LOCAL_WEBSITE_ICONS = [
   { id: "spark", label: "Destello", path: "M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zm7 11l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1 1-2.5zM5 15l.8 2.2L8 18l-2.2.8L5 21l-.8-2.2L2 18l2.2-.8L5 15z" },
   { id: "heart", label: "Corazón", path: "M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8z" },
