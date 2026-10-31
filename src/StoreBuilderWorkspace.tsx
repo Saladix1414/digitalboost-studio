@@ -30,7 +30,9 @@ import {
 } from "lucide-react";
 import ProductInventoryPro from "./ProductInventoryPro";
 import CommerceOSOverview from "./CommerceOSOverview";
-import { getCommerceSnapshot, recordCommerceCustomer, recordCommerceOrder, recordCommerceProduct, resetCommerceLedger } from "./commerce/DigitalBoostCommerceLedger";
+import { getCommerceSnapshot, recordCommerceCustomer, recordCommerceOrder, replaceCommerceProducts } from "./commerce/DigitalBoostCommerceLedger";
+import { useCommerceLive } from "./commerce/useCommerceLive";
+import { deleteCommerceProduct, saveCommerceProduct } from "./commerce/DigitalBoostCommerceApi";
 import DigitalBoostPulseBotPanel from "./commerce/DigitalBoostPulseBotPanel";
 import DigitalBoostMarketplacePanel from "./commerce/DigitalBoostMarketplacePanel";
 import { CommerceStoreProvider } from "./commerce/DigitalBoostCommerceContext";
@@ -204,6 +206,8 @@ export default function StoreBuilderWorkspace({
 }: {
   onBack?: () => void;
 }) {
+  const commerceLive = useCommerceLive("local-tenant");
+  const [commerceNotice, setCommerceNotice] = useState("");
 
   // ----------------------------------------------------------
   // DIGITALBOOST COMMERCE OS — BOOT SEQUENCE
@@ -259,7 +263,7 @@ export default function StoreBuilderWorkspace({
     const snap = getCommerceSnapshot("local-tenant");
     if (!snap.products.length) return productsSeed;
     return snap.products.map((item, index) => ({
-      id: index + 1,
+      id: Number(item.id) || index + 1,
       name: item.title,
       sku: item.sku || item.id,
       price: item.price.amount,
@@ -268,6 +272,45 @@ export default function StoreBuilderWorkspace({
       category: "General",
     }));
   });
+  useEffect(() => {
+    if (commerceLive.snap.source !== "postgresql") return;
+    setProducts(commerceLive.snap.products.map((item, index) => ({
+      id: Number(item.id) || index + 1,
+      name: item.title,
+      sku: item.sku || item.id,
+      price: item.price.amount,
+      stock: item.stock,
+      status: "Activo" as const,
+      category: "General",
+    })));
+    setOrders(commerceLive.snap.orders.map(item => ({
+      id: item.id,
+      customer: item.customerId || "sin cliente",
+      total: item.total.amount,
+      status: item.paymentState === "PAID" ? "Pagado" : "Unpaid",
+      items: 1,
+      date: item.createdAt,
+    })));
+  }, [commerceLive.version, commerceLive.snap.source]);
+
+  const persistCommerceProducts = (next: Product[], previous: Product[]) => {
+    const nextIds = new Set(next.map(product => String(product.id)));
+    replaceCommerceProducts("local-tenant", next.map(product => ({
+      id: String(product.id), tenantId: "local-tenant", title: product.name,
+      sku: product.sku, price: { amount: Number(product.price) || 0, currency: "USD" },
+      stock: Number(product.stock) || 0,
+    })));
+    const writes = next.map(product => saveCommerceProduct({
+      id: String(product.id), tenantId: "local-tenant", title: product.name,
+      sku: product.sku, price: { amount: Number(product.price) || 0, currency: "USD" },
+      stock: Number(product.stock) || 0,
+    }));
+    const removed = previous.filter(product => !nextIds.has(String(product.id)))
+      .map(product => deleteCommerceProduct(String(product.id)));
+    void Promise.all([...writes, ...removed])
+      .then(() => setCommerceNotice("Catálogo guardado en PostgreSQL."))
+      .catch(() => setCommerceNotice("Cambios guardados localmente; PostgreSQL no está disponible."));
+  };
   const [orders, setOrders] = useState(() => {
     const snap = getCommerceSnapshot("local-tenant");
     if (!snap.orders.length) return ordersSeed;
@@ -799,8 +842,7 @@ const filteredProducts = useMemo(() => {
       `DB-${Date.now().toString().slice(-6)}`;
 
     if (editingProduct) {
-      setProducts((current) =>
-        current.map((product) =>
+      const next = products.map((product) =>
           product.id === editingProduct.id
             ? {
                 ...product,
@@ -812,11 +854,12 @@ const filteredProducts = useMemo(() => {
                 status: productForm.status,
               }
             : product
-        )
-      );
+        );
+      persistCommerceProducts(next, products);
+      setProducts(next);
     } else {
-      setProducts((current) => [
-        ...current,
+      const next = [
+        ...products,
         {
           id: Date.now(),
           name,
@@ -826,7 +869,9 @@ const filteredProducts = useMemo(() => {
           category: productForm.category,
           status: productForm.status,
         },
-      ]);
+      ];
+      persistCommerceProducts(next, products);
+      setProducts(next);
     }
 
     setShowAddProduct(false);
@@ -1068,9 +1113,9 @@ const filteredProducts = useMemo(() => {
 
     if (!confirmed) return;
 
-    setProducts((current) =>
-      current.filter((item) => item.id !== product.id)
-    );
+    const next = products.filter((item) => item.id !== product.id);
+    persistCommerceProducts(next, products);
+    setProducts(next);
   };
 
   const renderDashboard = () => {
@@ -1695,6 +1740,7 @@ const filteredProducts = useMemo(() => {
           Sin productos en el ledger. No se muestra catálogo de demostración.
         </div>
       )}
+      {commerceNotice && <p role="status" className="text-xs text-slate-400">{commerceNotice}</p>}
       <ProductInventoryPro
         products={products.map((product) => ({
           ...product,
@@ -1712,18 +1758,8 @@ const filteredProducts = useMemo(() => {
               status: product.status,
               category: product.category,
           }));
+          persistCommerceProducts(next, products);
           setProducts(next);
-          resetCommerceLedger();
-          for (const product of next) {
-            recordCommerceProduct({
-              id: String(product.id),
-              tenantId: "local-tenant",
-              title: product.name,
-              sku: product.sku,
-              price: { amount: Number(product.price) || 0, currency: "USD" },
-              stock: Number(product.stock) || 0,
-            });
-          }
         }}
       />
 

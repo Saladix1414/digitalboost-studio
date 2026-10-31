@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { registerOpenClawRoutes } from './src/server/DigitalBoostOpenClawServer';
+import { registerCommerceRoutes } from './src/server/commerce/CommerceRoutes';
 import {
   readInfrastructureEnvironment,
 } from './src/server/infrastructure/DigitalBoostInfrastructureEnvironment';
@@ -136,6 +137,16 @@ async function startServer() {
       try { client.write("event: commerce\ndata: {\"reason\":\"peer\"}\n\n"); } catch {}
     }
     res.json({ ok: true, peers: commerceSyncClients.size });
+  });
+
+  registerCommerceRoutes(app, {
+    database: infrastructure.foundation.database,
+    environment: infrastructureConfiguration.environment,
+    publishChange: () => {
+      for (const client of commerceSyncClients) {
+        try { client.write('event: commerce\ndata: {"reason":"database-write"}\n\n'); } catch {}
+      }
+    },
   });
 
   app.post('/api/websites-builder/brief', async (req, res) => {

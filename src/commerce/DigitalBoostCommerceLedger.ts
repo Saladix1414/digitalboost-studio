@@ -41,7 +41,7 @@ export type CommerceEvent = {
 export type CommerceSnapshot = {
   readonly contract: typeof COMMERCE_LEDGER_CONTRACT;
   readonly tenantId: string;
-  readonly source: "ledger";
+  readonly source: "ledger" | "postgresql";
   readonly products: readonly CommerceProduct[];
   readonly orders: readonly CommerceOrder[];
   readonly customers: readonly CommerceCustomer[];
@@ -59,6 +59,7 @@ type TenantBag = {
 };
 
 const bags = new Map<string, TenantBag>();
+const serverBackedTenants = new Set<string>();
 const LS_KEY = "db-commerce-ledger-v1";
 
 function readAll(): void {
@@ -80,9 +81,9 @@ function readAll(): void {
   } catch {}
 }
 
-function writeAll(): void {
+function writeAll(options: { notifyServerPeers?: boolean } = {}): void {
   emitCommerceSync("ledger");
-  pingCommerceSyncPeers();
+  if (options.notifyServerPeers !== false) pingCommerceSyncPeers();
   try {
     const dump: Record<string, TenantBag> = {};
     for (const [id, bag] of bags) dump[id] = bag;
@@ -109,7 +110,36 @@ function bag(tenantId: string): TenantBag {
 
 export function resetCommerceLedger(): void {
   bags.clear();
+  serverBackedTenants.clear();
   try { localStorage.removeItem(LS_KEY); } catch {}
+}
+
+/** Replace one tenant's local product cache without touching orders or customers. */
+export function replaceCommerceProducts(tenantId: string, products: readonly CommerceProduct[]): void {
+  const data = bag(tenantId);
+  serverBackedTenants.delete(tenantId);
+  data.products = products.filter(product => product.tenantId === tenantId).map(product => ({ ...product }));
+  writeAll({ notifyServerPeers: false });
+}
+
+/** Hydrate the browser cache from the server without broadcasting a write back. */
+export function hydrateCommerceSnapshot(snapshot: CommerceSnapshot): void {
+  const tenantId = snapshot.tenantId.trim();
+  if (!tenantId) return;
+  readAll();
+  bags.set(tenantId, {
+    products: [...snapshot.products],
+    orders: [...snapshot.orders],
+    customers: [...snapshot.customers],
+    events: [...snapshot.events],
+  });
+  serverBackedTenants.add(tenantId);
+  try {
+    const dump: Record<string, TenantBag> = {};
+    for (const [id, value] of bags) dump[id] = value;
+    localStorage.setItem(LS_KEY, JSON.stringify(dump));
+  } catch {}
+  emitCommerceSync("server-snapshot");
 }
 
 export function getCommerceSnapshot(tenantId: string): CommerceSnapshot {
@@ -126,7 +156,7 @@ export function getCommerceSnapshot(tenantId: string): CommerceSnapshot {
   return {
     contract: COMMERCE_LEDGER_CONTRACT,
     tenantId: id,
-    source: "ledger",
+    source: serverBackedTenants.has(id) ? "postgresql" : "ledger",
     products: data.products,
     orders: data.orders,
     customers: data.customers,
@@ -142,6 +172,7 @@ export function recordCommerceProduct(input: CommerceProduct): CommerceProduct {
     throw new Error("tenantId is required");
   }
   bag(input.tenantId).products.push(input);
+  serverBackedTenants.delete(input.tenantId);
   writeAll();
   return input;
 }
@@ -151,12 +182,14 @@ export function recordCommerceOrder(input: CommerceOrder): CommerceOrder {
   const idx = data.orders.findIndex((item) => item.id === input.id);
   if (idx >= 0) data.orders[idx] = input;
   else data.orders.push(input);
+  serverBackedTenants.delete(input.tenantId);
   writeAll();
   return input;
 }
 
 export function recordCommerceCustomer(input: CommerceCustomer): CommerceCustomer {
   bag(input.tenantId).customers.push(input);
+  serverBackedTenants.delete(input.tenantId);
   writeAll();
   return input;
 }
