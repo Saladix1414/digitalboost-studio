@@ -5,6 +5,7 @@ import {
   Boxes,
   CandlestickChart,
   Coins,
+  Gauge,
   LineChart,
   ShieldCheck,
   Sparkles,
@@ -39,6 +40,11 @@ const groups = [
   {
     label: "Trading",
     items: [
+      {
+        id: "overview",
+        label: "Overview",
+        icon: Gauge,
+      },
       {
         id: "terminal",
         label: "Terminal",
@@ -103,6 +109,7 @@ const groups = [
         id: "dbx",
         label: "DBX",
         icon: Boxes,
+        disabled: true,
       },
       {
         id: "activity",
@@ -120,6 +127,7 @@ export function IslandSidebar({
 }: IslandSidebarProps) {
   return (
     <aside
+      id="trading-islands-navigation"
       className={[
         "ti-shell-sidebar",
         collapsed
@@ -167,16 +175,20 @@ export function IslandSidebar({
                 <button
                   key={item.id}
                   type="button"
-                  title={
-                    collapsed
-                      ? item.label
-                      : undefined
-                  }
                   aria-current={
                     active
                       ? "page"
                       : undefined
                   }
+                  aria-label={item.disabled ? `${item.label} workspace unavailable` : undefined}
+                  title={
+                    item.disabled
+                      ? "DBX workspace is not available yet"
+                      : collapsed
+                        ? item.label
+                        : undefined
+                  }
+                  disabled={Boolean(item.disabled)}
                   className={[
                     "ti-shell-sidebar__item",
                     active
@@ -186,9 +198,7 @@ export function IslandSidebar({
                     .filter(Boolean)
                     .join(" ")}
                   onClick={() =>
-                    onSectionChange(
-                      item.id
-                    )
+                    onSectionChange(item.id)
                   }
                 >
                   <Icon

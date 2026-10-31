@@ -47,6 +47,8 @@ import RiskReviewWorkspace from "./risk/RiskReviewWorkspace";
 import ActivityWorkspace from "./activity/ActivityWorkspace";
 import NftForgeWorkspace from "./nft/NftForgeWorkspace";
 import WalletWorkspace from "./identity/WalletWorkspace";
+import MarketsWorkspace from "./market-data/MarketsWorkspace";
+import NftMarketplaceWorkspace from "./nft/marketplace/NftMarketplaceWorkspace";
 
 import {
   MarketDataProvider,
@@ -72,9 +74,9 @@ const sectionMeta: Record<
   }
 > = {
   overview: {
-    title: "Overview",
+    title: "Exchange Harbor",
     subtitle:
-      "Trading operations, assets and system state.",
+      "Simulate. Explore. Refine strategies in a risk-free island environment.",
     icon: Gauge,
   },
 
@@ -157,7 +159,7 @@ const sectionMeta: Record<
   dbx: {
     title: "DBX",
     subtitle:
-      "DigitalBoost internal operating economy.",
+      "DBX foundations exist; the operator workspace is unavailable in this build.",
     icon: Boxes,
   },
 
@@ -253,6 +255,7 @@ export function TradingIslandsWorkspace({
                       id === "activity"
                   ? "Economy"
                   : "Trading",
+            disabled: id === "dbx",
           })
         ),
       []
@@ -313,6 +316,7 @@ export function TradingIslandsWorkspace({
         onBack={onBack}
       >
         <div className="ti-shell-page">
+          {activeSection !== "overview" ? (
           <div className="ti-shell-page__head">
             <div>
               <div className="ti-label">
@@ -332,12 +336,15 @@ export function TradingIslandsWorkspace({
               Foundation
             </StatusBadge>
           </div>
+          ) : null}
 
           <section className="ti-shell-stage">
             {activeSection === "overview" ? (
               <TradingOverview
                 onNavigate={setActiveSection}
               />
+            ) : activeSection === "markets" ? (
+              <MarketsWorkspace />
             ) : activeSection === "terminal" ? (
               <TradingTerminal />
             ) : activeSection === "strategies" ? (
@@ -352,11 +359,19 @@ export function TradingIslandsWorkspace({
               <RiskReviewWorkspace />
             ) : activeSection === "nft-forge" ? (
               <NftForgeWorkspace />
+            ) : activeSection === "marketplace" ? (
+              <NftMarketplaceWorkspace />
             ) : activeSection === "wallet" ? (
               <WalletWorkspace />
 
             ) : activeSection === "activity" ? (
               <ActivityWorkspace />
+            ) : activeSection === "dbx" ? (
+              <EmptyState
+                icon={<Boxes size={21} strokeWidth={1.5} />}
+                title="DBX interface unavailable"
+                description="The DBX domain has foundations in this build, but no operator workspace is mounted here. No balance, purchase or reward action is available from Trading Islands."
+              />
             ) : (
               <EmptyState
                 icon={

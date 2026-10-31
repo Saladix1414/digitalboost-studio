@@ -185,7 +185,7 @@ export function MarketPulseChart() {
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           preserveAspectRatio="none"
           role="img"
-          aria-label={`${activeSymbol} deterministic intraday chart`}
+          aria-label={`${activeSymbol} simulated intraday chart from local deterministic fixture; not live market data`}
         >
           <defs>
             <linearGradient

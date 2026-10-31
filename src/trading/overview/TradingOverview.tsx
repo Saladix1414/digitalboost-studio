@@ -5,6 +5,7 @@ import {
   Bot,
   BriefcaseBusiness,
   CandlestickChart,
+  Info,
   TrendingUp,
 } from "lucide-react";
 
@@ -306,6 +307,27 @@ export function TradingOverview({
 
   return (
     <div className="ti-overview">
+      <section className="ti-overview__harbor" aria-labelledby="ti-exchange-harbor-title">
+        <div className="ti-overview__harbor-copy">
+          <span className="ti-overview__harbor-kicker">TRADING ISLANDS</span>
+          <h2 id="ti-exchange-harbor-title">
+            Exchange <span className="ti-overview__harbor-accent">Harbor</span>
+          </h2>
+          <p>Simulate. Explore. Refine your strategies in a risk-free island environment.</p>
+          <span className="ti-overview__disclaimer">
+            <Info size={13} aria-hidden="true" />
+            All data shown is local simulation. Not live trading.
+          </span>
+        </div>
+        <span className="ti-overview__demo-flag">
+          <span aria-hidden="true" />
+          <span className="ti-overview__demo-copy">
+            LOCAL DEMO
+            <small>Simulated market data</small>
+          </span>
+        </span>
+      </section>
+
       <section className="ti-overview__metrics">
         <MetricCard
           label="Paper portfolio"
@@ -440,7 +462,7 @@ export function TradingOverview({
             </div>
 
             <StatusBadge tone="info">
-              Mock feed
+              Mock feed · local
             </StatusBadge>
           </div>
 
@@ -464,6 +486,7 @@ export function TradingOverview({
                 Paper allocation
               </h2>
             </div>
+            <StatusBadge tone="neutral">Simulated</StatusBadge>
           </div>
 
           <DataTable
@@ -514,6 +537,7 @@ export function TradingOverview({
                 Recent events
               </h2>
             </div>
+            <StatusBadge tone="neutral">Demo activity</StatusBadge>
           </div>
 
           <ActivityFeed
@@ -524,79 +548,10 @@ export function TradingOverview({
         </div>
       </section>
 
-      {/* DBX_ACTIONS_START */}
-      <div
-        data-testid="dbx-overview-actions"
-        aria-label="DBX actions"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-          width: "100%",
-          maxWidth: 300,
-          marginTop: 18,
-        }}
-      >
-        <button
-          type="button"
-          data-dbx-action="purchase"
-          aria-label="Comprar DBX"
-          title="Comprar DBX"
-          style={{
-            appearance: "none",
-            width: "100%",
-            minHeight: 48,
-            padding: "0 18px",
-            borderRadius: 12,
-            border:
-              "1px solid rgba(56,189,248,0.42)",
-            background:
-              "linear-gradient(180deg, rgba(14,165,233,0.22) 0%, rgba(3,105,161,0.13) 100%)",
-            color: "#effaff",
-            fontSize: 14,
-            fontWeight: 750,
-            letterSpacing: "0.01em",
-            cursor: "pointer",
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 24px rgba(2,132,199,0.08)",
-            transition:
-              "border-color 160ms ease, background 160ms ease, transform 160ms ease",
-          }}
-        >
-          Comprar DBX
-        </button>
-
-        <button
-          type="button"
-          data-dbx-action="rewards"
-          data-dbx-rewards-type="usage-credit"
-          aria-label="DBX Rewards"
-          title="DBX Rewards"
-          style={{
-            appearance: "none",
-            width: "100%",
-            minHeight: 48,
-            padding: "0 18px",
-            borderRadius: 12,
-            border:
-              "1px solid rgba(45,212,191,0.30)",
-            background:
-              "linear-gradient(180deg, rgba(15,118,110,0.13) 0%, rgba(15,23,42,0.74) 100%)",
-            color: "#e4fffb",
-            fontSize: 14,
-            fontWeight: 750,
-            letterSpacing: "0.01em",
-            cursor: "pointer",
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.035)",
-            transition:
-              "border-color 160ms ease, background 160ms ease, transform 160ms ease",
-          }}
-        >
-          DBX Rewards
-        </button>
-      </div>
-      {/* DBX_ACTIONS_END */}
+      <p className="ti-overview__dbx-note" role="note">
+        DBX workspace is not available in this build. Portfolio values and
+        activity above are deterministic local simulations.
+      </p>
 
 </div>
   );

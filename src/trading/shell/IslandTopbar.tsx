@@ -56,6 +56,8 @@ export function IslandTopbar({
         <button
           type="button"
           className="ti-shell-topbar__sidebar-toggle"
+          aria-expanded={!sidebarCollapsed}
+          aria-controls="trading-islands-navigation"
           aria-label={
             sidebarCollapsed
               ? "Expand sidebar"
@@ -106,7 +108,13 @@ export function IslandTopbar({
         <button
           type="button"
           className="ti-shell-topbar__mobile-menu"
-          aria-label="Open navigation"
+          aria-expanded={!sidebarCollapsed}
+          aria-controls="trading-islands-navigation"
+          aria-label={
+            sidebarCollapsed
+              ? "Open navigation"
+              : "Close navigation"
+          }
           onClick={onToggleSidebar}
         >
           <Menu
