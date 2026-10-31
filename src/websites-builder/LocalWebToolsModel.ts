@@ -81,6 +81,10 @@ function safeNumber(value: number | undefined, fallback: number, min: number, ma
     : fallback;
 }
 
+function safeMediaDataUrl(value: string | undefined): string | null {
+  return value && /^data:image\/(?:png|jpeg|webp|gif|svg\+xml);base64,[A-Za-z0-9+/]+=*$/.test(value) ? value : null;
+}
+
 function renderHtmlBlocks(blocks: WebCanvasBlockSeed[], tokens: WebsiteProject["designTokens"]): string {
   const surface = safeColor(tokens.surface, "#ffffff");
   const foreground = safeColor(tokens.foreground, "#0f172a");
@@ -98,7 +102,9 @@ function renderHtmlBlocks(blocks: WebCanvasBlockSeed[], tokens: WebsiteProject["
     const align = block.align === "center" || block.align === "right" ? block.align : "left";
     const isButton = block.type === "button";
     const className = isButton ? "content-block content-cta" : "content-block";
-    return '<section class="' + className + '" aria-label="' + escapeHtml(block.label) + '" style="background:' + (isButton ? accent : blockBackground) + ';color:' + (isButton ? accentForeground : blockColor) + ';font-size:' + fontSize + 'px;text-align:' + align + ';padding:' + paddingY + 'px ' + paddingX + 'px;border-radius:' + blockRadius + 'px">' + escapeHtml(block.text) + '</section>';
+    const media = block.type === "image" ? safeMediaDataUrl(block.mediaDataUrl) : null;
+    const body = media ? '<img src="' + media + '" alt="' + escapeHtml(block.mediaAlt || block.text || block.label) + '" style="display:block;max-width:100%;max-height:640px;height:auto;object-fit:contain;margin:auto">' : escapeHtml(block.text);
+    return '<section class="' + className + '" aria-label="' + escapeHtml(block.label) + '" style="background:' + (isButton ? accent : blockBackground) + ';color:' + (isButton ? accentForeground : blockColor) + ';font-size:' + fontSize + 'px;text-align:' + align + ';padding:' + paddingY + 'px ' + paddingX + 'px;border-radius:' + blockRadius + 'px">' + body + '</section>';
   }).join("\n");
 }
 
@@ -130,6 +136,7 @@ export function createWebsitePageHtml(
     '  <meta name="viewport" content="width=device-width, initial-scale=1">',
     '  <meta name="description" content="' + description + '">',
     '  <meta name="robots" content="' + robots + '">',
+    ...(safeMediaDataUrl(project.faviconDataUrl) ? ['  <link rel="icon" href="' + safeMediaDataUrl(project.faviconDataUrl) + '">'] : []),
     "  <title>" + title + "</title>",
     "  <style>",
     "    *{box-sizing:border-box}body{margin:0;background:" + background + ";color:" + foreground + ';font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}',
@@ -185,6 +192,7 @@ export function createWebsiteProjectPreviewHtml(project: WebsiteProject): { file
     '  <meta name="viewport" content="width=device-width, initial-scale=1">',
     '  <meta name="description" content="' + initialDescription + '">',
     '  <meta name="robots" content="noindex,nofollow">',
+    ...(safeMediaDataUrl(project.faviconDataUrl) ? ['  <link rel="icon" href="' + safeMediaDataUrl(project.faviconDataUrl) + '">'] : []),
     "  <title>" + initialTitle + " · " + escapeHtml(project.name) + "</title>",
     "  <style>",
     "    *{box-sizing:border-box}body{margin:0;background:" + background + ";color:" + foreground + ';font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}',

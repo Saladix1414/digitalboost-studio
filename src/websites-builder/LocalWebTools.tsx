@@ -9,6 +9,8 @@ type Props = {
   pageId: string;
   blocks: WebCanvasBlockSeed[];
   onSeoChange: (patch: { title?: string; description?: string; indexable?: boolean }) => void;
+  onInsertMedia: (asset: { dataUrl: string; kind: "image" | "svg"; alt: string }) => void;
+  onFaviconChange: (dataUrl: string) => void;
   onClose: () => void;
 };
 
@@ -30,13 +32,24 @@ function downloadBlob(blob: Blob, name: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function ImageUtility({ favicon = false }: { favicon?: boolean }) {
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("No se pudo preparar el recurso local."));
+    reader.onerror = () => reject(new Error("No se pudo leer el recurso local."));
+    reader.readAsDataURL(blob);
+  });
+}
+
+function ImageUtility({ favicon = false, onInsertMedia, onFaviconChange }: { favicon?: boolean; onInsertMedia: Props["onInsertMedia"]; onFaviconChange: Props["onFaviconChange"] }) {
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<string>("");
   const [resultFormat, setResultFormat] = useState(favicon ? "png" : "webp");
+  const [resultDataUrl, setResultDataUrl] = useState("");
   const [message, setMessage] = useState("");
   const [quality, setQuality] = useState(82);
   const [busy, setBusy] = useState(false);
+  const [appliedMessage, setAppliedMessage] = useState("");
   useEffect(() => () => { if (result) URL.revokeObjectURL(result); }, [result]);
 
   async function process() {
@@ -63,9 +76,12 @@ function ImageUtility({ favicon = false }: { favicon?: boolean }) {
       const mime = favicon ? "image/png" : "image/webp";
       const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob((value) => value ? resolve(value) : reject(new Error("No se pudo generar el archivo.")), mime, quality / 100));
       const outputType = blob.type === "image/webp" ? "webp" : "png";
+      const dataUrl = await blobToDataUrl(blob);
+      if (dataUrl.length > 1_800_000) throw new Error("El recurso optimizado supera 1,8 MB. Reducí la calidad o el tamaño antes de agregarlo al proyecto.");
       const previous = result;
       const next = URL.createObjectURL(blob);
       setResult(next);
+      setResultDataUrl(dataUrl);
       setResultFormat(outputType);
       if (previous) URL.revokeObjectURL(previous);
       setMessage(`${canvas.width} × ${canvas.height}px · ${formatBytes(file.size)} → ${formatBytes(blob.size)}`);
@@ -78,11 +94,15 @@ function ImageUtility({ favicon = false }: { favicon?: boolean }) {
 
   return <div className="db-tool-content">
     <p>El procesamiento ocurre en este navegador. Tu imagen no se sube a ningún servidor.</p>
-    <label className="db-tool-label">Imagen<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event: ChangeEvent<HTMLInputElement>) => { setFile(event.target.files?.[0] ?? null); setResult(""); setMessage(""); }} /></label>
+    <label className="db-tool-label">Imagen<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event: ChangeEvent<HTMLInputElement>) => { setFile(event.target.files?.[0] ?? null); setResult(""); setResultDataUrl(""); setMessage(""); }} /></label>
     {!favicon && <label className="db-tool-label">Calidad WebP · {quality}%<input type="range" min="45" max="95" value={quality} onChange={(event) => setQuality(Number(event.target.value))} /></label>}
     {file && <button className="db-tool-primary" type="button" disabled={busy} onClick={process}>{busy ? "Procesando…" : favicon ? "Crear favicon PNG 64px" : "Optimizar a WebP"}</button>}
     {message && <div className="db-tool-message" role="status">{message}</div>}
     {result && <a className="db-tool-download" href={result} download={favicon ? "favicon-64.png" : `imagen-optimizada.${resultFormat}`}><Download size={15}/> Descargar {favicon ? "PNG" : resultFormat.toUpperCase()}</a>}
+    {resultDataUrl && (favicon
+      ? <button className="db-tool-primary" type="button" onClick={() => { onFaviconChange(resultDataUrl); setAppliedMessage("Favicon guardado en el proyecto local."); }}>Usar como favicon del sitio</button>
+      : <button className="db-tool-primary" type="button" onClick={() => { onInsertMedia({ dataUrl: resultDataUrl, kind: "image", alt: file?.name.replace(/\.[^.]+$/, "") || "Imagen optimizada" }); setAppliedMessage("Imagen agregada al canvas."); }}>Agregar imagen al canvas</button>)}
+    {appliedMessage && <div className="db-tool-message" role="status">{appliedMessage}</div>}
     {result && <img className="db-tool-image-result" src={result} alt="Vista previa del resultado" />}
   </div>;
 }
@@ -91,7 +111,7 @@ function formatBytes(value: number) {
   return value < 1024 * 1024 ? `${(value / 1024).toFixed(1)} KB` : `${(value / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChange, onClose }: Props) {
+export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChange, onInsertMedia, onFaviconChange, onClose }: Props) {
   const [foreground, setForeground] = useState("#17375b");
   const [background, setBackground] = useState("#ffffff");
   const [iconId, setIconId] = useState<string>(LOCAL_WEBSITE_ICONS[0].id);
@@ -151,8 +171,8 @@ export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChan
   return <div className="db-tool-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
     <section className="db-tool-dialog" role="dialog" aria-modal="true" aria-labelledby="db-tool-title">
       <header className="db-tool-dialog-header"><div><span>SKY WORKSHOP · LOCAL</span><h2 id="db-tool-title">{TOOL_TITLE[tool]}</h2></div><button type="button" className="db-tool-close" aria-label="Cerrar herramienta" onClick={onClose}><X size={18}/></button></header>
-      {tool === "image-optimizer" && <ImageUtility/>}
-      {tool === "favicon" && <ImageUtility favicon/>}
+      {tool === "image-optimizer" && <ImageUtility onInsertMedia={onInsertMedia} onFaviconChange={onFaviconChange}/>}
+      {tool === "favicon" && <ImageUtility favicon onInsertMedia={onInsertMedia} onFaviconChange={onFaviconChange}/>}
       {tool === "color-contrast" && <div className="db-tool-content">
         <p>Comprobación WCAG local de contraste entre texto y fondo.</p>
         <div className="db-tool-colors"><label className="db-tool-label">Texto<input type="color" value={foreground} onChange={(event) => setForeground(event.target.value)}/></label><label className="db-tool-label">Fondo<input type="color" value={background} onChange={(event) => setBackground(event.target.value)}/></label></div>
@@ -164,7 +184,7 @@ export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChan
         <label className="db-tool-label">Ícono<select value={iconId} onChange={(event) => setIconId(event.target.value)}>{LOCAL_WEBSITE_ICONS.map((icon) => <option key={icon.id} value={icon.id}>{icon.label}</option>)}</select></label>
         <label className="db-tool-label">Color<input type="color" value={iconColor} onChange={(event) => setIconColor(event.target.value)}/></label>
         <div className="db-svg-preview" dangerouslySetInnerHTML={{ __html: svg }}/>
-        <div className="db-tool-actions"><button type="button" className="db-tool-primary" onClick={copySvg}>Copiar SVG</button><button type="button" className="db-tool-secondary" onClick={() => downloadBlob(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }), `${iconId}.svg`)}>Descargar .svg</button></div>
+        <div className="db-tool-actions"><button type="button" className="db-tool-primary" onClick={copySvg}>Copiar SVG</button><button type="button" className="db-tool-secondary" onClick={() => downloadBlob(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }), `${iconId}.svg`)}>Descargar .svg</button><button type="button" className="db-tool-primary" onClick={() => { const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`; onInsertMedia({ dataUrl, kind: "svg", alt: LOCAL_WEBSITE_ICONS.find((icon) => icon.id === iconId)?.label || "Ícono SVG" }); setNotice("SVG agregado al canvas."); }}>Agregar SVG al canvas</button></div>
         <label className="db-tool-label">Código SVG<textarea readOnly rows={4} value={svg}/></label>
       </div>}
       {tool === "seo-preview" && <div className="db-tool-content">

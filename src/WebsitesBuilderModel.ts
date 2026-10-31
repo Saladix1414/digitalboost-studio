@@ -74,6 +74,9 @@ export interface WebCanvasBlockSeed {
   borderRadius?: number;
   shadow?: "none" | "soft" | "glow";
   hidden?: boolean;
+  mediaDataUrl?: string;
+  mediaKind?: "image" | "svg";
+  mediaAlt?: string;
 }
 
 export const WEB_DESIGN_LANGUAGES: WebDesignLanguage[] = [
@@ -482,6 +485,7 @@ export interface WebsiteProject {
 
   brief: WebsitesBuilderBrief;
   designTokens: WebDesignTokens;
+  faviconDataUrl?: string;
 
   pages: WebsitePage[];
 
@@ -708,6 +712,11 @@ export function updateWebsitePageSeo(
   };
 }
 
+export function updateWebsiteProjectFavicon(project: WebsiteProject, faviconDataUrl: string): WebsiteProject {
+  if (!/^data:image\/png;base64,[A-Za-z0-9+/]+=*$/.test(faviconDataUrl)) return project;
+  return { ...project, faviconDataUrl };
+}
+
 /* -------------------------------------------------------------------------- */
 /* Website Project <-> Canvas projection                                      */
 /* -------------------------------------------------------------------------- */
@@ -735,6 +744,9 @@ export function canvasBlocksToWebsiteSections(
         name: `${block.label} content`,
         content: {
           text: block.text,
+          mediaDataUrl: block.mediaDataUrl,
+          mediaKind: block.mediaKind,
+          mediaAlt: block.mediaAlt,
         },
         dataState: "EMPTY",
       },
@@ -757,6 +769,9 @@ export function canvasBlocksToWebsiteSections(
       borderColor: block.borderColor ?? "#d9e8f7",
       borderRadius: block.borderRadius ?? 0,
       shadow: block.shadow ?? "none",
+      mediaDataUrl: block.mediaDataUrl,
+      mediaKind: block.mediaKind,
+      mediaAlt: block.mediaAlt,
     },
   }));
 }
@@ -838,6 +853,9 @@ export function websiteSectionsToCanvasBlocks(
       borderRadius: typeof settings.borderRadius === "number" ? settings.borderRadius : 0,
       shadow: settings.shadow === "soft" || settings.shadow === "glow" ? settings.shadow : "none",
       hidden: section.hidden,
+      mediaDataUrl: typeof settings.mediaDataUrl === "string" ? settings.mediaDataUrl : undefined,
+      mediaKind: settings.mediaKind === "svg" ? "svg" : settings.mediaKind === "image" ? "image" : undefined,
+      mediaAlt: typeof settings.mediaAlt === "string" ? settings.mediaAlt : undefined,
     };
   });
 }
