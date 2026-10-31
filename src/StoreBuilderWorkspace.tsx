@@ -2,7 +2,7 @@ import DigitalBoostSeoCenter from "./DigitalBoostSeoCenter";
 import DigitalBoostMarketingHub from "./DigitalBoostMarketingHub";
 import "./DigitalBoostStudioDock";
 import './store-builder-vibrant-global.css';
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   BarChart3,
@@ -62,6 +62,7 @@ import "./commerce-os-navy-lock.css";
 import "./digitalboost-os.css";
 import "./digitalboost-qa.css";
 import "./digitalboost-dashboard.css";
+import "./commerce-os-shell.css";
 type StoreSection =
   | "dashboard"
   | "products"
@@ -685,6 +686,30 @@ export default function StoreBuilderWorkspace({
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [wideNavigation, setWideNavigation] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches);
+  const navigationRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const update = () => setWideNavigation(media.matches);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  useEffect(() => {
+    if (!mobileMenu || wideNavigation) return;
+    const panel = navigationRef.current;
+    panel?.querySelector<HTMLElement>('button')?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { setMobileMenu(false); return; }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(panel?.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]') || []).filter(el => el.getClientRects().length > 0);
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("keydown", onKey); menuButtonRef.current?.focus(); };
+  }, [mobileMenu, wideNavigation]);
 
   const [productForm, setProductForm] = useState({
     name: "",
@@ -3461,16 +3486,23 @@ const filteredProducts = useMemo(() => {
   };
 
   return (
-    <div data-store-builder-vibrant="true" data-store-builder={section === "website-builder" ? "true" : "false"} data-os-section={section} className={`flex h-screen overflow-hidden ${section === "website-builder" ? "bg-[#070d18] text-[#F7FAFF]" : "bg-[#0A1020] text-white"}`}>
+    <div data-commerce-theme="arcade-pop" data-store-builder={section === "website-builder" ? "true" : "false"} data-os-section={section} className="commerce-shell">
       {mobileMenu && (
         <div
-          className="fixed inset-0 z-40 bg-slate-900/10 lg:hidden"
+          className="commerce-menu-backdrop fixed inset-0 z-40 bg-slate-900/10 lg:hidden"
           onClick={() => setMobileMenu(false)}
         />
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[250px] flex-col border-r border-[#D6E2EE] bg-[#0B1B30] transition-transform lg:relative lg:translate-x-0 ${
+        ref={navigationRef}
+        data-open={mobileMenu}
+        inert={!wideNavigation && !mobileMenu}
+        role={!wideNavigation && mobileMenu ? "dialog" : undefined}
+        aria-modal={!wideNavigation && mobileMenu ? true : undefined}
+        id="commerce-navigation"
+        aria-label="Navegación Commerce OS"
+        className={`commerce-sidebar fixed inset-y-0 left-0 z-50 flex w-[250px] flex-col border-r border-[#D6E2EE] bg-[#0B1B30] transition-transform lg:relative lg:translate-x-0 ${
           mobileMenu ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -3485,7 +3517,7 @@ const filteredProducts = useMemo(() => {
             </div>
 
             <div>
-              DIGITAL<span className="text-cyan-400">BOOST</span>
+              ORIGIN<span className="text-cyan-400">X</span> FOUNDATION
               <div className="text-[9px] font-medium tracking-widest text-[#475569]">
                 STORE
               </div>
@@ -3493,14 +3525,16 @@ const filteredProducts = useMemo(() => {
           </button>
 
           <button
+            type="button"
+            aria-label="Cerrar navegación"
             onClick={() => setMobileMenu(false)}
-            className="lg:hidden"
+            className="commerce-icon-button lg:hidden"
           >
             <X size={18} />
           </button>
         </div>
 
-        <div className="px-3 py-5">
+        <div className="commerce-navigation px-3 py-5">
           <button
             onClick={() => setSection("dashboard")}
             className="mb-4 flex w-full items-center justify-between rounded-lg border border-[#00B7FF]/30 bg-cyan-400/5 px-3 py-3 text-left"
@@ -3537,6 +3571,7 @@ const filteredProducts = useMemo(() => {
                         [group.id]: !current[group.id],
                       }))
                     }
+                    aria-expanded={isOpen}
                     className="mb-2 flex w-full items-center justify-between px-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#475569] transition hover:text-[#475569]"
                   >
                     <span>{group.label}</span>
@@ -3550,6 +3585,7 @@ const filteredProducts = useMemo(() => {
                   </button>
 
                   <div
+                    hidden={!isOpen}
                     className={`space-y-1 overflow-hidden transition-all duration-200 ${
                       isOpen
                         ? "max-h-[500px] opacity-100"
@@ -3563,6 +3599,7 @@ const filteredProducts = useMemo(() => {
                       return (
                         <button
                           key={item.id}
+                          aria-current={active ? "page" : undefined}
                           type="button"
                           onClick={() => {
                             if (item.id === "marketing") {
@@ -3622,64 +3659,52 @@ const filteredProducts = useMemo(() => {
             className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#475569] hover:bg-[#0A0E16] hover:text-white"
           >
             <ArrowLeft size={17} />
-            Volver a DigitalBoost
+            Volver a OriginX Foundation
           </button>
         </div>
       </aside>
 
-      <main className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-[72px] shrink-0 items-center justify-between border-b border-[#1D4260] bg-[#050913]/95 px-4 backdrop-blur-xl lg:px-7">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setMobileMenu(true)}
-              className="rounded-lg p-2 text-[#475569] hover:bg-[#0A0E16] lg:hidden"
-            >
-              <Menu size={20} />
+      <main inert={mobileMenu && !wideNavigation} className="commerce-main flex min-w-0 flex-1 flex-col">
+        <header className="commerce-header">
+          <div className="commerce-header-identity">
+            <button ref={menuButtonRef} type="button" aria-label="Abrir navegación" aria-controls="commerce-navigation" aria-expanded={mobileMenu}
+              onClick={() => setMobileMenu(true)} className="commerce-icon-button lg:hidden">
+              <Menu size={22} />
             </button>
-
-            <div>
-              <div className="text-sm font-semibold">
-                {navGroups.flatMap((group) => group.items).find((item) => item.id === section)?.label ||
-                  "Configuración"}
-              </div>
-
-              <div className="text-[10px] text-[#475569]">
-                DigitalBoost Commerce OS
-                <DigitalBoostStoreSwitch />
-                <DigitalBoostOsHello />
-                <DigitalBoostOsRange />
-                <span className="inline-flex items-center"><DigitalBoostOsLive /><DigitalBoostPulseRadar /></span>
-              </div>
+            <div className="commerce-brand" aria-label="OriginX Foundation Commerce OS">
+              <span>Origin<span className="commerce-brand-accent">X</span></span>
+              <small>FOUNDATION</small>
             </div>
           </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => section === "website-builder" ? setShowAI(true) : setSection("pulse-bot")}
-              className="hidden items-center gap-2 rounded-lg border border-violet-400/20 bg-violet-500/20 px-3 py-2 text-xs text-violet-300 sm:flex"
-            >
-              <Sparkles size={14} />
+          <div className="commerce-header-actions">
+            <div className="commerce-store-switch"><DigitalBoostStoreSwitch /></div>
+            <button type="button" onClick={() => section === "website-builder" ? setShowAI(true) : setSection("pulse-bot")}
+              className="commerce-pulse-button">
+              <Sparkles size={18} />
               {section === "website-builder" ? "PULSE" : "Pulse Bot"}
             </button>
-
-            <button className="rounded-lg p-2 text-[#475569] hover:bg-[#0A0E16]">
-              <span onClick={function () { setShowNotes(true); }}><span onClick={() => setShowNotes(true)}><Bell size={18} /></span></span>
+            <button type="button" aria-label="Abrir notificaciones" onClick={() => setShowNotes(true)} className="commerce-icon-button">
+              <Bell size={21} />
             </button>
-
-            <div className="hidden h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-300 text-xs font-bold sm:flex">
-              DB
-            </div>
+            <div className="commerce-avatar" aria-label="OriginX Foundation">OX</div>
           </div>
+          <div className="commerce-toolbar">
+            <div className="commerce-range"><DigitalBoostOsRange /></div>
+            <div className="commerce-live"><DigitalBoostOsLive /></div>
+            <DigitalBoostPulseRadar />
+            <span className="commerce-section-label">{navGroups.flatMap((group) => group.items).find((item) => item.id === section)?.label || "Configuración"}</span>
+            <div className="commerce-command"><DigitalBoostCommandCenter onNavigate={setSection} onOpenAI={() => setShowAI(true)} onOpenSearch={() => setShowSearch(true)} onOpenHealth={() => setShowHealth(true)} onOpenIntegrations={() => setShowIntegrations(true)} onOpenAutomations={() => setShowAutomations(true)} onOpenConsole={() => setShowConsole(true)} onOpenNotes={() => setShowNotes(true)} onOpenShortcuts={() => setShowShortcuts(true)} /></div>
+          </div>
+          <div className="commerce-hello"><DigitalBoostOsHello /></div>
         </header>
 
-        <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-[1400px] p-4 md:p-7">
+        <div className="commerce-scroll flex-1 overflow-y-auto">
+          <div data-store-editor-theme={section === "website-builder" ? "arcade-pop" : undefined} className="commerce-content mx-auto max-w-[1400px] p-4 md:p-7">
             {renderSection()}
           </div>
         </div>
       </main>
 
-      <DigitalBoostCommandCenter onNavigate={setSection} onOpenAI={() => setShowAI(true)} onOpenSearch={() => setShowSearch(true)} onOpenHealth={() => setShowHealth(true)} onOpenIntegrations={() => setShowIntegrations(true)} onOpenAutomations={() => setShowAutomations(true)} onOpenConsole={() => setShowConsole(true)} onOpenNotes={() => setShowNotes(true)} onOpenShortcuts={() => setShowShortcuts(true)} />
       {showShortcuts && (<DigitalBoostShortcuts onClose={() => setShowShortcuts(false)} />)}
       {showNotes && (<DigitalBoostNotifications onClose={() => setShowNotes(false)} />)}
       {showConsole && (<DigitalBoostConsole onClose={() => setShowConsole(false)} />)}
@@ -3958,7 +3983,7 @@ const filteredProducts = useMemo(() => {
                       name: e.target.value,
                     }))
                   }
-                  placeholder="Ej. DigitalBoost Hoodie"
+                  placeholder="Ej. OriginX Hoodie"
                   className="mt-2 w-full rounded-lg border border-[#00B7FF]/30 bg-[#0B1B30] px-3 py-2.5 text-sm outline-none focus:border-cyan-400/50"
                 />
               </div>

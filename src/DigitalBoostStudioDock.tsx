@@ -17,9 +17,9 @@ const SNIPPETS = [
 ];
 const PAGES = ["Inicio", "Productos", "Colecciones", "Nosotros", "Contacto"];
 const TABS = [
-  ["outline", "Outline"], ["pages", "Pages"], ["snip", "Snippets"],
-  ["audit", "Problems"], ["seo", "SEO"], ["copy", "Copy"],
-  ["media", "Media"], ["export", "Export"], ["insp", "Inspector"]
+  ["outline", "Estructura"], ["pages", "Páginas"], ["snip", "Bloques"],
+  ["audit", "Revisión"], ["seo", "SEO"], ["copy", "Textos"],
+  ["media", "Medios"], ["export", "Exportar"], ["insp", "Inspector"]
 ];
 
 function readBlocks() {
@@ -100,7 +100,7 @@ function Dock() {
               <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-300">Studio</div>
               <div className="text-xs text-[#AFC0D5]">{facts.store} · {facts.page} · {blocks.length} bloques · {facts.score}/100</div>
             </div>
-            <button type="button" onClick={function () { setTab(null); }} className="grid h-9 w-9 place-items-center rounded-md border border-white/10">x</button>
+            <button type="button" aria-label="Cerrar herramientas" onClick={function () { setTab(null); }} className="grid h-9 w-9 place-items-center rounded-md border border-white/10">x</button>
           </div>
           <div className="max-h-[40vh] overflow-y-auto p-3 text-[13px] leading-6">
             {tab === "outline" && blocks.map(function (b: any, i: number) { if (!passFilt(b)) return null;

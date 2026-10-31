@@ -236,19 +236,18 @@ export function decide(input: PulseInput): PulseDecision {
     return finish(input, { title: "PULSE Design", body: "Estamos en " + (input.page || "Inicio") + " · " + String(input.blockCount || 0) + " bloques.\n" + hero + "\n¿Lo reescribimos, cambiamos el theme, o afinamos los botones?", action: "website-builder", label: "Seguir en el canvas" });
   }
 
-  const m = mul(input);
-  const salesN = Math.round(474 * m);
-  const ordersN = Math.max(1, Math.round(4 * m));
-  const ticket = Math.round(118 * m);
+  const salesN = 0;
+  const ordersN = 0;
+  const ticket = 0;
   const packs: Pack[] = [];
   function add(keys: string[], title: string, body: string, action: string, label: string, confirm?: boolean) {
     const s = score(q, keys);
     if (s > 0) packs.push({ title: title, body: body, action: action, label: label, confirm: confirm, score: s });
   }
   add(["hola", "quien", "sos", "pulse"], "PULSE", st(input) + ". Estoy acá. ¿Vemos el día, un pedido, o el canvas?", "dashboard", "Seguir aca");
-  add(["venta", "plata", "ingreso", "analytics", "factur"], "PULSE · Ventas", "" + st(input) + ". " + money(salesN) + " · " + ordersN + " pedidos · ticket " + money(ticket) + ". Mobile recorta. ¿Abro Analytics?", "analytics", "Abrir Analytics");
-  add(["pedido", "orden", "envio", "despacho", "1048", "1047"], "PULSE · Pedidos", "El 1048 está pagado. El 1047 sigue en preparación: el cuello es despacho, no la vitrina. Cada hora ahí es plata cobrada que no sale. ¿Entro a Pedidos?", "orders", "Abrir Pedidos");
-  add(["stock", "invent", "sku", "producto", "cap"], "PULSE · Stock", "El Cap Digital Blue está fino. Si el drop llega sin reposición, la ficha se ve y no hay talle. Anotar el faltante es L0; comprar al proveedor ya sería L3 y Pulse Card. ¿Abrimos Productos?", "products", "Abrir Productos");
+  add(["venta", "plata", "ingreso", "analytics", "factur"], "PULSE · Ventas", "" + st(input) + ". No hay store autoritativo de ventas. No invento " + money(salesN) + " ni " + ordersN + " pedidos. ¿Abro Analytics?", "analytics", "Abrir Analytics");
+  add(["pedido", "orden", "envio", "despacho", "1048", "1047"], "PULSE · Pedidos", "No hay store autoritativo de pedidos. No invento el 1048 ni el 1047. ¿Entro a Pedidos?", "orders", "Abrir Pedidos");
+  add(["stock", "invent", "sku", "producto", "cap"], "PULSE · Stock", "No hay inventario autoritativo. No invento el Cap Digital Blue ni faltantes. ¿Abrimos Productos?", "products", "Abrir Productos");
   add(["cliente", "vip", "martin"], "PULSE · Clientes", "RECOMENDACION: valor concentrado. Tag VIP, no campana masiva.", "customers", "Abrir Clientes");
   add(["health", "salud", "error", "diagnost"], "PULSE · Health", "Alerta operativa. Te abro el diagnostico. No ejecuto cambios.", "__health", "Abrir Store Health");
   add(["buscar", "search"], "PULSE · Search", "Te abro Search del OS.", "__search", "Abrir Search");
@@ -280,7 +279,7 @@ export function decide(input: PulseInput): PulseDecision {
   let pick: Pack;
   if (!packs.length) {
     if (inStudio) pick = { title: "PULSE Design", body: input.heroTitle ? ("Hero «" + input.heroTitle + "». ¿Lo reescribimos o cambiamos theme?") : "¿Hero, theme o CTA?", action: "website-builder", label: "Seguir en el canvas", score: 0 };
-    else pick = { title: "PULSE", body: "No enganché un frente claro. ¿Lo vemos por ventas, por el 1047, o por el hero del canvas?", action: input.section || "dashboard", label: "Seguir acá", score: 0 };
+    else pick = { title: "PULSE", body: "No enganché un frente claro. ¿Lo vemos por ventas, por pedidos reales, o por el hero del canvas?", action: input.section || "dashboard", label: "Seguir acá", score: 0 };
   } else {
     pick = packs[0];
   }

@@ -40,11 +40,10 @@ export function toolInspect(input?: { store?: string; range?: string; live?: boo
     if ((t === "hero" || t === "featured" || t === "product" || t === "cta") && !has) missingCta++;
   }
   const genericHero = !heroTitle || heroTitle.length < 8 || /extraordinario|welcome|bienvenid|lorem|crea algo|nueva tienda|hello world/i.test(heroTitle);
-  const m = mul(range);
-  const sales = Math.round(474 * m);
-  const orders = Math.max(1, Math.round(4 * m));
-  const ticket = Math.round(118 * m);
-  const notes: string[] = ["DEMO: sales/orders/ticket no son fuente autoritativa"];
+  const sales = 0;
+  const orders = 0;
+  const ticket = 0;
+  const notes: string[] = ["DEMO: no hay store autoritativo de ventas/pedidos/ticket"];
   let score = 55;
   if (live) score += 8; else { score -= 10; notes.push("Live apagado"); }
   if (heroTitle && heroTitle.indexOf('permiso') !== -1) { score += 12; } else if (genericHero) { score -= 15; notes.push('Hero de plantilla'); } else score += 12;
@@ -97,7 +96,7 @@ export function toolNba(f: PulseFacts): { title: string; body: string; action: s
 export function toolOrders(f: PulseFacts) {
   return {
     title: "PULSE · Pedidos",
-    body: "En " + f.store + " el 1048 ya está pago.\nEl 1047 sigue en preparación: plata cobrada que no sale.\nEl cuello es despacho, no la vitrina.",
+    body: "No hay store autoritativo de pedidos para " + f.store + ".\nNo invento el 1048 ni el 1047.",
     action: "orders",
     label: "Abrir Pedidos"
   };
@@ -106,7 +105,7 @@ export function toolOrders(f: PulseFacts) {
 export function toolStock(f: PulseFacts) {
   return {
     title: "PULSE · Stock",
-    body: "El Cap Digital Blue está justo en " + f.store + ".\nAnotar el faltante es inocuo. Comprar al proveedor ya es una decisión tuya, no mía.",
+    body: "No hay inventario autoritativo en " + f.store + ".\nNo invento SKUs ni faltantes.",
     action: "products",
     label: "Abrir Productos"
   };
@@ -138,7 +137,7 @@ export function toolRange(f: PulseFacts) {
   const a = mul("7d"), b = mul("30d"), c = mul("90d");
   return {
     title: "PULSE · Rangos",
-    body: "Cálculo de demo, no pasarela. 7d " + money(474 * a) + " / " + Math.max(1, 4 * a) + " pedidos. 30d " + money(474 * b) + " / " + Math.max(1, 4 * b) + ". 90d " + money(474 * c) + " / " + Math.max(1, 4 * c) + ". Estás en " + f.range + ". El cuello (1047, cap) no cambia al alargar el rango.",
+    body: "No hay serie autoritativa por rango. Estás en " + f.range + ". No invento ventas ni el 1047 al cambiar 7d/30d/90d.",
     action: "analytics",
     label: "Abrir Analytics"
   };

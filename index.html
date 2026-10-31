@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DigitalBoost - Crea. Impulsa. Escala. Innova.</title>
+    <title>OriginX Foundation</title>
 
 
 
@@ -12,28 +12,31 @@
 
 
 <style id="db-os-navy-lock">
-[data-commerce-os="true"]{
+[data-commerce-os="true"]:not([data-commerce-theme="arcade-pop"] *){
   background:#0A1020 !important;
   color:#F7FAFF !important;
 }
-[data-commerce-os="true"] h1{color:#F7FAFF !important}
-[data-commerce-os="true"] h1 span{color:#67E8F9 !important}
-[data-commerce-os="true"] p{color:#AFC0D5 !important}
-[data-commerce-os="true"] section,
-[data-commerce-os="true"] button{
+[data-commerce-os="true"]:not([data-commerce-theme="arcade-pop"] *) h1{color:#F7FAFF !important}
+[data-commerce-os="true"]:not([data-commerce-theme="arcade-pop"] *) h1 span{color:#67E8F9 !important}
+[data-commerce-os="true"]:not([data-commerce-theme="arcade-pop"] *) p{color:#AFC0D5 !important}
+[data-commerce-os="true"]:not([data-commerce-theme="arcade-pop"] *) section,
+[data-commerce-os="true"]:not([data-commerce-theme="arcade-pop"] *) button{
   background:#101B32 !important;
   color:#F7FAFF !important;
   border-color:rgba(247,250,255,.12) !important;
 }
-[data-commerce-os="true"] button[class*="bg-cyan"]{
+[data-commerce-os="true"]:not([data-commerce-theme="arcade-pop"] *) button[class*="bg-cyan"]{
   background:#22D3EE !important;
   color:#070D18 !important;
 }
-[data-commerce-os="true"] button[class*="bg-violet"]{
+[data-commerce-os="true"]:not([data-commerce-theme="arcade-pop"] *) button[class*="bg-violet"]{
   background:#8B5CF6 !important;
   color:#F7FAFF !important;
 }
-html,body,#root,#app{
+html:not(:has([data-commerce-theme="arcade-pop"])),
+body:not(:has([data-commerce-theme="arcade-pop"])),
+#root:not(:has([data-commerce-theme="arcade-pop"])),
+#app:not(:has([data-commerce-theme="arcade-pop"])){
   background:#0A1020 !important;
   color:#F7FAFF !important;
 }

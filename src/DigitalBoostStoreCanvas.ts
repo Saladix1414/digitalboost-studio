@@ -50,7 +50,7 @@ export function loadCanvas(): CanvasBlock[] {
     const raw = localStorage.getItem(KEY);
     if (!raw) return seedHome();
     const parsed = JSON.parse(raw) as CanvasBlock[];
-    if (!Array.isArray(parsed) || parsed.length === 0) return seedHome();
+    if (!Array.isArray(parsed)) return seedHome();
     return parsed;
   } catch { return seedHome(); }
 }
@@ -81,10 +81,10 @@ export function loadCanvasPage(page: string): CanvasBlock[] {
     const raw = localStorage.getItem(KEY + ":" + page);
     if (!raw) return seedPage(page);
     const parsed = JSON.parse(raw) as CanvasBlock[];
-    if (!Array.isArray(parsed) || parsed.length === 0) return seedPage(page);
+    if (!Array.isArray(parsed)) return seedPage(page);
     return parsed;
   } catch { return seedPage(page); }
 }
 export function saveCanvasPage(page: string, blocks: CanvasBlock[]) {
-  try { localStorage.setItem(KEY + ":" + page, JSON.stringify(blocks)); } catch {}
+  try { localStorage.setItem(KEY + ":" + page, JSON.stringify(blocks)); return true; } catch { return false; }
 }

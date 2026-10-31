@@ -1,5 +1,5 @@
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 type Props = {
   onNavigate: (id: any) => void;
   onOpenAI: () => void;
@@ -30,6 +30,8 @@ const COMMANDS = [
   { id: "settings", label: "Open Settings", k: "config" }
 ];
 export default function DigitalBoostCommandCenter(props: Props) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [i, setI] = useState(0);
@@ -42,6 +44,7 @@ export default function DigitalBoostCommandCenter(props: Props) {
     function onKey(e: KeyboardEvent) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
+        if (!open) returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         setOpen(function (v) { return !v; });
         setQ("");
         setI(0);
@@ -54,7 +57,11 @@ export default function DigitalBoostCommandCenter(props: Props) {
     }
     window.addEventListener("keydown", onKey);
     return function () { window.removeEventListener("keydown", onKey); };
-  }, []);
+  }, [props.onOpenShortcuts, open]);
+  useEffect(() => {
+    if (!open) return;
+    return () => { if (returnFocusRef.current?.isConnected) returnFocusRef.current.focus(); };
+  }, [open]);
   function run(id: string) {
     setOpen(false);
     if (id === "ai") props.onOpenAI();
@@ -69,19 +76,32 @@ export default function DigitalBoostCommandCenter(props: Props) {
   }
   return (
     <>
-      <button type="button" onClick={function () { setOpen(true); setQ(""); setI(0); }} className="h-9 rounded-full border border-white/10 px-3 text-[11px] text-cyan-300">
-        Cmd
+      <button type="button" onClick={function (event) { returnFocusRef.current = event.currentTarget; setOpen(true); setQ(""); setI(0); }} aria-haspopup="dialog" aria-expanded={open} className="db-cmd-trigger">
+        Cmd ⌘
       </button>
       {open && (
         <div className="db-cmd-overlay" role="dialog" aria-modal="true" aria-label="Command Center" onClick={function () { setOpen(false); }}>
-          <style>{".db-cmd-overlay{position:fixed;inset:0;z-index:200;background:rgba(7,13,24,.72);display:flex;align-items:flex-end;justify-content:center;padding:16px}.db-cmd-panel{width:min(560px,100%);background:#101B32;border:1px solid rgba(247,250,255,.12);border-radius:16px;overflow:hidden;color:#F7FAFF}.db-cmd-panel input{width:100%;height:48px;border:0;outline:0;background:#0C1427;color:#F7FAFF;padding:0 16px;font-size:14px}.db-cmd-item{display:block;width:100%;text-align:left;padding:12px 16px;background:transparent;border:0;color:#D7E2F0;font-size:13px}.db-cmd-item.active,.db-cmd-item:hover{background:#14233F;color:#fff}"}</style>
-          <div className="db-cmd-panel" onClick={function (e) { e.stopPropagation(); }}>
+
+          <div ref={panelRef} className="db-cmd-panel" onClick={function (e) { e.stopPropagation(); }}
+            onKeyDown={(event) => {
+              if (event.key !== "Tab") return;
+              const focusable = panelRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input, [tabindex="0"]');
+              if (!focusable?.length) return;
+              const first = focusable[0];
+              const last = focusable[focusable.length - 1];
+              if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+              if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+            }}>
+            <div className="db-cmd-heading">Comandos
+              <button type="button" className="commerce-icon-button" aria-label="Cerrar comandos" onClick={() => setOpen(false)}>×</button>
+            </div>
             <input autoFocus placeholder="Command Center  ·  Cmd" aria-label="Buscar comando" value={q} onChange={function (e) { setQ(e.target.value); setI(0); }}
               onKeyDown={function (e) {
-                if (e.key === "ArrowDown") { e.preventDefault(); setI(Math.min(items.length - 1, i + 1)); }
+                if (e.key === "ArrowDown") { e.preventDefault(); setI(Math.max(0, Math.min(items.length - 1, i + 1))); }
                 if (e.key === "ArrowUp") { e.preventDefault(); setI(Math.max(0, i - 1)); }
                 if (e.key === "Enter" && items[i]) run(items[i].id);
               }} />
+            {!items.length && <p className="db-cmd-empty">No se encontraron comandos.</p>}
             {items.map(function (c, n) {
               return <button key={c.id} type="button" className={n === i ? "db-cmd-item active" : "db-cmd-item"} onClick={function () { run(c.id); }}>{c.label}</button>;
             })}
