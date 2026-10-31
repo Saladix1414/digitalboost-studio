@@ -17,7 +17,7 @@ import {
   verifyWebsitesBuilderProject,
   websiteProjectToCanvasBlocks,
 } from "../../src/WebsitesBuilderModel.ts";
-import { createWebsitePageHtml } from "../../src/websites-builder/LocalWebToolsModel.ts";
+import { createWebsitePageHtml, createWebsiteProjectPreviewHtml } from "../../src/websites-builder/LocalWebToolsModel.ts";
 
 test("fallback creates four blocks without fake proof", () => {
   const brief = createFallbackBrief(
@@ -400,4 +400,28 @@ test("local HTML export includes active page tokens and escapes authored content
   assert.doesNotMatch(output.html, /url\(javascript:/);
   assert.match(output.html, /name="robots" content="index,follow"/);
   assert.match(output.html, /width:min\(calc\(100% - 40px\),1200px\)/);
+});
+
+test("multipage HTML preview navigates every page and keeps the file private to preview", () => {
+  const brief = createFallbackBrief("Sitio multipágina local");
+  const project = createWebsiteProjectFromBrief(brief, createDesignTokens(brief.designLanguage));
+  const home = getWebsiteHomePage(project);
+  const homeBlocks = [{ id: "home-hero", type: "hero" as const, label: "Inicio", text: "Bienvenidos", background: "#fff", color: "#111111", fontSize: 32, padding: 24, align: "left" as const, width: 100 }];
+  const withHome = updateWebsiteProjectFromCanvas(project, homeBlocks, home.id);
+  const withContact = createWebsitePage(withHome, "Contacto & consultas");
+  const contact = withContact.pages[1];
+  const contactBlocks = [{ id: "contact-copy", type: "text" as const, label: "Contacto", text: "<script>no ejecutar</script>", background: "#ffffff", color: "#222222", fontSize: 18, padding: 20, align: "left" as const, width: 100 }];
+  const completeProject = updateWebsiteProjectFromCanvas(withContact, contactBlocks, contact.id);
+  const output = createWebsiteProjectPreviewHtml(completeProject);
+
+  assert.equal(output.filename, "digitalboost-site-preview.html");
+  assert.match(output.html, /data-page-target="0"/);
+  assert.match(output.html, /data-page-target="1"/);
+  assert.match(output.html, /data-page-view="0"/);
+  assert.match(output.html, /data-page-view="1" hidden/);
+  assert.match(output.html, /Bienvenidos/);
+  assert.match(output.html, /&lt;script&gt;no ejecutar&lt;\/script&gt;/);
+  assert.match(output.html, /noindex,nofollow/);
+  assert.match(output.html, /aria-current='page'|aria-current="page"/);
+  assert.match(output.html, /view\.hidden=view\.dataset\.pageView!==target/);
 });

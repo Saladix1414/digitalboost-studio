@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { Download, X } from "lucide-react";
 import { getWebsiteHomePage, type WebCanvasBlockSeed, type WebsiteProject } from "../WebsitesBuilderModel";
-import { createSvgIconMarkup, createWebsiteExport, createWebsitePageHtml, getContrastRatio, LOCAL_WEBSITE_ICONS, type LocalWebsiteTool } from "./LocalWebToolsModel";
+import { createSvgIconMarkup, createWebsiteExport, createWebsitePageHtml, createWebsiteProjectPreviewHtml, getContrastRatio, LOCAL_WEBSITE_ICONS, type LocalWebsiteTool } from "./LocalWebToolsModel";
 
 type Props = {
   tool: LocalWebsiteTool;
@@ -127,6 +127,17 @@ export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChan
     }
   }
 
+  function exportMultipagePreview() {
+    if (!project) return;
+    try {
+      const output = createWebsiteProjectPreviewHtml(project);
+      downloadBlob(new Blob([output.html], { type: "text/html;charset=utf-8" }), output.filename);
+      setNotice("Vista local multipágina generada. El archivo no se publica ni requiere servidor.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "No se pudo generar la vista multipágina.");
+    }
+  }
+
   async function copySvg() {
     try {
       await navigator.clipboard.writeText(svg);
@@ -166,9 +177,10 @@ export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChan
         </> : <div className="db-tool-message">Creá o aplicá un proyecto para preparar la vista previa SEO.</div>}
       </div>}
       {tool === "export" && <div className="db-tool-content">
-        <p>Generá una página HTML para previsualizar o una copia JSON del proyecto. Todo se prepara en este dispositivo.</p>
+        <p>Descargá una vista HTML navegable con todas las páginas, una página individual o el JSON del proyecto. Todo se genera en este dispositivo.</p>
         <div className="db-tool-export-summary"><span>Páginas <strong>{project?.pages.length ?? 0}</strong></span><span>Secciones <strong>{blocks.length}</strong></span><span>Formato <strong>JSON</strong></span></div>
         <div className="db-tool-actions">
+          <button type="button" className="db-tool-primary" disabled={!project || !project.pages.length} onClick={exportMultipagePreview}><Download size={15}/> Descargar sitio multipágina</button>
           <button type="button" className="db-tool-primary" disabled={!project || !page} onClick={exportPageHtml}><Download size={15}/> Descargar HTML de esta página</button>
           <button type="button" className="db-tool-secondary" onClick={exportProject}><Download size={15}/> Descargar proyecto JSON</button>
         </div>
