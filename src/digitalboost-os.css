@@ -13,25 +13,25 @@ html,body,#root,#app{
   background:var(--db-bg);
   color:var(--db-text);
 }
-[data-store-builder="true"]{
+[data-store-builder="true"]:not([data-commerce-theme="arcade-pop"]){
   background:var(--db-bg) !important;
   color:var(--db-text) !important;
 }
-[data-store-builder="true"] > aside{
+[data-store-builder="true"]:not([data-commerce-theme="arcade-pop"]) > aside{
   background:#070D18 !important;
   color:var(--db-text) !important;
   border-color:rgba(247,250,255,.12) !important;
 }
-[data-store-builder="true"] > main{
+[data-store-builder="true"]:not([data-commerce-theme="arcade-pop"]) > main{
   background:var(--db-bg) !important;
   color:var(--db-text) !important;
 }
-[data-store-builder="true"] > main > header{
+[data-store-builder="true"]:not([data-commerce-theme="arcade-pop"]) > main > header{
   background:var(--db-bg) !important;
   color:var(--db-text) !important;
   border-color:rgba(247,250,255,.12) !important;
 }
-[data-store-builder="true"] > main > header [class*="text-[#475569]"]{
+[data-store-builder="true"]:not([data-commerce-theme="arcade-pop"]) > main > header [class*="text-[#475569]"]{
   color:var(--db-muted) !important;
 }
 .db-cmd-overlay{

@@ -1,0 +1,72 @@
+/* Editor chrome only. Canvas content and --store-* tokens are intentionally independent. */
+[data-store-editor-theme="arcade-pop"] { background: #f7f0e4; padding-bottom: 90px; }
+[data-commerce-editor="arcade-pop"] {
+  background: #fffbf2; color: #101a40; border: 1px solid #dfd5c5;
+  border-radius: 18px; overflow: hidden; min-height: 640px;
+  box-shadow: 0 8px 30px #4834130a; color-scheme: light;
+}
+.commerce-editor-toolbar {
+  height: auto; min-height: 70px; flex-wrap: wrap; gap: 12px;
+  padding: 12px 16px; background: #fffbf2; border-color: #dfd5c5;
+}
+.commerce-editor-toolbar > div:last-child { flex-wrap: wrap; gap: 6px; }
+.commerce-editor-workspace { min-width: 0; }
+.commerce-editor-stage {
+  background-color: #eee7da;
+  background-image: radial-gradient(#cfc4b0 1px, transparent 1px);
+  background-size: 18px 18px; gap: 6px;
+}
+.commerce-editor-frame { flex-shrink: 0; border-color: #d7cebf; box-shadow: 0 12px 35px #352b231c; }
+.commerce-editor-workspace > aside { background: #fffbf2; border-color: #dfd5c5; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="text-slate-"]:not(.db-store-paper, .db-store-paper *),
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="text-[#AFC0D5]"]:not(.db-store-paper, .db-store-paper *) { color: #606774; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="text-[#F7FAFF]"]:not(.db-store-paper, .db-store-paper *) { color: #101a40; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="text-cyan-"]:not(.db-store-paper, .db-store-paper *) { color: #20667c; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="text-violet-"]:not(.db-store-paper, .db-store-paper *) { color: #60339b; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="text-emerald-"]:not(.db-store-paper, .db-store-paper *) { color: #287344; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="text-pink-"]:not(.db-store-paper, .db-store-paper *),
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="text-red-"]:not(.db-store-paper, .db-store-paper *) { color: #ae2945; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="text-amber-"]:not(.db-store-paper, .db-store-paper *) { color: #82500a; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="bg-[#101B32]"]:not(.db-store-paper, .db-store-paper *),
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="bg-[#0A1020]"]:not(.db-store-paper, .db-store-paper *),
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="bg-[#0C1427]"]:not(.db-store-paper, .db-store-paper *) { background-color: #f5eedf; color: #101a40; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="border-white/"]:not(.db-store-paper, .db-store-paper *),
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="border-cyan-"]:not(.db-store-paper, .db-store-paper *) { border-color: #d9cdbb; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="bg-violet-"]:not(.db-store-paper, .db-store-paper *),
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) button[aria-pressed="true"]:not(.db-store-paper, .db-store-paper *) { background: #eadcff; color: #542c8b; border-color: #c8a9ec; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) [class*="bg-cyan-"]:not(.db-store-paper, .db-store-paper *) { background: #e4f4fa; color: #20667c; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) button:not(.db-store-paper, .db-store-paper *) { min-height: 40px; border-radius: 10px; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) button:hover:not(:disabled):not(.db-store-paper, .db-store-paper *) { box-shadow: inset 0 0 0 1px #b78e60; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) button:disabled:not(.db-store-paper, .db-store-paper *) { opacity: .4; cursor: not-allowed; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) input:not([type="color"]):not(.db-store-paper, .db-store-paper *),
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) textarea:not(.db-store-paper, .db-store-paper *),
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) select:not(.db-store-paper, .db-store-paper *) { background: #fffdf8; color: #101a40; border-color: #d9cdbb; border-radius: 9px; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) input:not(.db-store-paper, .db-store-paper *)::placeholder,
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) textarea:not(.db-store-paper, .db-store-paper *)::placeholder { color: #687080; }
+:is([data-commerce-editor="arcade-pop"], body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock) :focus-visible:not(.db-store-paper, .db-store-paper *) { outline: 3px solid #7044b5; outline-offset: 2px; }
+
+[data-commerce-editor="arcade-pop"] .commerce-editor-stage { background-color: #eee7da; }
+[data-commerce-editor="arcade-pop"] .commerce-editor-publish {
+  background: #ff641f; color: #101a40; border: 2px solid #fff5e4;
+  outline: 1px solid #d25c23; box-shadow: 0 3px 9px #bc521b25; font-weight: 800;
+}
+[data-commerce-editor="arcade-pop"] .commerce-editor-publish:focus-visible { outline: 3px solid #7044b5; }
+body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock > div > div {
+  background: #fffbf2; color: #101a40; border-color: #dfd5c5;
+  box-shadow: 0 -5px 28px #392c161a;
+}
+body:has([data-commerce-editor="arcade-pop"]) #db-studio-dock button { color: #101a40; }
+@media(max-width:1023px) {
+ .commerce-editor-toolbar { align-items: flex-start; }
+ .commerce-editor-toolbar > div:last-child { width: 100%; }
+ .commerce-editor-workspace > aside:last-child { max-height: 55dvh; }
+ .commerce-editor-stage { padding: 16px 12px; }
+}
+@media(max-width:480px) {
+ .commerce-editor-toolbar { padding: 12px; }
+ .commerce-editor-toolbar button { min-height: 44px; }
+ .commerce-editor-toolbar > div:last-child { gap: 4px; }
+}
+@media(prefers-reduced-motion:reduce) {
+ [data-commerce-editor="arcade-pop"] { scroll-behavior: auto; }
+}

@@ -1,16 +1,18 @@
+import { useCommerceDialog } from "./useCommerceDialog";
 
 import { PRESETS, type StoreTheme } from "./DigitalBoostTheme";
 export default function DigitalBoostThemePanel(props: { theme: StoreTheme; onChange: (t: StoreTheme) => void; onClose: () => void }) {
   const fields: Array<keyof StoreTheme> = ["bg", "surface", "text", "muted", "primary", "accent"];
+  const dialogRef = useCommerceDialog(props.onClose);
   return (
-    <div role="dialog" aria-modal="true" className="fixed inset-0 z-[130] flex items-end justify-center bg-black/55 p-3 sm:items-center" onClick={props.onClose}>
+    <div ref={dialogRef} tabIndex={-1} role="dialog" aria-label="Tema de la tienda" aria-modal="true" className="fixed inset-0 z-[130] flex items-end justify-center bg-black/55 p-3 sm:items-center" onClick={props.onClose}>
       <div className="max-h-[86vh] w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-[#0C1427] p-4 text-[#F7FAFF]" onClick={function (e) { e.stopPropagation(); }}>
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-300">Theme System</div>
-            <div className="text-sm font-semibold">Tokens de la tienda</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-300">Tema de la tienda</div>
+            <div className="text-sm font-semibold">Colores de la tienda</div>
           </div>
-          <button type="button" onClick={props.onClose} className="grid h-11 w-11 place-items-center rounded-md border border-white/10">x</button>
+          <button type="button" aria-label="Cerrar panel" onClick={props.onClose} className="grid h-11 w-11 place-items-center rounded-md border border-white/10">x</button>
         </div>
         <div className="mb-4 grid grid-cols-2 gap-2">
           {PRESETS.map(function (p) {
