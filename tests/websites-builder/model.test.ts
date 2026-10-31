@@ -14,6 +14,7 @@ import {
   updateWebsitePageSeo,
   updateWebsitePageDetails,
   updateWebsiteProjectDesignTokens,
+  updateWebsiteProjectFavicon,
   verifyWebsitesBuilderProject,
   websiteProjectToCanvasBlocks,
 } from "../../src/WebsitesBuilderModel.ts";
@@ -424,4 +425,23 @@ test("multipage HTML preview navigates every page and keeps the file private to 
   assert.match(output.html, /noindex,nofollow/);
   assert.match(output.html, /aria-current='page'|aria-current="page"/);
   assert.match(output.html, /view\.hidden=view\.dataset\.pageView!==target/);
+});
+
+test("local image and favicon assets persist through the project and HTML preview", () => {
+  const brief = createFallbackBrief("Sitio con medios locales");
+  const project = createWebsiteProjectFromBrief(brief, createDesignTokens(brief.designLanguage));
+  const home = getWebsiteHomePage(project);
+  const imageData = "data:image/webp;base64,QUJD";
+  const faviconData = "data:image/png;base64,REVG";
+  const blocks = [{ id: "local-image", type: "image" as const, label: "Imagen local", text: "Paisaje", mediaAlt: "Paisaje de prueba", mediaDataUrl: imageData, mediaKind: "image" as const, background: "#ffffff", color: "#17375b", fontSize: 18, padding: 20, align: "center" as const, width: 100 }];
+  const withImage = updateWebsiteProjectFromCanvas(project, blocks, home.id);
+  const withFavicon = updateWebsiteProjectFavicon(withImage, faviconData);
+  const projected = websiteProjectToCanvasBlocks(withFavicon, home.id);
+  const html = createWebsiteProjectPreviewHtml(withFavicon).html;
+
+  assert.equal(projected[0].mediaDataUrl, imageData);
+  assert.equal(projected[0].mediaAlt, "Paisaje de prueba");
+  assert.equal(updateWebsiteProjectFavicon(withImage, "data:image/svg+xml;base64,QQ=="), withImage);
+  assert.match(html, /<img src="data:image\/webp;base64,QUJD" alt="Paisaje de prueba"/);
+  assert.match(html, /<link rel="icon" href="data:image\/png;base64,REVG">/);
 });

@@ -61,6 +61,9 @@ export type BuilderBlock = {
   borderRadius?: number;
   shadow?: "none" | "soft" | "glow";
   hidden?: boolean;
+  mediaDataUrl?: string;
+  mediaKind?: "image" | "svg";
+  mediaAlt?: string;
 };
 
 type Props = {
@@ -529,9 +532,7 @@ export default function WebsitesBuilderCanvas({
               style={getBlockStyle(block)}
             >
               {block.type === "image" ? (
-                <div className="mx-auto flex min-h-[220px] items-center justify-center rounded-xl border border-dashed border-white/15 bg-white/[.03] text-sm text-slate-500">
-                  {block.text}
-                </div>
+                block.mediaDataUrl ? <img className="mx-auto max-h-[640px] max-w-full rounded-xl object-contain" src={block.mediaDataUrl} alt={block.mediaAlt || block.text || block.label} /> : <div className="mx-auto flex min-h-[220px] items-center justify-center rounded-xl border border-dashed border-white/15 bg-white/[.03] text-sm text-slate-500">{block.text}</div>
               ) : block.type === "button" ? (
                 <button className="db-site-cta rounded-xl px-6 py-3 text-sm font-semibold">
                   {block.text}
@@ -849,9 +850,7 @@ export default function WebsitesBuilderCanvas({
 
                     <div className="mx-auto max-w-4xl">
                       {block.type === "image" ? (
-                        <div className="flex min-h-[180px] items-center justify-center rounded-xl border border-dashed border-white/15 bg-white/[.03] text-xs text-slate-500">
-                          {block.text}
-                        </div>
+                        block.mediaDataUrl ? <img className="mx-auto max-h-[640px] max-w-full rounded-xl object-contain" src={block.mediaDataUrl} alt={block.mediaAlt || block.text || block.label} draggable={false} /> : <div className="flex min-h-[180px] items-center justify-center rounded-xl border border-dashed border-white/15 bg-white/[.03] text-xs text-slate-500">{block.text}</div>
                       ) : block.type === "button" ? (
                         <button
                           type="button"

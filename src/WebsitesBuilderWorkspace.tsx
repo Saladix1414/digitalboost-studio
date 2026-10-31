@@ -49,6 +49,7 @@ import {
   updateWebsiteProjectFromCanvas,
   updateWebsitePageSeo,
   updateWebsiteProjectDesignTokens,
+  updateWebsiteProjectFavicon,
   websiteProjectToCanvasBlocks,
   type WebsiteProject,} from "./WebsitesBuilderModel";
 
@@ -339,6 +340,27 @@ export default function WebsitesBuilderWorkspace({
       ...current,
       tokens: { ...current.tokens, ...patch },
     } : current);
+  }
+
+  function insertLocalMedia(asset: { dataUrl: string; kind: "image" | "svg"; alt: string }) {
+    const nextBlocks: WebCanvasBlockSeed[] = [...canvasBlocks, {
+      id: `local-media-${Date.now()}`,
+      type: "image",
+      label: asset.kind === "svg" ? "SVG local" : "Imagen optimizada",
+      text: asset.alt,
+      mediaAlt: asset.alt,
+      mediaDataUrl: asset.dataUrl,
+      mediaKind: asset.kind,
+      background: "#ffffff",
+      color: "#17375b",
+      fontSize: 18,
+      padding: 24,
+      align: "center",
+      width: 100,
+    }];
+    setCanvasBlocks(nextBlocks);
+    setWebsiteProject((current) => current ? updateWebsiteProjectFromCanvas(current, nextBlocks, activePageId) : current);
+    setNotice(`${asset.kind === "svg" ? "SVG" : "Imagen"} agregado al canvas y guardado localmente.`);
   }
 
   useEffect(() => {
@@ -1335,6 +1357,11 @@ export default function WebsitesBuilderWorkspace({
           pageId={activePageId}
           blocks={canvasBlocks}
           onSeoChange={updateHomeSeo}
+          onInsertMedia={insertLocalMedia}
+          onFaviconChange={(dataUrl) => {
+            setWebsiteProject((current) => current ? updateWebsiteProjectFavicon(current, dataUrl) : current);
+            setNotice("Favicon guardado en la configuración local del proyecto.");
+          }}
           onClose={() => setSelectedLocalTool(null)}
         />
       )}
