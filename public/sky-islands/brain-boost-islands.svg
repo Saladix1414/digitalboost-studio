@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="520" viewBox="0 0 1000 520" fill="none">
+  <defs>
+    <linearGradient id="rockA" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#DDA17A"/><stop offset="1" stop-color="#A96772"/></linearGradient>
+    <linearGradient id="rockB" x1="0" y1="0" x2="0.9" y2="1"><stop stop-color="#E8B37D"/><stop offset="1" stop-color="#B7797D"/></linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#C8F6FF"/><stop offset="1" stop-color="#4CC7ED"/></linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="150%"><feGaussianBlur stdDeviation="9"/></filter>
+  </defs>
+  <g shape-rendering="crispEdges">
+    <!-- airy pixel clouds -->
+    <g fill="#fff" opacity=".78">
+      <path d="M54 203h28v-12h19v-15h34v12h17v15h17v18H54zm306-89h20V98h25V82h38v13h20v19h18v19H360zm397 49h25v-13h25v-16h37v13h23v16h19v20H757z"/>
+      <path d="M175 316h18v-9h17v-12h28v10h14v11h17v13h-94zm579-9h17v-11h19v-12h27v10h15v13h18v12h-96z" opacity=".62"/>
+    </g>
+    <g fill="#6DD7F3" opacity=".7">
+      <path d="M302 62h10v10h-10zm12 10h10v10h-10zm-154 154h8v8h-8zm614-83h10v10h-10zm-75 205h8v8h-8z"/>
+    </g>
+    <!-- small western floating isle -->
+    <path d="M72 244h18v-10h22v-9h20v-12h32v8h24v9h22v11h16v15h-14v13h-14v13h-14v15h-16v17h-18v17h-19v-13h-13v-17h-12v-17h-12v-16h-12v-15H72z" fill="url(#rockA)"/>
+    <path d="M72 244h18v-10h22v-9h20v-12h32v8h24v9h22v11h16v15H72z" fill="#68C98E"/>
+    <path d="M89 234h26v-9h20v-12h15v18h-13v10h-25v10H89zm56-13h18v10h-18zm29 9h22v10h-22zm-85 20h17v9H89z" fill="#8CE3A4"/>
+    <path d="M119 275h12v11h12v15h-12v-8h-12zm42-7h10v11h-10zm23 18h15v10h-15zm-68 20h12v9h-12z" fill="#9C5E6C" opacity=".75"/>
+    <path d="M94 229h10v-12h8v12zm48-19h8v-13h9v13zm-29 9h8v-11h9v11z" fill="#3C9B70"/>
+    <!-- central island with a leafy tree and hanging waterfall -->
+    <path d="M331 190h25v-12h28v-12h38v9h26v9h28v11h24v14h-18v14h-16v16h-16v17h-18v17h-18v19h-22v18h-19v-16h-15v-17h-15v-18h-14v-17h-13v-17h-13v-16h-16z" fill="url(#rockB)"/>
+    <path d="M331 190h25v-12h28v-12h38v9h26v9h28v11h24v14H331z" fill="#69D09A"/>
+    <path d="M346 180h27v-12h18v17h-16v10h-29zm49-11h19v10h-19zm32 8h28v10h-28zm37 12h20v10h-20zm-117 9h22v10h-22z" fill="#9BE7A9"/>
+    <!-- chunky tree canopy -->
+    <path d="M394 155h12v-12h11v-12h15v10h12v14h13v17h-15v8h-16v-9h-14v10h-18v-13h-13v-12h13z" fill="#36A879"/>
+    <path d="M405 147h10v-10h9v13h-8v10h-11zm23-9h10v12h-10zm-35 19h11v10h-11zm37 15h15v8h-15z" fill="#79D78E"/>
+    <path d="M406 167h8v21h-8zm17-1h8v25h-8z" fill="#8A5C49"/>
+    <!-- patterned rock strata -->
+    <path d="M354 227h17v9h-17zm39 10h19v9h-19zm43-15h18v9h-18zm-63 34h14v9h-14zm45 2h20v9h-20zm36-27h14v9h-14z" fill="#E8B98C" opacity=".9"/>
+    <path d="M376 272h12v10h-12zm48-9h13v10h-13zm-27 27h12v9h-12z" fill="#875869" opacity=".72"/>
+    <path d="M448 258h9v16h8v17h8v19h-10v-14h-8v-16h-7z" fill="url(#water)"/>
+    <path d="M459 281h5v20h5v11h-5v-8h-5z" fill="#E4FBFF" opacity=".85"/>
+    <!-- broad eastern isle, waterfall and palms -->
+    <path d="M625 269h24v-12h32v-11h35v-11h42v9h34v11h35v10h25v15h-17v15h-18v15h-16v17h-18v18h-20v17h-21v-15h-16v-17h-16v-17h-16v-16h-15v-17h-14v-15h-20z" fill="url(#rockA)"/>
+    <path d="M625 269h24v-12h32v-11h35v-11h42v9h34v11h35v10h25v15H625z" fill="#5FC78D"/>
+    <path d="M645 253h27v-11h18v17h-19v10h-26zm54-12h21v10h-21zm39-8h22v11h-22zm39 12h32v10h-32zm39 11h25v10h-25z" fill="#97E4A3"/>
+    <!-- palm trunks and pixel fronds -->
+    <path d="M739 232h8v-21h8v-18h8v18h-8v21h-8v12h-8zm40 4h8v-16h8v-13h8v13h-8v16h-8v9h-8z" fill="#9A654A"/>
+    <path d="M720 197h17v-8h13v8h-9v8h-13v-4h-8zm21-13h10v-9h10v9h-9v8h-11zm20 7h14v8h-13v8h-9v-12h8zm20 9h13v-8h13v8h-9v8h-17zm-61 1h-13v-8h-13v8h9v8h17z" fill="#218D68"/>
+    <path d="M744 188h8v-8h8v8h-8v8h-8zm31 8h8v-8h8v8h-8v8h-8zm-46 5h9v7h-9z" fill="#78D98F"/>
+    <!-- cliff facets -->
+    <path d="M649 286h18v10h-18zm41 12h16v10h-16zm47-15h20v10h-20zm40 18h18v10h-18zm-83 25h14v10h-14zm56 1h19v10h-19z" fill="#E7B386"/>
+    <path d="M720 348h9v18h9v16h-10v-12h-8zm28 0h8v14h8v20h-9v-15h-7z" fill="url(#water)"/>
+    <path d="M739 359h4v16h5v10h-5v-7h-4z" fill="#E8FCFF" opacity=".88"/>
+    <path d="M671 316h13v9h-13zm91 17h12v9h-12zm-47 14h11v9h-11z" fill="#8D596B" opacity=".72"/>
+    <!-- distant upper-right island -->
+    <path d="M839 157h19v-9h24v-10h31v8h22v8h24v10h17v13h-14v11h-13v13h-16v13h-16v15h-19v-11h-12v-13h-12v-12h-11v-13h-12v-12h-12z" fill="url(#rockB)"/>
+    <path d="M839 157h19v-9h24v-10h31v8h22v8h24v10h17v13H839z" fill="#68CE96"/>
+    <path d="M855 149h25v-9h15v15h-16v8h-24zm48-9h18v9h-18zm34 13h26v9h-26z" fill="#9AE5A6"/>
+    <path d="M871 190h12v10h-12zm39 8h14v10h-14z" fill="#E6B58A"/>
+  </g>
+</svg>

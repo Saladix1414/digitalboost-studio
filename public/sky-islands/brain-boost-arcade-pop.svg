@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="520" viewBox="0 0 1000 520" fill="none">
+  <g shape-rendering="crispEdges" stroke="#17224b" stroke-linejoin="round" stroke-width="6">
+    <!-- pop-art clouds and halftone sparks -->
+    <g stroke="none" fill="#fffdf7">
+      <path d="M55 254h28v-15h22v-15h40v14h24v16h20v20H55zm333-104h24v-13h20v-17h42v13h24v18h20v20H388zm340 94h25v-14h24v-18h38v13h26v17h20v21H728z"/>
+      <path d="M170 366h20v-10h18v-13h30v10h17v13h16v14h-101zm598-48h18v-9h18v-12h29v10h15v13h17v13h-97z" fill="#d9f8ff"/>
+    </g>
+    <g stroke="none" fill="#18bddd"><path d="M286 92h12v12h-12zm12 12h12v12h-12zm397 85h10v10h-10zm-523 71h10v10h-10zm735-92h12v12h-12z"/></g>
+    <g stroke="none" fill="#e743a8"><path d="M350 110h10v30h-10zm-10 10h30v10h-30zm574 102h10v28h-10zm-10 9h30v10h-30z"/></g>
+
+    <!-- left mini island -->
+    <path d="M89 296h24v-14h28v-12h46v11h31v10h34v13h22v17h-18v16h-17v17h-18v18h-17v18h-20v20h-18v-18h-15v-18h-15v-18h-14v-17h-15v-17h-15z" fill="#b96c54"/>
+    <path d="M89 296h24v-14h28v-12h46v11h31v10h34v13h22v17H89z" fill="#13a366"/>
+    <path d="M104 288h34v-13h29v15h-21v10h-28v10h-14zm61-13h24v10h-24zm41 12h33v10h-33zm44 9h23v10h-23z" fill="#55d35e" stroke="none"/>
+    <path d="M132 324h17v10h-17zm48 24h19v11h-19zm46-28h15v10h-15z" fill="#f19a52" stroke="none"/>
+    <path d="M132 270v-18h8v-13h10v13h-8v18z" fill="#9b5d3f"/>
+    <path d="M112 240h17v-8h14v8h-11v8h-17zm23-15h11v-9h13v9h-12v8h-12zm23 4h14v8h-13v8h-10v-12h9z" fill="#087c59" stroke="none"/>
+    <path d="M119 238h10v-7h8v8h-8v7h-10zm30-9h9v8h-9z" fill="#b6ef55" stroke="none"/>
+
+    <!-- broad center island with arcade-color waterfall -->
+    <path d="M332 244h26v-16h36v-14h49v-14h61v12h39v12h43v12h37v12h30v18h-21v18h-20v19h-19v19h-19v20h-19v20h-20v20h-19v20h-20v21h-20v22h-21v-20h-18v-20h-17v-19h-17v-19h-18v-18h-18v-18h-17v-18h-17v-17h-17v-17h-16v-16h-19z" fill="#ba7054"/>
+    <path d="M332 244h26v-16h36v-14h49v-14h61v12h39v12h43v12h37v12h30v18H332z" fill="#12a56a"/>
+    <path d="M352 234h40v-14h36v-14h27v16h-22v11h-38v12h-43zm76-18h32v10h-32zm51-15h37v13h-37zm57 13h43v11h-43zm53 12h44v11h-44zm46 12h36v10h-36z" fill="#50d65f" stroke="none"/>
+    <path d="M372 245h25v9h-25zm66-29h20v8h-20zm70-12h23v9h-23zm69 20h25v9h-25zm53 13h20v8h-20z" fill="#c4f65b" stroke="none"/>
+    <path d="M379 293h25v10h-25zm52 20h28v11h-28zm61-22h22v10h-22zm52 28h25v11h-25zm-78 31h23v10h-23zm68 14h28v10h-28zm55-25h22v10h-22zm-82 49h23v10h-23z" fill="#f2a05a" stroke="none"/>
+    <path d="M356 272h18v12h-18zm70 49h15v11h-15zm125 10h14v12h-14zm59 25h17v11h-17zm-85 35h17v12h-17zm-55-37h14v12h-14z" fill="#854d68" stroke="none"/>
+    <path d="M508 339h14v22h12v22h12v23h12v22h-15v-18h-12v-20h-11v-21h-12z" fill="#20c8e5" stroke="none"/>
+    <path d="M523 356h6v20h7v19h6v16h-7v-12h-7v-18h-6z" fill="#fffdf7" stroke="none"/>
+    <!-- small pixel palms -->
+    <path d="M459 204v-22h9v-18h9v18h-9v22zM500 208v-18h9v-15h9v15h-9v18z" fill="#995a3d"/>
+    <path d="M431 168h20v-10h18v10h-14v10h-18v-5h-6zm26-18h14v-11h14v11h-14v10h-14zm29 5h16v9h-15v10h-12v-15h11zm23 16h18v-10h17v10h-13v10h-22zm-77-2h-17v-10h-17v10h12v10h22z" fill="#087b59" stroke="none"/>
+    <path d="M448 164h10v-8h9v8h-9v9h-10zm42-8h10v-8h9v8h-9v8h-10zm27 15h10v-7h9v7h-9v8h-10z" fill="#b5ed55" stroke="none"/>
+    <!-- right island with palm and pink/cyan accents -->
+    <path d="M733 324h21v-14h30v-13h38v-13h49v11h31v11h29v12h24v17h-18v17h-18v17h-18v18h-18v18h-20v18h-19v-17h-15v-18h-15v-17h-15v-17h-14v-17h-15v-16h-15z" fill="#b96c54"/>
+    <path d="M733 324h21v-14h30v-13h38v-13h49v11h31v11h29v12h24v17H733z" fill="#13a366"/>
+    <path d="M751 315h30v-13h32v16h-20v10h-31v10h-11zm58-13h24v10h-24zm47-14h32v11h-32zm38 17h33v10h-33zm42 12h22v10h-22z" fill="#55d35e" stroke="none"/>
+    <path d="M777 352h20v10h-20zm51 19h19v11h-19zm44-28h16v10h-16z" fill="#f2a05a" stroke="none"/>
+    <path d="M831 285v-20h8v-17h9v17h-8v20z" fill="#995a3d"/>
+    <path d="M807 250h17v-9h15v9h-12v8h-17zm22-16h12v-10h13v10h-12v8h-13zm25 5h16v9h-15v9h-11v-13h10zm-44 7h-14v-9h-14v9h10v9h18z" fill="#087b59" stroke="none"/>
+    <path d="M823 248h10v-7h8v7h-8v8h-10zm29-10h10v8h-10z" fill="#b5ed55" stroke="none"/>
+    <path d="M887 365h10v18h9v18h-12v-13h-8z" fill="#20c8e5" stroke="none"/>
+
+    <!-- comic stars -->
+    <path d="M303 192v-16h8v16h16v8h-16v16h-8v-16h-16v-8z" fill="#ffbd37"/>
+    <path d="M690 201v-12h7v12h12v7h-12v12h-7v-12h-12v-7z" fill="#e743a8"/>
+  </g>
+</svg>

@@ -133,7 +133,7 @@ const dailyCategory: Category = {
 };
 
 
-function GameMiniature({ id }: { id: string }) {
+function GameMiniature({ id, featured = false }: { id: string; featured?: boolean }) {
   const kinds: Record<string, string> = {
     sequence: "memory",
     pairs: "ocean",
@@ -163,7 +163,7 @@ function GameMiniature({ id }: { id: string }) {
 
   return (
     <span
-      className={"bb-game-miniature bb-game-miniature--" + kind}
+      className={"bb-game-miniature bb-game-miniature--" + kind + (featured ? " bb-game-miniature--featured" : "")}
       aria-hidden="true"
     >
       {art && (
@@ -177,18 +177,35 @@ function GameMiniature({ id }: { id: string }) {
       )}
       {art && <span className="bb-game-miniature__image-wash" />}
       <svg
-        viewBox="0 0 120 76"
+        viewBox={kind === "arena" ? "0 0 160 90" : "0 0 120 76"}
         className="bb-game-miniature__svg"
         fill="none"
         focusable="false"
       >
         {kind === "arena" ? (
           <>
-            <ellipse cx="60" cy="39" rx="48" ry="30" fill="#152315" stroke="#6c8543" />
-            <path d="M52 46L55 34H65L68 46M55 46V55M65 46V55M65 35L83 20" stroke="#d5e4b8" strokeWidth="4" />
-            <circle cx="60" cy="28" r="6" fill="#9fdce6" />
-            <path d="M21 24L32 34L21 44M17 34H38M89 43L100 53L89 63M85 53H106M83 8L94 18L83 28M79 18H100" stroke="#c4a96c" strokeWidth="2" />
-            <ellipse cx="28" cy="34" rx="5" ry="8" fill="#9da15c" /><ellipse cx="96" cy="53" rx="5" ry="8" fill="#9da15c" />
+            <rect width="160" height="90" fill="#071426" />
+            <path d="M0 14H160M0 30H160M0 46H160M0 62H160M24 0V90M48 0V90M72 0V90M96 0V90M120 0V90M144 0V90" stroke="#5dc9e4" strokeOpacity=".09" strokeWidth=".7" />
+            <path d="M0 57L18 44L30 50L43 38L58 53L72 45L88 55L102 39L116 48L130 36L144 48L160 40V72H0Z" fill="#102337" />
+            <path d="M0 67H160V90H0Z" fill="#0a1725" />
+            <path d="M0 67H160M14 76H42M120 76H150M57 84H103" stroke="#17d9e9" strokeOpacity=".36" strokeWidth="1" />
+            <path d="M8 12H32M8 16H24M128 12H152M136 16H152" stroke="#7cecff" strokeOpacity=".7" strokeWidth="1.5" />
+            <path d="M11 38L20 32L28 40L28 54L13 54ZM132 38L141 30L151 40L148 55L134 54Z" fill="#251927" stroke="#f45c71" strokeOpacity=".72" strokeWidth="1.5" />
+            <path d="M14 37L11 28L19 34M24 36L28 28L29 39M135 37L132 28L140 33M146 37L152 29L150 41" fill="#f45c71" fillOpacity=".68" />
+            <circle className="bb-mini-node bb-mini-node--alt" cx="20" cy="43" r="2.2" fill="#ff8190" />
+            <circle className="bb-mini-node bb-mini-node--alt" cx="142" cy="43" r="2.2" fill="#ff8190" />
+            <ellipse cx="81" cy="76" rx="17" ry="4" fill="#020812" fillOpacity=".8" />
+            <ellipse cx="81" cy="74" rx="12" ry="2.5" fill="#18dcf1" fillOpacity=".34" />
+            <path d="M73 45L76 39H86L91 47L88 62H72Z" fill="#b6d9dc" stroke="#e7ffff" strokeWidth="1.2" />
+            <path d="M75 39L76 34L81 31L87 34L88 40Z" fill="#d7f4ef" stroke="#fff" strokeWidth="1" />
+            <path d="M77 35H86L84 38H78Z" fill="#14c9e7" />
+            <path d="M74 47L66 54L62 52M89 47L96 42L100 44" stroke="#b6d9dc" strokeWidth="3.2" strokeLinecap="round" />
+            <path d="M76 60L72 70M85 60L91 69" stroke="#8fb5c0" strokeWidth="4" strokeLinecap="round" />
+            <path d="M94 43L103 37L106 39L99 46L91 49" fill="#e7f3d9" stroke="#7cecff" strokeWidth="1" />
+            <path d="M106 38L111 35" stroke="#ffd27a" strokeWidth="2" strokeLinecap="round" />
+            <path d="M47 25L60 33M115 25L103 32" stroke="#fb7185" strokeWidth="1.4" strokeDasharray="3 3" />
+            <path d="M5 5H18M5 5V17M155 5H142M155 5V17M5 85H18M5 85V73M155 85H142M155 85V73" stroke="#75e8f5" strokeOpacity=".78" strokeWidth="1.2" />
+            <circle cx="53" cy="17" r="1.4" fill="#ffd27a" /><circle cx="122" cy="59" r="1.2" fill="#7cecff" />
           </>
         ) : kind === "memory" ? (
           <>
@@ -308,10 +325,9 @@ export default function BrainBoostLandingSection() {
   }, [activeCategory]);
 
   return (
-    <section id="resources" className="relative isolate overflow-hidden bg-[#050c22] px-4 py-16 text-white sm:px-6 sm:py-20 lg:px-10"
-      style={{ backgroundImage: "radial-gradient(ellipse at 0% 20%, rgba(0,153,255,0.20) 0%, transparent 40%), radial-gradient(ellipse at 100% 55%, rgba(131,59,255,0.20) 0%, transparent 42%), radial-gradient(ellipse at 50% 100%, rgba(0,211,255,0.12) 0%, transparent 44%), linear-gradient(155deg, #07132b 0%, #050a1b 48%, #0b0a22 100%)" }}>
+    <section id="resources" data-sky-brain-boost className="relative isolate overflow-hidden bg-[#050c22] px-4 py-10 text-white sm:px-6 sm:py-14 lg:px-10">
       <div aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.13]"
+        className="pointer-events-none absolute inset-0 opacity-0"
         style={{
           backgroundImage: "radial-gradient(circle, rgba(103,232,249,.8) 1px, transparent 1.5px)",
           backgroundSize: "43px 43px",
@@ -319,13 +335,20 @@ export default function BrainBoostLandingSection() {
         }}
       />
 
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden opacity-0">
         <div className="absolute -left-24 top-32 h-72 w-72 rounded-full bg-violet-500/[0.23] blur-3xl motion-safe:animate-pulse motion-reduce:animate-none" />
         <div className="absolute -right-24 top-[28rem] h-80 w-80 rounded-full bg-cyan-400/[0.20] blur-3xl" />
         <div className="absolute inset-0 opacity-[0.10]" style={{ backgroundImage: "linear-gradient(rgba(34,211,238,.30) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,.30) 1px, transparent 1px)", backgroundSize: "26px 26px" }} />
       </div>
-      <div className="relative mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-cyan-300/30 bg-gradient-to-r from-[#081a30]/95 to-[#100d2b]/95 px-4 py-3 shadow-[0_0_32px_rgba(0,190,255,.16),inset_0_1px_0_rgba(255,255,255,.05)]">
+      <img
+        data-sky-bb-islands
+        src="/sky-islands/sky-islands-brain-boost-archipelago-v5.svg"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute right-0 top-[52px] z-0 h-auto w-full max-w-[1000px] object-contain"
+      />
+      <div className="relative z-10 mx-auto max-w-7xl">
+        <div data-sky-bb-status className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-cyan-300/30 bg-gradient-to-r from-[#081a30]/95 to-[#100d2b]/95 px-4 py-3 shadow-[0_0_32px_rgba(0,190,255,.16),inset_0_1px_0_rgba(255,255,255,.05)]">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/70 motion-safe:animate-ping motion-reduce:animate-none" />
@@ -333,19 +356,20 @@ export default function BrainBoostLandingSection() {
             </span>
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-200 sm:text-xs">Neural system / ready</span>
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-slate-300 sm:text-xs">
-            <span className="rounded-md border border-cyan-300/20 bg-cyan-300/[0.06] px-2 py-1.5">05 disciplinas</span>
-            <span className="rounded-md border border-cyan-300/20 bg-cyan-300/[0.06] px-2 py-1.5">Modo arcade</span>
+          <div data-sky-bb-status-badges className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-slate-300 sm:text-xs">
+            <span data-sky-bb-status-badge className="rounded-md border border-cyan-300/20 bg-cyan-300/[0.06] px-2 py-1.5">05 disciplinas</span>
+            <span data-sky-bb-status-badge className="rounded-md border border-cyan-300/20 bg-cyan-300/[0.06] px-2 py-1.5">Modo arcade</span>
           </div>
         </div>
-        <header className="mb-10 max-w-3xl">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-cyan-300">
+        <header data-sky-bb-heading className="mb-8 max-w-3xl">
+          <p data-sky-bb-kicker className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-cyan-300">
             DIGITALBOOST ARCADE / NEURAL GAMING SYSTEM
           </p>
           <h2 className="text-3xl font-black tracking-tight sm:text-5xl">
             Brain <span className="bg-gradient-to-r from-cyan-200 via-white to-violet-300 bg-clip-text text-transparent">Boost</span> <span className="bg-gradient-to-r from-cyan-200 via-white to-violet-300 bg-clip-text text-transparent">Gamez</span>
+            <img src="/sky-islands/brain-boost-gamepad.jpg" alt="" aria-hidden="true" className="sky-bb-gamepad ml-2 inline-block h-9 w-9 rounded-lg object-cover align-middle sm:h-12 sm:w-12" />
           </h2>
-          <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-fuchsia-400/35 bg-fuchsia-400/[0.08] px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-fuchsia-200 shadow-[0_0_20px_rgba(217,70,239,.13)]">
+          <div data-sky-bb-player className="mt-3 inline-flex items-center gap-2 rounded-md border border-fuchsia-400/35 bg-fuchsia-400/[0.08] px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-fuchsia-200 shadow-[0_0_20px_rgba(217,70,239,.13)]">
             <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-300 shadow-[0_0_10px_rgba(232,121,249,.9)]" />
             Neural Arcade / Player 01
           </div>
@@ -356,15 +380,15 @@ export default function BrainBoostLandingSection() {
         </header>
 
         <div className="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)_235px]">
-          <nav aria-label="Categorías de Brain Boost" className="relative isolate min-w-0 overflow-hidden rounded-2xl border border-cyan-300/45 bg-gradient-to-br from-[#0c2040]/95 via-[#081126]/95 to-[#130b2c]/95 p-3 shadow-[0_0_34px_rgba(0,180,255,.13),inset_0_1px_0_rgba(255,255,255,.05)]">
+          <nav data-sky-bb-categories aria-label="Categorías de Brain Boost" className="order-1 relative isolate min-w-0 overflow-hidden rounded-2xl border border-cyan-300/45 bg-gradient-to-br from-[#0c2040]/95 via-[#081126]/95 to-[#130b2c]/95 p-3 shadow-[0_0_34px_rgba(0,180,255,.13),inset_0_1px_0_rgba(255,255,255,.05)]">
             <div className="mb-3 flex items-center justify-between gap-2 px-2">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-200">Neural Arcade / Select Mode</p>
-                <p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">Elegí tu siguiente desafío</p>
+                <p data-sky-bb-kicker className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-200">Neural Arcade / Select Mode</p>
+                <p data-sky-bb-caption className="mt-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">Elegí tu siguiente desafío</p>
               </div>
-              <span className="shrink-0 rounded-md border border-cyan-300/30 bg-cyan-300/[0.06] px-2 py-1.5 text-[8px] font-black tracking-wider text-cyan-100">05 MODOS</span>
+              <span data-sky-bb-mode-count className="shrink-0 rounded-md border border-cyan-300/30 bg-cyan-300/[0.06] px-2 py-1.5 text-[8px] font-black tracking-wider text-cyan-100">05 MODOS</span>
             </div>
-            <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto pb-3 [scrollbar-width:none] lg:flex-col lg:overflow-visible lg:pb-0">
+            <div data-sky-bb-category-list className="flex snap-x snap-mandatory gap-2 overflow-x-auto pb-3 [scrollbar-width:none] lg:flex-col lg:overflow-visible lg:pb-0">
               {categories.map((category, index) => (
                 <button
                   key={category.id}
@@ -380,8 +404,8 @@ export default function BrainBoostLandingSection() {
                     "border-amber-400/30 bg-amber-400/[0.10] text-amber-200"
                   }`}>{category.symbol}<span className="absolute -right-1 -top-1 rounded border border-cyan-100/35 bg-[#061329] px-1 py-0.5 text-[7px] font-black leading-none text-cyan-100">{String(index + 1).padStart(2, "0")}</span></span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[10px] font-black uppercase tracking-wide text-slate-100 sm:text-[11px]">{category.name}</span>
-                    <span className="mt-1 block truncate text-[8px] font-bold uppercase tracking-[0.12em] text-cyan-200/60">
+                    <span data-sky-bb-mode-name className="block truncate text-[10px] font-black uppercase tracking-wide text-slate-100 sm:text-[11px]">{category.name}</span>
+                    <span data-sky-bb-mode-caption className="mt-1 block truncate text-[8px] font-bold uppercase tracking-[0.12em] text-cyan-200/60">
                       {category.id === "memory" ? "Memoria / secuencias" :
                        category.id === "logic" ? "Lógica / patrones" :
                        category.id === "spatial" ? "Espacial / rotación" :
@@ -396,7 +420,7 @@ export default function BrainBoostLandingSection() {
               <div data-brain-boost-nightmare="" className="relative w-full overflow-hidden rounded-xl border border-rose-300/55 bg-gradient-to-br from-[#2b1020] via-[#17122d] to-[#071b2f] p-4 shadow-[0_0_30px_rgba(255,23,68,.16),inset_0_1px_0_rgba(255,255,255,.08)]">
                 <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-rose-500/20 blur-2xl" />
                 <div className="relative flex items-center gap-3">
-                  <GameMiniature id="neon-arena" />
+                  <GameMiniature id="neon-arena" featured />
                   <div className="min-w-0">
                     <p className="text-[8px] font-black uppercase tracking-[0.2em] text-rose-200">FOCUS LAB / FLAGSHIP MODE</p>
                     <p className="mt-1 text-xs font-black uppercase tracking-wide text-white">Nightmare Protocolo</p>
@@ -416,109 +440,16 @@ export default function BrainBoostLandingSection() {
             </div>
           </nav>
 
-          <main className="relative isolate flex min-h-[390px] min-w-0 flex-col items-center justify-center overflow-hidden rounded-2xl border border-cyan-300/55 bg-gradient-to-br from-cyan-400/[0.22] via-[#081329] to-violet-500/[0.28] px-6 py-12 text-center shadow-[0_0_68px_rgba(34,211,238,.16),inset_0_0_42px_rgba(139,92,246,.12)]">
-            <div aria-hidden="true"
-              className="pointer-events-none absolute inset-3 rounded-xl border border-dashed border-cyan-200/[0.13]"
-            />
-            <div aria-hidden="true"
-              className="pointer-events-none absolute left-8 right-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/75 to-transparent"
-            />
-
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-              <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-violet-500/[0.20] blur-3xl" />
-              <div className="absolute -bottom-24 -left-20 h-56 w-56 rounded-full bg-cyan-400/[0.20] blur-3xl" />
-            </div>
-            {/* NEURAL CORE — emblema de Neural Arcade */}
-            <div
-              role="img"
-              aria-label="Neural Core, núcleo de Neural Arcade"
-              className="relative mb-5 flex h-28 w-28 items-center justify-center rounded-full border border-cyan-300/40 bg-[#06152a]/80 shadow-[0_0_38px_rgba(34,211,238,.18)]"
-            >
-              <div className="absolute inset-1 rounded-full border border-cyan-200/25" />
-              <div className="absolute inset-2 rounded-full border border-dashed border-violet-300/55 motion-safe:animate-[spin_18s_linear_infinite] motion-reduce:animate-none" />
-              <div className="absolute inset-4 rounded-full border border-cyan-300/30 shadow-[inset_0_0_18px_rgba(34,211,238,.14)]" />
-              <div className="absolute inset-6 rounded-full border border-violet-300/25" />
-              <span className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-200/45 bg-gradient-to-br from-cyan-300/25 via-[#073348] to-violet-500/30 shadow-[0_0_28px_rgba(34,211,238,.35)]">
-                <svg aria-hidden="true" viewBox="0 0 64 64" className="h-10 w-10 drop-shadow-[0_0_8px_rgba(103,232,249,.65)]" fill="none">
-                  <path d="M32 11V23M32 41V53M11 32H23M41 32H53M17 17L26 26M38 38L47 47M47 17L38 26M26 38L17 47" stroke="#67E8F9" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M32 23L40 32L32 41L24 32Z" stroke="#C4B5FD" strokeWidth="2" />
-                  <circle cx="32" cy="32" r="4" fill="#A5F3FC" />
-                  <circle cx="32" cy="8" r="2.5" fill="#67E8F9" />
-                  <circle cx="32" cy="56" r="2.5" fill="#C4B5FD" />
-                  <circle cx="8" cy="32" r="2.5" fill="#67E8F9" />
-                  <circle cx="56" cy="32" r="2.5" fill="#C4B5FD" />
-                </svg>
-              </span>
-            </div>
-            <p className="relative text-xs font-bold uppercase tracking-[0.22em] text-cyan-300">Neural Core / mission select</p>
-            <h3 className="relative mt-3 text-2xl font-black tracking-tight sm:text-3xl">Elegí tu próxima misión</h3>
-            <p className="mt-3 max-w-md text-sm leading-6 text-slate-400">
-              Elegí una disciplina para abrir sus actividades. Cada nodo te lleva a un modo diferente de Neural Arcade.
-            </p>
-
-            {/* MISSION MAP — conecta las cinco disciplinas existentes */}
-            <div className="relative mt-7 w-full max-w-2xl" aria-label="Mapa de misiones Neural Arcade">
-              <div aria-hidden="true" className="pointer-events-none absolute left-[10%] right-[10%] top-[30px] h-px bg-gradient-to-r from-violet-400/20 via-cyan-300/80 to-amber-300/30 shadow-[0_0_10px_rgba(34,211,238,.4)]" />
-              <div className="relative grid grid-cols-5 gap-0.5 sm:gap-3">
-                {categories.map((category, index) => (
-                  <button
-                    key={category.id}
-                    type="button"
-                    onClick={() => openCategory(category)}
-                    aria-label={`Abrir disciplina ${category.name}`}
-                    title={category.name}
-                    className="group relative z-10 flex min-w-0 flex-col items-center rounded-xl px-0.5 py-1.5 text-center transition duration-200 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 motion-reduce:transition-none"
-                  >
-                    <span className={`relative flex h-12 w-12 max-w-full items-center justify-center rounded-2xl border bg-[#08162d] text-xl transition duration-200 group-hover:scale-110 group-hover:shadow-[0_0_24px_rgba(34,211,238,.20)] ${
-                      category.id === "memory" ? "border-violet-300/60 text-violet-200 group-hover:bg-violet-400/20" :
-                      category.id === "logic" ? "border-cyan-300/60 text-cyan-200 group-hover:bg-cyan-400/20" :
-                      category.id === "spatial" ? "border-blue-300/60 text-blue-200 group-hover:bg-blue-400/20" :
-                      category.id === "focus" ? "border-emerald-300/60 text-emerald-200 group-hover:bg-emerald-400/20" :
-                      "border-amber-300/60 text-amber-200 group-hover:bg-amber-400/20"
-                    }`}>
-                      {category.symbol}
-                      <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full border border-cyan-200/35 bg-[#0a1830] px-0.5 text-[8px] font-black text-cyan-100">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                    </span>
-                    <span className="mt-2 text-[8px] font-black uppercase leading-3 tracking-wide text-slate-300 transition-colors group-hover:text-cyan-100 sm:text-[10px]">
-                      {category.id === "tests" ? "Cognitive" : category.name.replace(" Lab", "").replace(" Puzzles", "")}
-                    </span>
-                    <span className="mt-1 text-[8px] text-slate-500 group-hover:text-cyan-200/80">
-                      {category.id === "memory" ? "Recall" :
-                       category.id === "logic" ? "Solve" :
-                       category.id === "spatial" ? "Explore" :
-                       category.id === "focus" ? "Target" : "Master"}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              <p className="mt-3 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">
-                Neural route <span className="text-cyan-300/80">/ 05 modes available</span>
-              </p>
-            </div>
-
-            <div className="relative mt-6 flex flex-wrap justify-center gap-2">
-              <span className="rounded-md border border-cyan-300/15 bg-cyan-300/[0.05] px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-cyan-100">5 disciplinas</span>
-              <span className="rounded-md border border-violet-300/15 bg-violet-300/[0.05] px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-violet-100">Ruta mixta</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => openCategory(dailyCategory)}
-              className="relative mt-6 rounded-xl border border-cyan-100/30 bg-gradient-to-r from-cyan-300 via-sky-300 to-violet-300 px-5 py-3 text-sm font-black text-slate-950 shadow-[0_0_32px_rgba(34,211,238,0.28)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_32px_rgba(34,211,238,0.20)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white motion-reduce:transition-none"
-            >
-              Iniciar Daily Neural Run →
-            </button>
-          </main>
+          
 
           <aside
-            className="relative isolate min-w-0 overflow-hidden rounded-2xl border border-cyan-300/35 bg-gradient-to-br from-[#0a1c36] via-[#0b1028] to-[#170d38] p-5 shadow-[0_0_42px_rgba(0,190,255,.13),0_0_55px_rgba(139,92,246,.10),inset_0_1px_0_rgba(255,255,255,.06)]"
-            style={{ backgroundImage: "radial-gradient(ellipse at 100% 0%, rgba(34,211,238,.15), transparent 42%), radial-gradient(ellipse at 0% 100%, rgba(139,92,246,.17), transparent 45%), linear-gradient(145deg,#0a1c36,#0b1028 55%,#170d38)" }}
+            data-sky-bb-metrics
+            className="order-2 relative isolate min-w-0 overflow-hidden rounded-2xl border border-cyan-300/35 bg-gradient-to-br from-[#0a1c36] via-[#0b1028] to-[#170d38] p-5 shadow-[0_0_42px_rgba(0,190,255,.13),0_0_55px_rgba(139,92,246,.10),inset_0_1px_0_rgba(255,255,255,.06)] lg:order-3"
           >
             <div aria-hidden="true" className="pointer-events-none absolute right-3 top-3 h-10 w-10 border-r border-t border-cyan-200/30" />
             <div aria-hidden="true" className="pointer-events-none absolute bottom-3 left-3 h-10 w-10 border-b border-l border-violet-300/25" />
             <div aria-hidden="true" className="pointer-events-none absolute left-5 right-5 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/70 to-transparent" />
-            <div className="relative z-10 flex items-start justify-between gap-3">
+            <div data-sky-bb-score-header className="relative z-10 flex items-start justify-between gap-3">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-200/80">Neural metrics / player data</p>
                 <h3 className="mt-2 text-xl font-black tracking-tight text-white">Cognitive Score</h3>
@@ -529,38 +460,51 @@ export default function BrainBoostLandingSection() {
               </span>
             </div>
             <div
-              className="relative mx-auto mt-7 flex h-40 w-40 items-center justify-center rounded-full border border-cyan-300/35 bg-[#061329]/75 shadow-[0_0_34px_rgba(34,211,238,.13),inset_0_0_32px_rgba(34,211,238,.07)]"
+              data-sky-bb-score-gauge
               role="img"
-              aria-label="Cognitive Score: puntuación pendiente de calibración"
+              aria-label="Cognitive Score pendiente de calibración; escala de 0 a 1000 puntos"
             >
-              <div className="absolute inset-1.5 rounded-full border border-cyan-200/20" />
-              <div className="absolute inset-3 rounded-full border border-dashed border-cyan-300/45 motion-safe:animate-[spin_24s_linear_infinite] motion-reduce:animate-none" />
-              <div className="absolute inset-5 rounded-full border border-violet-300/30" />
-              <div className="absolute inset-7 rounded-full border border-cyan-200/15 shadow-[inset_0_0_20px_rgba(34,211,238,.09)]" />
-              <span aria-hidden="true" className="absolute left-1/2 top-1 h-2 w-2 -translate-x-1/2 rounded-full bg-cyan-200 shadow-[0_0_10px_rgba(103,232,249,.9)]" />
-              <span aria-hidden="true" className="absolute bottom-4 right-5 h-1.5 w-1.5 rounded-full bg-violet-300 shadow-[0_0_8px_rgba(196,181,253,.8)]" />
-              <div className="relative text-center">
-                <p className="text-5xl font-black tracking-tight text-cyan-100 drop-shadow-[0_0_16px_rgba(34,211,238,.45)]">—</p>
-                <p className="mt-1 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">/ 1000</p>
-                <p className="mt-1 text-[8px] font-bold uppercase tracking-[0.18em] text-cyan-300/70">Core index</p>
+              <div data-sky-bb-rank-badge aria-hidden="true">
+                <span data-sky-bb-rank-spark>✦</span>
+                <span data-sky-bb-rank-monogram>BB</span>
+                <span data-sky-bb-rank-caption>PLAYER</span>
+              </div>
+              <div data-sky-bb-rank-content>
+                <div data-sky-bb-rank-heading>
+                  <span data-sky-bb-score-label>CORE INDEX</span>
+                  <span data-sky-bb-rank-state>EN CALIBRACIÓN</span>
+                </div>
+                <div data-sky-bb-rank-value-row>
+                  <span data-sky-bb-score-value>—</span>
+                  <span data-sky-bb-score-max>/ 1000 PTS</span>
+                </div>
+                <div data-sky-bb-rank-progress>
+                  <div data-sky-bb-progress-labels>
+                    <span>PROGRESO DE RANGO</span>
+                    <span>ESPERANDO PRIMERA PARTIDA</span>
+                  </div>
+                  <div data-sky-bb-progress-track aria-hidden="true">
+                    <span />
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="mt-3 flex justify-center">
+            <div data-sky-bb-calibration className="mt-3 flex justify-center">
               <span className="inline-flex items-center gap-2 rounded-md border border-amber-300/30 bg-amber-300/[0.07] px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.14em] text-amber-100 shadow-[0_0_18px_rgba(252,211,77,.07)]">
                 <span className="h-1.5 w-1.5 rounded-full bg-amber-300" />
                 Calibración pendiente
               </span>
             </div>
-            <p className="mt-2 text-xs leading-5 text-slate-400">
+            <p data-sky-bb-score-copy className="mt-2 text-xs leading-5 text-slate-400">
               El puntaje estará disponible cuando se implemente el sistema de actividades y medición.
             </p>
-            <div className="my-5 border-t border-cyan-200/15" />
-            <div className="mb-3 flex items-center justify-between gap-2">
+            <div data-sky-bb-score-divider className="my-5 border-t border-cyan-200/15" />
+            <div data-sky-bb-discipline-signals className="mb-3 flex items-center justify-between gap-2">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-100/70">Discipline signals</p>
               <span className="text-[8px] font-bold uppercase tracking-wider text-slate-500">05 channels</span>
             </div>
             {categories.map((category, index) => (
-              <div key={category.id} className="group flex items-center justify-between gap-2 border-b border-cyan-100/[0.07] py-3 transition-colors last:border-0 hover:border-cyan-200/20">
+              <div data-sky-bb-signal key={category.id} className="group flex items-center justify-between gap-2 border-b border-cyan-100/[0.07] py-3 transition-colors last:border-0 hover:border-cyan-200/20">
                 <span className="flex min-w-0 items-center gap-2 text-xs text-slate-200">
                   <span className="font-mono text-[9px] font-bold text-cyan-300/60">{String(index + 1).padStart(2, "0")}</span>
                   <span className={`h-2 w-2 shrink-0 rounded-full ${

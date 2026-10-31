@@ -36,3 +36,1713 @@ body {
 button, a {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Sky Islands visual system. Every token and rule stays inside the landing scope. */
+.db-sky-islands {
+  --sky-ink: #111b3e;
+  --sky-muted: #52617c;
+  --sky-paper: #fffdf9;
+  --sky-surface: #ffffff;
+  --sky-sky: #dff4ff;
+  --sky-blue: #168bd1;
+  --sky-orange: #f15b2a;
+  --sky-lavender: #f1eaff;
+  --sky-mint: #e4f7ec;
+  --sky-apricot: #fff0e6;
+  --sky-border: rgba(25, 54, 91, .11);
+  --sky-shadow: 0 10px 26px rgba(36, 69, 105, .08);
+  color: var(--sky-ink);
+  background-color: var(--sky-paper);
+  background-image:
+    radial-gradient(ellipse at 75% 3%, rgba(123, 211, 255, .18), transparent 32%),
+    linear-gradient(180deg, #fffdf9 0%, #fffefa 62%, #f8fcff 100%);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.db-sky-islands [data-sky-header] {
+  color: var(--sky-ink);
+  background: var(--sky-surface);
+  border-color: var(--sky-border);
+  box-shadow: 0 5px 20px rgba(33, 63, 100, .07);
+}
+.db-sky-islands [data-sky-header] button:not([data-sky-cta]) { color: var(--sky-ink); }
+.db-sky-islands [data-sky-cta] {
+  color: #fff;
+  background: var(--sky-orange);
+  border: 1px solid #e84e20;
+  box-shadow: 0 5px 0 #c83f1c, 0 9px 20px rgba(241, 91, 42, .18);
+}
+.db-sky-islands [data-sky-cta]:hover {
+  background: #e94d20;
+  box-shadow: 0 6px 0 #c83f1c, 0 12px 24px rgba(241, 91, 42, .22);
+}
+.db-sky-islands [data-sky-cta]:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 #c83f1c, 0 6px 14px rgba(241, 91, 42, .16);
+}
+.db-sky-islands :is(button, a):focus-visible {
+  outline: 3px solid #148bd1;
+  outline-offset: 3px;
+}
+
+.db-sky-islands [data-sky-hero] {
+  color: var(--sky-ink);
+  border-color: rgba(43, 120, 175, .10);
+  background:
+    radial-gradient(ellipse at 79% 42%, rgba(91, 194, 246, .22), transparent 42%),
+    linear-gradient(112deg, #fffdf9 0%, #f8fcff 48%, var(--sky-sky) 100%);
+}
+.db-sky-islands [data-sky-hero] h1 {
+  max-width: 720px;
+  color: var(--sky-ink);
+  font-size: clamp(2.75rem, 5.2vw, 4.65rem);
+  font-weight: 850;
+  letter-spacing: -.065em;
+  line-height: .98;
+}
+.db-sky-islands [data-sky-hero] h1 span {
+  background: linear-gradient(90deg, #ed4e20 0%, #f36b2a 88%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.db-sky-islands [data-sky-hero] p { color: var(--sky-muted); }
+.db-sky-islands [data-sky-benefits] { color: var(--sky-muted); }
+.db-sky-islands [data-sky-benefits] svg { color: #17a765; }
+.db-sky-islands [data-sky-hero] [data-sky-eyebrow] {
+  color: #147fbd;
+  background: rgba(255,255,255,.68);
+  border-color: rgba(33, 143, 203, .2);
+}
+.db-sky-islands .sky-islands-clouds {
+  background: radial-gradient(circle, rgba(111, 201, 245, .26), rgba(255,255,255,0) 68%);
+  animation: sky-cloud-breathe 14s ease-in-out infinite alternate;
+}
+.db-sky-islands .sky-island-horizon {
+  opacity: .92;
+  mask-image: radial-gradient(ellipse at 70% 68%, #000 48%, transparent 100%);
+  animation: sky-island-drift 24s ease-in-out infinite alternate;
+}
+.db-sky-islands .sky-hero-dragon-art {
+  max-width: min(100%, 400px);
+  aspect-ratio: 271 / 263;
+  border-radius: 32px;
+  box-shadow: 0 18px 38px rgba(42, 107, 135, .14);
+  animation: sky-dragon-float 7s ease-in-out infinite;
+}
+.db-sky-islands .sky-bb-gamepad {
+  box-shadow: 0 4px 12px rgba(107, 46, 186, .14);
+  animation: sky-gamepad-bob 5s ease-in-out infinite;
+}
+@keyframes sky-dragon-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes sky-island-drift {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-4px, -3px, 0); }
+}
+@keyframes sky-cloud-breathe {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: .8; }
+  50% { transform: translate3d(-5px, -3px, 0) scale(1.03); opacity: 1; }
+}
+@keyframes sky-gamepad-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-3px) rotate(2deg); }
+}
+.db-sky-islands .sky-dragon-medallion {
+  border: 1px solid rgba(255,255,255,.9);
+  background: radial-gradient(circle at 48% 42%, rgba(255,255,255,.92), rgba(202,239,255,.63) 57%, rgba(132,210,245,.17) 75%, transparent 76%);
+  box-shadow: 0 0 0 9px rgba(255,255,255,.38), 0 20px 54px rgba(43,116,160,.14), inset 0 0 32px rgba(255,255,255,.7);
+}
+.db-sky-islands [data-sky-dragon] img { mix-blend-mode: normal; }
+
+.db-sky-islands [data-sky-modules-bar] {
+  color: var(--sky-ink);
+  background: var(--sky-surface);
+  border-color: var(--sky-border);
+  box-shadow: var(--sky-shadow);
+}
+.db-sky-islands [data-sky-modules-bar] > div { border-color: var(--sky-border); }
+.db-sky-islands [data-sky-modules-bar] svg { color: var(--sky-blue); }
+.db-sky-islands [data-sky-modules-bar="primary"] [data-sky-module-icon="02"],
+.db-sky-islands [data-sky-modules-bar="primary"] [data-sky-module-icon="06"] { color: #8253c6; }
+.db-sky-islands [data-sky-modules-bar="primary"] [data-sky-module-icon="04"] { color: #25895e; }
+.db-sky-islands [data-sky-module-label] { color: var(--sky-muted); }
+
+.db-sky-islands [data-sky-tools] h2 {
+  color: var(--sky-ink);
+  font-size: clamp(1.65rem, 3.8vw, 2.8rem);
+  font-weight: 850;
+  letter-spacing: -.045em;
+}
+.db-sky-islands [data-sky-tools] h2 span { color: var(--sky-orange); }
+.db-sky-islands [data-sky-tools] article {
+  min-height: 172px;
+  color: var(--sky-ink);
+  border: 1px solid var(--sky-border);
+  border-radius: 18px;
+  box-shadow: var(--sky-shadow);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.db-sky-islands [data-sky-tool] { position: relative; }
+.db-sky-islands [data-sky-tool]::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  content: "";
+  background: var(--sky-tool-accent);
+}
+.db-sky-islands [data-sky-tool="forge"] { --sky-tool-accent: #bd86f2; background: var(--sky-lavender); }
+.db-sky-islands [data-sky-tool="stores"] { --sky-tool-accent: #ffad77; background: var(--sky-apricot); }
+.db-sky-islands [data-sky-tool="nexus"] { --sky-tool-accent: #79dba8; background: var(--sky-mint); }
+.db-sky-islands [data-sky-tool="websites"] { --sky-tool-accent: #71c7f1; background: #e7f5ff; }
+.db-sky-islands [data-sky-tool="trading"] { --sky-tool-accent: #f0d15a; background: #fff7d9; }
+.db-sky-islands [data-sky-tools] article h3 { color: var(--sky-ink); }
+.db-sky-islands [data-sky-tools] article p { color: #465671; }
+.db-sky-islands [data-sky-tools] article button { color: var(--sky-ink); }
+.db-sky-islands [data-sky-tools] article:hover { transform: translateY(-3px); box-shadow: 0 14px 28px rgba(36,69,105,.12); }
+.db-sky-islands [data-sky-tools] article img { transition: transform .2s ease; }
+.db-sky-islands [data-sky-tools] article:hover img { transform: translateY(-2px) rotate(-2deg); }
+
+.db-sky-islands [data-sky-integrations] > div {
+  color: var(--sky-ink);
+  border-color: var(--sky-border);
+  background: var(--sky-surface);
+  box-shadow: var(--sky-shadow);
+}
+.db-sky-islands [data-sky-integrations] > div > div:first-child { color: #177cac; }
+.db-sky-islands [data-sky-integrations-grid] { color: var(--sky-ink); }
+.db-sky-islands [data-sky-integrations-grid] button { color: var(--sky-ink); }
+.db-sky-islands [data-sky-modules-bar="secondary"] {
+  color: var(--sky-ink);
+  border-color: var(--sky-border);
+  background: linear-gradient(100deg, #fff 0%, #f7f4ff 100%);
+  box-shadow: var(--sky-shadow);
+}
+.db-sky-islands [data-sky-modules-bar="secondary"] svg { color: #8054c7; }
+.db-sky-islands [data-sky-pricing-panel] {
+  color: var(--sky-ink);
+  border-color: var(--sky-border);
+  border-radius: 24px;
+  background: linear-gradient(145deg, #fff 0%, #f5faff 100%);
+  box-shadow: var(--sky-shadow);
+}
+.db-sky-islands [data-sky-pricing-panel] h2,
+.db-sky-islands [data-sky-pricing-panel] h3 { color: var(--sky-ink); }
+.db-sky-islands [data-sky-pricing-panel] p { color: var(--sky-muted); }
+.db-sky-islands [data-sky-plan] {
+  border-color: var(--sky-border);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(36,69,105,.06);
+}
+.db-sky-islands [data-sky-plan="starter"] { background: #f3edff; }
+.db-sky-islands [data-sky-plan="pro"] { border-color: rgba(146, 94, 204, .24); background: #f3eaff; }
+.db-sky-islands [data-sky-plan="business"] { background: #eaf7ff; }
+.db-sky-islands [data-sky-plan="pro"] > div:first-child { color: #7041a5; }
+.db-sky-islands [data-sky-plan-cta] {
+  min-height: 44px;
+  color: var(--sky-ink);
+  border: 1px solid rgba(25,54,91,.16);
+  background: rgba(255,255,255,.88);
+}
+.db-sky-islands [data-sky-plan="pro"] [data-sky-plan-cta] {
+  color: #fff;
+  border-color: #e84e20;
+  background: var(--sky-orange);
+  box-shadow: 0 4px 0 #c83f1c;
+}
+.db-sky-islands [data-sky-final-cta-panel] {
+  color: var(--sky-ink);
+  border-color: var(--sky-border);
+  border-radius: 24px;
+  background: linear-gradient(110deg, #fff 0%, #eef8ff 64%, #e9f3ff 100%);
+  box-shadow: var(--sky-shadow);
+}
+.db-sky-islands [data-sky-final-cta-panel] h2 { color: var(--sky-ink); }
+.db-sky-islands [data-sky-final-cta-panel] p,
+.db-sky-islands [data-sky-final-cta-panel] [class*="text-slate-"] { color: var(--sky-muted); }
+.db-sky-islands [data-sky-footer] {
+  color: var(--sky-ink);
+  border-color: var(--sky-border);
+  background: #fffdf9;
+}
+.db-sky-islands [data-sky-footer] [class*="text-slate-"] { color: var(--sky-muted); }
+.db-sky-islands [data-sky-footer-meta] { border-color: var(--sky-border); }
+
+.db-sky-islands [data-sky-brain-boost] {
+  position: relative;
+  isolation: isolate;
+  color: var(--sky-ink);
+  background:
+    radial-gradient(ellipse at 88% 12%, rgba(110,206,255,.25), transparent 40%),
+    linear-gradient(145deg, #eaf8ff 0%, #dff3ff 55%, #f1faff 100%);
+}
+.db-sky-islands [data-sky-bb-islands] {
+  position: absolute;
+  z-index: 0;
+  top: 150px;
+  right: -75px;
+  width: min(640px, 68vw);
+  height: auto;
+  opacity: .27;
+  pointer-events: none;
+}
+@media (max-width: 767px) {
+  .db-sky-islands [data-sky-bb-islands] {
+    top: 250px;
+    right: -30px;
+    width: 300px;
+    max-width: none;
+    opacity: .24;
+  }
+}
+
+.db-sky-islands [data-sky-bb-status],
+.db-sky-islands [data-sky-bb-categories],
+.db-sky-islands [data-sky-bb-daily] {
+  color: var(--sky-ink);
+  background: rgba(255,255,255,.82);
+  border-color: rgba(46, 126, 177, .16);
+  box-shadow: 0 8px 24px rgba(44,112,157,.08);
+}
+.db-sky-islands [data-sky-bb-status] [class*="text-emerald-"] { color: #17875f; }
+.db-sky-islands [data-sky-bb-status] [class*="text-slate-"],
+.db-sky-islands [data-sky-bb-status] [class*="text-cyan-"] { color: var(--sky-muted); }
+.db-sky-islands [data-sky-bb-heading] { color: var(--sky-ink); }
+.db-sky-islands [data-sky-bb-heading] p { color: var(--sky-muted); }
+.db-sky-islands [data-sky-bb-heading] h2 { color: var(--sky-ink); font-size: clamp(2rem, 4.4vw, 3.5rem); letter-spacing: -.055em; }
+.db-sky-islands [data-sky-bb-heading] h2 span { background: none; color: var(--sky-ink); -webkit-text-fill-color: currentColor; }
+.db-sky-islands [data-sky-bb-player] {
+  color: #7041a5;
+  border-color: rgba(112, 65, 165, .22);
+  background: #f3eaff;
+  box-shadow: none;
+}
+.db-sky-islands [data-sky-bb-player] span {
+  background: #b84bd1;
+  box-shadow: 0 0 8px rgba(184, 75, 209, .4);
+}
+.db-sky-islands [data-sky-bb-categories] button {
+  color: var(--sky-ink);
+  background: #fff;
+  border-color: rgba(34, 126, 183, .16);
+  box-shadow: 0 4px 10px rgba(35,100,145,.06);
+}
+.db-sky-islands [data-sky-bb-categories] button [class*="text-slate-"],
+.db-sky-islands [data-sky-bb-categories] button [class*="text-cyan-"] { color: var(--sky-muted); }
+.db-sky-islands [data-sky-bb-categories] [data-brain-boost-nightmare] {
+  background: #fff0e9;
+  border-color: rgba(226, 102, 67, .22);
+  box-shadow: none;
+}
+.db-sky-islands [data-sky-bb-categories] [data-brain-boost-nightmare] [class*="text-white"],
+.db-sky-islands [data-sky-bb-categories] [data-brain-boost-nightmare] [class*="text-rose-"] { color: #783d2d; }
+.db-sky-islands [data-sky-bb-categories] [data-brain-boost-nightmare] button {
+  color: #9e4228;
+  background: rgba(255,255,255,.84);
+  border-color: rgba(189, 92, 57, .24);
+  box-shadow: 0 3px 0 rgba(166, 74, 44, .12);
+}
+.db-sky-islands [data-sky-bb-daily] {
+  min-height: 330px;
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(255,255,255,.84), rgba(221,243,255,.9));
+}
+.db-sky-islands [data-sky-mission-map] button {
+  min-height: 108px;
+  color: var(--sky-ink);
+  border: 1px solid var(--sky-border);
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 4px 0 rgba(30, 91, 132, .09);
+}
+.db-sky-islands [data-sky-mission-map] button:hover {
+  background: #fff;
+  border-color: rgba(22, 139, 209, .3);
+  box-shadow: 0 7px 14px rgba(35,100,145,.10);
+}
+.db-sky-islands [data-sky-mission="memory"] { --sky-mission-bg: #f1eaff; --sky-mission-ink: #7542b7; --sky-mission-border: #dbc8ff; }
+.db-sky-islands [data-sky-mission="logic"] { --sky-mission-bg: #e2f8ff; --sky-mission-ink: #137ba8; --sky-mission-border: #b5e7f8; }
+.db-sky-islands [data-sky-mission="spatial"] { --sky-mission-bg: #e8f2ff; --sky-mission-ink: #356db0; --sky-mission-border: #c6ddf8; }
+.db-sky-islands [data-sky-mission="focus"] { --sky-mission-bg: #e4f7ec; --sky-mission-ink: #218052; --sky-mission-border: #bee8d0; }
+.db-sky-islands [data-sky-mission="tests"] { --sky-mission-bg: #fff2dc; --sky-mission-ink: #9a6718; --sky-mission-border: #f2dfb8; }
+.db-sky-islands [data-sky-mission-icon] {
+  color: var(--sky-mission-ink);
+  background: var(--sky-mission-bg);
+  border-color: var(--sky-mission-border);
+  box-shadow: none;
+}
+.db-sky-islands [data-sky-mission-icon] > span { color: #fff; background: var(--sky-mission-ink); border-color: rgba(255,255,255,.8); }
+.db-sky-islands [data-sky-daily-cta] {
+  min-height: 48px;
+  color: #fff;
+  background: var(--sky-orange);
+  border-color: #e84e20;
+  box-shadow: 0 5px 0 #c83f1c;
+}
+.db-sky-islands [data-sky-bb-daily] [class*="text-white"],
+.db-sky-islands [data-sky-bb-daily] [class*="text-slate-"],
+.db-sky-islands [data-sky-bb-daily] [class*="text-cyan-"],
+.db-sky-islands [data-sky-bb-daily] [class*="text-violet-"] { color: var(--sky-ink); }
+.db-sky-islands [data-sky-bb-daily] [class*="border-cyan-"] { border-color: rgba(33, 132, 184, .2); }
+.db-sky-islands [data-sky-bb-daily] [data-sky-daily-cta] { color: #fff; }
+.db-sky-islands [data-sky-bb-core] {
+  border-color: rgba(33, 132, 184, .24);
+  background: radial-gradient(circle at 50% 40%, #fff, #dff4ff 76%);
+  box-shadow: 0 8px 24px rgba(44,112,157,.10), inset 0 0 20px rgba(34,153,206,.08);
+}
+.db-sky-islands [data-sky-bb-core] > span {
+  border-color: rgba(33,132,184,.24);
+  background: linear-gradient(145deg, #d8f2ff, #e9e1ff);
+  box-shadow: 0 4px 12px rgba(44,112,157,.12);
+}
+.db-sky-islands [data-sky-bb-metrics] {
+  color: var(--sky-ink);
+  border-color: rgba(46, 126, 177, .18);
+  background: linear-gradient(145deg, #fff 0%, #eff9ff 65%, #f5f0ff 100%);
+  box-shadow: 0 10px 28px rgba(44,112,157,.09);
+}
+.db-sky-islands [data-sky-bb-metrics] [class*="text-white"] { color: var(--sky-ink); }
+.db-sky-islands [data-sky-bb-metrics] [class*="text-slate-"] { color: var(--sky-muted); }
+.db-sky-islands [data-sky-bb-metrics] [class*="text-cyan-"] { color: #247fa8; }
+.db-sky-islands [data-sky-bb-metrics] [class*="text-amber-"] { color: #795400; }
+.db-sky-islands [data-sky-bb-metrics] [class*="border-cyan-"] { border-color: rgba(33, 132, 184, .2); }
+.db-sky-islands [data-sky-bb-metrics] [class*="border-amber-"] { border-color: rgba(155, 112, 27, .25); }
+.db-sky-islands [data-sky-bb-metrics] [class*="bg-amber-"] { background: #fff3d2; }
+.db-sky-islands [data-sky-bb-score-gauge] {
+  border-color: rgba(33, 132, 184, .24);
+  background: radial-gradient(circle at 50% 45%, #fff, #e8f6ff 72%);
+  box-shadow: 0 8px 24px rgba(44,112,157,.10), inset 0 0 24px rgba(34, 153, 206, .08);
+}
+
+/* Small finishing motions: a soft aura behind the hero artwork and clearer
+   color feedback on existing cards and controls. All remain landing-scoped. */
+.db-sky-islands [data-sky-dragon]::before {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: min(88%, 430px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(87, 202, 255, .23) 0%, rgba(144, 219, 255, .15) 42%, rgba(255,255,255,0) 72%);
+  filter: blur(8px);
+  transform: translate(-50%, -50%);
+  animation: sky-medallion-aura 8s ease-in-out infinite;
+}
+@keyframes sky-medallion-aura {
+  0%, 100% { opacity: .68; scale: .96; }
+  50% { opacity: 1; scale: 1.035; }
+}
+.db-sky-islands [data-sky-tools] article {
+  border-top-color: var(--sky-tool-accent);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.db-sky-islands [data-sky-tools] article:hover,
+.db-sky-islands [data-sky-tools] article:focus-within {
+  border-color: color-mix(in srgb, var(--sky-tool-accent) 60%, white);
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--sky-tool-accent) 18%, transparent);
+}
+.db-sky-islands [data-sky-tools] article::before { transition: height .2s ease, filter .2s ease; }
+.db-sky-islands [data-sky-tools] article:hover::before,
+.db-sky-islands [data-sky-tools] article:focus-within::before {
+  height: 6px;
+  filter: saturate(1.15);
+}
+.db-sky-islands [data-sky-bb-category-list] > button {
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease;
+}
+.db-sky-islands [data-sky-bb-category-list] > button:hover,
+.db-sky-islands [data-sky-bb-category-list] > button:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(22, 139, 209, .34);
+  background: linear-gradient(135deg, #fff 0%, #f4fbff 100%);
+  box-shadow: 0 8px 18px rgba(44, 112, 157, .12);
+}
+.db-sky-islands [data-sky-bb-category-list] > button > span:first-child {
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.db-sky-islands [data-sky-bb-category-list] > button:hover > span:first-child,
+.db-sky-islands [data-sky-bb-category-list] > button:focus-visible > span:first-child {
+  transform: scale(1.06) rotate(-3deg);
+  box-shadow: 0 5px 12px rgba(63, 113, 158, .12);
+}
+.db-sky-islands [data-sky-daily-cta]:hover {
+  background: #e94d20;
+  box-shadow: 0 6px 0 #c83f1c, 0 10px 20px rgba(241, 91, 42, .18);
+}
+.db-sky-islands [data-sky-daily-cta]:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 #c83f1c;
+}
+
+/* Brain Boost landing polish: clearer labels and a calm, collectible mission map. */
+.db-sky-islands [data-sky-bb-heading] [data-sky-bb-kicker],
+.db-sky-islands [data-sky-bb-categories] [data-sky-bb-kicker],
+.db-sky-islands [data-sky-bb-daily] [data-sky-bb-mission-kicker] { color: #287da5; }
+.db-sky-islands [data-sky-bb-caption] { color: #65738a; }
+.db-sky-islands [data-sky-bb-mode-count] {
+  color: #236f96;
+  border-color: rgba(35, 111, 150, .2);
+  background: #edf9ff;
+}
+.db-sky-islands [data-sky-bb-categories] [data-sky-bb-category-list] > button > [data-sky-bb-mode-name] { color: var(--sky-ink); }
+.db-sky-islands [data-sky-bb-categories] [data-sky-bb-category-list] > button > [data-sky-bb-mode-caption] {
+  color: #62738c;
+  font-size: 9px;
+}
+.db-sky-islands [data-sky-bb-daily] [data-sky-bb-route-name] { color: var(--sky-ink); }
+.db-sky-islands [data-sky-bb-daily] [data-sky-bb-route-caption] { color: #65738a; }
+.db-sky-islands [data-sky-bb-daily] [data-sky-bb-route-summary] { color: #526a85; }
+.db-sky-islands [data-sky-mission-map] [data-sky-mission]:hover {
+  background: linear-gradient(155deg, #fff 12%, var(--sky-mission-bg) 100%);
+  border-color: var(--sky-mission-border);
+}
+.db-sky-islands [data-sky-bb-mission-list] {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(22, 139, 209, .42) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+.db-sky-islands [data-sky-bb-mission-list]::-webkit-scrollbar { height: 6px; }
+.db-sky-islands [data-sky-bb-mission-list]::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(22, 139, 209, .4);
+}
+.db-sky-islands [data-sky-bb-mission-list] > button { min-height: 122px; }
+.db-sky-islands [data-sky-bb-mission-list] [data-sky-bb-route-name] { font-size: 10px; }
+.db-sky-islands [data-sky-bb-mission-list] [data-sky-bb-route-caption] { font-size: 9px; }
+.db-sky-islands [data-sky-bb-status] [data-sky-bb-status-badge] {
+  color: #42617c;
+  border-color: rgba(35, 111, 150, .16);
+  background: #f1faff;
+}
+.db-sky-islands [data-sky-bb-core] {
+  border-color: rgba(35, 133, 181, .42);
+  background: radial-gradient(circle at 45% 38%, #fff 0%, #d9f2ff 64%, #c9e7ff 100%);
+  box-shadow: 0 10px 28px rgba(36, 125, 174, .16), inset 0 0 26px rgba(34, 153, 206, .14);
+}
+.db-sky-islands [data-sky-bb-core] > span {
+  border-color: rgba(73, 145, 195, .34);
+  background: linear-gradient(145deg, #c8edff, #e2dcff);
+  box-shadow: 0 5px 16px rgba(69, 119, 180, .2);
+}
+.db-sky-islands [data-sky-bb-core] svg {
+  filter: saturate(1.5) brightness(.78) drop-shadow(0 1px 2px rgba(42, 96, 153, .24));
+}
+.db-sky-islands [data-sky-mission-map] button[data-sky-mission] {
+  min-height: 126px;
+  overflow: hidden;
+  border-color: var(--sky-mission-border);
+  background: linear-gradient(155deg, #fff 10%, var(--sky-mission-bg) 135%);
+  box-shadow: 0 5px 0 color-mix(in srgb, var(--sky-mission-ink) 14%, white), 0 9px 18px rgba(53, 96, 135, .08);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.db-sky-islands [data-sky-mission-map] button[data-sky-mission]::after {
+  position: absolute;
+  inset: 0 18% auto;
+  height: 3px;
+  border-radius: 0 0 999px 999px;
+  background: var(--sky-mission-ink);
+  opacity: .55;
+  content: "";
+  pointer-events: none;
+}
+.db-sky-islands [data-sky-mission-map] button[data-sky-mission]:hover,
+.db-sky-islands [data-sky-mission-map] button[data-sky-mission]:focus-visible {
+  border-color: var(--sky-mission-ink);
+  box-shadow: 0 7px 0 color-mix(in srgb, var(--sky-mission-ink) 18%, white), 0 12px 22px rgba(53, 96, 135, .12);
+}
+.db-sky-islands [data-sky-mission-map] [data-sky-bb-route-name] { font-size: 11px; }
+.db-sky-islands [data-sky-mission-map] [data-sky-bb-route-caption] { color: #536985; font-size: 10px; }
+
+@media (min-width: 768px) {
+  .db-sky-islands [data-sky-modules-bar] { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+  .db-sky-islands [data-sky-route-track] { display: none; }
+  .db-sky-islands [data-sky-bb-mission-list] { margin-inline: -4px; padding-inline: 4px; }
+  .db-sky-islands [data-sky-modules-bar] {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+  }
+  .db-sky-islands [data-sky-modules-bar] > div { flex: 0 0 112px; scroll-snap-align: start; }
+  .db-sky-islands [data-sky-hero] h1 { font-size: clamp(2.55rem, 11.6vw, 3.65rem); }
+  .db-sky-islands [data-sky-dragon] { min-height: 255px; }
+  .db-sky-islands .sky-dragon-medallion { right: auto; width: min(74vw, 310px); height: min(74vw, 310px); }
+  .db-sky-islands [data-sky-dragon] img { max-width: min(100%, 390px); }
+  .db-sky-islands .sky-island-horizon { width: min(100vw, 390px); opacity: .55; }
+  .db-sky-islands .sky-hero-dragon-art { max-width: min(100%, 340px); }
+  .db-sky-islands [data-sky-tools] article { min-height: 154px; }
+  .db-sky-islands [data-sky-modules-bar] > div { flex-direction: column; justify-content: center; gap: 4px; padding: 12px 8px; text-align: center; }
+}
+@media (max-width: 1023px) {
+  .db-sky-islands [data-sky-bb-category-list] {
+    overflow-x: auto;
+    padding-bottom: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(22, 139, 209, .45) transparent;
+    -webkit-overflow-scrolling: touch;
+  }
+  .db-sky-islands [data-sky-bb-category-list]::-webkit-scrollbar { height: 6px; }
+  .db-sky-islands [data-sky-bb-category-list]::-webkit-scrollbar-thumb { border-radius: 999px; background: rgba(22, 139, 209, .4); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .db-sky-islands *, .db-sky-islands *::before, .db-sky-islands *::after { scroll-behavior: auto; animation-duration: .01ms; animation-iteration-count: 1; transition-duration: .01ms; }
+}
+@media (min-width: 768px) {
+  .db-sky-islands [data-sky-tools-grid] { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .db-sky-islands [data-sky-tool="forge"],
+  .db-sky-islands [data-sky-tool="stores"],
+  .db-sky-islands [data-sky-tool="nexus"] { grid-column: span 2; }
+  .db-sky-islands [data-sky-tool="websites"],
+  .db-sky-islands [data-sky-tool="trading"] { grid-column: span 3; }
+}
+/* Sky Islands — Brain Boost Arcade Pop skin (visual only) */
+.db-sky-islands [data-sky-brain-boost] {
+  --bb-pop-ink: #17224b;
+  --bb-pop-cyan: #18bddd;
+  --bb-pop-pink: #e743a8;
+  --bb-pop-orange: #ff693e;
+  --bb-pop-lime: #64c957;
+  --bb-pop-paper: #fffdf7;
+  color: var(--bb-pop-ink);
+  background-color: #e9f8ff;
+  background-image:
+    radial-gradient(circle, rgba(41, 155, 219, .12) 1.2px, transparent 1.5px),
+    radial-gradient(ellipse at 88% 8%, rgba(255, 228, 112, .26), transparent 30%),
+    linear-gradient(145deg, #f6fcff 0%, #e5f6ff 52%, #effaff 100%);
+  background-size: 16px 16px, auto, auto;
+  background-position: 0 0, center, center;
+}
+
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-status] {
+  color: #fff;
+  background: linear-gradient(100deg, #17224b 0%, #24366c 100%);
+  border: 2px solid #17224b;
+  border-radius: 14px;
+  box-shadow: 0 5px 0 rgba(23, 34, 75, .18), 0 12px 26px rgba(44, 105, 153, .12);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-status] [data-sky-bb-status-badge] {
+  color: #17224b;
+  background: #dffaff;
+  border: 1px solid #6bd9ee;
+  border-radius: 8px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-status] [data-sky-bb-status-badge]:last-child {
+  background: #fff0b8;
+  border-color: #f2ce54;
+}
+
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-heading] h2 {
+  color: var(--bb-pop-ink);
+  text-shadow: 2px 2px 0 rgba(255,255,255,.9);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-heading] h2 span {
+  background: linear-gradient(100deg, #18bddd 5%, #7554e8 52%, #e743a8 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-kicker] {
+  color: #176a9f;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-player] {
+  color: #8e2476;
+  background: #ffe4f5;
+  border: 2px solid #ef91d2;
+  border-radius: 999px;
+  box-shadow: 0 3px 0 #eab4dc;
+}
+
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-categories],
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-daily],
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-metrics] {
+  color: var(--bb-pop-ink);
+  background: rgba(255, 253, 247, .96);
+  border: 2px solid var(--bb-pop-ink);
+  border-radius: 18px;
+  box-shadow: 0 6px 0 rgba(23, 34, 75, .16), 0 15px 32px rgba(40, 103, 151, .12);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-categories] {
+  border-top: 7px solid var(--bb-pop-cyan);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-categories] [data-sky-bb-caption],
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-categories] [data-sky-bb-mode-caption] {
+  color: #586486;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-mode-count] {
+  color: #17224b;
+  background: #fff0b8;
+  border: 1px solid #f2ce54;
+  border-radius: 8px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-category-list] > * {
+  color: var(--bb-pop-ink);
+  background: #fff;
+  border: 2px solid #24366c;
+  border-radius: 12px;
+  box-shadow: 0 3px 0 rgba(23, 34, 75, .16);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-category-list] > *:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 rgba(23, 34, 75, .18);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-mode-name] {
+  color: #17224b;
+}
+
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-daily] {
+  background:
+    radial-gradient(circle at 92% 12%, rgba(231, 67, 168, .15), transparent 28%),
+    radial-gradient(circle at 8% 92%, rgba(24, 189, 221, .18), transparent 32%),
+    #fffdf7;
+  border-top: 7px solid var(--bb-pop-pink);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-core] {
+  color: #17224b;
+  background: linear-gradient(145deg, #b8f5ff, #e8d8ff 58%, #ffd7ef);
+  border: 3px solid #17224b;
+  box-shadow: 0 5px 0 rgba(23, 34, 75, .2), 0 0 0 6px rgba(255,255,255,.62);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-mission-kicker] {
+  color: #176a9f;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-mission-map] [data-sky-route-track] {
+  height: 4px;
+  background: linear-gradient(90deg, #e743a8, #18bddd 52%, #ffbd37);
+  box-shadow: 0 2px 0 rgba(23, 34, 75, .12);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-mission] {
+  color: #17224b;
+  background: #fff;
+  border: 2px solid #24366c;
+  border-radius: 14px;
+  box-shadow: 0 4px 0 rgba(23, 34, 75, .17);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-mission]:hover {
+  transform: translateY(-3px) rotate(-1deg);
+  box-shadow: 0 7px 0 rgba(23, 34, 75, .18);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-mission-icon] {
+  color: #17224b;
+  background: linear-gradient(145deg, #d8faff, #e6e0ff);
+  border: 2px solid #7d72e8;
+  border-radius: 12px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-route-name] {
+  color: #17224b;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-route-caption],
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-route-summary] {
+  color: #596587;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-daily-cta] {
+  color: #fff;
+  background: linear-gradient(180deg, #ff7548, #ef4b39);
+  border: 2px solid #17224b;
+  border-radius: 12px;
+  box-shadow: 0 5px 0 #17224b;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-daily-cta]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 #17224b;
+}
+
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-metrics] {
+  border-top: 7px solid #ffbd37;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] {
+  filter: drop-shadow(0 8px 10px rgba(33, 126, 176, .16));
+}
+.db-sky-islands [data-sky-brain-boost] button:focus-visible,
+.db-sky-islands [data-sky-brain-boost] a:focus-visible {
+  outline: 3px solid #e743a8;
+  outline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-status] { gap: 8px; }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-categories],
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-daily],
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-metrics] {
+    border-radius: 15px;
+    box-shadow: 0 4px 0 rgba(23, 34, 75, .14);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-category-list] > *,
+  .db-sky-islands [data-sky-brain-boost] [data-sky-mission],
+  .db-sky-islands [data-sky-brain-boost] [data-sky-daily-cta] {
+    transition: none;
+    transform: none;
+  }
+}
+/* Arcade Pop refinement: clearer title, calmer halftone, richer island art */
+.db-sky-islands [data-sky-brain-boost] {
+  background-image:
+    radial-gradient(circle, rgba(41, 155, 219, .055) 1px, transparent 1.5px),
+    radial-gradient(ellipse at 88% 8%, rgba(255, 228, 112, .23), transparent 30%),
+    linear-gradient(145deg, #f8fdff 0%, #e8f7ff 54%, #f4fbff 100%);
+  background-size: 24px 24px, auto, auto;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-heading] h2 span {
+  background: linear-gradient(100deg, #007da8 4%, #5b35bd 52%, #c52c7d 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-status] [class*="text-emerald-"] {
+  color: #baff8f;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-islands] {
+  top: 125px;
+  right: -12%;
+  opacity: .36;
+}
+@media (max-width: 767px) {
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-islands] {
+    top: 150px;
+    right: -26%;
+    opacity: .32;
+    clip-path: inset(0 0 0 14%);
+  }
+}
+
+
+/* Sky Islands — Cognitive Score responsive pop layout */
+.db-sky-islands [data-sky-bb-metrics] {
+  display: grid;
+  grid-template-columns: minmax(220px, .82fr) minmax(0, 1.18fr);
+  column-gap: clamp(22px, 4vw, 56px);
+  align-items: start;
+  padding: clamp(20px, 3vw, 32px);
+  color: #17224b;
+  background:
+    radial-gradient(circle at 8% 90%, rgba(24, 189, 221, .10), transparent 30%),
+    radial-gradient(circle at 92% 8%, rgba(231, 67, 168, .09), transparent 28%),
+    #fffdf7;
+  border: 2px solid #17224b;
+  border-top: 7px solid #ffbd37;
+  border-radius: 20px;
+  box-shadow: 0 6px 0 rgba(23, 34, 75, .16), 0 16px 32px rgba(40, 103, 151, .12);
+}
+.db-sky-islands [data-sky-bb-score-header] {
+  grid-column: 1 / -1;
+  margin-bottom: 4px;
+}
+.db-sky-islands [data-sky-bb-score-header] p { color: #176a9f; }
+.db-sky-islands [data-sky-bb-score-header] h3 { color: #17224b; }
+.db-sky-islands [data-sky-bb-score-header] > span {
+  color: #765100;
+  background: #fff1bd;
+  border: 1px solid #edc75b;
+  border-radius: 999px;
+}
+.db-sky-islands [data-sky-bb-score-gauge] {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: center;
+  width: 156px;
+  height: 156px;
+  margin-top: 16px;
+  color: #17224b;
+  background: linear-gradient(145deg, #d7f8ff, #f0e9ff 72%, #ffe3f2);
+  border: 3px solid #17224b;
+  box-shadow: 0 6px 0 rgba(23, 34, 75, .16), 0 0 0 6px rgba(255, 255, 255, .78);
+}
+.db-sky-islands [data-sky-bb-score-gauge] > div { border-color: rgba(24, 142, 185, .28); }
+.db-sky-islands [data-sky-bb-score-gauge] > div p:first-child {
+  color: #087da2;
+  -webkit-text-fill-color: #087da2;
+  text-shadow: none;
+}
+.db-sky-islands [data-sky-bb-score-gauge] > div p:not(:first-child) { color: #536486; }
+.db-sky-islands [data-sky-bb-calibration] {
+  grid-column: 1;
+  grid-row: 3;
+  margin-top: 16px;
+}
+.db-sky-islands [data-sky-bb-calibration] > span {
+  color: #775300;
+  background: #fff2c8;
+  border: 1px solid #edca67;
+  border-radius: 999px;
+  box-shadow: 0 3px 0 rgba(23, 34, 75, .10);
+}
+.db-sky-islands [data-sky-bb-score-copy] {
+  grid-column: 1;
+  grid-row: 4;
+  align-self: start;
+  margin-top: 10px;
+  color: #536486;
+  text-align: center;
+}
+.db-sky-islands [data-sky-bb-score-divider] { display: none; }
+.db-sky-islands [data-sky-bb-discipline-signals] {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: end;
+  margin: 0 0 8px;
+  padding: 0 2px 10px;
+  border-bottom: 2px solid #d8edf5;
+}
+.db-sky-islands [data-sky-bb-discipline-signals] p { color: #176a9f; }
+.db-sky-islands [data-sky-bb-discipline-signals] > span { color: #66728d; }
+.db-sky-islands [data-sky-bb-signal] {
+  grid-column: 2;
+  margin: 0 0 8px;
+  padding: 11px 12px;
+  color: #17224b;
+  background: rgba(255, 255, 255, .82);
+  border: 1px solid #d6e7f2;
+  border-radius: 11px;
+  box-shadow: 0 2px 0 rgba(23, 34, 75, .06);
+}
+.db-sky-islands [data-sky-bb-signal] > span:first-child { color: #526383; }
+.db-sky-islands [data-sky-bb-signal] > span:last-child {
+  color: #536486;
+  background: #f1f5fb;
+  border: 1px solid #d9e3ee;
+  border-radius: 999px;
+}
+.db-sky-islands [data-sky-bb-signal]:last-child { margin-bottom: 0; }
+
+@media (max-width: 899px) {
+  .db-sky-islands [data-sky-bb-metrics] { display: block; }
+  .db-sky-islands [data-sky-bb-score-header] { margin-bottom: 4px; }
+  .db-sky-islands [data-sky-bb-score-gauge] { margin: 18px auto 0; }
+  .db-sky-islands [data-sky-bb-calibration] { margin-top: 14px; }
+  .db-sky-islands [data-sky-bb-score-copy] { max-width: 32rem; margin: 10px auto 0; text-align: center; }
+  .db-sky-islands [data-sky-bb-score-divider] {
+    display: block;
+    margin: 20px 0 14px;
+    border-color: #d8edf5;
+  }
+  .db-sky-islands [data-sky-bb-discipline-signals] { margin-bottom: 6px; }
+  .db-sky-islands [data-sky-bb-signal] { margin-bottom: 7px; }
+}
+@media (max-width: 480px) {
+  .db-sky-islands [data-sky-bb-metrics] { padding: 18px 15px; border-radius: 16px; }
+  .db-sky-islands [data-sky-bb-score-gauge] { width: 144px; height: 144px; }
+  .db-sky-islands [data-sky-bb-signal] { padding: 10px; }
+}
+/* Cognitive Score — Arcade Pop Core Index */
+.db-sky-islands [data-sky-bb-score-gauge] {
+  position: relative;
+  isolation: isolate;
+  width: 176px;
+  height: 176px;
+  overflow: visible;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,.98) 0 39%, transparent 40%),
+    conic-gradient(from -35deg, #19c9e8 0 15%, #d9faff 15% 24%, #a783f4 24% 39%, #f4e5ff 39% 56%, #37cfe6 56% 73%, #d9faff 73% 88%, #7f62e7 88% 100%);
+  border: 3px solid #17224b;
+  box-shadow:
+    0 7px 0 rgba(23, 34, 75, .18),
+    0 0 0 6px rgba(255,255,255,.9),
+    0 0 0 9px rgba(24,189,221,.48),
+    0 0 32px rgba(24,189,221,.26);
+}
+.db-sky-islands [data-sky-bb-score-gauge]::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: -17px;
+  border: 2px dashed rgba(103, 73, 210, .55);
+  border-radius: 50%;
+  animation: bb-core-orbit 28s linear infinite;
+  pointer-events: none;
+}
+.db-sky-islands [data-sky-bb-score-gauge]::after {
+  content: "";
+  position: absolute;
+  top: -12px;
+  right: 22px;
+  width: 12px;
+  height: 12px;
+  background: #ffbd37;
+  clip-path: polygon(40% 0,60% 0,60% 40%,100% 40%,100% 60%,60% 60%,60% 100%,40% 100%,40% 60%,0 60%,0 40%,40% 40%);
+  filter: drop-shadow(0 0 5px rgba(255, 189, 55, .8));
+  pointer-events: none;
+}
+.db-sky-islands [data-sky-bb-score-gauge] > div {
+  border-color: rgba(64, 160, 207, .3);
+}
+.db-sky-islands [data-sky-bb-score-gauge] > span:first-of-type {
+  z-index: 2;
+  width: 8px;
+  height: 8px;
+  background: #34e5f4;
+  box-shadow: 0 0 0 4px rgba(52,229,244,.18), 0 0 16px rgba(52,229,244,.95);
+}
+.db-sky-islands [data-sky-bb-score-gauge] > span:nth-of-type(2) {
+  z-index: 2;
+  width: 7px;
+  height: 7px;
+  background: #e65ac2;
+  box-shadow: 0 0 12px rgba(230,90,194,.9);
+}
+.db-sky-islands [data-sky-bb-score-gauge] > div:last-child p:first-child {
+  display: grid;
+  width: 62px;
+  height: 62px;
+  margin-inline: auto;
+  place-items: center;
+  color: #fff;
+  background: radial-gradient(circle at 35% 30%, #63f2ff 0%, #20c4e8 34%, #7251dc 76%, #30265e 100%);
+  border: 3px solid rgba(255,255,255,.95);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 4px rgba(44, 195, 232, .18),
+    0 0 22px rgba(24, 189, 221, .68),
+    inset 0 -5px 10px rgba(23, 34, 75, .28);
+  color: #fff;
+  font-size: 2.5rem;
+  line-height: 1;
+  text-shadow: 0 0 12px rgba(255,255,255,.9);
+  -webkit-text-fill-color: #fff;
+}
+.db-sky-islands [data-sky-bb-score-gauge] > div:last-child p:nth-child(2) {
+  margin-top: 7px;
+  color: #35466d;
+}
+.db-sky-islands [data-sky-bb-score-gauge] > div:last-child p:nth-child(3) {
+  margin-top: 3px;
+  color: #087da2;
+  font-weight: 900;
+}
+@keyframes bb-core-orbit {
+  to { transform: rotate(360deg); }
+}
+@media (max-width: 480px) {
+  .db-sky-islands [data-sky-bb-score-gauge] { width: 164px; height: 164px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .db-sky-islands [data-sky-bb-score-gauge]::before { animation: none; }
+}
+/* Compact mission select and clarify the Core Index label */
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-daily] {
+  min-height: 0;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 26px clamp(18px, 3vw, 34px);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-core] {
+  width: 78px;
+  height: 78px;
+  margin: 0 auto 10px;
+  border-width: 3px;
+  box-shadow: 0 4px 0 rgba(23, 34, 75, .16), 0 0 0 4px rgba(255,255,255,.8), 0 0 24px rgba(24,189,221,.24);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-mission-kicker] {
+  margin: 0;
+  font-size: 10px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-mission-kicker] + h2 {
+  margin-top: 5px;
+  font-size: clamp(1.45rem, 2.8vw, 2rem);
+  line-height: 1.15;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-mission-kicker] + h2 + p {
+  max-width: 38rem;
+  margin: 8px auto 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-mission-map] {
+  margin-top: 16px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-route-track] {
+  top: 25px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-mission-list] {
+  gap: 9px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-mission] {
+  min-height: 82px;
+  padding: 8px 7px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-mission-icon] {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-route-summary] {
+  margin-top: 8px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-daily-cta] {
+  margin-top: 14px;
+  padding: 10px 18px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] > div:last-child p:nth-child(3) {
+  color: #087da2;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .18em;
+}
+@media (max-width: 899px) {
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-daily] { padding: 22px 16px; }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-core] { width: 70px; height: 70px; margin-bottom: 8px; }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-mission-map] { margin-top: 13px; }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-mission] { min-height: 76px; }
+}
+@media (max-width: 480px) {
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-daily] { padding: 18px 13px; }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-mission-kicker] + h2 { font-size: 1.4rem; }
+}
+/* Mission Select — 50% tighter vertical rhythm */
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-daily] {
+  min-height: 0;
+  padding-block: 14px;
+  padding-inline: clamp(14px, 2vw, 24px);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-core] {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 5px;
+  box-shadow: 0 3px 0 rgba(23,34,75,.14), 0 0 0 3px rgba(255,255,255,.78), 0 0 16px rgba(24,189,221,.2);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-mission-kicker] {
+  margin: 0;
+  font-size: 9px;
+  line-height: 1.2;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-mission-kicker] + h2 {
+  margin-top: 3px;
+  font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+  line-height: 1.12;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-mission-kicker] + h2 + p {
+  max-width: 34rem;
+  margin: 5px auto 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-mission-map] {
+  margin-top: 9px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-route-track] {
+  top: 20px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-mission-list] {
+  gap: 7px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-mission] {
+  min-height: 60px;
+  padding: 5px 6px;
+  border-radius: 10px;
+  box-shadow: 0 3px 0 rgba(23,34,75,.14);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-mission-icon] {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  font-size: 15px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-route-name] {
+  margin-top: 5px;
+  font-size: 8px;
+  line-height: 1.1;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-route-caption] {
+  margin-top: 2px;
+  font-size: 8px;
+  line-height: 1.1;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-route-summary] {
+  margin-top: 5px;
+  font-size: 8px;
+  line-height: 1.2;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-daily-cta] {
+  min-height: 40px;
+  margin-top: 8px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  box-shadow: 0 4px 0 #17224b;
+}
+@media (max-width: 899px) {
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-daily] { padding-block: 12px; }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-core] { width: 48px; height: 48px; margin-bottom: 4px; }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-mission-map] { margin-top: 8px; }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-mission] { min-height: 58px; }
+}
+@media (max-width: 480px) {
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-daily] { padding: 12px 10px; }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-mission-kicker] + h2 { font-size: 1.2rem; }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-mission] { min-height: 56px; padding-inline: 4px; }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-route-name] { font-size: 8px; }
+}
+
+
+/* Sky Islands — Dragon Arcade module bar */
+.db-sky-islands [data-sky-modules-bar="primary"] {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(96, 218, 255, .68);
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 92% 48%, rgba(44, 195, 255, .22), transparent 34%),
+    radial-gradient(circle at 8% 0%, rgba(160, 107, 255, .18), transparent 28%),
+    repeating-linear-gradient(135deg, rgba(133, 216, 255, .035) 0 2px, transparent 2px 9px),
+    linear-gradient(110deg, #09152e 0%, #12234b 52%, #17143c 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 5px 0 #09152e,
+    0 14px 30px rgba(20, 59, 104, .2), 0 0 28px rgba(37, 188, 255, .12);
+}
+.db-sky-islands [data-sky-modules-bar="primary"]::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0 1% 0 auto;
+  width: min(30%, 230px);
+  pointer-events: none;
+  background: url("/sky-islands/dragon-arcade-crest.svg") no-repeat right 16px center / auto 112%;
+  opacity: .42;
+  filter: drop-shadow(0 0 12px rgba(46, 210, 255, .52));
+}
+.db-sky-islands [data-sky-modules-bar="primary"] > button {
+  position: relative;
+  z-index: 1;
+  min-height: 86px;
+  color: #f3f8ff;
+  border-right: 1px solid rgba(157, 211, 255, .16);
+  background: linear-gradient(180deg, rgba(255,255,255,.025), transparent 70%);
+  transition: background-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.db-sky-islands [data-sky-modules-bar="primary"] > button:last-child { border-right: 0; }
+.db-sky-islands [data-sky-modules-bar="primary"] > button:hover,
+.db-sky-islands [data-sky-modules-bar="primary"] > button:focus-visible {
+  z-index: 2;
+  background: linear-gradient(180deg, rgba(54, 207, 255, .16), rgba(154, 107, 255, .08));
+  box-shadow: inset 0 2px 0 rgba(93, 224, 255, .85), 0 0 20px rgba(55, 191, 255, .14);
+  transform: translateY(-2px);
+}
+.db-sky-islands [data-sky-modules-bar="primary"] > button:focus-visible {
+  outline: 2px solid #7be8ff;
+  outline-offset: -3px;
+}
+.db-sky-islands [data-sky-modules-bar="primary"] [data-sky-module-icon] {
+  filter: drop-shadow(0 0 6px currentColor);
+}
+.db-sky-islands [data-sky-modules-bar="primary"] [data-sky-module-label] { color: #cad8f4; }
+@media (max-width: 767px) {
+  .db-sky-islands [data-sky-modules-bar="primary"] { border-radius: 16px; }
+  .db-sky-islands [data-sky-modules-bar="primary"]::before {
+    width: 42%;
+    opacity: .22;
+    background-position: right 5px center;
+  }
+  .db-sky-islands [data-sky-modules-bar="primary"] > button { min-height: 72px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .db-sky-islands [data-sky-modules-bar="primary"] > button { transition: none; }
+}
+
+
+/* Sky Islands — panoramic dragon replaces the primary modules bar */
+.db-sky-islands .sky-dragon-module-banner {
+  width: 100%;
+  height: clamp(78px, 8vw, 116px);
+  overflow: hidden;
+  border: 1px solid rgba(77, 193, 255, .66);
+  border-radius: 18px;
+  background-color: #98ddff;
+  background-image:
+    linear-gradient(90deg, rgba(13, 37, 77, .10), transparent 25%, transparent 78%, rgba(19, 47, 83, .08)),
+    url("/sky-islands/dragon-arcade-banner.png");
+  background-repeat: no-repeat;
+  background-position: center, center 18%;
+  background-size: 100% 100%, cover;
+  box-shadow: 0 5px 0 rgba(25, 58, 101, .22), 0 14px 30px rgba(38, 119, 168, .18);
+}
+@media (max-width: 767px) {
+  .db-sky-islands .sky-dragon-module-banner {
+    height: clamp(76px, 21vw, 96px);
+    border-radius: 14px;
+    background-position: center, center 20%;
+  }
+}
+
+
+/* Sky Islands — full dragon floats beyond the former module-bar frame */
+.db-sky-islands .sky-dragon-module-banner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: clamp(220px, 24vw, 340px);
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.db-sky-islands .sky-dragon-module-art {
+  display: block;
+  width: min(100%, 1320px);
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+  object-position: center;
+  overflow: visible;
+  filter: drop-shadow(0 14px 18px rgba(30, 101, 150, .19));
+  animation: sky-full-dragon-float 6s ease-in-out infinite;
+}
+@keyframes sky-full-dragon-float {
+  0%, 100% { transform: translateY(3px); }
+  50% { transform: translateY(-5px); }
+}
+@media (max-width: 767px) {
+  .db-sky-islands .sky-dragon-module-banner { height: clamp(150px, 42vw, 205px); }
+  .db-sky-islands .sky-dragon-module-art { width: 100%; animation-duration: 7s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .db-sky-islands .sky-dragon-module-art { animation: none; }
+}
+
+
+/* Sky Islands — moving arcade clouds behind the full dragon */
+.db-sky-islands .sky-dragon-module-banner {
+  isolation: isolate;
+  background: linear-gradient(180deg, #c9f2ff 0%, #f5fcff 78%, #fff8e8 100%);
+}
+.db-sky-islands .sky-dragon-module-banner::before,
+.db-sky-islands .sky-dragon-module-banner::after {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  border-radius: 24px;
+}
+.db-sky-islands .sky-dragon-module-banner::before {
+  inset: -8px 0;
+  background-image: url("/sky-islands/sky-islands-arcade-cloud-sky.jpg");
+  background-repeat: no-repeat;
+  background-position: center 52%;
+  background-size: cover;
+  opacity: .88;
+  animation: sky-arcade-sky-drift 70s ease-in-out infinite alternate;
+}
+.db-sky-islands .sky-dragon-module-banner::after {
+  inset: 8% -18%;
+  background-image:
+    radial-gradient(ellipse 7% 18% at 8% 44%, rgba(255,255,255,.88) 0 55%, transparent 58%),
+    radial-gradient(ellipse 10% 22% at 14% 40%, rgba(255,255,255,.92) 0 54%, transparent 58%),
+    radial-gradient(ellipse 8% 17% at 20% 46%, rgba(255,255,255,.82) 0 55%, transparent 59%),
+    radial-gradient(ellipse 8% 17% at 48% 30%, rgba(255,255,255,.78) 0 55%, transparent 59%),
+    radial-gradient(ellipse 10% 22% at 55% 27%, rgba(255,255,255,.88) 0 54%, transparent 58%),
+    radial-gradient(ellipse 8% 17% at 62% 33%, rgba(255,255,255,.8) 0 55%, transparent 59%),
+    radial-gradient(ellipse 8% 17% at 78% 58%, rgba(255,255,255,.76) 0 55%, transparent 59%),
+    radial-gradient(ellipse 10% 22% at 85% 54%, rgba(255,255,255,.86) 0 54%, transparent 58%),
+    radial-gradient(ellipse 8% 17% at 92% 60%, rgba(255,255,255,.78) 0 55%, transparent 59%);
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 5px 7px rgba(79, 170, 216, .12));
+  animation: sky-arcade-cloud-drift 38s ease-in-out infinite alternate;
+}
+.db-sky-islands .sky-dragon-module-art {
+  position: relative;
+  z-index: 1;
+}
+@keyframes sky-arcade-cloud-drift {
+  from { transform: translateX(-2.5%) translateY(1px); }
+  to { transform: translateX(2.5%) translateY(-5px); }
+}
+@keyframes sky-arcade-sky-drift {
+  from { background-position: 48% 52%; }
+  to { background-position: 54% 48%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .db-sky-islands .sky-dragon-module-banner::before,
+  .db-sky-islands .sky-dragon-module-banner::after { animation: none; }
+}
+
+
+/* Sky Islands — hide nonfunctional Neural System ready bar */
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-status] {
+  display: none !important;
+}
+
+
+/* Sky Islands — epic Cognitive Score meter */
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] {
+  position: relative !important;
+  isolation: isolate;
+  width: 224px !important;
+  height: 224px !important;
+  min-width: 224px;
+  min-height: 224px;
+  overflow: visible !important;
+  border: 1px solid rgba(59, 194, 230, .5) !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 34% 27%, rgba(255,255,255,.96), rgba(222,248,255,.94) 36%, rgba(234,232,255,.96) 70%, rgba(255,255,255,.94) 100%) !important;
+  box-shadow:
+    0 0 0 7px rgba(73, 204, 237, .09),
+    0 0 0 10px rgba(126, 97, 255, .08),
+    0 18px 42px rgba(25, 104, 151, .18),
+    inset 0 3px 12px rgba(255,255,255,.95),
+    inset 0 -12px 28px rgba(122, 163, 238, .17) !important;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge]::before {
+  position: absolute;
+  z-index: 0;
+  inset: 8px;
+  content: "";
+  border-radius: 50%;
+  background: conic-gradient(from -90deg,
+    #13c7e8 0deg 43deg, transparent 43deg 48deg,
+    #36d7eb 48deg 91deg, transparent 91deg 96deg,
+    #7665f6 96deg 139deg, transparent 139deg 144deg,
+    #a36cf5 144deg 187deg, transparent 187deg 192deg,
+    #e18bd5 192deg 235deg, transparent 235deg 240deg,
+    #8c7afa 240deg 283deg, transparent 283deg 288deg,
+    #35cbe2 288deg 331deg, transparent 331deg 336deg,
+    #13c7e8 336deg 360deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 68%, #000 70% 77%, transparent 79%);
+  mask: radial-gradient(circle, transparent 0 68%, #000 70% 77%, transparent 79%);
+  filter: drop-shadow(0 0 7px rgba(19, 199, 232, .5));
+  animation: sky-cognitive-ring-turn 42s linear infinite;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge]::after {
+  position: absolute;
+  z-index: 0;
+  inset: 24%;
+  content: "";
+  border: 1px solid rgba(69, 179, 222, .42);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 25%, rgba(255,255,255,.98), transparent 35%),
+    radial-gradient(circle at 70% 78%, rgba(184, 154, 255, .31), transparent 52%),
+    linear-gradient(145deg, #e9fbff 0%, #c4f3ff 48%, #d9d1ff 100%);
+  box-shadow:
+    0 0 24px rgba(35, 193, 231, .23),
+    inset 0 2px 10px rgba(255,255,255,.96),
+    inset 0 -5px 14px rgba(104, 112, 218, .17);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] > div:not(:last-child),
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] > span {
+  display: none !important;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] > div:last-child {
+  position: relative !important;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 45% !important;
+  height: 45% !important;
+  border: 1px solid rgba(255,255,255,.9);
+  border-radius: 50%;
+  background: linear-gradient(145deg, rgba(19, 47, 103, .96), rgba(42, 82, 158, .97) 56%, rgba(105, 66, 177, .95));
+  box-shadow: 0 6px 16px rgba(30, 49, 111, .28), inset 0 1px 5px rgba(255,255,255,.38);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] > div:last-child p:first-child {
+  margin: 0 !important;
+  color: #fff !important;
+  font-size: 2.55rem !important;
+  line-height: 1 !important;
+  text-shadow: 0 0 18px rgba(88, 235, 255, .7);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] > div:last-child p:nth-child(2) {
+  margin-top: 5px !important;
+  color: #d7f7ff !important;
+  font-size: 9px !important;
+  letter-spacing: .2em;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] > div:last-child p:nth-child(3) {
+  margin-top: 4px !important;
+  color: #71eaff !important;
+  font-size: 7px !important;
+  letter-spacing: .2em;
+}
+@keyframes sky-cognitive-ring-turn {
+  to { transform: rotate(360deg); }
+}
+@media (max-width: 640px) {
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] {
+    width: 190px !important;
+    height: 190px !important;
+    min-width: 190px;
+    min-height: 190px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge]::before { animation: none; }
+}
+
+
+/* Sky Islands — Cognitive Score rank and XP meter */
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] {
+  position: relative !important;
+  isolation: isolate;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  box-sizing: border-box;
+  width: min(100%, 410px) !important;
+  min-width: 0 !important;
+  height: 154px !important;
+  min-height: 154px !important;
+  margin: 22px auto 0 !important;
+  padding: 20px 22px 42px !important;
+  overflow: hidden !important;
+  border: 2px solid #17224b !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(ellipse at 92% 8%, rgba(117, 99, 245, .38), transparent 38%),
+    linear-gradient(120deg, #17224b 0%, #24366b 62%, #263c79 100%) !important;
+  box-shadow:
+    0 5px 0 rgba(15, 27, 65, .22),
+    0 14px 28px rgba(22, 43, 87, .19),
+    inset 0 1px 0 rgba(255,255,255,.22) !important;
+  text-align: left !important;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge]::before {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  right: 14px;
+  content: "RANGO · EN CALIBRACIÓN";
+  padding: 7px 10px;
+  color: #17224b;
+  border: 1px solid rgba(255,255,255,.65);
+  border-radius: 999px;
+  background: linear-gradient(100deg, #bff6ff, #d9d2ff);
+  box-shadow: 0 3px 0 rgba(7, 14, 42, .22);
+  font: 900 8px/1 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: .12em;
+  white-space: nowrap;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge]::after {
+  position: absolute;
+  z-index: 1;
+  right: 22px;
+  bottom: 20px;
+  left: 22px;
+  height: 9px;
+  content: "";
+  border: 1px solid rgba(255,255,255,.26);
+  border-radius: 999px;
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.13) 0 22px, rgba(255,255,255,.04) 22px 26px);
+  box-shadow: inset 0 1px 3px rgba(4, 12, 39, .3);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] > div:not(:last-child),
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] > span {
+  display: none !important;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] > div:last-child {
+  position: relative !important;
+  z-index: 3;
+  display: grid !important;
+  grid-template-columns: auto auto;
+  grid-template-rows: 1fr 1fr;
+  align-items: end;
+  justify-content: start;
+  column-gap: 10px;
+  width: auto !important;
+  height: 78px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-align: left !important;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] > div:last-child p:first-child {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  margin: 0 !important;
+  color: #fff !important;
+  font-size: 58px !important;
+  line-height: .92 !important;
+  text-shadow: 0 0 18px rgba(69, 222, 255, .58);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] > div:last-child p:nth-child(2) {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  margin: 0 0 2px !important;
+  color: #d7efff !important;
+  font-size: 12px !important;
+  font-weight: 900;
+  letter-spacing: .18em;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] > div:last-child p:nth-child(3) {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  margin: 0 !important;
+  color: #70e8f6 !important;
+  font-size: 8px !important;
+  font-weight: 900;
+  letter-spacing: .2em;
+}
+@media (max-width: 640px) {
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] {
+    width: min(100%, 360px) !important;
+    height: 146px !important;
+    min-height: 146px !important;
+    margin-top: 18px !important;
+    padding: 18px 16px 40px !important;
+  }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge]::before {
+    top: 12px;
+    right: 10px;
+    font-size: 7px;
+  }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] > div:last-child p:first-child { font-size: 52px !important; }
+}
+
+
+/* Sky Islands — Cognitive Score arcade rank card */
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] {
+  position: relative !important;
+  isolation: isolate;
+  display: flex !important;
+  align-items: stretch !important;
+  gap: 16px;
+  box-sizing: border-box;
+  width: min(100%, 440px) !important;
+  min-width: 0 !important;
+  height: 184px !important;
+  min-height: 184px !important;
+  margin: 22px auto 0 !important;
+  padding: 14px !important;
+  overflow: hidden !important;
+  border: 2px solid #17224b !important;
+  border-radius: 20px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(175, 128, 255, .15), transparent 28%),
+    linear-gradient(135deg, #fffdf7 0%, #fff 100%) !important;
+  box-shadow: 0 5px 0 rgba(23,34,75,.17), 0 14px 28px rgba(42,67,112,.13), inset 0 1px 0 #fff !important;
+  text-align: left !important;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge]::before,
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge]::after { content: none !important; display: none !important; }
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-rank-badge] {
+  position: relative;
+  display: flex;
+  flex: 0 0 88px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 2px solid #101a3c;
+  border-radius: 15px;
+  background: linear-gradient(155deg, #25366f, #121d46 75%);
+  box-shadow: 0 4px 0 #0d1534, inset 0 1px 0 rgba(255,255,255,.24);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-rank-spark] {
+  color: #ffd45e;
+  font-size: 16px;
+  line-height: 1;
+  text-shadow: 0 0 10px rgba(255,205,76,.6);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-rank-monogram] {
+  color: #fff;
+  font: 950 25px/.95 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -.08em;
+  text-shadow: 2px 2px 0 #18bfdc, -1px -1px 0 #a36af0;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-rank-caption] {
+  color: #a9eefa;
+  font: 900 7px/1 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: .2em;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-rank-content] {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 3px 3px 4px 0;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-rank-heading],
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-rank-value-row],
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-progress-labels] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-label] {
+  color: #24799a;
+  font: 950 9px/1 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: .2em;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-rank-state] {
+  color: #965b00;
+  font: 900 7px/1 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: .08em;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-value] {
+  color: #17224b;
+  font: 950 48px/.9 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -.07em;
+  text-shadow: 2px 2px 0 #bceefa;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-max] {
+  margin-right: auto;
+  padding: 5px 8px;
+  color: #fff;
+  border-radius: 6px;
+  background: #f15b2a;
+  box-shadow: 0 2px 0 #c7441c;
+  font: 950 9px/1 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: .12em;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-progress-labels] {
+  margin-bottom: 5px;
+  color: #596780;
+  font: 900 7px/1.2 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: .09em;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-progress-labels] span:last-child {
+  color: #7a68bb;
+  text-align: right;
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-progress-track] {
+  height: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(23,34,75,.18);
+  border-radius: 999px;
+  background: repeating-linear-gradient(90deg, #e6edf6 0 14px, #fff 14px 17px);
+  box-shadow: inset 0 1px 2px rgba(23,34,75,.12);
+}
+.db-sky-islands [data-sky-brain-boost] [data-sky-bb-progress-track] span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #19c3de, #8d65ef, #f15b2a);
+}
+@media (max-width: 640px) {
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-gauge] {
+    gap: 11px;
+    width: min(100%, 380px) !important;
+    height: 168px !important;
+    min-height: 168px !important;
+    margin-top: 17px !important;
+    padding: 11px !important;
+  }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-rank-badge] { flex-basis: 68px; }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-score-value] { font-size: 42px; }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-rank-state] { font-size: 6px; }
+  .db-sky-islands [data-sky-brain-boost] [data-sky-bb-progress-labels] { font-size: 6px; }
+}

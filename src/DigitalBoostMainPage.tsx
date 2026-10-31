@@ -8,7 +8,6 @@ import {
   Code2,
   ShoppingCart,
   LayoutTemplate,
-  Hexagon,
   Terminal,
   Sparkles,
   Users,
@@ -17,54 +16,98 @@ import {
   MessageCircle,
 } from "lucide-react";
 
-const neon =
-  "bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400";
+const primaryCta = "bg-[#f15b2a] text-white shadow-[0_8px_18px_rgba(241,91,42,.22)]";
 
 const stats = [
-  ["01", "Commerce OS", ShoppingCart],
-  ["02", "Web Builder", LayoutTemplate],
-  ["03", "IA Forge", Code2],
-  ["04", "Trading Islands", Terminal],
-  ["05", "Sentinel", Gauge],
-  ["06", "Nexus", Users],
+  ["01", "Commerce OS", ShoppingCart, "store"],
+  ["02", "Web Builder", LayoutTemplate, "websites"],
+  ["03", "IA Forge", Code2, "forge"],
+  ["04", "Trading Islands", Terminal, "islands"],
+  ["05", "Sentinel", Gauge, null],
+  ["06", "Nexus", Users, "nexus"],
 ] as const;
 
 const tools = [
-  { icon: Code2, title: "IA Forge", desc: "Forja sitios y piezas con IA.", accent: "text-violet-400", ring: "hover:border-violet-400/60", iconBg: "bg-violet-500/10" },
-  { icon: ShoppingCart, title: "Tiendas Virtuales", desc: "Crea tu tienda online profesional al estilo Shopify.", accent: "text-cyan-400", ring: "hover:border-cyan-400/60", iconBg: "bg-cyan-400/10" },
-  { icon: LayoutTemplate, title: "Nexus", desc: "Hub de landings y campañas.", accent: "text-fuchsia-400", ring: "hover:border-fuchsia-400/60", iconBg: "bg-fuchsia-500/10" },
-  { icon: Hexagon, title: "Websites Builder", desc: "Constructor de sitios. Canvas y páginas.", accent: "text-sky-400", ring: "hover:border-sky-400/60", iconBg: "bg-sky-500/10" },
-  { icon: Terminal, title: "Trading Islands", desc: "Islas de intercambio. Rails reales cuando existan.", accent: "text-emerald-400", ring: "hover:border-emerald-400/60", iconBg: "bg-emerald-500/10" },
+  { tone: "forge", mode: "forge" as ToolMode, image: "/sky-islands/tool-ia-forge.jpg", title: "IA Forge", desc: "Forja sitios y piezas con IA.", accent: "text-violet-700", ring: "hover:border-violet-300" },
+  { tone: "stores", mode: "store" as ToolMode, image: "/sky-islands/tool-stores.jpg", title: "Tiendas Virtuales", desc: "Crea tu tienda online profesional al estilo Shopify.", accent: "text-orange-700", ring: "hover:border-orange-300" },
+  { tone: "nexus", mode: "nexus" as ToolMode, image: "/sky-islands/tool-nexus.jpg", title: "Nexus", desc: "Hub de landings y campañas.", accent: "text-emerald-700", ring: "hover:border-emerald-300" },
+  { tone: "websites", mode: "websites" as ToolMode, image: "/sky-islands/tool-websites-builder.jpg", title: "Websites Builder", desc: "Constructor de sitios. Canvas y páginas.", accent: "text-sky-700", ring: "hover:border-sky-300" },
+  { tone: "trading", mode: "islands" as ToolMode, image: "/sky-islands/tool-trading-islands.jpg", title: "Trading Islands", desc: "Islas de intercambio. Rails reales cuando existan.", accent: "text-amber-700", ring: "hover:border-amber-300" },
 ];
 
 function StatRow({
   purple = false,
+  onSelectTool,
 }: {
   purple?: boolean;
+  onSelectTool: (mode: ToolMode) => void;
 }) {
+  if (!purple) {
+    return (
+      <div
+        data-sky-dragon-module-banner
+        className="sky-dragon-module-banner"
+        role="img"
+        aria-label="Dragón azul de Sky Islands volando sobre islas flotantes"
+      >
+        <img
+          src="/sky-islands/dragon-arcade-full.png"
+          alt=""
+          aria-hidden="true"
+          className="sky-dragon-module-art"
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-2 divide-x divide-white/10 overflow-hidden rounded-xl border border-cyan-400/50 bg-gradient-to-r from-[#07132b] via-[#050a19] to-[#100a25] shadow-[0_0_30px_rgba(0,100,255,.10)] md:grid-cols-6">
-      {stats.map(([number, label, Icon]) => (
-        <div
-          key={label}
-          className="flex items-center gap-3 px-4 py-4 md:px-5 md:py-5"
-        >
-          <Icon
-            size={purple ? 25 : 28}
-            className={purple ? "text-violet-400" : number === "03" ? "text-fuchsia-400" : number === "04" ? "text-emerald-300" : number === "06" ? "text-fuchsia-400" : "text-cyan-300"}
-          />
+    <div data-sky-modules-bar={purple ? "secondary" : "primary"} className="grid grid-cols-2 divide-x divide-white/10 overflow-hidden rounded-xl border border-cyan-400/50 bg-gradient-to-r from-[#07132b] via-[#050a19] to-[#100a25] shadow-[0_0_30px_rgba(0,100,255,.10)] md:grid-cols-6">
+      {stats.map(([number, label, Icon, mode]) => {
+        const iconClass = purple
+          ? "text-violet-400"
+          : number === "03" ? "text-fuchsia-400"
+          : number === "04" ? "text-emerald-300"
+          : number === "06" ? "text-fuchsia-400"
+          : "text-cyan-300";
+        const contents = (
+          <>
+            <Icon size={purple ? 25 : 28} data-sky-module-icon={number} className={iconClass} />
+            <span className="min-w-0 text-left">
+              <span className="block text-lg font-medium md:text-xl">{number}</span>
+              <span data-sky-module-label className="block text-[10px] text-slate-500 md:text-xs">{label}</span>
+            </span>
+          </>
+        );
 
-          <div>
-            <div className="text-lg font-medium md:text-xl">
-              {number}
-            </div>
+        if (!mode) {
+          return (
+            <button
+              key={label}
+              type="button"
+              disabled
+              aria-label="Sentinel, módulo todavía no disponible"
+              title="Sentinel todavía no tiene un espacio de trabajo"
+              data-sky-module-mode="unavailable"
+              className="flex min-w-0 cursor-not-allowed items-center gap-3 bg-transparent px-4 py-4 text-left opacity-45 md:px-5 md:py-5"
+            >
+              {contents}
+            </button>
+          );
+        }
 
-            <div className="text-[10px] text-slate-500 md:text-xs">
-              {label}
-            </div>
-          </div>
-        </div>
-      ))}
+        return (
+          <button
+            key={label}
+            type="button"
+            onClick={() => onSelectTool(mode)}
+            aria-label={`Abrir ${label}`}
+            data-sky-module-mode={mode}
+            className="flex min-w-0 cursor-pointer items-center gap-3 bg-transparent px-4 py-4 text-left transition-colors hover:bg-white/[.07] focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cyan-300 md:px-5 md:py-5"
+          >
+            {contents}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -93,46 +136,47 @@ export default function DigitalBoostMainPage({
   return (
     <main
       id="top"
-      className="min-h-screen overflow-hidden bg-[#020611] text-white selection:bg-cyan-300/30"
-      style={{ backgroundImage: "radial-gradient(ellipse at 12% 27%, rgba(0,132,255,0.16) 0%, transparent 34%), radial-gradient(ellipse at 88% 48%, rgba(109,54,255,0.15) 0%, transparent 36%), radial-gradient(ellipse at 48% 82%, rgba(0,198,255,0.09) 0%, transparent 42%), linear-gradient(180deg, #061126 0%, #040919 48%, #08091d 100%)" }}
+      data-theme="sky-islands"
+      className="db-sky-islands min-h-screen overflow-hidden selection:bg-sky-200"
     >
 
       {/* HEADER */}
-      <header className="sticky top-0 z-50 border-b border-cyan-300/30 bg-[#03091b]/95 shadow-[0_8px_40px_rgba(0,180,255,.15)] backdrop-blur-2xl">
+      <header data-sky-header className="sticky top-0 z-50 border-b border-cyan-300/30 bg-[#03091b]/95 shadow-[0_8px_40px_rgba(0,180,255,.15)] backdrop-blur-2xl">
         <div className="mx-auto flex h-[64px] max-w-[1320px] items-center justify-between px-4 sm:px-6">
 
           <button
             onClick={() => go("top")}
-            aria-label="DigitalBoost, volver al inicio"
+            aria-label=", volver al inicio"
             className="group flex items-center gap-2.5 text-left"
           >
             <img
-              src="/digitalboost-dragon-logo.png"
+              src="/sky-islands/originx-foundation-logo.jpg"
               alt=""
-              className="h-10 w-[78px] shrink-0 object-contain mix-blend-screen drop-shadow-[0_0_18px_rgba(0,200,255,.42)] sm:h-11 sm:w-[88px]"
+              className="h-10 w-[150px] object-contain sm:w-[180px]"
             />
-            <span className="text-base font-black tracking-[0.12em] sm:text-lg">
-              DIGITAL<span className="bg-gradient-to-r from-violet-400 via-blue-400 to-cyan-300 bg-clip-text text-transparent">BOOST</span>
+            <span className="text-[11px] font-black tracking-[0.08em] sm:text-lg sm:tracking-[0.12em]">
+              
             </span>
           </button>
 
 
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             <button className="hidden p-2 text-slate-300 sm:block">
               <Moon size={17} />
             </button>
 
             <button
               onClick={() => setShowLogin(true)}
-              className="hidden rounded-lg border border-indigo-400/40 px-4 py-2.5 text-sm transition hover:border-cyan-400/60 hover:text-cyan-300 sm:block"
+              className="rounded-lg border border-indigo-400/40 px-1.5 py-2.5 text-[10px] transition hover:border-cyan-400/60 hover:text-cyan-300 sm:px-4 sm:text-sm"
             >
               Iniciar sesión
             </button>
 
             <button
               onClick={() => openTool("forge")}
-              className={`rounded-lg border border-white/15 px-5 py-2.5 text-sm font-bold shadow-[0_0_28px_rgba(90,70,255,.32)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_34px_rgba(0,200,255,.28)] ${neon}`}
+              data-sky-cta
+              className={`rounded-xl px-2.5 py-2.5 text-xs sm:px-5 sm:text-sm font-bold transition duration-200 hover:-translate-y-0.5 ${primaryCta}`}
             >
               Comenzar ahora
             </button>
@@ -142,10 +186,10 @@ export default function DigitalBoostMainPage({
 
 
       {/* HERO */}
-      <section className="relative isolate border-b border-cyan-300/35 bg-[radial-gradient(ellipse_at_75%_45%,rgba(0,114,255,0.20),transparent_52%),linear-gradient(135deg,#020611_0%,#06112a_52%,#0b0620_100%)]">
+      <section data-sky-hero className="relative isolate border-b border-cyan-300/35 bg-[radial-gradient(ellipse_at_75%_45%,rgba(0,114,255,0.20),transparent_52%),linear-gradient(135deg,#020611_0%,#06112a_52%,#0b0620_100%)]">
 
         <div
-          className="pointer-events-none absolute inset-0 opacity-40"
+          className="pointer-events-none absolute inset-0 opacity-0"
           style={{
             backgroundImage:
               "linear-gradient(rgba(38,150,255,.20) 1px,transparent 1px),linear-gradient(90deg,rgba(38,150,255,.20) 1px,transparent 1px)",
@@ -155,15 +199,21 @@ export default function DigitalBoostMainPage({
           }}
         />
 
-        <div className="pointer-events-none absolute right-[8%] top-[45%] h-[420px] w-[420px] -translate-y-1/2 rounded-full bg-blue-500/[0.28] blur-3xl" />
-        <div className="pointer-events-none absolute right-[3%] top-[52%] h-[340px] w-[340px] -translate-y-1/2 rounded-full bg-violet-500/[0.24] blur-3xl" />
+        <div aria-hidden="true" className="sky-islands-clouds pointer-events-none absolute right-[3%] top-[52%] h-[340px] w-[340px] -translate-y-1/2 rounded-full" />
 
-        <div className="relative mx-auto grid max-w-[1320px] grid-cols-1 items-center gap-6 px-4 py-10 sm:px-6 md:grid-cols-[.92fr_1.08fr] md:gap-4 md:py-12 lg:min-h-[500px]">
+        <img
+          src="/sky-islands/hero-floating-islands.jpg"
+          alt=""
+          aria-hidden="true"
+          className="sky-island-horizon pointer-events-none absolute bottom-0 right-0 z-[1] h-auto w-[min(55vw,520px)]"
+        />
+
+        <div className="relative z-10 mx-auto grid max-w-[1320px] grid-cols-1 items-center gap-6 px-4 py-10 sm:px-6 md:grid-cols-[.92fr_1.08fr] md:gap-4 md:py-12 lg:min-h-[500px]">
 
           {/* TEXTO HERO */}
           <div className="relative z-20">
 
-            <div className="mb-4 inline-flex rounded-full border border-cyan-400/50 bg-cyan-400/5 px-4 py-1.5 text-[10px] font-semibold tracking-wider text-cyan-300">
+            <div data-sky-eyebrow className="mb-4 inline-flex rounded-full border border-cyan-400/50 bg-cyan-400/5 px-4 py-1.5 text-[10px] font-semibold tracking-wider text-cyan-300">
               TODO EN UNO. POTENCIADO POR IA
             </div>
 
@@ -189,7 +239,8 @@ export default function DigitalBoostMainPage({
             <div className="mt-6 flex flex-wrap gap-4">
               <button
                 onClick={() => openTool("forge")}
-                className={`rounded-lg px-7 py-3 font-bold shadow-[0_0_28px_rgba(100,40,255,.3)] ${neon}`}
+                data-sky-cta
+                className={`rounded-xl px-7 py-3 font-bold transition hover:-translate-y-0.5 ${primaryCta}`}
               >
                 Comenzar gratis
                 <ArrowRight
@@ -200,7 +251,7 @@ export default function DigitalBoostMainPage({
 
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-5 text-xs text-slate-300">
+            <div data-sky-benefits className="mt-4 flex flex-wrap gap-3 text-xs sm:gap-5">
               <span>
                 <Check
                   size={15}
@@ -229,17 +280,13 @@ export default function DigitalBoostMainPage({
 
 
           {/* LOGO HERO - ÚNICA APARICIÓN */}
-          <div className="relative z-10 flex min-h-[300px] items-center justify-center md:min-h-[430px] md:justify-end">
-
-            <div className="pointer-events-none absolute right-[2%] h-[min(82vw,470px)] w-[min(82vw,470px)] rounded-full border border-cyan-300/45 shadow-[0_0_100px_rgba(0,170,255,.32),inset_0_0_85px_rgba(100,50,255,.24)]" />
-
-            <div className="pointer-events-none absolute right-[5%] h-[min(68vw,390px)] w-[min(68vw,390px)] rounded-full bg-cyan-400/[0.24] blur-3xl" />
+          <div data-sky-dragon className="relative z-10 flex min-h-[300px] items-center justify-center md:min-h-[430px] md:justify-end">
 
             <img
-              src="/digitalboost-dragon-logo.png"
-              alt="Dragón luminoso de DigitalBoost"
+              src="/sky-islands/hero-dragon-medallion.jpg"
+              alt="Dragón azul pixelado de DigitalBoost dentro de un medallón celeste"
               fetchPriority="high"
-              className="relative z-20 block w-full max-w-[720px] object-contain mix-blend-screen drop-shadow-[0_0_48px_rgba(0,210,255,.58)]"
+              className="sky-hero-dragon-art relative z-20 block w-full object-cover"
             />
 
           </div>
@@ -249,13 +296,14 @@ export default function DigitalBoostMainPage({
 
 
       {/* STATS */}
-      <section className="mx-auto max-w-[1320px] px-5 py-4">
-        <StatRow />
+      <section className="mx-auto max-w-[1320px] px-4 py-4 sm:px-5">
+        <StatRow onSelectTool={onSelectTool} />
       </section>
 
 
       {/* TOOLS */}
       <section
+        data-sky-tools
         id="tools"
         className="mx-auto max-w-[1320px] px-4 py-7 sm:px-6"
       >
@@ -266,15 +314,24 @@ export default function DigitalBoostMainPage({
           </span>
         </h2>
 
-        <div className="grid gap-3 md:grid-cols-5">
-          {tools.map(({ icon: Icon, title, desc: description, accent, ring, iconBg }) => (
+        <div data-sky-tools-grid className="grid gap-3 md:grid-cols-5">
+          {tools.map(({ tone, mode, image, title, desc: description, accent, ring }) => (
             <article
+              data-sky-tool={tone}
               key={title}
-              className={`group relative min-h-[174px] overflow-hidden rounded-xl border border-cyan-400/40 bg-gradient-to-br from-[#0b2042] via-[#050d20] to-[#160b32] p-4 shadow-[0_0_28px_rgba(0,170,255,.10)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_0_28px_rgba(34,211,238,.12)] motion-reduce:transition-none ${ring}`}
+              role="button"
+              tabIndex={0}
+              aria-label={`Abrir ${title}`}
+              onClick={() => openTool(mode)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  openTool(mode);
+                }
+              }}
+              className={`group relative cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500 min-h-[174px] overflow-hidden rounded-xl border border-cyan-400/40 bg-gradient-to-br from-[#0b2042] via-[#050d20] to-[#160b32] p-4 shadow-[0_0_28px_rgba(0,170,255,.10)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_0_28px_rgba(34,211,238,.12)] motion-reduce:transition-none ${ring}`}
             >
-              <div className={`mb-5 inline-flex rounded-md p-2 ${iconBg}`}>
-                <Icon size={28} className={accent} />
-              </div>
+              <img src={image} alt="" aria-hidden="true" loading="lazy" className="mb-4 h-14 w-14 rounded-xl object-cover shadow-sm" />
 
               <h3 className="font-semibold">
                 {title}
@@ -284,22 +341,15 @@ export default function DigitalBoostMainPage({
                 {description}
               </p>
 
-              <button
-                onClick={() => {
-                  if (title === "IA Forge") openTool("forge");
-                  else if (title === "Tiendas Virtuales") openTool("store");
-                  else if (title === "Nexus") openTool("nexus");
-                  else if (title === "Websites Builder") openTool("websites");
-                  else if (title === "Trading Islands") openTool("islands");
-                }}
-                className={`mt-3 text-xs ${accent}`}
+              <span
+                className={`mt-3 inline-flex min-h-10 items-center text-xs ${accent}`}
               >
                 Explorar
                 <ArrowRight
                   size={13}
                   className="inline"
                 />
-              </button>
+              </span>
             </article>
           ))}
         </div>
@@ -310,14 +360,14 @@ export default function DigitalBoostMainPage({
       <BrainBoostLandingSection />
 
       {/* INTEGRACIONES */}
-      <section className="mx-auto max-w-[1320px] px-5 py-3">
+      <section data-sky-integrations className="mx-auto max-w-[1320px] px-5 py-3">
         <div className="rounded-xl border border-cyan-400/30 bg-gradient-to-br from-[#07172c] to-[#100b2a] px-6 py-5 shadow-[0_0_28px_rgba(0,170,255,.08)]">
 
           <div className="mb-4 text-center text-xs font-semibold tracking-[.18em] text-cyan-300">
             INTEGRACIONES CON LO MEJOR
           </div>
 
-          <div className="grid grid-cols-2 items-center gap-5 text-center text-lg font-semibold text-slate-300 md:grid-cols-7">
+          <div data-sky-integrations-grid className="grid grid-cols-2 items-center gap-5 text-center text-lg font-semibold text-slate-300 md:grid-cols-7">
 
             <button
               onClick={() => openTool("forge")}
@@ -382,18 +432,19 @@ export default function DigitalBoostMainPage({
 
 
       {/* SECOND STATS */}
-      <section className="mx-auto max-w-[1320px] px-5 py-4">
-        <StatRow purple />
+      <section data-sky-secondary-modules className="mx-auto max-w-[1320px] px-5 py-4">
+        <StatRow purple onSelectTool={onSelectTool} />
       </section>
 
 
 
       {/* PRICING */}
       <section
+        data-sky-pricing
         id="pricing"
         className="mx-auto max-w-[1320px] px-5 py-10"
       >
-        <div className="rounded-xl border border-violet-400/30 bg-gradient-to-br from-[#07132a] to-[#100a28] p-7 shadow-[0_0_30px_rgba(100,60,255,.08)]">
+        <div data-sky-pricing-panel className="rounded-xl border border-violet-400/30 bg-gradient-to-br from-[#07132a] to-[#100a28] p-7 shadow-[0_0_30px_rgba(100,60,255,.08)]">
           <h2 className="text-center text-2xl font-semibold">
             Planes simples y transparentes
           </h2>
@@ -403,13 +454,14 @@ export default function DigitalBoostMainPage({
           </p>
 
           <div className="mt-7 grid gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-indigo-300/25 bg-[#071022] p-5 shadow-[0_0_18px_rgba(60,90,255,.06)]">
+            <div data-sky-plan="starter" className="rounded-xl border border-indigo-300/25 bg-[#071022] p-5 shadow-[0_0_18px_rgba(60,90,255,.06)]">
               <h3 className="font-bold">Starter</h3>
               <p className="mt-2 text-2xl font-bold">$0</p>
               <p className="mt-2 text-xs text-slate-400">
                 Para comenzar a crear.
               </p>
               <button
+                data-sky-plan-cta
                 onClick={() => openTool("forge")}
                 className="mt-5 w-full rounded-lg border border-indigo-400/40 px-4 py-2 text-sm"
               >
@@ -417,7 +469,7 @@ export default function DigitalBoostMainPage({
               </button>
             </div>
 
-            <div className="rounded-lg border border-cyan-400/40 bg-cyan-400/5 p-5">
+            <div data-sky-plan="pro" className="rounded-lg border border-cyan-400/40 bg-cyan-400/5 p-5">
               <div className="mb-2 text-[10px] font-bold tracking-wider text-cyan-300">
                 MÁS POPULAR
               </div>
@@ -427,6 +479,7 @@ export default function DigitalBoostMainPage({
                 Más potencia para tus proyectos.
               </p>
               <button
+                data-sky-plan-cta
                 onClick={() => openTool("islands")}
                 className="mt-5 w-full rounded-lg bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400 px-4 py-2 text-sm font-bold"
               >
@@ -434,13 +487,14 @@ export default function DigitalBoostMainPage({
               </button>
             </div>
 
-            <div className="rounded-xl border border-indigo-300/25 bg-[#071022] p-5 shadow-[0_0_18px_rgba(60,90,255,.06)]">
+            <div data-sky-plan="business" className="rounded-xl border border-indigo-300/25 bg-[#071022] p-5 shadow-[0_0_18px_rgba(60,90,255,.06)]">
               <h3 className="font-bold">Business</h3>
               <p className="mt-2 text-2xl font-bold">$79</p>
               <p className="mt-2 text-xs text-slate-400">
                 Para equipos y negocios en crecimiento.
               </p>
               <button
+                data-sky-plan-cta
                 onClick={() => openTool("store")}
                 className="mt-5 w-full rounded-lg border border-indigo-400/40 px-4 py-2 text-sm"
               >
@@ -453,10 +507,11 @@ export default function DigitalBoostMainPage({
 
       {/* CTA PRINCIPAL */}
       <section
+        data-sky-final-cta
         id="cta"
         className="mx-auto max-w-[1320px] px-5 py-4"
       >
-        <div className="relative overflow-hidden rounded-lg border border-indigo-400/25 bg-[#030914] px-7 py-8 md:flex md:items-center md:justify-between">
+        <div data-sky-final-cta-panel className="relative overflow-hidden rounded-lg border border-indigo-400/25 bg-[#030914] px-7 py-8 md:flex md:items-center md:justify-between">
 
           <div className="relative z-10 max-w-[600px]">
             <h2 className="text-2xl font-semibold">
@@ -474,7 +529,8 @@ export default function DigitalBoostMainPage({
           <div className="relative z-10 mt-6 text-center md:mt-0">
             <button
               onClick={() => openTool("forge")}
-              className={`rounded-lg px-8 py-3 font-bold shadow-[0_0_30px_rgba(100,40,255,.3)] ${neon}`}
+              data-sky-cta
+              className={`rounded-xl px-8 py-3 font-bold ${primaryCta}`}
             >
               Comenzar ahora gratis
               <ArrowRight
@@ -491,9 +547,9 @@ export default function DigitalBoostMainPage({
           {/* DRAGÓN CTA - UNA SOLA APARICIÓN */}
           <div className="relative z-10 mt-6 flex h-[100px] w-[130px] shrink-0 items-center justify-center md:mt-0">
             <img
-              src="/cta-dragon.png"
+              src="/digitalboost-dragon-logo.png"
               alt="DigitalBoost"
-              className="max-h-[110px] max-w-[125px] object-contain mix-blend-screen drop-shadow-[0_0_25px_rgba(40,100,255,.35)]"
+              className="max-h-[76px] max-w-[120px] object-contain drop-shadow-[0_6px_14px_rgba(20,80,150,.18)]"
             />
           </div>
 
@@ -503,6 +559,7 @@ export default function DigitalBoostMainPage({
 
       {/* FOOTER */}
       <footer
+        data-sky-footer
         id="footer"
         className="mt-4 border-t border-white/[.07] bg-[#020711]"
       >
@@ -583,7 +640,7 @@ export default function DigitalBoostMainPage({
 
         </div>
 
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between border-t border-white/[.06] px-5 py-5 text-xs text-slate-500">
+        <div data-sky-footer-meta className="mx-auto flex max-w-[1320px] items-center justify-between border-t border-white/[.06] px-5 py-5 text-xs text-slate-500">
 
           <div>
             © 2025 DigitalBoost.
@@ -707,7 +764,7 @@ export default function DigitalBoostMainPage({
 
               <button
                 type="submit"
-                className={`w-full rounded-lg px-5 py-3 text-sm font-bold ${neon}`}
+                className={`w-full rounded-lg px-5 py-3 text-sm font-bold ${primaryCta}`}
               >
                 Iniciar sesión
               </button>

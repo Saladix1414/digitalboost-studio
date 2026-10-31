@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="520" viewBox="0 0 1000 520" fill="none">
+  <g shape-rendering="crispEdges">
+    <!-- cloud banks -->
+    <g fill="#fff">
+      <path d="M44 274h32v-16h24v-16h40v16h24v16h20v20H44zm258-105h26v-13h20v-20h42v14h24v19h18v21H302zm420 90h28v-15h23v-19h42v15h26v18h20v22H722zM198 385h20v-11h18v-14h31v11h16v14h17v15h-102zm590-56h19v-10h18v-12h29v11h14v12h19v14h-99z" opacity=".82"/>
+      <path d="M98 294h28v-10h18v10h18v12H98zm515-147h20v-9h20v9h14v12h-54z" opacity=".54"/>
+    </g>
+    <g fill="#71d8f5"><path d="M270 94h10v10h-10zm11 10h10v10h-10zm382 84h8v8h-8zm-527 79h9v9h-9zm734-92h10v10h-10z"/></g>
+
+    <!-- left isle: green terrace and warm stepped cliff -->
+    <path d="M88 292h17v-13h25v-12h33v-12h42v12h29v9h28v12h20v14h-16v14h-17v15h-17v15h-18v17h-17v17h-18v16h-18v-15h-13v-16h-14v-17h-14v-16h-13v-15h-14v-15H88z" fill="#b86d59"/>
+    <path d="M88 292h17v-13h25v-12h33v-12h42v12h29v9h28v12h20v14H88z" fill="#159b64"/>
+    <path d="M104 284h27v-13h31v-12h19v15h-14v12h-32v11h-31zm57-12h23v9h-23zm42 4h34v10h-34zm43 11h29v9h-29z" fill="#41c66e"/>
+    <path d="M118 295h20v8h-20zm88-19h17v8h-17zm36 12h20v8h-20z" fill="#a8e35f"/>
+    <path d="M133 328h17v10h-17zm43 18h20v10h-20zm44-30h15v10h-15zm-28 47h18v10h-18z" fill="#df9562"/>
+    <path d="M164 367h15v17h-15zm47-23h15v16h-15z" fill="#8d4d60"/>
+    <!-- tiny tree on the left island -->
+    <path d="M173 254h8v-17h8v17h-8v16h-8z" fill="#80523b"/>
+    <path d="M151 237h18v-9h12v9h12v10h-12v8h-13v-8h-17zm10-14h11v-9h12v9h-11v8h-12zm23 14h14v8h-14z" fill="#087c58"/>
+    <path d="M158 232h10v-6h8v8h-9v7h-9zm22-8h9v8h-9z" fill="#64d77b"/>
+
+    <!-- main isle: broad luminous grassland -->
+    <path d="M344 235h23v-14h31v-13h47v-12h54v11h34v10h40v12h36v11h27v15h-20v16h-18v17h-19v18h-19v18h-18v19h-18v19h-20v20h-19v18h-19v20h-20v-18h-17v-18h-16v-18h-16v-18h-17v-17h-17v-18h-16v-17h-16v-17h-15v-16h-16v-15h-18z" fill="#bd7258"/>
+    <path d="M344 235h23v-14h31v-13h47v-12h54v11h34v10h40v12h36v11h27v15H344z" fill="#159e65"/>
+    <path d="M363 225h36v-13h36v-12h23v15h-19v11h-35v12h-41zm74-16h31v10h-31zm50-12h32v12h-32zm48 13h43v11h-43zm49 12h39v11h-39zm42 11h33v10h-33z" fill="#42c96e"/>
+    <path d="M380 237h24v9h-24zm67-28h19v8h-19zm70-7h21v9h-21zm56 19h25v8h-25zm55 11h20v8h-20z" fill="#b0e967"/>
+    <!-- layered cliff facets -->
+    <path d="M388 281h24v10h-24zm51 18h27v10h-27zm60-20h20v10h-20zm49 24h24v10h-24zm-82 31h22v10h-22zm59 13h28v10h-28zm57-21h20v10h-20zm-91 45h24v10h-24z" fill="#e3a071"/>
+    <path d="M367 262h18v11h-18zm72 48h15v11h-15zm116 9h14v12h-14zm62 20h16v12h-16zm-89 42h17v12h-17zm-53-32h13v12h-13z" fill="#934e60"/>
+    <path d="M510 320h12v20h11v19h11v21h11v19h-13v-16h-11v-18h-10v-19h-11z" fill="#28bde1"/>
+    <path d="M525 337h5v18h6v17h6v15h-6v-11h-6v-16h-5z" fill="#b8f5ff"/>
+    <path d="M458 377h16v10h-16zm102-26h17v10h-17zm-74 55h14v9h-14z" fill="#79465a"/>
+    <!-- palm grove on the main plateau -->
+    <path d="M470 195h9v-24h9v-17h9v17h-9v24h-9v14h-9zm42 6h8v-20h8v-15h8v15h-8v20h-8v10h-8z" fill="#89533c"/>
+    <path d="M442 162h19v-9h18v9h-13v9h-18v-5h-6zm26-17h12v-10h13v10h-12v9h-13zm26 4h15v9h-14v10h-11v-15h10zm24 14h15v-9h16v9h-12v9h-19zm-76 2h-16v-9h-16v9h12v10h20z" fill="#087d55"/>
+    <path d="M462 154h10v-8h8v8h-8v8h-10zm37-5h10v-8h8v8h-8v8h-10zm27 13h9v-7h9v7h-9v7h-9z" fill="#65d978"/>
+    <path d="M493 190h9v18h-9zm35-3h8v22h-8z" fill="#9b6241"/>
+
+    <!-- right isle: smaller high ledge with a palm -->
+    <path d="M732 316h18v-12h26v-12h33v-11h42v10h28v10h27v11h22v14h-17v14h-15v15h-17v15h-17v16h-17v15h-18v-14h-14v-16h-13v-15h-14v-15h-13v-15h-13v-14h-18z" fill="#b86e5d"/>
+    <path d="M732 316h18v-12h26v-12h33v-11h42v10h28v10h27v11h22v14H732z" fill="#159b64"/>
+    <path d="M750 307h28v-12h27v-11h19v15h-17v10h-29v11h-28zm53-12h22v8h-22zm42-11h28v10h-28zm38 17h35v9h-35zm41 11h23v8h-23z" fill="#43c96e"/>
+    <path d="M769 341h18v10h-18zm43 18h19v10h-19zm49-25h16v10h-16z" fill="#e1a070"/>
+    <path d="M836 275h8v-18h8v-14h8v14h-8v18h-8v11h-8z" fill="#87533b"/>
+    <path d="M813 245h17v-8h14v8h-11v8h-16v-4h-4zm21-14h11v-9h12v9h-11v8h-12zm23 7h14v8h-13v8h-10v-12h9zm-44 7h-13v-8h-13v8h9v8h17z" fill="#0b8056"/>
+    <path d="M829 239h9v-7h8v7h-8v7h-9zm28-4h9v7h-9z" fill="#70d982"/>
+    <path d="M885 357h9v15h8v17h-10v-12h-7z" fill="#24bce0"/>
+    <path d="M817 375h14v9h-14zm55 4h14v9h-14z" fill="#914d61"/>
+
+    <!-- tiny floating pixel motes -->
+    <path d="M305 246h8v8h-8zm8 8h8v8h-8zm371-59h8v8h-8zm-21 203h7v7h-7z" fill="#55d5ef"/>
+  </g>
+</svg>

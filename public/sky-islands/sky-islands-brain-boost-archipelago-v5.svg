@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="520" viewBox="0 0 1000 520" fill="none">
+  <defs>
+    <linearGradient id="cliff" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#f0b76f"/><stop offset=".5" stop-color="#d18a61"/><stop offset="1" stop-color="#9c6173"/></linearGradient>
+    <linearGradient id="cliffSmall" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#efbd79"/><stop offset="1" stop-color="#a66a78"/></linearGradient>
+    <linearGradient id="fall" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e7fdff"/><stop offset="1" stop-color="#62d8ef"/></linearGradient>
+  </defs>
+  <g shape-rendering="crispEdges">
+    <!-- distant soft clouds -->
+    <g fill="#fff" opacity=".78">
+      <path d="M63 282h28v-13h21v-15h37v12h22v16h18v20H63zm292-146h25v-13h20v-17h39v13h23v18h19v20H355zm398 72h26v-14h22v-17h39v13h25v18h18v20H753zM170 404h19v-10h18v-13h30v10h17v14h17v15h-101z"/>
+    </g>
+    <!-- distant upper island -->
+    <path d="M742 208h24v-13h32v-10h42v10h29v10h33v12h25v15h-18v15h-18v15h-18v17h-19v16h-19v-14h-15v-16h-14v-15h-15v-15h-14v-14h-14z" fill="url(#cliffSmall)"/>
+    <path d="M742 208h24v-13h32v-10h42v10h29v10h33v12h25v15H742z" fill="#52bd70"/>
+    <path d="M758 200h34v-12h18v15h-18v9h-34zm53-10h26v10h-26zm43 10h30v9h-30zm39 8h32v9h-32z" fill="#8ddd67"/>
+    <path d="M779 230h15v9h-15zm45 13h18v10h-18zm45-17h14v9h-14z" fill="#d99668"/>
+    <path d="M805 190h8v-13h8v13h-8v11h-8z" fill="#8e5a42"/>
+    <path d="M784 178h16v-8h12v8h-10v7h-17zm20-13h11v-9h12v9h-11v7h-12zm23 6h13v8h-12v8h-10v-12h9z" fill="#218b58"/>
+
+    <!-- left foreground isle, offset lower and smaller -->
+    <path d="M80 335h21v-12h29v-11h35v-10h45v10h30v9h27v11h22v14h-17v14h-16v16h-17v16h-18v16h-17v18h-19v-16h-14v-17h-14v-17h-14v-16h-13v-16h-14v-15h-16z" fill="url(#cliffSmall)"/>
+    <path d="M80 335h21v-12h29v-11h35v-10h45v10h30v9h27v11h22v14H80z" fill="#45b967"/>
+    <path d="M97 327h29v-11h31v14h-20v9h-29v10H97zm54-12h24v9h-24zm42 8h32v9h-32zm42 9h31v8h-31z" fill="#88d95b"/>
+    <path d="M111 353h17v9h-17zm56 22h19v10h-19zm47-29h15v9h-15zm-19 49h16v9h-16z" fill="#e4a06a"/>
+    <path d="M172 308v-18h8v-13h8v13h-8v18z" fill="#8f5a3e"/>
+    <path d="M147 279h17v-8h14v8h-11v8h-16zm23-15h11v-9h12v9h-11v7h-12zm23 5h14v8h-13v8h-10v-12h9zm-42 6h-14v-8h-14v8h10v8h18z" fill="#218653"/>
+    <path d="M154 277h10v-7h8v7h-8v7h-10zm30-9h9v8h-9z" fill="#b2e763"/>
+
+    <!-- main island: uneven, lush crown and faceted warm rock -->
+    <path d="M315 280h26v-15h35v-13h43v-13h56v-12h62v12h38v10h43v12h34v10h30v13h24v17h-20v17h-18v18h-18v18h-19v20h-19v20h-20v19h-20v20h-20v20h-21v20h-22v-18h-18v-18h-18v-17h-18v-18h-17v-17h-18v-17h-17v-18h-16v-17h-16v-16h-16v-16h-17v-15h-18v-15h-17z" fill="url(#cliff)"/>
+    <path d="M315 280h26v-15h35v-13h43v-13h56v-12h62v12h38v10h43v12h34v10h30v13h24v17H315z" fill="#42b965"/>
+    <path d="M333 270h37v-13h35v-12h28v16h-23v10h-38v11h-39zm76-16h35v10h-35zm56-14h38v12h-38zm59-13h28v14h-28zm37 14h39v10h-39zm48 11h44v11h-44zm47 12h38v10h-38zm41 11h32v9h-32z" fill="#86d95b"/>
+    <path d="M353 282h25v8h-25zm58-26h21v8h-21zm74-17h25v9h-25zm58-12h19v10h-19zm57 25h23v8h-23zm54 11h20v8h-20zm44 13h20v8h-20z" fill="#c1ec65"/>
+    <!-- grass tufts and flowering shrubs -->
+    <path d="M401 239h9v-13h9v13h-9v11h-9zm188-1h8v-12h8v12h-8v10h-8z" fill="#2d9858"/>
+    <path d="M427 238h8v8h-8zm-17-8h7v7h-7zm165-3h8v8h-8z" fill="#ffe36e"/>
+    <path d="M518 225v-16h8v-12h8v12h-8v16z" fill="#8b5b41"/>
+    <path d="M495 200h18v-9h15v9h-12v8h-18zm25-16h12v-10h14v10h-13v8h-13zm26 6h16v9h-15v9h-11v-13h10zm-46 5h-15v-9h-15v9h11v9h19z" fill="#238654"/>
+    <path d="M502 198h10v-7h8v7h-8v8h-10zm32-10h9v8h-9z" fill="#b1e85f"/>
+    <!-- stepped cliff strata -->
+    <path d="M350 319h25v10h-25zm54 17h28v10h-28zm61-23h22v10h-22zm49 30h28v10h-28zm60-19h22v10h-22zm-106 54h22v10h-22zm61 13h27v10h-27zm58-26h22v10h-22zm-91 50h24v10h-24z" fill="#f0bd7b"/>
+    <path d="M329 298h18v11h-18zm71 55h17v11h-17zm116 9h14v12h-14zm62 23h16v12h-16zm-94 38h17v11h-17zm-59-37h14v11h-14z" fill="#a15e6b"/>
+    <path d="M611 369h12v21h12v21h12v22h-14v-17h-12v-20h-10z" fill="url(#fall)"/>
+    <path d="M626 386h6v18h7v18h-7v-12h-6v-17h-6z" fill="#fff" opacity=".9"/>
+    <path d="M535 438h18v10h-18zm96-27h16v10h-16zm-147 8h14v10h-14z" fill="#885265"/>
+
+    <!-- small floating stones and sky glints -->
+    <path d="M292 360h13v8h-13zm458-66h12v8h-12zm-76 124h10v10h-10zm-386-54h9v9h-9z" fill="#a56a78"/>
+    <path d="M280 209h9v9h-9zm9 9h9v9h-9zm493-38h10v10h-10zm-152 28h8v8h-8z" fill="#42cde8"/>
+    <path d="M277 184v-13h7v13h13v7h-13v13h-7v-13h-13v-7z" fill="#ffbd37"/>
+  </g>
+</svg>
