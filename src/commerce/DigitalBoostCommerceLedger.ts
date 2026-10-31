@@ -41,7 +41,7 @@ export type CommerceEvent = {
 export type CommerceSnapshot = {
   readonly contract: typeof COMMERCE_LEDGER_CONTRACT;
   readonly tenantId: string;
-  readonly source: "ledger" | "postgresql";
+  readonly source: "ledger" | "postgresql" | "mixed";
   readonly products: readonly CommerceProduct[];
   readonly orders: readonly CommerceOrder[];
   readonly customers: readonly CommerceCustomer[];
@@ -60,6 +60,7 @@ type TenantBag = {
 
 const bags = new Map<string, TenantBag>();
 const serverBackedTenants = new Set<string>();
+const mixedTenants = new Set<string>();
 const LS_KEY = "db-commerce-ledger-v1";
 
 function readAll(): void {
@@ -108,16 +109,42 @@ function bag(tenantId: string): TenantBag {
   return created;
 }
 
+function mergeRows<T extends { readonly id: string }>(
+  localRows: readonly T[],
+  serverRows: readonly T[],
+): T[] {
+  const merged = new Map(serverRows.map(row => [row.id, row]));
+  // Keep local rows and values until an explicit reconciliation can resolve conflicts.
+  for (const row of localRows) merged.set(row.id, row);
+  return [...merged.values()];
+}
+
+function hasLocalDifferences<T extends { readonly id: string }>(
+  localRows: readonly T[],
+  serverRows: readonly T[],
+): boolean {
+  const serverById = new Map(serverRows.map(row => [row.id, row]));
+  return localRows.some(row => JSON.stringify(row) !== JSON.stringify(serverById.get(row.id)));
+}
+
+function markLocalMutation(tenantId: string): void {
+  if (serverBackedTenants.has(tenantId) || mixedTenants.has(tenantId)) {
+    mixedTenants.add(tenantId);
+  }
+  serverBackedTenants.delete(tenantId);
+}
+
 export function resetCommerceLedger(): void {
   bags.clear();
   serverBackedTenants.clear();
+  mixedTenants.clear();
   try { localStorage.removeItem(LS_KEY); } catch {}
 }
 
 /** Replace one tenant's local product cache without touching orders or customers. */
 export function replaceCommerceProducts(tenantId: string, products: readonly CommerceProduct[]): void {
   const data = bag(tenantId);
-  serverBackedTenants.delete(tenantId);
+  markLocalMutation(tenantId);
   data.products = products.filter(product => product.tenantId === tenantId).map(product => ({ ...product }));
   writeAll({ notifyServerPeers: false });
 }
@@ -127,13 +154,24 @@ export function hydrateCommerceSnapshot(snapshot: CommerceSnapshot): void {
   const tenantId = snapshot.tenantId.trim();
   if (!tenantId) return;
   readAll();
+  const local = bag(tenantId);
+  const hasLocalData = [local.products, local.orders, local.customers, local.events]
+    .some(rows => rows.length > 0);
+  const differs = hasLocalData && (
+    hasLocalDifferences(local.products, snapshot.products)
+    || hasLocalDifferences(local.orders, snapshot.orders)
+    || hasLocalDifferences(local.customers, snapshot.customers)
+    || hasLocalDifferences(local.events, snapshot.events)
+  );
   bags.set(tenantId, {
-    products: [...snapshot.products],
-    orders: [...snapshot.orders],
-    customers: [...snapshot.customers],
-    events: [...snapshot.events],
+    products: mergeRows(local.products, snapshot.products),
+    orders: mergeRows(local.orders, snapshot.orders),
+    customers: mergeRows(local.customers, snapshot.customers),
+    events: mergeRows(local.events, snapshot.events),
   });
   serverBackedTenants.add(tenantId);
+  if (differs) mixedTenants.add(tenantId);
+  else mixedTenants.delete(tenantId);
   try {
     const dump: Record<string, TenantBag> = {};
     for (const [id, value] of bags) dump[id] = value;
@@ -156,12 +194,18 @@ export function getCommerceSnapshot(tenantId: string): CommerceSnapshot {
   return {
     contract: COMMERCE_LEDGER_CONTRACT,
     tenantId: id,
-    source: serverBackedTenants.has(id) ? "postgresql" : "ledger",
+    source: mixedTenants.has(id)
+      ? "mixed"
+      : serverBackedTenants.has(id)
+        ? "postgresql"
+        : "ledger",
     products: data.products,
     orders: data.orders,
     customers: data.customers,
     events: data.events,
-    netSales: paid.length ? paid.reduce((s, o) => s + o.total.amount, 0) : null,
+    netSales: mixedTenants.has(id)
+      ? null
+      : paid.length ? paid.reduce((s, o) => s + o.total.amount, 0) : null,
     orderCount: data.orders.length,
     customerCount: data.customers.length,
   };
@@ -172,7 +216,7 @@ export function recordCommerceProduct(input: CommerceProduct): CommerceProduct {
     throw new Error("tenantId is required");
   }
   bag(input.tenantId).products.push(input);
-  serverBackedTenants.delete(input.tenantId);
+  markLocalMutation(input.tenantId);
   writeAll();
   return input;
 }
@@ -182,14 +226,14 @@ export function recordCommerceOrder(input: CommerceOrder): CommerceOrder {
   const idx = data.orders.findIndex((item) => item.id === input.id);
   if (idx >= 0) data.orders[idx] = input;
   else data.orders.push(input);
-  serverBackedTenants.delete(input.tenantId);
+  markLocalMutation(input.tenantId);
   writeAll();
   return input;
 }
 
 export function recordCommerceCustomer(input: CommerceCustomer): CommerceCustomer {
   bag(input.tenantId).customers.push(input);
-  serverBackedTenants.delete(input.tenantId);
+  markLocalMutation(input.tenantId);
   writeAll();
   return input;
 }

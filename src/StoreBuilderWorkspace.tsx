@@ -273,7 +273,10 @@ export default function StoreBuilderWorkspace({
     }));
   });
   useEffect(() => {
-    if (commerceLive.snap.source !== "postgresql") return;
+    if (commerceLive.snap.source === "ledger") return;
+    setCommerceNotice(commerceLive.snap.source === "mixed"
+      ? "Hay datos locales y PostgreSQL; ventas pendientes de reconciliación."
+      : "");
     setProducts(commerceLive.snap.products.map((item, index) => ({
       id: Number(item.id) || index + 1,
       name: item.title,

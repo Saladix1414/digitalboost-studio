@@ -9,6 +9,8 @@ This phase adds a PostgreSQL-backed catalog and order ledger behind the existing
 3. Run `npm run infra:migrate` once, then start the app with `npm run dev`.
 4. The local development principal is scoped to `local-tenant`. Product edits are stored in PostgreSQL; the browser ledger remains as an offline fallback.
 
+When a server snapshot differs from existing browser data, the client keeps local-only records and local values for conflicting IDs. The snapshot is marked `mixed`, and net sales are suppressed until the data is reconciled. This avoids silently replacing the browser ledger with an empty or partial database snapshot.
+
 The app uses the existing infrastructure composition and migration runner. No database credentials are committed.
 
 ## API added
