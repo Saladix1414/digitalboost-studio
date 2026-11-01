@@ -64,3 +64,49 @@ export function createCommerceOrder(input: {
 export function createCommerceCustomer(input: { name: string; email?: string }): Promise<{ ok: true; customer: CommerceCustomer }> {
   return request("/customers", { method: "POST", body: JSON.stringify(input) });
 }
+
+export type CommerceUsdtEthereumPayment = {
+  id: string;
+  state: "pending" | "verified" | "expired";
+  chainId: 1;
+  token: "USDT";
+  tokenDecimals: 6;
+  tokenContract: string;
+  merchantAddress: string;
+  amountAtomic: string;
+  amountUsdt: string;
+  expiresAt: string;
+  transactionHash?: string;
+  payerAddress?: string;
+  verifiedAt?: string;
+};
+
+export function createCommerceUsdtEthereumIntent(orderId: string): Promise<{ ok: true; payment: CommerceUsdtEthereumPayment }> {
+  return request("/orders/" + encodeURIComponent(orderId) + "/usdt-ethereum-intents", {
+    method: "POST", body: JSON.stringify({}),
+  });
+}
+
+export function verifyCommerceUsdtEthereumPayment(intentId: string, txHash: string): Promise<{ ok: true; payment: CommerceUsdtEthereumPayment }> {
+  return request("/usdt-ethereum-intents/" + encodeURIComponent(intentId) + "/verify", {
+    method: "POST", body: JSON.stringify({ txHash }),
+  });
+}
+
+export type CommerceUsdtEthereumPayment = {
+  id: string;
+  state: "pending" | "verified" | "expired";
+  chainId: 1;
+  token: "USDT";
+  tokenDecimals: 6;
+  tokenContract: string;
+  merchantAddress: string;
+  amountAtomic: string;
+  amountUsdt: string;
+  expiresAt: string;
+  transactionHash?: string;
+  payerAddress?: string;
+  verifiedAt?: string;
+};
+
+

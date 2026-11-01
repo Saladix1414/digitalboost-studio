@@ -33,6 +33,7 @@ import CommerceOSOverview from "./CommerceOSOverview";
 import { getCommerceSnapshot, hydrateCommerceSnapshot, recordCommerceCustomer, recordCommerceOrder, replaceCommerceProducts, type CommerceOrderLine, type CommerceCurrency } from "./commerce/DigitalBoostCommerceLedger";
 import { useCommerceLive } from "./commerce/useCommerceLive";
 import { createCommerceCustomer, createCommerceOrder, deleteCommerceProduct, fetchCommerceOrderItems, fetchCommerceSnapshot, saveCommerceProduct } from "./commerce/DigitalBoostCommerceApi";
+import CommerceUsdtPaymentPanel from "./commerce/CommerceUsdtPaymentPanel";
 import { deleteCommerceCampaign, fetchCommerceCampaigns, saveCommerceCampaign, type CommerceCampaignConfiguration } from "./commerce/DigitalBoostCommerceCampaignApi";
 import DigitalBoostPulseBotPanel from "./commerce/DigitalBoostPulseBotPanel";
 import DigitalBoostMarketplacePanel from "./commerce/DigitalBoostMarketplacePanel";
@@ -2111,7 +2112,7 @@ const filteredProducts = useMemo(() => {
               </div>
 
               <p className="mt-5 rounded-lg border border-white/10 bg-white/[.03] p-3 text-[11px] leading-5 text-slate-400">
-                Este panel refleja los estados guardados en el servidor. Las acciones de pago y cumplimiento se habilitarán cuando se conecten sus servicios reales.
+                El pago se actualiza cuando el servidor verifica una transferencia USDT en Ethereum. El cumplimiento sigue pendiente de conectar a su servicio.
               </p>
 
               <div className="mt-5 rounded-xl border border-[#D6E2EE] bg-[#0B1B30] p-4">
@@ -2126,6 +2127,16 @@ const filteredProducts = useMemo(() => {
               </div>
             </div>
           </Panel>
+
+          {order.status === "Impago" && order.currency === "USD" && (
+            <CommerceUsdtPaymentPanel orderId={order.id} onVerified={() => {
+              void fetchCommerceSnapshot().then(snapshot => hydrateCommerceSnapshot(snapshot))
+                .catch(() => setCommerceNotice("Pago verificado; la vista no se pudo actualizar automáticamente."));
+            }} />
+          )}
+          {order.status === "Impago" && order.currency === "ARS" && (
+            <Panel title="Pago con USDT"><p className="p-5 text-xs text-slate-400">USDT en Ethereum solo está disponible para pedidos en USD. Este pedido está expresado en ARS.</p></Panel>
+          )}
 
           <Panel title="PULSE">
             <div className="p-5">
