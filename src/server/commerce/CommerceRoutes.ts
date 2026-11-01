@@ -6,6 +6,7 @@ import { MarketplaceRepository } from "./MarketplaceRepository";
 import { validateMarketAsset } from "../../commerce/DigitalBoostMarketAssetGuard";
 import { MARKET_TAKE_RATE, type MarketRail } from "../../commerce/DigitalBoostMarketplace";
 import { CommerceAutomationRepository } from "./CommerceAutomationRepository";
+import { CommerceCampaignRepository } from "./CommerceCampaignRepository";
 import { COMMERCE_BOT_SKILLS, type CommerceBotSkill } from "../../commerce/DigitalBoostCommerceBots";
 import type { BotRuleAction, BotRuleTrigger } from "../../commerce/DigitalBoostCommerceBotRules";
 
@@ -59,6 +60,7 @@ export function registerCommerceRoutes(
   const repository = input.database ? new CommerceRepository(input.database) : null;
   const marketplace = input.database ? new MarketplaceRepository(input.database) : null;
   const automation = input.database ? new CommerceAutomationRepository(input.database) : null;
+  const campaigns = input.database ? new CommerceCampaignRepository(input.database) : null;
 
   router.use((request, response, next) => {
     const principal = principalFor(request, input.environment);
@@ -254,6 +256,67 @@ export function registerCommerceRoutes(
       response.status(201).json({ ok: true, listing });
     } catch {
       response.status(503).json({ error: "commerce_market_listing_write_failed" });
+    }
+  });
+
+  router.get("/campaigns", async (request, response) => {
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      response.json({
+        contract: "cos-commerce-campaign-config-v1",
+        campaigns: await campaigns!.list(principal),
+        source: "postgresql",
+        authoritative: false,
+      });
+    } catch {
+      response.status(503).json({ error: "commerce_campaign_read_failed" });
+    }
+  });
+
+  router.put("/campaigns/:id", async (request, response) => {
+    const id = request.params.id.trim();
+    const body = request.body ?? {};
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const audience = typeof body.audience === "string" ? body.audience.trim() : "";
+    const discount = Number(body.discount);
+    const status = body.status;
+    const source = typeof body.source === "string" ? body.source.trim() : "";
+    const sequence = body.sequence;
+    if (!id || id.length > 100 || !name || name.length > 160
+      || !audience || audience.length > 500
+      || !Number.isFinite(discount) || discount < 0 || discount > 100
+      || (status !== "Activa" && status !== "Pausada")
+      || source.length > 120
+      || !Array.isArray(sequence) || sequence.length > 10
+      || sequence.some((item: unknown) => typeof item !== "string" || item.length > 180)) {
+      response.status(400).json({ error: "invalid_commerce_campaign" });
+      return;
+    }
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      const campaign = await campaigns!.save(principal, {
+        id, name, audience, discount, status, source, sequence,
+      });
+      input.publishChange?.();
+      response.json({ ok: true, campaign });
+    } catch {
+      response.status(503).json({ error: "commerce_campaign_write_failed" });
+    }
+  });
+
+  router.delete("/campaigns/:id", async (request, response) => {
+    const id = request.params.id.trim();
+    if (!id || id.length > 100) {
+      response.status(400).json({ error: "invalid_commerce_campaign_id" });
+      return;
+    }
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      await campaigns!.delete(principal, id);
+      input.publishChange?.();
+      response.json({ ok: true });
+    } catch {
+      response.status(503).json({ error: "commerce_campaign_delete_failed" });
     }
   });
 

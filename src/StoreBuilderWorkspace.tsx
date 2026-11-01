@@ -33,6 +33,7 @@ import CommerceOSOverview from "./CommerceOSOverview";
 import { getCommerceSnapshot, recordCommerceCustomer, recordCommerceOrder, replaceCommerceProducts } from "./commerce/DigitalBoostCommerceLedger";
 import { useCommerceLive } from "./commerce/useCommerceLive";
 import { deleteCommerceProduct, saveCommerceProduct } from "./commerce/DigitalBoostCommerceApi";
+import { deleteCommerceCampaign, fetchCommerceCampaigns, saveCommerceCampaign, type CommerceCampaignConfiguration } from "./commerce/DigitalBoostCommerceCampaignApi";
 import DigitalBoostPulseBotPanel from "./commerce/DigitalBoostPulseBotPanel";
 import DigitalBoostMarketplacePanel from "./commerce/DigitalBoostMarketplacePanel";
 import { CommerceStoreProvider } from "./commerce/DigitalBoostCommerceContext";
@@ -431,6 +432,7 @@ export default function StoreBuilderWorkspace({
       return [];
     }
   });
+  const [campaignNotice, setCampaignNotice] = useState("Las métricas no tienen atribución de campaña; no se envían mensajes.");
   const [campaignToDelete, setCampaignToDelete] =
     useState<Campaign | null>(null);
   const [campaignToView, setCampaignToView] =
@@ -442,6 +444,37 @@ export default function StoreBuilderWorkspace({
       JSON.stringify(campaigns)
     );
   }, [campaigns]);
+
+  useEffect(() => {
+    let active = true;
+    fetchCommerceCampaigns()
+      .then(({ campaigns: remoteCampaigns }) => {
+        if (!active) return;
+        setCampaigns((current) => {
+          const merged = new Map(current.map((campaign) => [String(campaign.id), campaign]));
+          for (const remote of remoteCampaigns) {
+            const id = Number(remote.id);
+            if (!Number.isSafeInteger(id) || id <= 0) continue;
+            const previous = merged.get(remote.id);
+            merged.set(remote.id, {
+              ...remote,
+              id,
+              sequence: [...remote.sequence],
+              reach: previous?.reach ?? 0,
+              recoveredCarts: previous?.recoveredCarts ?? 0,
+              conversions: previous?.conversions ?? 0,
+              revenue: previous?.revenue ?? 0,
+            });
+          }
+          return [...merged.values()];
+        });
+        setCampaignNotice("Configuración sincronizada con PostgreSQL. No se envían mensajes; las métricas no tienen atribución de campaña.");
+      })
+      .catch(() => {
+        if (active) setCampaignNotice("PostgreSQL no disponible; se conserva la copia local. No se envían mensajes.");
+      });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     if (campaigns.length > 0 && orders.length > 0) {
@@ -684,6 +717,21 @@ export default function StoreBuilderWorkspace({
     syncCampaignMetrics();
   }, [orders, customers.length]);
 
+  const persistCampaignConfiguration = (campaign: Campaign) => {
+    const configuration: CommerceCampaignConfiguration = {
+      id: String(campaign.id),
+      name: campaign.name,
+      audience: campaign.audience,
+      discount: campaign.discount,
+      status: campaign.status,
+      source: campaign.source,
+      sequence: campaign.sequence,
+    };
+    void saveCommerceCampaign(configuration)
+      .then(() => setCampaignNotice("Configuración guardada en PostgreSQL. No se ejecuta la secuencia."))
+      .catch(() => setCampaignNotice("Configuración guardada localmente; PostgreSQL no está disponible. No se envían mensajes."));
+  };
+
   const createCampaign = (
     name: string,
     audience: string,
@@ -726,15 +774,16 @@ export default function StoreBuilderWorkspace({
     };
 
     setCampaigns((current) => [...current, campaignWithMetrics]);
+    persistCampaignConfiguration(campaignWithMetrics);
     return true;
   };
 
   const toggleCampaignStatus = (campaignId: number) => {
-    setCampaigns((current) => current.map((campaign) =>
-      campaign.id === campaignId
-        ? { ...campaign, status: campaign.status === "Activa" ? "Pausada" : "Activa" }
-        : campaign,
-    ));
+    const current = campaigns.find((campaign) => campaign.id === campaignId);
+    if (!current) return;
+    const next = { ...current, status: current.status === "Activa" ? "Pausada" as const : "Activa" as const };
+    setCampaigns((items) => items.map((campaign) => campaign.id === campaignId ? next : campaign));
+    persistCampaignConfiguration(next);
   };
 
   const [showAddProduct, setShowAddProduct] = useState(false);
@@ -1109,6 +1158,9 @@ const filteredProducts = useMemo(() => {
     setCampaigns((currentCampaigns) =>
       currentCampaigns.filter((campaign) => campaign.id !== campaignId)
     );
+    void deleteCommerceCampaign(String(campaignId))
+      .then(() => setCampaignNotice("Configuración eliminada de PostgreSQL."))
+      .catch(() => setCampaignNotice("No se pudo borrar en PostgreSQL; se quitó localmente y puede reaparecer al reconectar."));
 
     setCampaignToDelete(null);
 
@@ -2695,8 +2747,9 @@ const filteredProducts = useMemo(() => {
         <div>
           <p className="text-lg font-semibold">Campañas</p>
           <p className="mt-1 text-sm text-[#475569]">
-            Campañas creadas por el PULSE o manualmente.
+            Configuraciones de campaña para revisar. Guardar o activar no envía mensajes.
           </p>
+          <p className="mt-1 text-xs leading-5 text-cyan-200/70">{campaignNotice}</p>
         </div>
 
         <button
@@ -2802,7 +2855,7 @@ const filteredProducts = useMemo(() => {
 
             <div className="rounded-lg border border-[#00B7FF]/30 bg-[#0B1B30] p-3">
               <p className="text-[11px] font-medium text-[#475569]">
-                Secuencia automática
+                Secuencia sugerida · sin ejecución
               </p>
 
               <div className="mt-2 space-y-1.5 text-[11px] text-[#475569]">
@@ -2953,7 +3006,7 @@ const filteredProducts = useMemo(() => {
 
                 <div className="mt-4 rounded-lg border border-[#00B7FF]/30 bg-[#0B1B30] p-3">
                   <p className="text-[11px] font-medium text-[#475569]">
-                    Secuencia automática
+                    Secuencia sugerida · sin ejecución
                   </p>
 
                   <div className="mt-2 space-y-1.5 text-[11px] text-[#475569]">
@@ -3876,7 +3929,7 @@ const filteredProducts = useMemo(() => {
                       Crear campaña de recuperación
                     </p>
                     <p className="mt-1 text-xs leading-5 text-[#475569]">
-                      Configurá la campaña preparada por el PULSE.
+                      Revisá y guardá una propuesta. No se envían mensajes ni se ejecutan secuencias.
                     </p>
                   </div>
 
@@ -3884,10 +3937,10 @@ const filteredProducts = useMemo(() => {
                     <div className="space-y-3">
                       <div className="rounded-lg border border-emerald-400/20 bg-emerald-500/10 p-4">
                         <p className="text-sm font-semibold text-emerald-300">
-                          ✓ Campaña creada correctamente
+                          ✓ Configuración de campaña guardada
                         </p>
                         <p className="mt-1 text-xs leading-5 text-[#475569]">
-                          "{campaignName}" quedó creada como campaña activa.
+                          "{campaignName}" quedó guardada como configuración; no se envían mensajes ni se ejecuta la secuencia.
                         </p>
                       </div>
 
@@ -3941,7 +3994,7 @@ const filteredProducts = useMemo(() => {
 
                       <div className="rounded-lg border border-[#00B7FF]/30 bg-[#0B1B30] p-3">
                         <p className="text-[11px] font-medium text-[#475569]">
-                          Secuencia automática
+                          Secuencia sugerida · sin ejecución
                         </p>
                         <div className="mt-2 space-y-1.5 text-[11px] text-[#475569]">
                           <p>⏱️ 1 hora — Recordatorio del carrito</p>

@@ -10,10 +10,14 @@ import {
 import {
   commerceBotConfigurationMigration,
 } from "./0004CommerceBotConfiguration";
+import {
+  commerceCampaignConfigurationMigration,
+} from "./0005CommerceCampaignConfiguration";
 
 export const postgresMigrations = [
   infrastructureFoundationMigration,
   commerceCatalogAndOrdersMigration,
   commerceMarketplaceMigration,
   commerceBotConfigurationMigration,
+  commerceCampaignConfigurationMigration,
 ] as const;
