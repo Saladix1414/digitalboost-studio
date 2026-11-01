@@ -1,4 +1,4 @@
-import type { CommerceSnapshot, CommerceProduct } from "./DigitalBoostCommerceLedger";
+import type { CommerceSnapshot, CommerceProduct, CommerceCustomer } from "./DigitalBoostCommerceLedger";
 
 const BASE = "/api/commerce/v1";
 
@@ -41,4 +41,8 @@ export function createCommerceOrder(input: {
   customerId?: string;
 }): Promise<{ ok: true; order: CommerceSnapshot["orders"][number] }> {
   return request("/orders", { method: "POST", body: JSON.stringify(input) });
+}
+
+export function createCommerceCustomer(input: { name: string; email?: string }): Promise<{ ok: true; customer: CommerceCustomer }> {
+  return request("/customers", { method: "POST", body: JSON.stringify(input) });
 }

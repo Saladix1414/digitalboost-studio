@@ -109,9 +109,10 @@ export function registerCommerceRoutes(
   router.get("/snapshot", async (request, response) => {
     try {
       const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
-      const [products, orders] = await Promise.all([
+      const [products, orders, customers] = await Promise.all([
         repository!.listProducts(principal),
         repository!.listOrders(principal),
+        repository!.listCustomers(principal),
       ]);
       const paidOrders = orders.filter(order => order.paymentState === "PAID");
       response.json({
@@ -120,17 +121,36 @@ export function registerCommerceRoutes(
         source: "postgresql",
         products,
         orders,
-        customers: [],
+        customers,
         events: [],
         netSales: paidOrders.length
           ? paidOrders.reduce((sum, order) => sum + order.total.amount, 0)
           : null,
         orderCount: orders.length,
-        customerCount: 0,
+        customerCount: customers.length,
         authoritative: false,
       });
     } catch {
       response.status(503).json({ error: "commerce_read_failed" });
+    }
+  });
+
+  router.post("/customers", async (request, response) => {
+    const name = typeof request.body?.name === "string" ? request.body.name.trim() : "";
+    const rawEmail = request.body?.email;
+    const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
+    const emailOk = !email || (email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+    if (name.length < 2 || name.length > 120 || !emailOk) {
+      response.status(400).json({ error: "invalid_commerce_customer" });
+      return;
+    }
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      const customer = await repository!.createCustomer(principal, { name, email: email || undefined });
+      input.publishChange?.();
+      response.status(201).json({ ok: true, customer });
+    } catch {
+      response.status(503).json({ error: "commerce_customer_write_failed" });
     }
   });
 

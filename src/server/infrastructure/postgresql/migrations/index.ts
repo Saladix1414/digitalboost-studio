@@ -16,6 +16,9 @@ import {
 import {
   commerceStoreDraftsMigration,
 } from "./0006CommerceStoreDrafts";
+import {
+  commerceCustomersMigration,
+} from "./0007CommerceCustomers";
 
 export const postgresMigrations = [
   infrastructureFoundationMigration,
@@ -24,4 +27,5 @@ export const postgresMigrations = [
   commerceBotConfigurationMigration,
   commerceCampaignConfigurationMigration,
   commerceStoreDraftsMigration,
+  commerceCustomersMigration,
 ] as const;

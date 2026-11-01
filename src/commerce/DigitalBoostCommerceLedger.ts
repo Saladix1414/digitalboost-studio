@@ -29,6 +29,7 @@ export type CommerceCustomer = {
   readonly id: string;
   readonly tenantId: string;
   readonly name: string;
+  readonly email?: string;
 };
 
 export type CommerceEvent = {

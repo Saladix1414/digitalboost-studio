@@ -30,9 +30,9 @@ import {
 } from "lucide-react";
 import ProductInventoryPro from "./ProductInventoryPro";
 import CommerceOSOverview from "./CommerceOSOverview";
-import { getCommerceSnapshot, recordCommerceCustomer, recordCommerceOrder, replaceCommerceProducts } from "./commerce/DigitalBoostCommerceLedger";
+import { getCommerceSnapshot, hydrateCommerceSnapshot, recordCommerceCustomer, recordCommerceOrder, replaceCommerceProducts } from "./commerce/DigitalBoostCommerceLedger";
 import { useCommerceLive } from "./commerce/useCommerceLive";
-import { deleteCommerceProduct, saveCommerceProduct } from "./commerce/DigitalBoostCommerceApi";
+import { createCommerceCustomer, deleteCommerceProduct, fetchCommerceSnapshot, saveCommerceProduct } from "./commerce/DigitalBoostCommerceApi";
 import { deleteCommerceCampaign, fetchCommerceCampaigns, saveCommerceCampaign, type CommerceCampaignConfiguration } from "./commerce/DigitalBoostCommerceCampaignApi";
 import DigitalBoostPulseBotPanel from "./commerce/DigitalBoostPulseBotPanel";
 import DigitalBoostMarketplacePanel from "./commerce/DigitalBoostMarketplacePanel";
@@ -345,7 +345,7 @@ export default function StoreBuilderWorkspace({
         id: index + 1,
         recordId: profile.id,
         name: profile.name,
-        email: "",
+        email: profile.email ?? "",
         orders: linkedOrders.length,
         spent: linkedOrders
           .filter((order) => order.paymentState === "PAID")
@@ -357,10 +357,33 @@ export default function StoreBuilderWorkspace({
 
   const [search, setSearch] = useState("");
   const [customerSearch, setCustomerSearch] = useState("");
+  const [showCustomerForm, setShowCustomerForm] = useState(false);
+  const [newCustomerName, setNewCustomerName] = useState("");
+  const [newCustomerEmail, setNewCustomerEmail] = useState("");
+  const [customerSaving, setCustomerSaving] = useState(false);
+  const [customerNotice, setCustomerNotice] = useState("");
   const [customerFilter, setCustomerFilter] = useState<
     "all" | "high-value" | "repeat" | "inactive"
   >("all");
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
+  const saveCustomerProfile = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (customerSaving) return;
+    setCustomerSaving(true);
+    setCustomerNotice("");
+    try {
+      await createCommerceCustomer({ name: newCustomerName.trim(), email: newCustomerEmail.trim() || undefined });
+      hydrateCommerceSnapshot(await fetchCommerceSnapshot());
+      setNewCustomerName("");
+      setNewCustomerEmail("");
+      setShowCustomerForm(false);
+      setCustomerNotice("Perfil guardado en PostgreSQL.");
+    } catch {
+      setCustomerNotice("No se pudo guardar en PostgreSQL. Los datos siguen en el formulario para reintentar.");
+    } finally {
+      setCustomerSaving(false);
+    }
+  };
   const [aiCustomerId, setAiCustomerId] = useState<number | null>(null);
   const [productFilter, setProductFilter] = useState<"all" | "active" | "draft" | "low">("all");
   const [showAI, setShowAI] = useState(false);
@@ -2217,6 +2240,24 @@ const filteredProducts = useMemo(() => {
 
         <Panel title="Clientes registrados">
           <div className="border-b border-[#1D4260] p-4">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-xs text-slate-400">Ingresá datos reales; el correo es opcional.</p>
+              <button type="button" onClick={() => setShowCustomerForm((open) => !open)} className="inline-flex items-center gap-2 rounded-lg bg-violet-500 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-400">
+                <Plus size={14} /> {showCustomerForm ? "Cancelar" : "Agregar cliente"}
+              </button>
+            </div>
+            {customerNotice && <p role="status" className="mb-3 text-xs text-cyan-200">{customerNotice}</p>}
+            {showCustomerForm && (
+              <form onSubmit={saveCustomerProfile} className="mb-4 grid gap-3 rounded-xl border border-white/10 bg-[#070d18] p-4 md:grid-cols-[1fr_1fr_auto]">
+                <label className="text-xs text-slate-400">Nombre
+                  <input required minLength={2} maxLength={120} value={newCustomerName} onChange={(event) => setNewCustomerName(event.target.value)} className="mt-1 w-full rounded-lg border border-white/10 bg-[#0B1B30] px-3 py-2 text-sm text-white" placeholder="Nombre del cliente" />
+                </label>
+                <label className="text-xs text-slate-400">Correo electrónico · opcional
+                  <input type="email" maxLength={254} value={newCustomerEmail} onChange={(event) => setNewCustomerEmail(event.target.value)} className="mt-1 w-full rounded-lg border border-white/10 bg-[#0B1B30] px-3 py-2 text-sm text-white" placeholder="cliente@ejemplo.com" />
+                </label>
+                <button disabled={customerSaving} type="submit" className="self-end rounded-lg bg-emerald-400 px-4 py-2 text-xs font-semibold text-[#070d18] disabled:opacity-60">{customerSaving ? "Guardando…" : "Guardar perfil"}</button>
+              </form>
+            )}
             <div className="flex flex-col gap-3 md:flex-row">
               <input
                 value={customerSearch}

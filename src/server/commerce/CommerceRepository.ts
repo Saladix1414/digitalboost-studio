@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { DatabasePort } from "../../infrastructure/core/database";
 import { createInfrastructureOperationContext } from "../../infrastructure/core/types";
 import type {
+  CommerceCustomer,
   CommerceOrder,
   CommerceProduct,
 } from "../../commerce/DigitalBoostCommerceLedger";
@@ -19,6 +20,8 @@ type ProductRow = {
   currency: "USD";
   stock: number;
 };
+
+type CustomerRow = { id: string; name: string; email: string | null };
 
 type OrderRow = {
   id: string;
@@ -50,6 +53,10 @@ function mapProduct(row: ProductRow, tenantId: string): CommerceProduct {
   };
 }
 
+function mapCustomer(row: CustomerRow, tenantId: string): CommerceCustomer {
+  return { id: row.id, tenantId, name: row.name, email: row.email ?? undefined };
+}
+
 function mapOrder(row: OrderRow, tenantId: string): CommerceOrder {
   return {
     id: row.id,
@@ -75,6 +82,27 @@ export class CommerceRepository {
       operation: operation(principal),
     });
     return result.rows.map(row => mapProduct(row, principal.tenantId));
+  }
+
+  async listCustomers(principal: CommercePrincipal): Promise<CommerceCustomer[]> {
+    const result = await this.database.query<CustomerRow>({
+      statement: "SELECT id, name, email FROM commerce_customers WHERE tenant_id = $1 ORDER BY created_at, id",
+      parameters: [principal.tenantId], operation: operation(principal),
+    });
+    return result.rows.map(row => mapCustomer(row, principal.tenantId));
+  }
+
+  async createCustomer(principal: CommercePrincipal, input: { name: string; email?: string }): Promise<CommerceCustomer> {
+    const customer: CommerceCustomer = {
+      id: randomUUID(), tenantId: principal.tenantId, name: input.name, email: input.email || undefined,
+    };
+    const now = new Date().toISOString();
+    await this.database.mutate({
+      statement: "INSERT INTO commerce_customers (tenant_id, id, name, email, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $5)",
+      parameters: [principal.tenantId, customer.id, customer.name, customer.email ?? null, now],
+      expectedVersion: null, operation: operation(principal),
+    });
+    return customer;
   }
 
   async listOrders(principal: CommercePrincipal): Promise<CommerceOrder[]> {
