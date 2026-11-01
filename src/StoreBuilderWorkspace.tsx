@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import ProductInventoryPro from "./ProductInventoryPro";
 import CommerceOSOverview from "./CommerceOSOverview";
-import { getCommerceSnapshot, hydrateCommerceSnapshot, recordCommerceCustomer, recordCommerceOrder, replaceCommerceProducts, type CommerceOrderLine } from "./commerce/DigitalBoostCommerceLedger";
+import { getCommerceSnapshot, hydrateCommerceSnapshot, recordCommerceCustomer, recordCommerceOrder, replaceCommerceProducts, type CommerceOrderLine, type CommerceCurrency } from "./commerce/DigitalBoostCommerceLedger";
 import { useCommerceLive } from "./commerce/useCommerceLive";
 import { createCommerceCustomer, createCommerceOrder, deleteCommerceProduct, fetchCommerceOrderItems, fetchCommerceSnapshot, saveCommerceProduct } from "./commerce/DigitalBoostCommerceApi";
 import { deleteCommerceCampaign, fetchCommerceCampaigns, saveCommerceCampaign, type CommerceCampaignConfiguration } from "./commerce/DigitalBoostCommerceCampaignApi";
@@ -85,6 +85,7 @@ type Product = {
   name: string;
   sku: string;
   price: number;
+  priceArs?: number;
   stock: number;
   status: "Activo" | "Borrador";
   category: string;
@@ -94,6 +95,7 @@ type Order = {
   id: string;
   customer: string;
   total: number;
+  currency?: CommerceCurrency;
   status: string;
   items: number;
   date: string;
@@ -108,6 +110,10 @@ type Customer = {
   spent: number;
   lastPurchase: string;
 };
+
+function formatStoreAmount(amount: number, currency: CommerceCurrency = "USD"): string {
+  return new Intl.NumberFormat("es-AR", { style: "currency", currency, maximumFractionDigits: 2 }).format(amount);
+}
 
 const productsSeed: Product[] = [];
 
@@ -211,6 +217,7 @@ export default function StoreBuilderWorkspace({
   const commerceLive = useCommerceLive("local-tenant");
   const [commerceNotice, setCommerceNotice] = useState("");
   const [localOrderProductId, setLocalOrderProductId] = useState("");
+  const [localOrderCurrency, setLocalOrderCurrency] = useState<CommerceCurrency>("USD");
   const [localOrderQuantity, setLocalOrderQuantity] = useState("1");
   const [localOrderCustomerId, setLocalOrderCustomerId] = useState("");
   const [localOrderSaving, setLocalOrderSaving] = useState(false);
@@ -230,6 +237,7 @@ export default function StoreBuilderWorkspace({
         lines: [{ productId: localOrderProductId, quantity }],
         customerId: localOrderCustomerId || undefined,
         idempotencyKey: localOrderIdempotencyKey,
+        currency: localOrderCurrency,
       });
       hydrateCommerceSnapshot(await fetchCommerceSnapshot());
       setLocalOrderNotice(
@@ -304,6 +312,7 @@ export default function StoreBuilderWorkspace({
       name: item.title,
       sku: item.sku || item.id,
       price: item.price.amount,
+      priceArs: item.priceArs?.amount,
       stock: item.stock,
       status: "Activo" as const,
       category: "General",
@@ -319,6 +328,7 @@ export default function StoreBuilderWorkspace({
       name: item.title,
       sku: item.sku || item.id,
       price: item.price.amount,
+      priceArs: item.priceArs?.amount,
       stock: item.stock,
       status: "Activo" as const,
       category: "General",
@@ -327,6 +337,7 @@ export default function StoreBuilderWorkspace({
       id: item.id,
       customer: item.customerName || item.customerId || "sin cliente",
       total: item.total.amount,
+      currency: item.total.currency,
       status: item.fulfillmentState === "CANCELLED"
         ? "Cancelado"
         : item.paymentState === "REFUNDED"
@@ -344,11 +355,13 @@ export default function StoreBuilderWorkspace({
     replaceCommerceProducts("local-tenant", next.map(product => ({
       id: String(product.id), tenantId: "local-tenant", title: product.name,
       sku: product.sku, price: { amount: Number(product.price) || 0, currency: "USD" },
+      priceArs: product.priceArs == null ? undefined : { amount: Number(product.priceArs), currency: "ARS" },
       stock: Number(product.stock) || 0,
     })));
     const writes = next.map(product => saveCommerceProduct({
       id: String(product.id), tenantId: "local-tenant", title: product.name,
       sku: product.sku, price: { amount: Number(product.price) || 0, currency: "USD" },
+      priceArs: product.priceArs == null ? undefined : { amount: Number(product.priceArs), currency: "ARS" },
       stock: Number(product.stock) || 0,
     }));
     const removed = previous.filter(product => !nextIds.has(String(product.id)))
@@ -364,6 +377,7 @@ export default function StoreBuilderWorkspace({
       id: item.id,
       customer: item.customerName || item.customerId || "sin cliente",
       total: item.total.amount,
+      currency: item.total.currency,
       status: item.fulfillmentState === "CANCELLED"
         ? "Cancelado"
         : item.paymentState === "REFUNDED"
@@ -900,6 +914,7 @@ export default function StoreBuilderWorkspace({
     name: "",
     sku: "",
     price: "49",
+    priceArs: "",
     stock: "25",
     category: "Digital",
     status: "Borrador" as "Activo" | "Borrador",
@@ -933,6 +948,7 @@ const filteredProducts = useMemo(() => {
       name: "",
       sku: "",
       price: "49",
+      priceArs: "",
       stock: "25",
       category: "Digital",
       status: "Borrador",
@@ -951,6 +967,7 @@ const filteredProducts = useMemo(() => {
       name: product.name,
       sku: product.sku,
       price: String(product.price),
+      priceArs: product.priceArs == null ? "" : String(product.priceArs),
       stock: String(product.stock),
       category: product.category,
       status: product.status,
@@ -967,10 +984,15 @@ const filteredProducts = useMemo(() => {
     }
 
     const price = Number(productForm.price);
+    const priceArs = productForm.priceArs.trim() === "" ? undefined : Number(productForm.priceArs);
     const stock = Number(productForm.stock);
 
     if (!Number.isFinite(price) || price < 0) {
-      alert("⚠️ Introducí un precio válido.");
+      alert("⚠️ Introducí un precio USD válido.");
+      return;
+    }
+    if (priceArs !== undefined && (!Number.isFinite(priceArs) || priceArs < 0)) {
+      alert("⚠️ Introducí un precio ARS válido o deja el campo vacío.");
       return;
     }
 
@@ -991,6 +1013,7 @@ const filteredProducts = useMemo(() => {
                 name,
                 sku,
                 price,
+                priceArs,
                 stock,
                 category: productForm.category,
                 status: productForm.status,
@@ -1007,6 +1030,7 @@ const filteredProducts = useMemo(() => {
           name,
           sku,
           price,
+          priceArs,
           stock,
           category: productForm.category,
           status: productForm.status,
@@ -1832,7 +1856,7 @@ const filteredProducts = useMemo(() => {
 
                 <div className="text-right">
                   <p className="text-xs font-semibold text-white">
-                    {money.format(order.total)}
+                    {formatStoreAmount(order.total, order.currency)}
                   </p>
 
                   <ChevronRight
@@ -1899,6 +1923,7 @@ const filteredProducts = useMemo(() => {
               name: product.name,
               sku: product.sku,
               price: product.price,
+              priceArs: product.priceArs,
               stock: product.stock,
               status: product.status,
               category: product.category,
@@ -1981,7 +2006,7 @@ const filteredProducts = useMemo(() => {
           />
           <Metric
             title="Total"
-            value={`$${order.total.toFixed(2)}`}
+            value={formatStoreAmount(order.total, order.currency)}
           />
           <Metric
             title="Productos"
@@ -2037,7 +2062,7 @@ const filteredProducts = useMemo(() => {
                   Total
                 </p>
                 <p className="mt-1 text-lg font-semibold text-emerald-300">
-                  ${order.total.toFixed(2)}
+                  {formatStoreAmount(order.total, order.currency)}
                 </p>
               </div>
               <div className="border-t border-white/10 pt-4">
@@ -2159,13 +2184,20 @@ const filteredProducts = useMemo(() => {
         />
 
         <Panel title="Pedido de prueba local">
-          <form onSubmit={saveLocalCommerceOrder} className="grid gap-3 p-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.5fr)_auto] md:items-end">
+          <form onSubmit={saveLocalCommerceOrder} className="grid gap-3 p-4 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.5fr)_auto] md:items-end">
+            <label className="grid gap-1.5 text-xs text-slate-400">
+              Moneda del pedido
+              <select value={localOrderCurrency} onChange={(event) => { const next = event.target.value as CommerceCurrency; setLocalOrderCurrency(next); setLocalOrderProductId(""); setLocalOrderIdempotencyKey(`local-${Date.now()}-${Math.random().toString(36).slice(2)}`); }} className="h-10 rounded-lg border border-white/10 bg-[#111827] px-3 text-sm text-white">
+                <option value="USD">USD</option>
+                <option value="ARS">ARS</option>
+              </select>
+            </label>
             <label className="grid gap-1.5 text-xs text-slate-400">
               Producto del catálogo
               <select required value={localOrderProductId} onChange={(event) => setLocalOrderProductId(event.target.value)} className="h-10 rounded-lg border border-white/10 bg-[#111827] px-3 text-sm text-white">
                 <option value="">{commerceLive.snap.products.length ? "Selecciona un producto" : "Primero agrega un producto"}</option>
                 {commerceLive.snap.products.map((product) => (
-                  <option key={product.id} value={product.id}>{product.title} · ${product.price.amount.toFixed(2)}</option>
+                  <option key={product.id} value={product.id} disabled={localOrderCurrency === "ARS" && !product.priceArs}>{product.title} · {localOrderCurrency === "USD" ? formatStoreAmount(product.price.amount, "USD") : product.priceArs ? formatStoreAmount(product.priceArs.amount, "ARS") : "sin precio ARS"}</option>
                 ))}
               </select>
             </label>
@@ -2185,8 +2217,8 @@ const filteredProducts = useMemo(() => {
             <button type="submit" disabled={localOrderSaving || !commerceLive.snap.products.length} className="h-10 rounded-lg bg-cyan-400 px-4 text-sm font-semibold text-[#07111f] disabled:cursor-not-allowed disabled:opacity-50">
               {localOrderSaving ? "Guardando…" : "Guardar pedido impago"}
             </button>
-            <p className="text-xs leading-5 text-slate-500 md:col-span-4">Prueba local conectada al catálogo de PostgreSQL. Crea el pedido como impago; no procesa pagos ni reserva inventario.</p>
-            {localOrderNotice && <p role="status" className="text-xs leading-5 text-cyan-200 md:col-span-4">{localOrderNotice}</p>}
+            <p className="text-xs leading-5 text-slate-500 md:col-span-5">Prueba local conectada al catálogo de PostgreSQL. Crea el pedido como impago; no procesa pagos ni reserva inventario.</p>
+            {localOrderNotice && <p role="status" className="text-xs leading-5 text-cyan-200 md:col-span-5">{localOrderNotice}</p>}
           </form>
         </Panel>
 
@@ -2590,7 +2622,7 @@ const filteredProducts = useMemo(() => {
                       </td>
 
                       <td className="px-5 py-4 text-sm font-semibold text-emerald-300">
-                        ${order.total.toFixed(2)}
+                        {formatStoreAmount(order.total, order.currency)}
                       </td>
                     </tr>
                   ))}
@@ -4212,7 +4244,7 @@ const filteredProducts = useMemo(() => {
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-3">
                 <div>
                   <label className="text-xs text-[#475569]">
                     Precio
@@ -4229,6 +4261,22 @@ const filteredProducts = useMemo(() => {
                     type="number"
                     min="0"
                     step="0.01"
+                    className="mt-2 w-full rounded-lg border border-[#00B7FF]/30 bg-[#0B1B30] px-3 py-2.5 text-sm outline-none focus:border-cyan-400/50"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-[#475569]">
+                    Precio ARS <span className="text-slate-500">(opcional)</span>
+                  </label>
+
+                  <input
+                    value={productForm.priceArs}
+                    onChange={(e) => setProductForm((f) => ({ ...f, priceArs: e.target.value }))}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Sin precio ARS"
                     className="mt-2 w-full rounded-lg border border-[#00B7FF]/30 bg-[#0B1B30] px-3 py-2.5 text-sm outline-none focus:border-cyan-400/50"
                   />
                 </div>
@@ -4428,7 +4476,7 @@ function OrderTable({
                   {order.items} producto(s)
                 </div>
               </td>
-              <td>${order.total.toFixed(2)}</td>
+              <td>{formatStoreAmount(order.total, order.currency)}</td>
               <td>
                 <span className="rounded-full border border-emerald-400/20 bg-emerald-400/5 px-2 py-1 text-[10px] text-emerald-300">
                   {order.status}
