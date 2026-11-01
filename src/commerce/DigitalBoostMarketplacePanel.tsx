@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   activateMarketSeller,
   addMarketListing,
@@ -11,6 +11,14 @@ import {
 import { requestWalletAccount } from "./DigitalBoostWeb3Rail";
 import { useCommerceStore } from "./DigitalBoostCommerceContext";
 import DigitalBoostMarketBotsPanel from "./DigitalBoostMarketBotsPanel";
+import {
+  activateMarketSellerOnServer,
+  fetchMarketplaceSnapshot,
+  fetchPublicMarketListings,
+  saveMarketListing,
+  saveMarketSeller,
+} from "./DigitalBoostMarketplaceApi";
+import { hydrateMarketplaceSnapshot } from "./DigitalBoostMarketplace";
 
 const RAILS: { id: MarketRail | "all"; label: string }[] = [
   { id: "all", label: "Todo" },
@@ -35,9 +43,34 @@ export default function DigitalBoostMarketplacePanel() {
   const [wallet, setWallet] = useState("");
   const [tick, setTick] = useState(0);
   const [showSalesDesk, setShowSalesDesk] = useState(false);
+  const [publicItems, setPublicItems] = useState(() => listPublicMarketListings());
   const market = useMemo(() => getMarketplaceSnapshot(tenantId), [tenantId, tick, store.tick]);
   const seller = market.sellers[0];
-  const publicItems = useMemo(() => listPublicMarketListings(), [tick, store.tick]);
+  useEffect(() => {
+    let active = true;
+    void fetchMarketplaceSnapshot().then(snapshot => {
+      if (!active || snapshot.tenantId !== tenantId) return;
+      hydrateMarketplaceSnapshot(snapshot);
+      setTick(value => value + 1);
+      if (snapshot.source === "mixed") setNote("Datos locales y PostgreSQL combinados; revisá antes de reconciliar.");
+    }).catch(() => {
+      if (active) setNote("Marketplace en modo local; PostgreSQL no está disponible.");
+    });
+    void fetchPublicMarketListings().then(result => {
+      if (active) setPublicItems(result.listings);
+    }).catch(() => {
+      if (active) setPublicItems(listPublicMarketListings());
+    });
+    return () => { active = false; };
+  }, [tenantId, store.tick]);
+
+  async function reloadMarketplace() {
+    const snapshot = await fetchMarketplaceSnapshot();
+    hydrateMarketplaceSnapshot(snapshot);
+    const publicResult = await fetchPublicMarketListings().catch(() => null);
+    if (publicResult) setPublicItems(publicResult.listings);
+    setTick(value => value + 1);
+  }
   const items = market.listings.filter((item) => {
     if (rail !== "all" && item.rail !== rail) return false;
     if (q.trim() && !item.title.toLowerCase().includes(q.trim().toLowerCase())) return false;
@@ -54,7 +87,7 @@ export default function DigitalBoostMarketplacePanel() {
       <div className="border-b border-white/8 px-4 py-5 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
           <span>Market · tenant {tenantId}</span>
-          <span>Take {Math.round(MARKET_TAKE_RATE * 100)}% · escrow off</span>
+          <span>Take {Math.round(MARKET_TAKE_RATE * 100)}% · {market.source === "postgresql" ? "PostgreSQL" : market.source === "mixed" ? "mixto" : "local"} · escrow off</span>
         </div>
         <div className="mt-2 flex justify-end">
           <button
@@ -197,8 +230,20 @@ export default function DigitalBoostMarketplacePanel() {
                 <span>{seller.name} · {seller.state}</span>
                 {seller.state === "pending" && (
                   <button type="button" className="text-cyan-300" onClick={() => {
-                    const result = activateMarketSeller(tenantId, seller.id);
-                    refresh("ok" in result && "reason" in result ? result.reason : "Seller activo");
+                    void (async () => {
+                      try {
+                        await activateMarketSellerOnServer(seller.id);
+                        const result = activateMarketSeller(tenantId, seller.id);
+                        if ("ok" in result && result.ok === false) return refresh(result.reason);
+                        await reloadMarketplace();
+                        refresh("Seller activo en desarrollo.");
+                      } catch (error) {
+                        const message = error instanceof Error && error.message === "market_seller_activation_requires_review"
+                          ? "La activación requiere revisión y no está habilitada en producción."
+                          : "No se pudo activar: verificá PostgreSQL y que el seller esté registrado en el servidor.";
+                        refresh(message);
+                      }
+                    })();
                   }}>Activar</button>
                 )}
               </div>
@@ -207,8 +252,13 @@ export default function DigitalBoostMarketplacePanel() {
                 <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" className="h-11 flex-1 rounded-md border border-white/10 bg-[#161D2B] px-3 text-sm" />
                 <button type="button" className="h-11 rounded-md bg-cyan-400 px-3 text-sm font-semibold text-[#0E1420]" onClick={() => {
                   const result = registerMarketSeller({ tenantId, name });
-                  refresh("ok" in result && result.ok === false ? result.reason : "Seller pending");
+                  if ("ok" in result) return refresh(result.reason);
+                  refresh("Seller pendiente; guardando en backend…");
                   setName("");
+                  void saveMarketSeller({ id: result.id, name: result.name })
+                    .then(() => reloadMarketplace())
+                    .then(() => refresh("Seller pendiente guardado en PostgreSQL."))
+                    .catch(() => refresh("Seller conservado localmente; PostgreSQL no está disponible."));
                 }}>Alta</button>
               </div>
             )}
@@ -232,9 +282,22 @@ export default function DigitalBoostMarketplacePanel() {
                 onClick={() => {
                   if (!seller) return refresh("Alta de seller primero");
                   const result = addMarketListing({ tenantId, sellerId: seller.id, title, rail: sellRail, price: Number(price) });
-                  if ("ok" in result && result.ok === false) refresh(result.reason);
-                  else {
-                    refresh(result.state === "listed" ? "Publicado" : "Draft");
+                  if ("ok" in result) return refresh(result.reason);
+                  {
+                    refresh(result.state === "listed" ? "Guardando publicación…" : "Guardando en borrador…");
+                    void saveMarketListing({
+                      id: result.id,
+                      sellerId: result.sellerId,
+                      productId: result.productId,
+                      title: result.title,
+                      rail: result.rail,
+                      price: result.price,
+                    })
+                      .then(() => reloadMarketplace())
+                      .then(() => refresh(result.state === "listed" ? "Publicación guardada." : "Borrador guardado; el rail requiere verificación."))
+                      .catch(error => refresh(error instanceof Error && error.message === "market_seller_not_active"
+                        ? "El seller todavía no está activo en el backend."
+                        : "Publicación conservada localmente; no se pudo guardar en PostgreSQL."));
                     setTitle("");
                     setPrice("");
                     setTab("explore");

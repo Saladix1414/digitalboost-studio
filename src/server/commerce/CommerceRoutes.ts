@@ -2,6 +2,9 @@ import { Router, type Express, type Request } from "express";
 import type { DatabasePort } from "../../infrastructure/core/database";
 import type { InfrastructureEnvironment } from "../../infrastructure/core/configuration";
 import { CommerceRepository, type CommercePrincipal } from "./CommerceRepository";
+import { MarketplaceRepository } from "./MarketplaceRepository";
+import { validateMarketAsset } from "../../commerce/DigitalBoostMarketAssetGuard";
+import { MARKET_TAKE_RATE, type MarketRail } from "../../commerce/DigitalBoostMarketplace";
 
 type AuthenticatedRequest = Request & {
   digitalboostPrincipal?: CommercePrincipal;
@@ -37,6 +40,8 @@ function validProduct(body: any): { id: string; title: string; sku?: string; pri
   return { id, title, sku: sku || undefined, price: { amount, currency: "USD" }, stock };
 }
 
+const MARKET_RAILS = new Set<MarketRail>(["physical", "digital", "nft", "crypto", "gift_card"]);
+
 export function registerCommerceRoutes(
   app: Express,
   input: {
@@ -47,6 +52,7 @@ export function registerCommerceRoutes(
 ): void {
   const router = Router();
   const repository = input.database ? new CommerceRepository(input.database) : null;
+  const marketplace = input.database ? new MarketplaceRepository(input.database) : null;
 
   router.use((request, response, next) => {
     const principal = principalFor(request, input.environment);
@@ -146,5 +152,115 @@ export function registerCommerceRoutes(
     }
   });
 
+  router.get("/marketplace/snapshot", async (request, response) => {
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      const [sellers, listings] = await Promise.all([
+        marketplace!.listSellers(principal),
+        marketplace!.listListings(principal),
+      ]);
+      response.json({
+        contract: "cos-market-v1",
+        tenantId: principal.tenantId,
+        takeRate: MARKET_TAKE_RATE,
+        sellers,
+        listings,
+        gmv: null,
+        source: "postgresql",
+        authoritative: false,
+      });
+    } catch {
+      response.status(503).json({ error: "commerce_marketplace_read_failed" });
+    }
+  });
+
+  router.post("/marketplace/sellers", async (request, response) => {
+    const id = typeof request.body?.id === "string" ? request.body.id.trim() : "";
+    const name = typeof request.body?.name === "string" ? request.body.name.trim() : "";
+    if (!id || id.length > 100 || name.length < 2 || name.length > 120) {
+      response.status(400).json({ error: "invalid_market_seller" });
+      return;
+    }
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      const seller = await marketplace!.createSeller(principal, { id, name });
+      input.publishChange?.();
+      response.status(201).json({ ok: true, seller });
+    } catch {
+      response.status(503).json({ error: "commerce_market_seller_write_failed" });
+    }
+  });
+
+  router.post("/marketplace/sellers/:id/activate", async (request, response) => {
+    if (input.environment !== "development") {
+      response.status(403).json({ error: "market_seller_activation_requires_review" });
+      return;
+    }
+    const id = request.params.id.trim();
+    if (!id || id.length > 100) {
+      response.status(400).json({ error: "invalid_market_seller_id" });
+      return;
+    }
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      const seller = await marketplace!.activateSeller(principal, id);
+      if (!seller) {
+        response.status(409).json({ error: "market_seller_not_pending" });
+        return;
+      }
+      input.publishChange?.();
+      response.json({ ok: true, seller });
+    } catch {
+      response.status(503).json({ error: "commerce_market_seller_activation_failed" });
+    }
+  });
+
+  router.post("/marketplace/listings", async (request, response) => {
+    const body = request.body ?? {};
+    const id = typeof body.id === "string" ? body.id.trim() : "";
+    const sellerId = typeof body.sellerId === "string" ? body.sellerId.trim() : "";
+    const title = typeof body.title === "string" ? body.title.trim() : "";
+    const productId = typeof body.productId === "string" ? body.productId.trim() : "";
+    const rail = body.rail as MarketRail;
+    const price = Number(body.price);
+    if (!id || id.length > 100 || !sellerId || sellerId.length > 100
+      || !MARKET_RAILS.has(rail) || !Number.isFinite(price) || price > 1_000_000_000
+      || productId.length > 180) {
+      response.status(400).json({ error: "invalid_market_listing" });
+      return;
+    }
+    const validation = validateMarketAsset({ title, rail, price, assetRef: productId });
+    if (!validation.ok) {
+      response.status(400).json({ error: "market_listing_validation_failed", issues: validation.issues });
+      return;
+    }
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      const listing = await marketplace!.createListing(principal, {
+        id, sellerId, productId: productId || title, title, rail, price,
+        railReady: validation.listedAllowed,
+      });
+      if (!listing) {
+        response.status(409).json({ error: "market_seller_not_active" });
+        return;
+      }
+      input.publishChange?.();
+      response.status(201).json({ ok: true, listing });
+    } catch {
+      response.status(503).json({ error: "commerce_market_listing_write_failed" });
+    }
+  });
+
+  app.get("/api/commerce/v1/marketplace/public-listings", async (_request, response) => {
+    if (!marketplace || !input.database) {
+      response.status(503).json({ error: "commerce_database_unavailable" });
+      return;
+    }
+    try {
+      response.json({ listings: await marketplace.listPublicListings() });
+    } catch {
+      response.status(503).json({ error: "commerce_marketplace_public_read_failed" });
+    }
+  });
   app.use("/api/commerce/v1", router);
 }

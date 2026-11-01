@@ -19,6 +19,11 @@ The app uses the existing infrastructure composition and migration runner. No da
 - `PUT /api/commerce/v1/products/:id` — create or update a product.
 - `DELETE /api/commerce/v1/products/:id` — delete a product.
 - `POST /api/commerce/v1/orders` — create an unpaid, unfulfilled order.
+- `GET /api/commerce/v1/marketplace/snapshot` — tenant-scoped sellers and listings.
+- `POST /api/commerce/v1/marketplace/sellers` — register a pending seller.
+- `POST /api/commerce/v1/marketplace/sellers/:id/activate` — development-only seller activation.
+- `POST /api/commerce/v1/marketplace/listings` — persist a listing; NFT and crypto listings remain drafts.
+- `GET /api/commerce/v1/marketplace/public-listings` — public, ready listings only.
 
 Database snapshots are tagged `authoritative: false`. The order endpoint does not accept payment or fulfillment state changes. Those actions need to be routed through authenticated PULSE policy and approval workflows before they can become server-authoritative.
 
@@ -29,3 +34,5 @@ Development uses a fixed `local-tenant` principal. Production requests require t
 ## Current scope and follow-up
 
 This is a first persistence slice, not a complete commerce integration. Product catalog editing uses the API and falls back to the existing local ledger if PostgreSQL is unavailable. Orders can be read and created through the API, but checkout, payment reconciliation, customer persistence, inventory reservation, and fulfillment workflows remain separate follow-up work. No live PostgreSQL service was available during this implementation, so the migration and endpoint were not exercised against a database.
+
+Marketplace persistence covers seller identity and listing metadata. Seller activation is intentionally development-only until an authenticated review/approval workflow exists. Listing rails that need chain or payment verification remain drafts; escrow and payments stay disabled. Local seller/listing records are merged without being discarded when the backend snapshot is incomplete.

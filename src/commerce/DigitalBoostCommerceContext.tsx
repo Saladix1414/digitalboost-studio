@@ -21,7 +21,12 @@ export function CommerceStoreProvider({
 }) {
   const live = useCommerceLive(tenantId);
   return (
-    <CommerceStoreContext.Provider value={{ tenantId, ...live }}>
+    <CommerceStoreContext.Provider value={{
+      tenantId,
+      tick: live.version,
+      snap: live.snap,
+      binding: live.binding,
+    }}>
       {children}
     </CommerceStoreContext.Provider>
   );
