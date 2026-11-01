@@ -101,6 +101,7 @@ type Order = {
 
 type Customer = {
   id: number;
+  recordId: string;
   name: string;
   email: string;
   orders: number;
@@ -332,37 +333,27 @@ export default function StoreBuilderWorkspace({
   const [aiOrderId, setAiOrderId] = useState<string | null>(null);
 
   const customers = useMemo<Customer[]>(() => {
-    const customerMap = new Map<string, Customer>();
-
-    orders.forEach((order) => {
-      const existing = customerMap.get(order.customer);
-
-      if (existing) {
-        existing.orders += 1;
-        existing.spent += order.total;
-        existing.lastPurchase = order.date;
-        return;
-      }
-
-      const email =
-        order.customer
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\\u0300-\\u036f]/g, "")
-          .replace(/\\s+/g, ".") + "@cliente.digitalboost";
-
-      customerMap.set(order.customer, {
-        id: customerMap.size + 1,
-        name: order.customer,
-        email,
-        orders: 1,
-        spent: order.total,
-        lastPurchase: order.date,
-      });
+    return commerceLive.snap.customers.map((profile, index) => {
+      const linkedOrders = commerceLive.snap.orders.filter(
+        (order) => order.customerId === profile.id,
+      );
+      const lastPurchase = linkedOrders.reduce(
+        (latest, order) => order.createdAt > latest ? order.createdAt : latest,
+        "",
+      );
+      return {
+        id: index + 1,
+        recordId: profile.id,
+        name: profile.name,
+        email: "",
+        orders: linkedOrders.length,
+        spent: linkedOrders
+          .filter((order) => order.paymentState === "PAID")
+          .reduce((total, order) => total + order.total.amount, 0),
+        lastPurchase: lastPurchase || "Sin compras",
+      };
     });
-
-    return Array.from(customerMap.values());
-  }, [orders]);
+  }, [commerceLive.version]);
 
   const [search, setSearch] = useState("");
   const [customerSearch, setCustomerSearch] = useState("");
@@ -2286,7 +2277,7 @@ const filteredProducts = useMemo(() => {
 
           {filteredCustomers.length === 0 ? (
             <div className="p-8 text-center text-sm text-[#475569]">
-              No encontramos clientes con esos criterios.
+              No hay perfiles reales registrados que coincidan. Los pedidos sin perfil asociado no se convierten en clientes automáticamente.
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -2312,7 +2303,7 @@ const filteredProducts = useMemo(() => {
                           {customer.name}
                         </div>
                         <div className="mt-1 text-xs text-[#475569]">
-                          {customer.email}
+                          {customer.email || "Correo no registrado"}
                         </div>
                       </td>
 
@@ -2353,7 +2344,7 @@ const filteredProducts = useMemo(() => {
     }
 
     const customerOrders = orders.filter(
-      (order) => order.customer === customer.name
+      (order) => order.customer === customer.recordId
     );
 
     const averageOrder =
@@ -2381,7 +2372,7 @@ const filteredProducts = useMemo(() => {
 
         <PageTitle
           title={customer.name}
-          subtitle={customer.email}
+          subtitle={customer.email || "Correo no registrado"}
         />
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
