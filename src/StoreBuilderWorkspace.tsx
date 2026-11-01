@@ -325,10 +325,10 @@ export default function StoreBuilderWorkspace({
     })));
     setOrders(commerceLive.snap.orders.map(item => ({
       id: item.id,
-      customer: item.customerId || "sin cliente",
+      customer: item.customerName || item.customerId || "sin cliente",
       total: item.total.amount,
       status: item.paymentState === "PAID" ? "Pagado" : "Unpaid",
-      items: 1,
+      items: item.itemCount ?? 0,
       date: item.createdAt,
     })));
   }, [commerceLive.version, commerceLive.snap.source]);
@@ -356,10 +356,10 @@ export default function StoreBuilderWorkspace({
     if (!snap.orders.length) return ordersSeed;
     return snap.orders.map((item) => ({
       id: item.id,
-      customer: item.customerId || "sin cliente",
+      customer: item.customerName || item.customerId || "sin cliente",
       total: item.total.amount,
       status: item.paymentState === "PAID" ? "Pagado" : "Unpaid",
-      items: 1,
+      items: item.itemCount ?? 0,
       date: item.createdAt,
     }));
   });

@@ -50,6 +50,8 @@ type OrderRow = {
   payment_state: CommerceOrder["paymentState"];
   fulfillment_state: CommerceOrder["fulfillmentState"];
   created_at: string | Date;
+  customer_name?: string | null;
+  item_count?: number | string;
 };
 
 function operation(principal: CommercePrincipal) {
@@ -87,6 +89,8 @@ function mapOrder(row: OrderRow, tenantId: string): CommerceOrder {
     createdAt: row.created_at instanceof Date
       ? row.created_at.toISOString()
       : new Date(row.created_at).toISOString(),
+    customerName: row.customer_name ?? undefined,
+    itemCount: row.item_count == null ? undefined : Number(row.item_count),
   };
 }
 
@@ -126,9 +130,17 @@ export class CommerceRepository {
 
   async listOrders(principal: CommercePrincipal): Promise<CommerceOrder[]> {
     const result = await this.database.query<OrderRow>({
-      statement: `SELECT id, customer_id, total_amount, currency, payment_state,
-        fulfillment_state, created_at FROM commerce_orders
-        WHERE tenant_id = $1 ORDER BY created_at DESC, id`,
+      statement: `SELECT o.id, o.customer_id, o.total_amount, o.currency, o.payment_state,
+        o.fulfillment_state, o.created_at, c.name AS customer_name,
+        COALESCE(SUM(i.quantity), 0)::int AS item_count
+        FROM commerce_orders o
+        LEFT JOIN commerce_customers c
+          ON c.tenant_id = o.tenant_id AND c.id = o.customer_id
+        LEFT JOIN commerce_order_items i
+          ON i.tenant_id = o.tenant_id AND i.order_id = o.id
+        WHERE o.tenant_id = $1
+        GROUP BY o.tenant_id, o.id, c.name
+        ORDER BY o.created_at DESC, o.id`,
       parameters: [principal.tenantId],
       operation: operation(principal),
     });

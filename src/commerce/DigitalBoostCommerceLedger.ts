@@ -23,6 +23,8 @@ export type CommerceOrder = {
   readonly paymentState: "UNPAID" | "PAID" | "REFUNDED";
   readonly fulfillmentState: "UNFULFILLED" | "FULFILLED" | "CANCELLED";
   readonly createdAt: string;
+  readonly customerName?: string;
+  readonly itemCount?: number;
 };
 
 export type CommerceOrderLineInput = {
