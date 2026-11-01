@@ -32,7 +32,7 @@ import ProductInventoryPro from "./ProductInventoryPro";
 import CommerceOSOverview from "./CommerceOSOverview";
 import { getCommerceSnapshot, hydrateCommerceSnapshot, recordCommerceCustomer, recordCommerceOrder, replaceCommerceProducts } from "./commerce/DigitalBoostCommerceLedger";
 import { useCommerceLive } from "./commerce/useCommerceLive";
-import { createCommerceCustomer, deleteCommerceProduct, fetchCommerceSnapshot, saveCommerceProduct } from "./commerce/DigitalBoostCommerceApi";
+import { createCommerceCustomer, createCommerceOrder, deleteCommerceProduct, fetchCommerceSnapshot, saveCommerceProduct } from "./commerce/DigitalBoostCommerceApi";
 import { deleteCommerceCampaign, fetchCommerceCampaigns, saveCommerceCampaign, type CommerceCampaignConfiguration } from "./commerce/DigitalBoostCommerceCampaignApi";
 import DigitalBoostPulseBotPanel from "./commerce/DigitalBoostPulseBotPanel";
 import DigitalBoostMarketplacePanel from "./commerce/DigitalBoostMarketplacePanel";
@@ -210,6 +210,41 @@ export default function StoreBuilderWorkspace({
 }) {
   const commerceLive = useCommerceLive("local-tenant");
   const [commerceNotice, setCommerceNotice] = useState("");
+  const [localOrderProductId, setLocalOrderProductId] = useState("");
+  const [localOrderQuantity, setLocalOrderQuantity] = useState("1");
+  const [localOrderCustomerId, setLocalOrderCustomerId] = useState("");
+  const [localOrderSaving, setLocalOrderSaving] = useState(false);
+  const [localOrderNotice, setLocalOrderNotice] = useState("");
+  const [localOrderIdempotencyKey, setLocalOrderIdempotencyKey] = useState(
+    () => `local-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
+
+  const saveLocalCommerceOrder = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const quantity = Number(localOrderQuantity);
+    if (localOrderSaving || !localOrderProductId || !Number.isSafeInteger(quantity) || quantity < 1 || quantity > 99) return;
+    setLocalOrderSaving(true);
+    setLocalOrderNotice("");
+    try {
+      const result = await createCommerceOrder({
+        lines: [{ productId: localOrderProductId, quantity }],
+        customerId: localOrderCustomerId || undefined,
+        idempotencyKey: localOrderIdempotencyKey,
+      });
+      hydrateCommerceSnapshot(await fetchCommerceSnapshot());
+      setLocalOrderNotice(
+        result.replayed
+          ? `Pedido ${result.order.id} recuperado: sigue impago.`
+          : `Pedido ${result.order.id} guardado como impago. No se reservó stock.`,
+      );
+      setLocalOrderIdempotencyKey(`local-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "error desconocido";
+      setLocalOrderNotice(`No se pudo guardar el pedido: ${reason}. La clave se conserva para permitir reintentar sin duplicarlo.`);
+    } finally {
+      setLocalOrderSaving(false);
+    }
+  };
 
   // ----------------------------------------------------------
   // DIGITALBOOST COMMERCE OS — BOOT SEQUENCE
@@ -2142,6 +2177,38 @@ const filteredProducts = useMemo(() => {
           title="Pedidos"
           subtitle="Gestiona pagos, preparación, envíos y devoluciones."
         />
+
+        <Panel title="Pedido de prueba local">
+          <form onSubmit={saveLocalCommerceOrder} className="grid gap-3 p-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.5fr)_auto] md:items-end">
+            <label className="grid gap-1.5 text-xs text-slate-400">
+              Producto del catálogo
+              <select required value={localOrderProductId} onChange={(event) => setLocalOrderProductId(event.target.value)} className="h-10 rounded-lg border border-white/10 bg-[#111827] px-3 text-sm text-white">
+                <option value="">{commerceLive.snap.products.length ? "Selecciona un producto" : "Primero agrega un producto"}</option>
+                {commerceLive.snap.products.map((product) => (
+                  <option key={product.id} value={product.id}>{product.title} · ${product.price.amount.toFixed(2)}</option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1.5 text-xs text-slate-400">
+              Cantidad
+              <input required type="number" min="1" max="99" step="1" value={localOrderQuantity} onChange={(event) => setLocalOrderQuantity(event.target.value)} className="h-10 rounded-lg border border-white/10 bg-[#111827] px-3 text-sm text-white" />
+            </label>
+            <label className="grid gap-1.5 text-xs text-slate-400">
+              Cliente (opcional)
+              <select value={localOrderCustomerId} onChange={(event) => setLocalOrderCustomerId(event.target.value)} className="h-10 rounded-lg border border-white/10 bg-[#111827] px-3 text-sm text-white">
+                <option value="">Sin cliente asociado</option>
+                {commerceLive.snap.customers.map((customer) => (
+                  <option key={customer.id} value={customer.id}>{customer.name}</option>
+                ))}
+              </select>
+            </label>
+            <button type="submit" disabled={localOrderSaving || !commerceLive.snap.products.length} className="h-10 rounded-lg bg-cyan-400 px-4 text-sm font-semibold text-[#07111f] disabled:cursor-not-allowed disabled:opacity-50">
+              {localOrderSaving ? "Guardando…" : "Guardar pedido impago"}
+            </button>
+            <p className="text-xs leading-5 text-slate-500 md:col-span-4">Prueba local conectada al catálogo de PostgreSQL. Crea el pedido como impago; no procesa pagos ni reserva inventario.</p>
+            {localOrderNotice && <p role="status" className="text-xs leading-5 text-cyan-200 md:col-span-4">{localOrderNotice}</p>}
+          </form>
+        </Panel>
 
         {(() => {
           const totalOrders = orders.length;
