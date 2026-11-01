@@ -729,6 +729,14 @@ export default function StoreBuilderWorkspace({
     return true;
   };
 
+  const toggleCampaignStatus = (campaignId: number) => {
+    setCampaigns((current) => current.map((campaign) =>
+      campaign.id === campaignId
+        ? { ...campaign, status: campaign.status === "Activa" ? "Pausada" : "Activa" }
+        : campaign,
+    ));
+  };
+
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -2875,6 +2883,7 @@ const filteredProducts = useMemo(() => {
                   <div className="ml-auto flex items-center gap-2">
                     <button
                       onClick={() => toggleCampaignStatus(campaign.id)}
+                      title="Solo cambia el estado local; no envía mensajes ni ejecuta la secuencia."
                       className="rounded-lg border border-[#00B7FF]/30 px-3 py-1.5 text-[11px] text-[#475569] transition hover:bg-cyan-300/10"
                     >
                       {campaign.status === "Activa" ? "Pausar" : "Activar"}

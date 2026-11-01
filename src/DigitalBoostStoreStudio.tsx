@@ -233,12 +233,12 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
   }
   function publish() {
     saveCanvasPage(page, blocks);
-    setHistory(pushSnapshot({ label: "Publicado · " + page, source: "publish", blocks, theme: (typeof theme !== "undefined" ? theme : undefined) }));
+    setHistory(pushSnapshot({ label: "Vista previa local · " + page, source: "publish", blocks, theme: (typeof theme !== "undefined" ? theme : undefined) }));
     recordSiteBinding({
       tenantId: "local-tenant",
       siteId: "site-local",
-      hostname: window.location.host || null,
-      published: true,
+      hostname: null,
+      published: false,
     });
     setSaved(true);
     window.setTimeout(() => setSaved(false), 1600);
@@ -298,7 +298,7 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
           ))}
           <button type="button" onClick={() => setShowTheme(true)} className="h-10 items-center rounded-md border border-white/10 px-3 text-xs text-slate-400 inline-flex">Theme</button>
           <button type="button" onClick={() => setPreview((v) => !v)} className="ml-1 h-10 items-center gap-1 rounded-md border border-white/10 px-3 text-xs text-slate-400 inline-flex"><Eye size={13} /> {preview ? "Editar" : "Preview"}</button>
-          <button type="button" onClick={publish} className="ml-1 h-10 rounded-md bg-emerald-400 px-3 text-xs font-semibold text-[#070d18]">{saved ? "Guardado" : "Publicar"}</button>
+          <button type="button" onClick={publish} title="Guarda una vista previa en este dispositivo; todavía no publica el sitio." className="ml-1 h-10 rounded-md bg-emerald-400 px-3 text-xs font-semibold text-[#070d18]">{saved ? "Guardado localmente" : "Guardar vista previa"}</button>
         </div>
       </div>
 
