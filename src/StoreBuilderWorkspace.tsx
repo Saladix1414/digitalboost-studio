@@ -327,7 +327,13 @@ export default function StoreBuilderWorkspace({
       id: item.id,
       customer: item.customerName || item.customerId || "sin cliente",
       total: item.total.amount,
-      status: item.paymentState === "PAID" ? "Pagado" : "Unpaid",
+      status: item.fulfillmentState === "CANCELLED"
+        ? "Cancelado"
+        : item.paymentState === "REFUNDED"
+          ? "Reembolsado"
+          : item.paymentState === "PAID"
+            ? item.fulfillmentState === "FULFILLED" ? "Entregado" : "Pagado"
+            : "Impago",
       items: item.itemCount ?? 0,
       date: item.createdAt,
     })));
@@ -358,7 +364,13 @@ export default function StoreBuilderWorkspace({
       id: item.id,
       customer: item.customerName || item.customerId || "sin cliente",
       total: item.total.amount,
-      status: item.paymentState === "PAID" ? "Pagado" : "Unpaid",
+      status: item.fulfillmentState === "CANCELLED"
+        ? "Cancelado"
+        : item.paymentState === "REFUNDED"
+          ? "Reembolsado"
+          : item.paymentState === "PAID"
+            ? item.fulfillmentState === "FULFILLED" ? "Entregado" : "Pagado"
+            : "Impago",
       items: item.itemCount ?? 0,
       date: item.createdAt,
     }));
@@ -1939,34 +1951,6 @@ const filteredProducts = useMemo(() => {
     </div>
   );
 
-  const advanceOrderStatus = (orderId: string) => {
-    const statusFlow = [
-      "Pagado",
-      "En preparación",
-      "Enviado",
-      "Entregado",
-    ];
-
-    setOrders((currentOrders) =>
-      currentOrders.map((order) => {
-        if (order.id !== orderId) {
-          return order;
-        }
-
-        const currentIndex = statusFlow.indexOf(order.status);
-
-        if (currentIndex < 0 || currentIndex >= statusFlow.length - 1) {
-          return order;
-        }
-
-        return {
-          ...order,
-          status: statusFlow[currentIndex + 1],
-        };
-      })
-    );
-  };
-
   const renderOrderProfile = () => {
     const order = orders.find((item) => item.id === selectedOrderId);
 
@@ -1987,7 +1971,7 @@ const filteredProducts = useMemo(() => {
 
         <PageTitle
           title={order.id}
-          subtitle="Detalle y seguimiento del pedido."
+          subtitle="Detalle de estados persistidos del pedido."
         />
 
         <div className="grid gap-4 md:grid-cols-4">
@@ -2082,72 +2066,28 @@ const filteredProducts = useMemo(() => {
             <div className="p-5">
               <div className="space-y-4">
                 {[
-                  "Pagado",
-                  "En preparación",
-                  "Enviado",
-                  "Entregado",
-                ].map((step, index) => {
-                  const steps = [
-                    "Pagado",
-                    "En preparación",
-                    "Enviado",
-                    "Entregado",
-                  ];
-
-                  const currentIndex = steps.indexOf(order.status);
-                  const isCompleted =
-                    currentIndex >= 0 && index <= currentIndex;
-                  const isCurrent = order.status === step;
-
-                  return (
-                    <div key={step} className="flex items-center gap-3">
-                      <div
-                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs ${
-                          isCompleted
-                            ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-                            : "border-[#00B7FF]/30 bg-[#0B1B30]/[.02] text-[#475569]"
-                        }`}
-                      >
-                        {isCompleted ? "✓" : index + 1}
-                      </div>
-
-                      <div className="min-w-0">
-                        <p
-                          className={`text-sm ${
-                            isCurrent
-                              ? "font-semibold text-white"
-                              : isCompleted
-                                ? "text-[#475569]"
-                                : "text-[#475569]"
-                          }`}
-                        >
-                          {step}
-                        </p>
-
-                        {isCurrent && (
-                          <p className="mt-0.5 text-[11px] text-violet-300">
-                            Estado actual
-                          </p>
-                        )}
-                      </div>
+                  { label: "Pago", state: order.status === "Impago" ? "Impago" : order.status === "Reembolsado" ? "Reembolsado" : "Pagado", done: order.status !== "Impago" && order.status !== "Cancelado" },
+                  { label: "Cumplimiento", state: order.status === "Entregado" ? "Cumplido" : order.status === "Cancelado" ? "Cancelado" : "Pendiente", done: order.status === "Entregado" },
+                ].map((step, index) => (
+                  <div key={step.label} className="flex items-center gap-3">
+                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs ${
+                      step.done
+                        ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
+                        : "border-[#00B7FF]/30 bg-[#0B1B30]/[.02] text-[#475569]"
+                    }`}>
+                      {step.done ? "✓" : index + 1}
                     </div>
-                  );
-                })}
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-white">{step.label}</p>
+                      <p className="mt-0.5 text-[11px] text-slate-400">{step.state}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              {order.status !== "Entregado" && (
-                <button
-                  onClick={() => advanceOrderStatus(order.id)}
-                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg border border-violet-400/30 bg-violet-500/20 px-4 py-2.5 text-xs font-medium text-violet-200 transition hover:bg-violet-500/20"
-                >
-                  {order.status === "Pagado"
-                    ? "Pasar a En preparación"
-                    : order.status === "En preparación"
-                      ? "Marcar como Enviado"
-                      : "Marcar como Entregado"}
-                  <ChevronRight size={14} />
-                </button>
-              )}
+              <p className="mt-5 rounded-lg border border-white/10 bg-white/[.03] p-3 text-[11px] leading-5 text-slate-400">
+                Este panel refleja los estados guardados en el servidor. Las acciones de pago y cumplimiento se habilitarán cuando se conecten sus servicios reales.
+              </p>
 
               <div className="mt-5 rounded-xl border border-[#D6E2EE] bg-[#0B1B30] p-4">
                 <p className="text-sm font-medium text-[#334155]">
