@@ -7,6 +7,9 @@ import { validateMarketAsset } from "../../commerce/DigitalBoostMarketAssetGuard
 import { MARKET_TAKE_RATE, type MarketRail } from "../../commerce/DigitalBoostMarketplace";
 import { CommerceAutomationRepository } from "./CommerceAutomationRepository";
 import { CommerceCampaignRepository } from "./CommerceCampaignRepository";
+import { CommerceStoreDraftRepository } from "./CommerceStoreDraftRepository";
+import type { CanvasBlock, BlockType } from "../../DigitalBoostStoreCanvas";
+import type { StoreTheme } from "../../DigitalBoostTheme";
 import { COMMERCE_BOT_SKILLS, type CommerceBotSkill } from "../../commerce/DigitalBoostCommerceBots";
 import type { BotRuleAction, BotRuleTrigger } from "../../commerce/DigitalBoostCommerceBotRules";
 
@@ -47,6 +50,32 @@ function validProduct(body: any): { id: string; title: string; sku?: string; pri
 const MARKET_RAILS = new Set<MarketRail>(["physical", "digital", "nft", "crypto", "gift_card"]);
 const BOT_SKILLS = new Set<CommerceBotSkill>(COMMERCE_BOT_SKILLS);
 const BOT_TRIGGERS = new Set<BotRuleTrigger>(["cart.idle", "order.unpaid", "stock.zero", "listing.listed"]);
+const STORE_PAGES = new Set(["Inicio", "Productos", "Colecciones", "Nosotros", "Contacto"]);
+const STORE_BLOCK_TYPES = new Set<BlockType>(["hero", "features", "products", "text", "cta", "media"]);
+
+function validStoreBlocks(value: unknown): CanvasBlock[] | null {
+  if (!Array.isArray(value) || value.length > 100) return null;
+  for (const item of value) {
+    if (!item || typeof item !== "object") return null;
+    const block = item as Record<string, unknown>;
+    if (typeof block.id !== "string" || !block.id.trim() || block.id.length > 100
+      || typeof block.type !== "string" || !STORE_BLOCK_TYPES.has(block.type as BlockType)
+      || typeof block.title !== "string" || block.title.length > 1000
+      || typeof block.body !== "string" || block.body.length > 4000
+      || typeof block.cta !== "string" || block.cta.length > 300
+      || (block.hidden !== undefined && typeof block.hidden !== "boolean")) return null;
+  }
+  return value as CanvasBlock[];
+}
+
+function validStoreTheme(value: unknown): StoreTheme | null {
+  if (!value || typeof value !== "object") return null;
+  const theme = value as Record<string, unknown>;
+  const colors = ["bg", "surface", "text", "muted", "primary", "accent"];
+  if (typeof theme.name !== "string" || theme.name.length > 80
+    || colors.some((key) => typeof theme[key] !== "string" || !/^#[0-9a-f]{6}$/i.test(theme[key] as string))) return null;
+  return value as StoreTheme;
+}
 
 export function registerCommerceRoutes(
   app: Express,
@@ -61,6 +90,7 @@ export function registerCommerceRoutes(
   const marketplace = input.database ? new MarketplaceRepository(input.database) : null;
   const automation = input.database ? new CommerceAutomationRepository(input.database) : null;
   const campaigns = input.database ? new CommerceCampaignRepository(input.database) : null;
+  const storeDrafts = input.database ? new CommerceStoreDraftRepository(input.database) : null;
 
   router.use((request, response, next) => {
     const principal = principalFor(request, input.environment);
@@ -256,6 +286,42 @@ export function registerCommerceRoutes(
       response.status(201).json({ ok: true, listing });
     } catch {
       response.status(503).json({ error: "commerce_market_listing_write_failed" });
+    }
+  });
+
+  router.get("/store/drafts/:page", async (request, response) => {
+    const page = request.params.page.trim();
+    if (!STORE_PAGES.has(page)) {
+      response.status(400).json({ error: "invalid_store_page" });
+      return;
+    }
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      response.json({
+        draft: await storeDrafts!.get(principal, "site-local", page),
+        source: "postgresql",
+        authoritative: false,
+      });
+    } catch {
+      response.status(503).json({ error: "commerce_store_draft_read_failed" });
+    }
+  });
+
+  router.put("/store/drafts/:page", async (request, response) => {
+    const page = request.params.page.trim();
+    const blocks = validStoreBlocks(request.body?.blocks);
+    const theme = validStoreTheme(request.body?.theme);
+    if (!STORE_PAGES.has(page) || !blocks || !theme) {
+      response.status(400).json({ error: "invalid_commerce_store_draft" });
+      return;
+    }
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      const draft = await storeDrafts!.save(principal, { siteId: "site-local", page, blocks, theme });
+      input.publishChange?.();
+      response.json({ ok: true, draft });
+    } catch {
+      response.status(503).json({ error: "commerce_store_draft_write_failed" });
     }
   });
 

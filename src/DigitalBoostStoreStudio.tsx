@@ -1,4 +1,5 @@
 import { recordSiteBinding } from "./commerce/DigitalBoostSiteBinding";
+import { fetchStoreDraftFromServer, saveStoreDraftOnServer } from "./commerce/DigitalBoostStoreDraftApi";
 import "./digitalboost-store-theme.css";
 import "./digitalboost-os.css";
 
@@ -127,7 +128,7 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
     try { (window as any).__dbSetPage = setPage; } catch {}
     function onPage(ev) {
       const name = ev && ev.detail;
-      if (typeof name === 'string' && name) setPage(name);
+      if (typeof name === 'string' && name) changePage(name);
     }
     window.addEventListener('db-page', onPage);
     return function () { window.removeEventListener('db-page', onPage); };
@@ -139,6 +140,8 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
   const [hover, setHover] = useState<string | null>(null);
   const [preview, setPreview] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [draftLoading, setDraftLoading] = useState(true);
+  const [draftNotice, setDraftNotice] = useState("Cargando el borrador local…");
   const inspectRef = useRef<HTMLElement | null>(null);
   const [history, setHistory] = useState<Snapshot[]>([]);
   const [showHistory, setShowHistory] = useState(false);
@@ -148,7 +151,30 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
   const [past, setPast] = useState<CanvasBlock[][]>([]);
   const [future, setFuture] = useState<CanvasBlock[][]>([]);
 
-  useEffect(() => { setBlocks(loadCanvasPage(page)); setHistory(loadHistory()); setTheme(loadTheme()); setReady(true); }, []);
+  useEffect(() => { setHistory(loadHistory()); setTheme(loadTheme()); setReady(true); }, []);
+  useEffect(() => {
+    let active = true;
+    setDraftLoading(true);
+    setBlocks(loadCanvasPage(page));
+    fetchStoreDraftFromServer(page)
+      .then((result) => {
+        if (!active) return;
+        if (result.draft) {
+          setBlocks(result.draft.blocks);
+          setTheme(result.draft.theme);
+          saveCanvasPage(page, result.draft.blocks);
+          saveTheme(result.draft.theme);
+          setDraftNotice("Borrador recuperado de PostgreSQL. El sitio sigue sin publicar.");
+        } else {
+          setDraftNotice("Usando el borrador local. Guardar vista previa lo copia a PostgreSQL.");
+        }
+      })
+      .catch(() => {
+        if (active) setDraftNotice("PostgreSQL no disponible; se usa el borrador local. El sitio sigue sin publicar.");
+      })
+      .finally(() => { if (active) setDraftLoading(false); });
+    return () => { active = false; };
+  }, [page]);
   useEffect(() => {
     function pull(next?: unknown) {
       if (Array.isArray(next) && next.length) {
@@ -170,11 +196,18 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
       try { delete (window as any).__dbSetBlocks; } catch {}
     };
   }, [page]);
-  useEffect(() => { if (ready) saveCanvasPage(page, blocks); }, [blocks, ready]);
+  useEffect(() => { if (ready) saveCanvasPage(page, blocks); }, [blocks, ready, page]);
   useEffect(() => { if (selected && inspectRef.current) inspectRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, [selected]);
   useEffect(() => { if (ready) saveTheme(theme); }, [theme, ready]);
 
   const current = useMemo(() => blocks.find((b) => b.id === selected) ?? null, [blocks, selected]);
+
+  function changePage(nextPage: string) {
+    if (!pages.includes(nextPage) || nextPage === page) return;
+    setDraftLoading(true);
+    setBlocks(loadCanvasPage(nextPage));
+    setPage(nextPage);
+  }
 
   function commit(next: CanvasBlock[]) {
     setPast((p) => [...p.slice(-29), blocks]);
@@ -233,13 +266,12 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
   }
   function publish() {
     saveCanvasPage(page, blocks);
-    setHistory(pushSnapshot({ label: "Vista previa local · " + page, source: "publish", blocks, theme: (typeof theme !== "undefined" ? theme : undefined) }));
-    recordSiteBinding({
-      tenantId: "local-tenant",
-      siteId: "site-local",
-      hostname: null,
-      published: false,
-    });
+    setHistory(pushSnapshot({ label: "Vista previa local · " + page, source: "publish", blocks, theme }));
+    recordSiteBinding({ tenantId: "local-tenant", siteId: "site-local", hostname: null, published: false });
+    setDraftNotice("Guardando borrador en PostgreSQL…");
+    void saveStoreDraftOnServer({ page, blocks, theme })
+      .then(() => setDraftNotice("Borrador guardado en PostgreSQL. El sitio sigue sin publicar."))
+      .catch(() => setDraftNotice("Borrador guardado solo en este dispositivo. El sitio sigue sin publicar."));
     setSaved(true);
     window.setTimeout(() => setSaved(false), 1600);
   }
@@ -279,7 +311,8 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
 
   const paper = { ['--store-bg' as string]: theme.bg, ['--store-surface' as string]: theme.surface, ['--store-text' as string]: theme.text, ['--store-muted' as string]: theme.muted, ['--store-primary' as string]: theme.primary, ['--store-accent' as string]: theme.accent } as React.CSSProperties;
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[#070d18] text-[#F7FAFF]">
+    <div className="relative flex h-full min-h-0 flex-col bg-[#070d18] text-[#F7FAFF]">
+      {draftLoading && <div className="fixed inset-0 z-[120] grid place-items-center bg-[#070d18]/85 px-5 text-center text-sm text-cyan-100">Cargando borrador local y remoto…</div>}
       {showHistory && <DigitalBoostHistoryPanel items={history} currentCount={blocks.length} onRestore={(s) => { setBlocks(s.blocks || []); setHistory(pushSnapshot({ label: "Restore · " + s.label, source: "user", blocks: s.blocks || [] })); setShowHistory(false); }} onClose={() => setShowHistory(false)} />}
       {showTheme && <DigitalBoostThemePanel theme={theme} onChange={setTheme} onClose={() => setShowTheme(false)} />}
       <div className="flex h-14 items-center justify-between border-b border-white/10 px-3">
@@ -298,7 +331,7 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
           ))}
           <button type="button" onClick={() => setShowTheme(true)} className="h-10 items-center rounded-md border border-white/10 px-3 text-xs text-slate-400 inline-flex">Theme</button>
           <button type="button" onClick={() => setPreview((v) => !v)} className="ml-1 h-10 items-center gap-1 rounded-md border border-white/10 px-3 text-xs text-slate-400 inline-flex"><Eye size={13} /> {preview ? "Editar" : "Preview"}</button>
-          <button type="button" onClick={publish} title="Guarda una vista previa en este dispositivo; todavía no publica el sitio." className="ml-1 h-10 rounded-md bg-emerald-400 px-3 text-xs font-semibold text-[#070d18]">{saved ? "Guardado localmente" : "Guardar vista previa"}</button>
+          <button type="button" onClick={publish} title="Guarda una vista previa local y un borrador en PostgreSQL si está disponible; no publica el sitio." className="ml-1 h-10 rounded-md bg-emerald-400 px-3 text-xs font-semibold text-[#070d18]">{saved ? "Guardado localmente" : "Guardar vista previa"}</button>
         </div>
       </div>
 
@@ -315,7 +348,7 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
           </div>
           <div className="mb-2 mt-6 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Pages</div>
           {pages.map((p) => (
-            <button key={p} type="button" onClick={() => setPage(p)} className={cx("mb-1 w-full rounded-md px-3 py-2 text-left text-xs", page === p ? "bg-violet-500/20 text-violet-300" : "text-slate-400")}>{p}</button>
+            <button key={p} type="button" onClick={() => changePage(p)} className={cx("mb-1 w-full rounded-md px-3 py-2 text-left text-xs", page === p ? "bg-violet-500/20 text-violet-300" : "text-slate-400")}>{p}</button>
           ))}
           <div className="mb-2 mt-6 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Structure</div>
           {blocks.map((b, n) => (
@@ -326,7 +359,7 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
         <div className="flex min-h-0 flex-col overflow-auto bg-[#0A1020] p-3 sm:p-6">
           <div className="mb-2 flex gap-2 overflow-x-auto lg:hidden">
             {pages.map((p) => (
-              <button key={p} type="button" onClick={() => setPage(p)} className={cx("shrink-0 rounded-full px-3 py-2 text-xs", page === p ? "bg-violet-500/30 text-violet-200" : "border border-white/10 text-slate-400")}>{p}</button>
+              <button key={p} type="button" onClick={() => changePage(p)} className={cx("shrink-0 rounded-full px-3 py-2 text-xs", page === p ? "bg-violet-500/30 text-violet-200" : "border border-white/10 text-slate-400")}>{p}</button>
             ))}
           </div>
           <div className="mb-3 flex gap-2 overflow-x-auto lg:hidden">
@@ -338,9 +371,10 @@ export default function DigitalBoostStoreStudio({ onBack }: { onBack?: () => voi
             <button type="button" onClick={() => { commit(typeof seedPage === "function" ? seedPage(page) : seedHome()); setSelected(null); }} className="shrink-0 rounded-full border border-white/10 px-3 py-2 text-xs">Plantilla</button>
             <button type="button" onClick={() => setShowHistory(true)} className="shrink-0 rounded-full border border-emerald-400/40 px-3 py-2 text-xs text-emerald-300">History</button>
           </div>
-          {!preview ? <div className="mb-2 text-center text-[10px] uppercase tracking-[0.14em] text-cyan-400">Editando · toca un bloque · Subir Bajar Copiar Ocultar</div> : <div className="mb-2 text-center text-[10px] uppercase tracking-[0.14em] text-slate-500">Preview</div>}
+          {!preview ? <div className="mb-1 text-center text-[10px] uppercase tracking-[0.14em] text-cyan-400">Editando · toca un bloque · Subir Bajar Copiar Ocultar</div> : <div className="mb-1 text-center text-[10px] uppercase tracking-[0.14em] text-slate-500">Preview</div>}
+          <div role="status" aria-live="polite" className="mb-2 text-center text-[10px] text-slate-400">{draftNotice}</div>
           <div style={paper} className={cx("mx-auto overflow-hidden rounded-xl border border-white/10 shadow-2xl", device === "mobile" && "w-full max-w-sm", device === "tablet" && "w-full max-w-xl", device === "desktop" && "w-full max-w-3xl")}>
-            <CanvasView blocks={blocks} selected={preview ? null : selected} hover={preview ? null : hover} onSelect={(id) => { if (!preview) setSelected(id); }} onHover={setHover} page={page} pages={pages} onPage={setPage} />
+            <CanvasView blocks={blocks} selected={preview ? null : selected} hover={preview ? null : hover} onSelect={(id) => { if (!preview) setSelected(id); }} onHover={setHover} page={page} pages={pages} onPage={changePage} />
           </div>
         </div>
 

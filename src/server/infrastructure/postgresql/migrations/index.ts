@@ -13,6 +13,9 @@ import {
 import {
   commerceCampaignConfigurationMigration,
 } from "./0005CommerceCampaignConfiguration";
+import {
+  commerceStoreDraftsMigration,
+} from "./0006CommerceStoreDrafts";
 
 export const postgresMigrations = [
   infrastructureFoundationMigration,
@@ -20,4 +23,5 @@ export const postgresMigrations = [
   commerceMarketplaceMigration,
   commerceBotConfigurationMigration,
   commerceCampaignConfigurationMigration,
+  commerceStoreDraftsMigration,
 ] as const;
