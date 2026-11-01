@@ -6,6 +6,7 @@ import { MarketplaceRepository } from "./MarketplaceRepository";
 import { validateMarketAsset } from "../../commerce/DigitalBoostMarketAssetGuard";
 import { MARKET_TAKE_RATE, type MarketRail } from "../../commerce/DigitalBoostMarketplace";
 import { CommerceAutomationRepository } from "./CommerceAutomationRepository";
+import { CommerceUsdtEthereumPayments } from "./CommerceUsdtEthereumPayments";
 import { CommerceCampaignRepository } from "./CommerceCampaignRepository";
 import { CommerceStoreDraftRepository } from "./CommerceStoreDraftRepository";
 import type { CanvasBlock, BlockType } from "../../DigitalBoostStoreCanvas";
@@ -97,6 +98,10 @@ export function registerCommerceRoutes(
   const automation = input.database ? new CommerceAutomationRepository(input.database) : null;
   const campaigns = input.database ? new CommerceCampaignRepository(input.database) : null;
   const storeDrafts = input.database ? new CommerceStoreDraftRepository(input.database) : null;
+  const usdtPayments = input.database ? new CommerceUsdtEthereumPayments(input.database, {
+    rpcUrl: process.env.DIGITALBOOST_USDT_ETH_RPC_URL || "",
+    merchantAddress: process.env.DIGITALBOOST_USDT_ETH_MERCHANT_ADDRESS || "",
+  }) : null;
 
   router.use((request, response, next) => {
     const principal = principalFor(request, input.environment);
@@ -547,6 +552,48 @@ export function registerCommerceRoutes(
       response.status(201).json({ ok: true, rule });
     } catch {
       response.status(503).json({ error: "commerce_bot_rule_write_failed" });
+    }
+  });
+
+  router.post("/orders/:id/usdt-ethereum-intents", async (request, response) => {
+    const orderId = request.params.id.trim();
+    if (!orderId || orderId.length > 100) {
+      response.status(400).json({ error: "invalid_commerce_order_id" });
+      return;
+    }
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      const payment = await usdtPayments!.createIntent(principal, orderId);
+      response.status(201).json({ ok: true, payment });
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "";
+      const status = code === "ORDER_NOT_FOUND" ? 404
+        : code === "USDT_ETH_NOT_CONFIGURED" ? 503
+        : code === "ORDER_NOT_PAYABLE" || code === "ORDER_USD_ONLY" ? 409 : 503;
+      response.status(status).json({ error: code || "usdt_payment_intent_failed" });
+    }
+  });
+
+  router.post("/usdt-ethereum-intents/:id/verify", async (request, response) => {
+    const intentId = request.params.id.trim();
+    const txHash = typeof request.body?.txHash === "string" ? request.body.txHash.trim() : "";
+    if (!intentId || intentId.length > 100 || !/^0x[a-fA-F0-9]{64}$/.test(txHash)) {
+      response.status(400).json({ error: "invalid_usdt_payment_verification" });
+      return;
+    }
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      const payment = await usdtPayments!.verifyIntent(principal, intentId, txHash);
+      if (payment.state === "verified") input.publishChange?.();
+      response.json({ ok: true, payment });
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "";
+      const status = code === "PAYMENT_INTENT_NOT_FOUND" ? 404
+        : code === "USDT_ETH_NOT_CONFIGURED" ? 503
+        : code === "PAYMENT_INTENT_EXPIRED" ? 410
+        : code === "PAYMENT_TX_NOT_CONFIRMED" || code === "PAYMENT_TX_INVALID"
+          || code === "PAYMENT_TX_ALREADY_USED" || code === "ORDER_NOT_PAYABLE" ? 409 : 503;
+      response.status(status).json({ error: code || "usdt_payment_verification_failed" });
     }
   });
 
