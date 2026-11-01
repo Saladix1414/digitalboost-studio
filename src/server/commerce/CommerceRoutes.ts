@@ -191,21 +191,34 @@ export function registerCommerceRoutes(
   });
 
   router.post("/orders", async (request, response) => {
-    const amount = Number(request.body?.amount);
-    const customerId = typeof request.body?.customerId === "string"
-      ? request.body.customerId.trim()
-      : undefined;
-    if (!Number.isFinite(amount) || amount <= 0 || amount > 1_000_000_000
-      || (customerId !== undefined && customerId.length > 100)) {
-      response.status(400).json({ error: "invalid_order" });
+    const body = request.body ?? {};
+    const lines = body.lines;
+    const customerId = typeof body.customerId === "string" ? body.customerId.trim() : "";
+    const idempotencyKey = typeof body.idempotencyKey === "string" ? body.idempotencyKey.trim() : "";
+    const validLines = Array.isArray(lines) && lines.length >= 1 && lines.length <= 30
+      && lines.every((line: any) => line && typeof line.productId === "string"
+        && line.productId.trim().length > 0 && line.productId.trim().length <= 100
+        && Number.isSafeInteger(line.quantity) && line.quantity >= 1 && line.quantity <= 99)
+      && new Set(lines.map((line: any) => line.productId.trim())).size === lines.length;
+    if (!validLines || (customerId && customerId.length > 100)
+      || idempotencyKey.length < 8 || idempotencyKey.length > 128) {
+      response.status(400).json({ error: "invalid_commerce_checkout" });
       return;
     }
     try {
       const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
-      const order = await repository!.createOrder(principal, { amount, customerId });
+      const result = await repository!.createOrderFromCatalog(principal, {
+        lines: lines.map((line: any) => ({ productId: line.productId.trim(), quantity: line.quantity })),
+        customerId: customerId || undefined, idempotencyKey,
+      });
       input.publishChange?.();
-      response.status(201).json({ ok: true, order });
-    } catch {
+      response.status(result.replayed ? 200 : 201).json({ ok: true, ...result });
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "";
+      if (code === "PRODUCT_NOT_FOUND" || code === "CUSTOMER_NOT_FOUND") {
+        response.status(409).json({ error: code.toLowerCase() });
+        return;
+      }
       response.status(503).json({ error: "commerce_order_create_failed" });
     }
   });

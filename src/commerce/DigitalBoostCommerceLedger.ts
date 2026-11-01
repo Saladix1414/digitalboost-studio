@@ -25,6 +25,19 @@ export type CommerceOrder = {
   readonly createdAt: string;
 };
 
+export type CommerceOrderLineInput = {
+  readonly productId: string;
+  readonly quantity: number;
+};
+
+export type CommerceOrderLine = {
+  readonly productId: string;
+  readonly title: string;
+  readonly quantity: number;
+  readonly unitPrice: CommerceMoney;
+  readonly total: CommerceMoney;
+};
+
 export type CommerceCustomer = {
   readonly id: string;
   readonly tenantId: string;

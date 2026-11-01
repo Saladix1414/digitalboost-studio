@@ -37,9 +37,14 @@ export function deleteCommerceProduct(id: string): Promise<{ ok: true }> {
 }
 
 export function createCommerceOrder(input: {
-  amount: number;
+  lines: Array<{ productId: string; quantity: number }>;
   customerId?: string;
-}): Promise<{ ok: true; order: CommerceSnapshot["orders"][number] }> {
+  idempotencyKey: string;
+}): Promise<{ ok: true; order: CommerceSnapshot["orders"][number]; items: Array<{
+  productId: string; title: string; quantity: number;
+  unitPrice: { amount: number; currency: "USD" };
+  total: { amount: number; currency: "USD" };
+}>; replayed: boolean }> {
   return request("/orders", { method: "POST", body: JSON.stringify(input) });
 }
 
