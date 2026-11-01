@@ -166,6 +166,28 @@ export class CommerceRepository {
     return result.affectedRows > 0;
   }
 
+  async getOrderItems(principal: CommercePrincipal, orderId: string): Promise<CommerceOrderLine[] | null> {
+    const order = await this.database.query<{ id: string }>({
+      statement: "SELECT id FROM commerce_orders WHERE tenant_id = $1 AND id = $2",
+      parameters: [principal.tenantId, orderId],
+      operation: operation(principal),
+    });
+    if (!order.rows[0]) return null;
+
+    const result = await this.database.query<OrderLineRow>({
+      statement: "SELECT id, product_id, title_snapshot, unit_price_amount, currency, quantity, line_total_amount FROM commerce_order_items WHERE tenant_id = $1 AND order_id = $2 ORDER BY created_at, id",
+      parameters: [principal.tenantId, orderId],
+      operation: operation(principal),
+    });
+    return result.rows.map(row => ({
+      productId: row.product_id,
+      title: row.title_snapshot,
+      quantity: Number(row.quantity),
+      unitPrice: { amount: Number(row.unit_price_amount), currency: row.currency },
+      total: { amount: Number(row.line_total_amount), currency: row.currency },
+    }));
+  }
+
   async createOrderFromCatalog(
     principal: CommercePrincipal,
     input: { lines: readonly CommerceOrderLineInput[]; customerId?: string; idempotencyKey: string },

@@ -30,9 +30,9 @@ import {
 } from "lucide-react";
 import ProductInventoryPro from "./ProductInventoryPro";
 import CommerceOSOverview from "./CommerceOSOverview";
-import { getCommerceSnapshot, hydrateCommerceSnapshot, recordCommerceCustomer, recordCommerceOrder, replaceCommerceProducts } from "./commerce/DigitalBoostCommerceLedger";
+import { getCommerceSnapshot, hydrateCommerceSnapshot, recordCommerceCustomer, recordCommerceOrder, replaceCommerceProducts, type CommerceOrderLine } from "./commerce/DigitalBoostCommerceLedger";
 import { useCommerceLive } from "./commerce/useCommerceLive";
-import { createCommerceCustomer, createCommerceOrder, deleteCommerceProduct, fetchCommerceSnapshot, saveCommerceProduct } from "./commerce/DigitalBoostCommerceApi";
+import { createCommerceCustomer, createCommerceOrder, deleteCommerceProduct, fetchCommerceOrderItems, fetchCommerceSnapshot, saveCommerceProduct } from "./commerce/DigitalBoostCommerceApi";
 import { deleteCommerceCampaign, fetchCommerceCampaigns, saveCommerceCampaign, type CommerceCampaignConfiguration } from "./commerce/DigitalBoostCommerceCampaignApi";
 import DigitalBoostPulseBotPanel from "./commerce/DigitalBoostPulseBotPanel";
 import DigitalBoostMarketplacePanel from "./commerce/DigitalBoostMarketplacePanel";
@@ -366,6 +366,27 @@ export default function StoreBuilderWorkspace({
 
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [aiOrderId, setAiOrderId] = useState<string | null>(null);
+  const [orderLines, setOrderLines] = useState<CommerceOrderLine[]>([]);
+  const [orderLinesLoading, setOrderLinesLoading] = useState(false);
+  const [orderLinesError, setOrderLinesError] = useState("");
+
+  useEffect(() => {
+    if (!selectedOrderId) {
+      setOrderLines([]);
+      setOrderLinesError("");
+      return;
+    }
+    let active = true;
+    setOrderLinesLoading(true);
+    setOrderLinesError("");
+    fetchCommerceOrderItems(selectedOrderId)
+      .then(({ items }) => { if (active) setOrderLines(items); })
+      .catch((error) => {
+        if (active) setOrderLinesError(error instanceof Error ? error.message : "No se pudieron leer los artículos.");
+      })
+      .finally(() => { if (active) setOrderLinesLoading(false); });
+    return () => { active = false; };
+  }, [selectedOrderId]);
 
   const customers = useMemo<Customer[]>(() => {
     return commerceLive.snap.customers.map((profile, index) => {
@@ -2034,6 +2055,25 @@ const filteredProducts = useMemo(() => {
                 <p className="mt-1 text-lg font-semibold text-emerald-300">
                   ${order.total.toFixed(2)}
                 </p>
+              </div>
+              <div className="border-t border-white/10 pt-4">
+                <p className="text-[11px] uppercase tracking-wide text-slate-400">Artículos guardados</p>
+                {orderLinesLoading ? (
+                  <p className="mt-2 text-xs text-slate-500">Cargando detalle desde PostgreSQL…</p>
+                ) : orderLinesError ? (
+                  <p role="status" className="mt-2 text-xs text-amber-300">No se pudo leer el detalle: {orderLinesError}</p>
+                ) : orderLines.length ? (
+                  <div className="mt-2 space-y-2">
+                    {orderLines.map((line) => (
+                      <div key={line.productId} className="flex items-start justify-between gap-3 text-xs">
+                        <span className="text-slate-300">{line.title} × {line.quantity}</span>
+                        <span className="shrink-0 text-slate-400">${line.total.amount.toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-2 text-xs text-slate-500">Este pedido no tiene líneas detalladas guardadas.</p>
+                )}
               </div>
             </div>
           </Panel>

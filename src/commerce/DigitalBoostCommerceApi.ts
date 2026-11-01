@@ -1,4 +1,4 @@
-import type { CommerceSnapshot, CommerceProduct, CommerceCustomer } from "./DigitalBoostCommerceLedger";
+import type { CommerceSnapshot, CommerceProduct, CommerceCustomer, CommerceOrderLine } from "./DigitalBoostCommerceLedger";
 
 const BASE = "/api/commerce/v1";
 
@@ -34,6 +34,18 @@ export function saveCommerceProduct(product: CommerceProduct): Promise<{ ok: tru
 
 export function deleteCommerceProduct(id: string): Promise<{ ok: true }> {
   return request(`/products/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+export function fetchCommerceOrderItems(orderId: string): Promise<{
+  items: CommerceOrderLine[];
+  source: "postgresql";
+  authoritative: false;
+}> {
+  return request<{
+    items: CommerceOrderLine[];
+    source: "postgresql";
+    authoritative: false;
+  }>(`/orders/${encodeURIComponent(orderId)}/items`);
 }
 
 export function createCommerceOrder(input: {

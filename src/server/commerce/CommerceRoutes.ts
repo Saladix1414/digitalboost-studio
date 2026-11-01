@@ -190,6 +190,25 @@ export function registerCommerceRoutes(
     }
   });
 
+  router.get("/orders/:id/items", async (request, response) => {
+    const id = request.params.id.trim();
+    if (!id || id.length > 100) {
+      response.status(400).json({ error: "invalid_commerce_order_id" });
+      return;
+    }
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      const items = await repository!.getOrderItems(principal, id);
+      if (!items) {
+        response.status(404).json({ error: "commerce_order_not_found" });
+        return;
+      }
+      response.json({ items, source: "postgresql", authoritative: false });
+    } catch {
+      response.status(503).json({ error: "commerce_order_items_read_failed" });
+    }
+  });
+
   router.post("/orders", async (request, response) => {
     const body = request.body ?? {};
     const lines = body.lines;
