@@ -3,6 +3,7 @@ import type { DatabasePort } from "../../infrastructure/core/database";
 import { createInfrastructureOperationContext } from "../../infrastructure/core/types";
 import type {
   CommerceCustomer,
+  CommerceCurrency,
   CommerceOrder,
   CommerceOrderLine,
   CommerceOrderLineInput,
@@ -19,6 +20,7 @@ type ProductRow = {
   title: string;
   sku: string | null;
   price_amount: string | number;
+  price_ars_amount: string | number | null;
   currency: "USD";
   stock: number;
 };
@@ -29,6 +31,7 @@ type OrderLineProductRow = {
   id: string;
   title: string;
   price_amount: string | number;
+  price_ars_amount: string | number | null;
   currency: "USD";
 };
 
@@ -37,7 +40,7 @@ type OrderLineRow = {
   product_id: string;
   title_snapshot: string;
   unit_price_amount: string | number;
-  currency: "USD";
+  currency: CommerceCurrency;
   quantity: number;
   line_total_amount: string | number;
 };
@@ -46,7 +49,7 @@ type OrderRow = {
   id: string;
   customer_id: string | null;
   total_amount: string | number;
-  currency: "USD";
+  currency: CommerceCurrency;
   payment_state: CommerceOrder["paymentState"];
   fulfillment_state: CommerceOrder["fulfillmentState"];
   created_at: string | Date;
@@ -70,6 +73,7 @@ function mapProduct(row: ProductRow, tenantId: string): CommerceProduct {
     title: row.title,
     sku: row.sku ?? undefined,
     price: { amount: Number(row.price_amount), currency: row.currency },
+    ...(row.price_ars_amount == null ? {} : { priceArs: { amount: Number(row.price_ars_amount), currency: "ARS" as const } }),
     stock: Number(row.stock),
   };
 }
@@ -99,7 +103,7 @@ export class CommerceRepository {
 
   async listProducts(principal: CommercePrincipal): Promise<CommerceProduct[]> {
     const result = await this.database.query<ProductRow>({
-      statement: `SELECT id, title, sku, price_amount, currency, stock
+      statement: `SELECT id, title, sku, price_amount, price_ars_amount, currency, stock
         FROM commerce_products WHERE tenant_id = $1 ORDER BY created_at, id`,
       parameters: [principal.tenantId],
       operation: operation(principal),
@@ -154,14 +158,15 @@ export class CommerceRepository {
     const now = new Date().toISOString();
     await this.database.mutate({
       statement: `INSERT INTO commerce_products
-        (tenant_id, id, title, sku, price_amount, currency, stock, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8)
+        (tenant_id, id, title, sku, price_amount, currency, stock, price_ars_amount, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9)
         ON CONFLICT (tenant_id, id) DO UPDATE SET
           title = EXCLUDED.title, sku = EXCLUDED.sku,
           price_amount = EXCLUDED.price_amount, currency = EXCLUDED.currency,
+          price_ars_amount = EXCLUDED.price_ars_amount,
           stock = EXCLUDED.stock, updated_at = EXCLUDED.updated_at`,
       parameters: [principal.tenantId, input.id, input.title, input.sku ?? null,
-        input.price.amount, input.price.currency, input.stock, now],
+        input.price.amount, input.price.currency, input.stock, input.priceArs?.amount ?? null, now],
       expectedVersion: null,
       operation: operation(principal),
     });
@@ -202,7 +207,7 @@ export class CommerceRepository {
 
   async createOrderFromCatalog(
     principal: CommercePrincipal,
-    input: { lines: readonly CommerceOrderLineInput[]; customerId?: string; idempotencyKey: string },
+    input: { lines: readonly CommerceOrderLineInput[]; customerId?: string; idempotencyKey: string; currency?: CommerceCurrency },
   ): Promise<{ order: CommerceOrder; items: CommerceOrderLine[]; replayed: boolean }> {
     return this.database.transaction("read-write", async transaction => {
       const op = operation(principal);
@@ -242,20 +247,23 @@ export class CommerceRepository {
         });
         if (!customer.rows[0]) throw new Error("CUSTOMER_NOT_FOUND");
       }
+      const currency: CommerceCurrency = input.currency ?? "USD";
       const ids = input.lines.map(line => line.productId).sort();
       const productsResult = await transaction.query<OrderLineProductRow>({
-        statement: "SELECT id, title, price_amount, currency FROM commerce_products WHERE tenant_id = $1 AND id = ANY($2::text[]) ORDER BY id",
+        statement: "SELECT id, title, price_amount, price_ars_amount, currency FROM commerce_products WHERE tenant_id = $1 AND id = ANY($2::text[]) ORDER BY id",
         parameters: [principal.tenantId, ids], operation: op,
       });
       const products = new Map(productsResult.rows.map(product => [product.id, product]));
       if (products.size !== ids.length) throw new Error("PRODUCT_NOT_FOUND");
       const items: CommerceOrderLine[] = input.lines.map(line => {
         const product = products.get(line.productId)!;
-        const unitCents = Math.round(Number(product.price_amount) * 100);
+        const rawAmount = currency === "ARS" ? product.price_ars_amount : product.price_amount;
+        if (rawAmount == null) throw new Error("PRODUCT_CURRENCY_PRICE_MISSING");
+        const unitCents = Math.round(Number(rawAmount) * 100);
         return {
           productId: product.id, title: product.title, quantity: line.quantity,
-          unitPrice: { amount: unitCents / 100, currency: "USD" },
-          total: { amount: unitCents * line.quantity / 100, currency: "USD" },
+          unitPrice: { amount: unitCents / 100, currency },
+          total: { amount: unitCents * line.quantity / 100, currency },
         };
       });
       const totalCents = items.reduce((sum, item) => sum + Math.round(item.total.amount * 100), 0);
@@ -263,18 +271,18 @@ export class CommerceRepository {
       const now = new Date().toISOString();
       const order: CommerceOrder = {
         id: randomUUID(), tenantId: principal.tenantId, customerId: input.customerId,
-        total: { amount: totalCents / 100, currency: "USD" },
+        total: { amount: totalCents / 100, currency },
         paymentState: "UNPAID", fulfillmentState: "UNFULFILLED", createdAt: now,
       };
       await transaction.mutate({
-        statement: "INSERT INTO commerce_orders (tenant_id, id, customer_id, total_amount, currency, payment_state, fulfillment_state, created_at, updated_at) VALUES ($1, $2, $3, $4, 'USD', 'UNPAID', 'UNFULFILLED', $5, $5)",
-        parameters: [principal.tenantId, order.id, order.customerId ?? null, order.total.amount, now],
+        statement: "INSERT INTO commerce_orders (tenant_id, id, customer_id, total_amount, currency, payment_state, fulfillment_state, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, 'UNPAID', 'UNFULFILLED', $6, $6)",
+        parameters: [principal.tenantId, order.id, order.customerId ?? null, order.total.amount, currency, now],
         expectedVersion: null, operation: op,
       });
       for (const item of items) {
         await transaction.mutate({
-          statement: "INSERT INTO commerce_order_items (tenant_id, order_id, id, product_id, title_snapshot, unit_price_amount, currency, quantity, line_total_amount, created_at) VALUES ($1, $2, $3, $4, $5, $6, 'USD', $7, $8, $9)",
-          parameters: [principal.tenantId, order.id, randomUUID(), item.productId, item.title, item.unitPrice.amount, item.quantity, item.total.amount, now],
+          statement: "INSERT INTO commerce_order_items (tenant_id, order_id, id, product_id, title_snapshot, unit_price_amount, currency, quantity, line_total_amount, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+          parameters: [principal.tenantId, order.id, randomUUID(), item.productId, item.title, item.unitPrice.amount, currency, item.quantity, item.total.amount, now],
           expectedVersion: null, operation: op,
         });
       }

@@ -1,9 +1,11 @@
 import { emitCommerceSync, pingCommerceSyncPeers } from "./DigitalBoostCommerceSync";
 export const COMMERCE_LEDGER_CONTRACT = "cos-l0-ledger-v1" as const;
 
+export type CommerceCurrency = "USD" | "ARS";
+
 export type CommerceMoney = {
   readonly amount: number;
-  readonly currency: "USD";
+  readonly currency: CommerceCurrency;
 };
 
 export type CommerceProduct = {
@@ -12,6 +14,8 @@ export type CommerceProduct = {
   readonly title: string;
   readonly sku?: string;
   readonly price: CommerceMoney;
+  /** Optional for legacy products until an ARS price is entered. */
+  readonly priceArs?: CommerceMoney;
   readonly stock: number;
 };
 

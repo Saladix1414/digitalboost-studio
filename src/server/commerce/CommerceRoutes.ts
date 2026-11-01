@@ -32,7 +32,7 @@ function principalFor(
   return null;
 }
 
-function validProduct(body: any): { id: string; title: string; sku?: string; price: { amount: number; currency: "USD" }; stock: number } | null {
+function validProduct(body: any): { id: string; title: string; sku?: string; price: { amount: number; currency: "USD" }; priceArs?: { amount: number; currency: "ARS" }; stock: number } | null {
   if (!body || typeof body !== "object") return null;
   const title = typeof body.title === "string" ? body.title.trim() : "";
   const id = typeof body.id === "string" ? body.id.trim() : "";
@@ -42,9 +42,15 @@ function validProduct(body: any): { id: string; title: string; sku?: string; pri
   if (!Number.isFinite(amount) || amount < 0 || amount > 1_000_000_000) return null;
   if (!Number.isSafeInteger(stock) || stock < 0 || stock > 2_000_000_000) return null;
   if (body.price?.currency !== "USD") return null;
+  let priceArs: { amount: number; currency: "ARS" } | undefined;
+  if (body.priceArs != null) {
+    const arsAmount = Number(body.priceArs?.amount);
+    if (body.priceArs?.currency !== "ARS" || !Number.isFinite(arsAmount) || arsAmount < 0 || arsAmount > 1_000_000_000) return null;
+    priceArs = { amount: arsAmount, currency: "ARS" };
+  }
   const sku = typeof body.sku === "string" ? body.sku.trim() : "";
   if (sku.length > 100) return null;
-  return { id, title, sku: sku || undefined, price: { amount, currency: "USD" }, stock };
+  return { id, title, sku: sku || undefined, price: { amount, currency: "USD" }, priceArs, stock };
 }
 
 const MARKET_RAILS = new Set<MarketRail>(["physical", "digital", "nft", "crypto", "gift_card"]);
@@ -214,12 +220,14 @@ export function registerCommerceRoutes(
     const lines = body.lines;
     const customerId = typeof body.customerId === "string" ? body.customerId.trim() : "";
     const idempotencyKey = typeof body.idempotencyKey === "string" ? body.idempotencyKey.trim() : "";
+    const currency = body.currency === undefined ? "USD" : body.currency;
+    const validCurrency = currency === "USD" || currency === "ARS";
     const validLines = Array.isArray(lines) && lines.length >= 1 && lines.length <= 30
       && lines.every((line: any) => line && typeof line.productId === "string"
         && line.productId.trim().length > 0 && line.productId.trim().length <= 100
         && Number.isSafeInteger(line.quantity) && line.quantity >= 1 && line.quantity <= 99)
       && new Set(lines.map((line: any) => line.productId.trim())).size === lines.length;
-    if (!validLines || (customerId && customerId.length > 100)
+    if (!validCurrency || !validLines || (customerId && customerId.length > 100)
       || idempotencyKey.length < 8 || idempotencyKey.length > 128) {
       response.status(400).json({ error: "invalid_commerce_checkout" });
       return;
@@ -228,13 +236,13 @@ export function registerCommerceRoutes(
       const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
       const result = await repository!.createOrderFromCatalog(principal, {
         lines: lines.map((line: any) => ({ productId: line.productId.trim(), quantity: line.quantity })),
-        customerId: customerId || undefined, idempotencyKey,
+        customerId: customerId || undefined, idempotencyKey, currency,
       });
       input.publishChange?.();
       response.status(result.replayed ? 200 : 201).json({ ok: true, ...result });
     } catch (error) {
       const code = error instanceof Error ? error.message : "";
-      if (code === "PRODUCT_NOT_FOUND" || code === "CUSTOMER_NOT_FOUND") {
+      if (code === "PRODUCT_NOT_FOUND" || code === "CUSTOMER_NOT_FOUND" || code === "PRODUCT_CURRENCY_PRICE_MISSING") {
         response.status(409).json({ error: code.toLowerCase() });
         return;
       }

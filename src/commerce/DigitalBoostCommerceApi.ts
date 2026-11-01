@@ -1,4 +1,4 @@
-import type { CommerceSnapshot, CommerceProduct, CommerceCustomer, CommerceOrderLine } from "./DigitalBoostCommerceLedger";
+import type { CommerceSnapshot, CommerceProduct, CommerceCustomer, CommerceOrderLine, CommerceCurrency } from "./DigitalBoostCommerceLedger";
 
 const BASE = "/api/commerce/v1";
 
@@ -25,10 +25,10 @@ export function fetchCommerceSnapshot(): Promise<CommerceSnapshot> {
 }
 
 export function saveCommerceProduct(product: CommerceProduct): Promise<{ ok: true; product: CommerceProduct }> {
-  const { id, title, sku, price, stock } = product;
+  const { id, title, sku, price, priceArs, stock } = product;
   return request(`/products/${encodeURIComponent(id)}`, {
     method: "PUT",
-    body: JSON.stringify({ title, sku, price, stock }),
+    body: JSON.stringify({ title, sku, price, priceArs, stock }),
   });
 }
 
@@ -52,10 +52,11 @@ export function createCommerceOrder(input: {
   lines: Array<{ productId: string; quantity: number }>;
   customerId?: string;
   idempotencyKey: string;
+  currency?: CommerceCurrency;
 }): Promise<{ ok: true; order: CommerceSnapshot["orders"][number]; items: Array<{
   productId: string; title: string; quantity: number;
-  unitPrice: { amount: number; currency: "USD" };
-  total: { amount: number; currency: "USD" };
+  unitPrice: { amount: number; currency: CommerceCurrency };
+  total: { amount: number; currency: CommerceCurrency };
 }>; replayed: boolean }> {
   return request("/orders", { method: "POST", body: JSON.stringify(input) });
 }
