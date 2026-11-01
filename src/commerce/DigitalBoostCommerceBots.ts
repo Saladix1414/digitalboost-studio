@@ -62,6 +62,18 @@ export function resetCommerceBots(): void {
 export function listCommerceBots(tenantId: string): readonly CommerceBot[] {
   return bag(tenantId).slice();
 }
+export function hydrateCommerceBots(tenantId: string, serverBots: readonly CommerceBot[]): boolean {
+  const local = bag(tenantId);
+  const serverById = new Map(serverBots.map((bot) => [bot.id, bot]));
+  const hasLocalDifferences = local.some((bot) =>
+    JSON.stringify(bot) !== JSON.stringify(serverById.get(bot.id)),
+  );
+  const merged = new Map(serverBots.map((bot) => [bot.id, bot]));
+  for (const bot of local) merged.set(bot.id, bot);
+  bags.set(tenantId, [...merged.values()]);
+  writeAll();
+  return hasLocalDifferences;
+}
 export function createCommerceBot(input: {
   tenantId: string;
   name: string;

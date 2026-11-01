@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   COMMERCE_BOT_SKILLS,
   createCommerceBot,
@@ -7,18 +7,42 @@ import {
   updateCommerceBot,
   type CommerceBotSkill,
 } from "./DigitalBoostCommerceBots";
-import { addBotRule, listBotRules, type BotRuleTrigger } from "./DigitalBoostCommerceBotRules";
+import { addBotRule, hydrateBotRules, listBotRules, type BotRuleTrigger } from "./DigitalBoostCommerceBotRules";
+import { hydrateCommerceBots } from "./DigitalBoostCommerceBots";
+import { useCommerceStore } from "./DigitalBoostCommerceContext";
+import {
+  createCommerceBotOnServer,
+  createCommerceBotRuleOnServer,
+  fetchCommerceBotSnapshot,
+  updateCommerceBotOnServer,
+} from "./DigitalBoostCommerceBotApi";
 
 export default function DigitalBoostMarketBotsPanel({
   tenantId = "local-tenant",
 }: {
   tenantId?: string;
 }) {
+  const store = useCommerceStore();
   const [name, setName] = useState("Bot de ventas");
   const [skill, setSkill] = useState<CommerceBotSkill>("sales.pre_purchase");
   const [note, setNote] = useState("Draft. No envían.");
   const [openId, setOpenId] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
+  useEffect(() => {
+    let active = true;
+    void fetchCommerceBotSnapshot().then(snapshot => {
+      if (!active || snapshot.tenantId !== tenantId) return;
+      const botConflict = hydrateCommerceBots(tenantId, snapshot.bots);
+      const ruleConflict = hydrateBotRules(tenantId, snapshot.rules);
+      setNote(botConflict || ruleConflict
+        ? "Hay bots o reglas locales pendientes de reconciliación."
+        : "Bots y reglas draft sincronizados con PostgreSQL.");
+      setTick(value => value + 1);
+    }).catch(() => {
+      if (active) setNote("Bots y reglas siguen locales; PostgreSQL no está disponible.");
+    });
+    return () => { active = false; };
+  }, [tenantId, store.tick]);
   const bots = listCommerceBots(tenantId);
   void tick;
   return (
@@ -34,8 +58,21 @@ export default function DigitalBoostMarketBotsPanel({
         </select>
         <button type="button" className="h-10 rounded-md bg-cyan-400 px-3 text-xs font-semibold text-[#0E1420]" onClick={() => {
           const result = createCommerceBot({ tenantId, name, skills: [skill] });
-          setNote("ok" in result && result.ok === false ? result.reason : "Bot creado");
+          if ("ok" in result) {
+            setNote(result.reason);
+            return;
+          }
+          setNote("Bot draft creado; guardando en backend…");
           setTick((n) => n + 1);
+          void createCommerceBotOnServer({ id: result.id, name: result.name, skills: result.skills })
+            .then(() => fetchCommerceBotSnapshot())
+            .then(snapshot => {
+              hydrateCommerceBots(tenantId, snapshot.bots);
+              hydrateBotRules(tenantId, snapshot.rules);
+              setNote("Bot draft guardado en PostgreSQL; no ejecuta acciones.");
+              setTick(value => value + 1);
+            })
+            .catch(() => setNote("Bot conservado localmente; no se pudo guardar en PostgreSQL."));
         }}>Crear</button>
       </div>
       {bots.map((bot) => (
@@ -70,8 +107,26 @@ export default function DigitalBoostMarketBotsPanel({
                   trigger: (sel?.value || "cart.idle") as BotRuleTrigger,
                   action: sel?.value === "listing.listed" ? "draft_offer" : "draft_notice",
                 });
-                setNote("ok" in result && result.ok === false ? result.reason : "Regla on");
+                if ("ok" in result) {
+                  setNote(result.reason);
+                  return;
+                }
+                setNote("Regla draft guardada localmente; guardando en backend…");
                 setTick((n) => n + 1);
+                void createCommerceBotRuleOnServer({
+                  id: result.id,
+                  botId: result.botId,
+                  trigger: result.trigger,
+                  action: result.action,
+                })
+                  .then(() => fetchCommerceBotSnapshot())
+                  .then(snapshot => {
+                    hydrateCommerceBots(tenantId, snapshot.bots);
+                    hydrateBotRules(tenantId, snapshot.rules);
+                    setNote("Regla guardada; permanece como configuración draft.");
+                    setTick(value => value + 1);
+                  })
+                  .catch(() => setNote("Regla conservada localmente; no se pudo guardar en PostgreSQL."));
               }}>Guardar regla</button>
               <p>{listBotRules(tenantId, bot.id).length} reglas</p>
               <label className="block">Personalidad</label>
@@ -84,19 +139,35 @@ export default function DigitalBoostMarketBotsPanel({
               <button type="button" className="h-8 rounded-md border border-white/10 px-2" onClick={() => {
                 const per = document.getElementById("mbot-per-" + bot.id) as HTMLInputElement;
                 const ch = document.getElementById("mbot-ch-" + bot.id) as HTMLSelectElement;
-                updateCommerceBot(tenantId, bot.id, {
+                const updated = updateCommerceBot(tenantId, bot.id, {
                   personality: per?.value || "directo y breve",
                   channel: (ch?.value === "mail_draft" ? "mail_draft" : "in_app"),
                 });
-                setNote("Perfil actualizado");
+                if ("ok" in updated) {
+                  setNote(updated.reason);
+                  return;
+                }
+                setNote("Perfil actualizado; guardando en backend…");
                 setTick((n) => n + 1);
+                void updateCommerceBotOnServer(bot.id, {
+                  personality: updated.personality,
+                  channel: updated.channel,
+                }).then(() => setNote("Perfil del bot guardado en PostgreSQL."))
+                  .catch(() => setNote("Perfil conservado localmente; no se pudo guardar en PostgreSQL."));
               }}>Guardar perfil</button>
 
               <button type="button" className="h-8 rounded-md border border-white/10 px-2" onClick={() => {
                 const el = document.getElementById("mbot-" + bot.id) as HTMLInputElement;
                 const result = renameCommerceBot(tenantId, bot.id, el?.value || "");
-                setNote("ok" in result && "reason" in result ? result.reason : "Nombre actualizado");
+                if ("ok" in result) {
+                  setNote(result.reason);
+                  return;
+                }
+                setNote("Nombre actualizado; guardando en backend…");
                 setTick((n) => n + 1);
+                void updateCommerceBotOnServer(bot.id, { name: result.name })
+                  .then(() => setNote("Nombre del bot guardado en PostgreSQL."))
+                  .catch(() => setNote("Nombre conservado localmente; no se pudo guardar en PostgreSQL."));
               }}>Guardar nombre</button>
             </div>
           )}

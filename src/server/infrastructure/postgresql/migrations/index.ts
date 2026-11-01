@@ -7,9 +7,13 @@ import {
 import {
   commerceMarketplaceMigration,
 } from "./0003CommerceMarketplace";
+import {
+  commerceBotConfigurationMigration,
+} from "./0004CommerceBotConfiguration";
 
 export const postgresMigrations = [
   infrastructureFoundationMigration,
   commerceCatalogAndOrdersMigration,
   commerceMarketplaceMigration,
+  commerceBotConfigurationMigration,
 ] as const;

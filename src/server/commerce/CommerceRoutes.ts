@@ -5,6 +5,9 @@ import { CommerceRepository, type CommercePrincipal } from "./CommerceRepository
 import { MarketplaceRepository } from "./MarketplaceRepository";
 import { validateMarketAsset } from "../../commerce/DigitalBoostMarketAssetGuard";
 import { MARKET_TAKE_RATE, type MarketRail } from "../../commerce/DigitalBoostMarketplace";
+import { CommerceAutomationRepository } from "./CommerceAutomationRepository";
+import { COMMERCE_BOT_SKILLS, type CommerceBotSkill } from "../../commerce/DigitalBoostCommerceBots";
+import type { BotRuleAction, BotRuleTrigger } from "../../commerce/DigitalBoostCommerceBotRules";
 
 type AuthenticatedRequest = Request & {
   digitalboostPrincipal?: CommercePrincipal;
@@ -41,6 +44,8 @@ function validProduct(body: any): { id: string; title: string; sku?: string; pri
 }
 
 const MARKET_RAILS = new Set<MarketRail>(["physical", "digital", "nft", "crypto", "gift_card"]);
+const BOT_SKILLS = new Set<CommerceBotSkill>(COMMERCE_BOT_SKILLS);
+const BOT_TRIGGERS = new Set<BotRuleTrigger>(["cart.idle", "order.unpaid", "stock.zero", "listing.listed"]);
 
 export function registerCommerceRoutes(
   app: Express,
@@ -53,6 +58,7 @@ export function registerCommerceRoutes(
   const router = Router();
   const repository = input.database ? new CommerceRepository(input.database) : null;
   const marketplace = input.database ? new MarketplaceRepository(input.database) : null;
+  const automation = input.database ? new CommerceAutomationRepository(input.database) : null;
 
   router.use((request, response, next) => {
     const principal = principalFor(request, input.environment);
@@ -248,6 +254,110 @@ export function registerCommerceRoutes(
       response.status(201).json({ ok: true, listing });
     } catch {
       response.status(503).json({ error: "commerce_market_listing_write_failed" });
+    }
+  });
+
+  router.get("/bots/snapshot", async (request, response) => {
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      const configuration = await automation!.listConfiguration(principal);
+      response.json({
+        contract: "cos-commerce-bot-config-v1",
+        tenantId: principal.tenantId,
+        ...configuration,
+        source: "postgresql",
+        authoritative: false,
+      });
+    } catch {
+      response.status(503).json({ error: "commerce_bot_config_read_failed" });
+    }
+  });
+
+  router.post("/bots", async (request, response) => {
+    const id = typeof request.body?.id === "string" ? request.body.id.trim() : "";
+    const name = typeof request.body?.name === "string" ? request.body.name.trim() : "";
+    const skills = Array.isArray(request.body?.skills) ? request.body.skills as CommerceBotSkill[] : [];
+    if (!id || id.length > 100 || name.length < 2 || name.length > 120
+      || !skills.length || skills.length > COMMERCE_BOT_SKILLS.length
+      || skills.some(skill => !BOT_SKILLS.has(skill))) {
+      response.status(400).json({ error: "invalid_commerce_bot" });
+      return;
+    }
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      const bot = await automation!.saveBot(principal, { id, name, skills: [...new Set(skills)] });
+      input.publishChange?.();
+      response.status(201).json({ ok: true, bot });
+    } catch {
+      response.status(503).json({ error: "commerce_bot_write_failed" });
+    }
+  });
+
+  router.patch("/bots/:id", async (request, response) => {
+    const id = request.params.id.trim();
+    const body = request.body ?? {};
+    const patch: { name?: string; personality?: string; channel?: "in_app" | "mail_draft" } = {};
+    if (body.name !== undefined) {
+      if (typeof body.name !== "string" || body.name.trim().length < 2 || body.name.trim().length > 120) {
+        response.status(400).json({ error: "invalid_commerce_bot_name" });
+        return;
+      }
+      patch.name = body.name.trim();
+    }
+    if (body.personality !== undefined) {
+      if (typeof body.personality !== "string" || body.personality.trim().length > 240) {
+        response.status(400).json({ error: "invalid_commerce_bot_personality" });
+        return;
+      }
+      patch.personality = body.personality.trim();
+    }
+    if (body.channel !== undefined) {
+      if (body.channel !== "in_app" && body.channel !== "mail_draft") {
+        response.status(400).json({ error: "invalid_commerce_bot_channel" });
+        return;
+      }
+      patch.channel = body.channel;
+    }
+    if (!id || id.length > 100 || !Object.keys(patch).length) {
+      response.status(400).json({ error: "invalid_commerce_bot_update" });
+      return;
+    }
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      const bot = await automation!.updateBot(principal, id, patch);
+      if (!bot) {
+        response.status(404).json({ error: "commerce_bot_not_found_or_not_draft" });
+        return;
+      }
+      input.publishChange?.();
+      response.json({ ok: true, bot });
+    } catch {
+      response.status(503).json({ error: "commerce_bot_update_failed" });
+    }
+  });
+
+  router.post("/bots/:id/rules", async (request, response) => {
+    const botId = request.params.id.trim();
+    const id = typeof request.body?.id === "string" ? request.body.id.trim() : "";
+    const trigger = request.body?.trigger as BotRuleTrigger;
+    const action = request.body?.action as BotRuleAction;
+    if (!botId || botId.length > 100 || !id || id.length > 100
+      || !BOT_TRIGGERS.has(trigger)
+      || (action !== "draft_notice" && action !== "draft_offer")) {
+      response.status(400).json({ error: "invalid_commerce_bot_rule" });
+      return;
+    }
+    try {
+      const principal = (request as AuthenticatedRequest).digitalboostPrincipal!;
+      const rule = await automation!.saveRule(principal, { id, botId, trigger, action });
+      if (!rule) {
+        response.status(409).json({ error: "commerce_bot_rule_conflict_or_bot_missing" });
+        return;
+      }
+      input.publishChange?.();
+      response.status(201).json({ ok: true, rule });
+    } catch {
+      response.status(503).json({ error: "commerce_bot_rule_write_failed" });
     }
   });
 

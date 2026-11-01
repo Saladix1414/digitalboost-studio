@@ -59,6 +59,19 @@ export function listBotRules(tenantId: string, botId?: string): readonly BotRule
   return botId ? list.filter((r) => r.botId === botId) : list;
 }
 
+export function hydrateBotRules(tenantId: string, serverRules: readonly BotRule[]): boolean {
+  const local = bag(tenantId);
+  const serverById = new Map(serverRules.map((rule) => [rule.id, rule]));
+  const hasLocalDifferences = local.some((rule) =>
+    JSON.stringify(rule) !== JSON.stringify(serverById.get(rule.id)),
+  );
+  const merged = new Map(serverRules.map((rule) => [rule.id, rule]));
+  for (const rule of local) merged.set(rule.id, rule);
+  bags.set(tenantId, [...merged.values()]);
+  writeAll();
+  return hasLocalDifferences;
+}
+
 export function addBotRule(input: {
   tenantId: string;
   botId: string;
