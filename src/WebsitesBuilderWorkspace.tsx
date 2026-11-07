@@ -371,9 +371,18 @@ export default function WebsitesBuilderWorkspace({
       const canvasStorageKey = page && page.slug !== "/"
         ? `${CANVAS_KEY}:${page.id}`
         : CANVAS_KEY;
-      localStorage.setItem(canvasStorageKey, JSON.stringify(canvasBlocks));
       if (websiteProject) {
         localStorage.setItem(MODEL_KEY, JSON.stringify(websiteProject));
+        // The canonical model now contains the canvas blocks for every page.
+        // Remove stale per-canvas snapshots left by earlier builder versions.
+        for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+          const key = localStorage.key(index);
+          if (key && (key === CANVAS_KEY || key.startsWith(`${CANVAS_KEY}:`))) {
+            localStorage.removeItem(key);
+          }
+        }
+      } else {
+        localStorage.setItem(canvasStorageKey, JSON.stringify(canvasBlocks));
       }
       if (activePageId) localStorage.setItem(ACTIVE_PAGE_KEY, activePageId);
     } catch {
@@ -523,11 +532,6 @@ export default function WebsitesBuilderWorkspace({
     localStorage.setItem(
       PROJECT_KEY,
       JSON.stringify(proposal)
-    );
-
-    localStorage.setItem(
-      CANVAS_KEY,
-      JSON.stringify(blocks)
     );
 
     localStorage.setItem(

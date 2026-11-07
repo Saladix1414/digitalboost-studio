@@ -429,10 +429,15 @@ export default function WebsitesBuilderCanvas({
   }, [libraryCategory, libraryQuery]);
 
   useEffect(() => {
-    localStorage.setItem(
-      storageKey,
-      JSON.stringify(blocks)
-    );
+    // In the workspace the canonical WebsiteProject owns persistence. Avoid
+    // writing a second copy of every block (including embedded image data) to
+    // localStorage. Standalone canvas consumers keep the legacy persistence.
+    if (!onBlocksChange) {
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify(blocks)
+      );
+    }
     onBlocksChange?.(blocks);
   }, [blocks, storageKey, onBlocksChange]);
 
