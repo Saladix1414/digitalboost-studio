@@ -1,0 +1,23 @@
+# Allow only the files used by the build/runtime.
+**
+!package.json
+!package-lock.json
+!server.ts
+!index.html
+!vite.config.ts
+!src/
+!src/**
+!public/
+!public/**
+!Dockerfile
+# Historical copies and secrets must not enter the image.
+**/*.bak*
+**/*.backup*
+**/*.before_*
+**/*BACKUP*
+**/*.log
+**/.env*
+**/*.pem
+**/*.key
+**/credentials*
+**/secrets*
