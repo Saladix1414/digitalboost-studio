@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { CONFIG, type GameSimulation } from './GameSimulation';
 import { splitViewports, type Viewport } from './LocalControls';
 import { LEGACY_ARENA, type ArenaDefinition } from './ArenaDefinition';
+import { paintColonyFloor } from './ColonyFloor';
 
 const ARCADE_MARINE_URL = '/brain-boost/neon-arena/marine-arcade-pop.glb';
 
@@ -15,8 +16,8 @@ export class SurvivalWorld {
   viewports: Viewport[] = [{ x: 0, y: 0, width: 1, height: 1 }];
   private geometries = new Set<THREE.BufferGeometry>(); private materials = new Set<THREE.Material>(); private textures = new Set<THREE.Texture>();
   private dummy = new THREE.Object3D(); private color = new THREE.Color(); private marine = new THREE.Group();
-  private floorMaterial!: THREE.MeshStandardMaterial; private mapPhase = -1;
-  private reactorCore?: THREE.InstancedMesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
+  private floorMaterial!: THREE.MeshStandardMaterial | THREE.MeshBasicMaterial; private mapPhase = -1;
+  private reactorCore?: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
   private disposed = false;
   private gun = new THREE.Group(); private boots: THREE.Mesh[] = []; private suit!: THREE.MeshStandardMaterial;
   private body!: THREE.InstancedMesh; private heads!: THREE.InstancedMesh; private legs!: THREE.InstancedMesh; private plates!: THREE.InstancedMesh;
@@ -118,6 +119,60 @@ export class SurvivalWorld {
     for (const texture of [map, normalMap, roughnessMap]) { texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.repeat.set(7, 7); texture.minFilter = THREE.LinearMipmapLinearFilter; texture.magFilter = THREE.LinearFilter; texture.generateMipmaps = true; texture.needsUpdate = true; this.textures.add(texture); }
     return { map, normalMap, roughnessMap };
   }
+  private colonyFloor() {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 1024;
+    paintColonyFloor(canvas.getContext('2d')!, this.arena, canvas.width);
+    const map = new THREE.CanvasTexture(canvas);
+    map.colorSpace = THREE.SRGBColorSpace;
+    this.textures.add(map);
+    return this.mat(new THREE.MeshBasicMaterial({ map, toneMapped: false }));
+  }
+  private buildColonyCover(box: THREE.BoxGeometry, pedestal: THREE.CylinderGeometry, coil: THREE.TorusGeometry, dark: THREE.Material) {
+    const copper = this.standard(0xad6a49), violet = this.standard(0x67517e), steel = this.standard(0x34545c);
+    const tube = this.geo(new THREE.CylinderGeometry(1, 1, 1, 10));
+    const crystal = this.geo(new THREE.IcosahedronGeometry(1, 0));
+    const light = (color: number) => this.mat(new THREE.MeshBasicMaterial({ color, toneMapped: false }));
+    const turquoise = light(0x74c4c6), orchid = light(0xa98bbf), gold = light(0xe2a566);
+    for (const { x, z, radius: r, kind } of this.arena.obstacles) {
+      const machine = new THREE.Group();
+      machine.name = `colony-${kind}`;
+      machine.position.set(x, 0, z);
+      this.scene.add(machine);
+      this.mesh(pedestal, dark, machine, 0, .18, 0, r, .36, r);
+      if (kind === 'reactor') {
+        this.mesh(pedestal, copper, machine, 0, .45, 0, r * .88, .28, r * .88);
+        this.mesh(coil, gold, machine, 0, .65, 0, r * .78, r * .78, r * .78).rotation.x = Math.PI / 2;
+        for (const angle of [0, Math.PI * 2 / 3, Math.PI * 4 / 3]) {
+          const support = this.mesh(box, copper, machine, Math.cos(angle) * r * .72, .78, Math.sin(angle) * r * .72, r * .32, .65, r * .18);
+          support.rotation.y = -angle;
+        }
+        const core = new THREE.Mesh(crystal, light(0xca8263));
+        core.position.y = 1.09;
+        core.scale.set(r * .47, .58, r * .47);
+        machine.add(core);
+        this.reactorCore = core;
+      } else if (kind === 'coolant') {
+        machine.rotation.y = x > 0 ? Math.PI / 2 : 0;
+        for (const side of [-1, 1]) {
+          const offset = side * r * .38;
+          this.mesh(tube, steel, machine, offset, .66, 0, r * .26, r * 1.38, r * .26).rotation.x = Math.PI / 2;
+          for (const end of [-1, 1]) {
+            this.mesh(tube, dark, machine, offset, .66, end * r * .5, r * .29, r * .18, r * .29).rotation.x = Math.PI / 2;
+          }
+          this.mesh(box, turquoise, machine, offset, .66 + r * .26, 0, r * .12, .04, r * .61);
+        }
+      } else {
+        machine.rotation.y = x > 0 ? -.25 : .35;
+        this.mesh(box, violet, machine, 0, .56, 0, r * 1.55, .54, r * .94);
+        for (const side of [-1, 1]) {
+          this.mesh(box, copper, machine, side * r * .56, .84, 0, r * .16, .12, r);
+        }
+        this.mesh(box, dark, machine, 0, .87, 0, r * .52, .07, r * .58);
+        this.mesh(box, orchid, machine, 0, .92, 0, r * .31, .05, r * .12);
+      }
+    }
+  }
   private build() {
     this.scene.background = new THREE.Color(0x03090f); this.scene.fog = new THREE.FogExp2(0x06111a, .008);
     this.scene.add(new THREE.HemisphereLight(0xa9c9d7, 0x202a24, 1.6));
@@ -126,19 +181,24 @@ export class SurvivalWorld {
     const arcade = this.arena.id === 'colony';
     const shell = this.standard(0xffffff), olive = this.standard(arcade ? 0x62515a : 0x5d6733), metal = this.standard(arcade ? 0x575064 : 0x3b4c49), dark = this.standard(arcade ? 0x2a2238 : 0x17221b);
     const cyan = this.standard(0x88e7ff, 0x00bfff, .8), amber = this.standard(0xffc86c, 0xff6313, 1);
-    const floor = this.mat(new THREE.MeshStandardMaterial({ ...this.groundTextures(), color: 0x98acb0, roughness: .92, metalness: .22, normalScale: new THREE.Vector2(.45, .45) }));
+    const floor = arcade ? this.colonyFloor() : this.mat(new THREE.MeshStandardMaterial({
+      ...this.groundTextures(), color: 0x98acb0, roughness: .92, metalness: .22, normalScale: new THREE.Vector2(.45, .45),
+    }));
     this.floorMaterial = floor;
     const ground = this.mesh(this.geo(new THREE.PlaneGeometry(this.arena.floorSize, this.arena.floorSize)), floor, this.scene); ground.rotation.x = -Math.PI / 2;
-    const rubble = this.pool(this.geo(new THREE.IcosahedronGeometry(1, 0)), olive, 420);
-    for (let i = 0; i < 420; i++) {
+    const rubbleCount = arcade ? 276 : 420;
+    const rubble = this.pool(this.geo(new THREE.IcosahedronGeometry(1, 0)), olive, rubbleCount);
+    for (let i = 0; i < rubbleCount; i++) {
       const a = i * 2.39996;
       const boundary = i < 240, side = i % 4, along = (Math.floor(i / 4) / 59 * 2 - 1) * this.arena.wall;
-      const x = boundary ? side === 0 || side === 2 ? along : (side === 1 ? 1 : -1) * (this.arena.wall + .6) : (this.arena.obstacles[i % 6].x + Math.cos(a) * (1.9 + i % 4 * .12));
-      const z = boundary ? side === 1 || side === 3 ? along : (side === 2 ? 1 : -1) * (this.arena.wall + .6) : (this.arena.obstacles[i % 6].z + Math.sin(a) * (1.9 + i % 4 * .12));
+      const o = this.arena.obstacles[i % this.arena.obstacles.length];
+      const distance = arcade ? o.radius + .22 + i % 4 * .12 : 1.9 + i % 4 * .12;
+      const x = boundary ? side === 0 || side === 2 ? along : (side === 1 ? 1 : -1) * (this.arena.wall + .6) : o.x + Math.cos(a) * distance;
+      const z = boundary ? side === 1 || side === 3 ? along : (side === 2 ? 1 : -1) * (this.arena.wall + .6) : o.z + Math.sin(a) * distance;
       const scale = boundary ? .5 + i % 7 * .14 : .08 + i % 5 * .035;
       this.instance(rubble, i, x, boundary ? .4 : .04, z, scale, boundary ? scale : .08, scale, a);
     }
-    rubble.count = 420; rubble.instanceMatrix.needsUpdate = true;
+    this.finish(rubble, rubbleCount);
     const ribs = this.pool(box, this.standard(0x42535d), 80), lamps = this.pool(box, this.standard(0xffffff, 0x589cac, .7), 80);
     const wallDistance = this.arena.wall;
     for (let i = 0; i < 4; i++) {
@@ -194,30 +254,25 @@ export class SurvivalWorld {
     this.steam = new THREE.Points(steamGeometry, this.mat(new THREE.PointsMaterial({ color: 0x92c1c7, size: .55, transparent: true, opacity: .12, depthWrite: false, sizeAttenuation: true }))); this.steam.frustumCulled = false; this.scene.add(this.steam);
     // Circular generator bases match the simulation's cover exactly; fittings stay inside.
     const pedestal = this.geo(new THREE.CylinderGeometry(1, 1, 1, 16)), coil = this.geo(new THREE.TorusGeometry(1, .045, 5, 28));
-    const casing = this.standard(arcade ? 0x857182 : 0x67777b), machinery = this.standard(arcade ? 0x47384e : 0x28383c), wiring = this.standard(0x7eb9ac, 0x187d75, .35);
     if (arcade) {
-      const coreMaterial = this.mat(new THREE.MeshBasicMaterial({ color: 0xca8263, toneMapped: false }));
-      const cores = this.pool(this.geo(new THREE.IcosahedronGeometry(1, 0)), coreMaterial, this.arena.obstacles.length);
-      this.arena.obstacles.forEach((obstacle, i) => {
-        this.instance(cores, i, obstacle.x, 1.1, obstacle.z, .32, .24, .32, Math.PI / 4);
-      });
-      this.finish(cores, this.arena.obstacles.length);
-      this.reactorCore = cores;
+      this.buildColonyCover(box, pedestal, coil, dark);
+    } else {
+      const casing = this.standard(0x67777b), machinery = this.standard(0x28383c), wiring = this.standard(0x7eb9ac, 0x187d75, .35);
+      for (const o of this.arena.obstacles) {
+        this.mesh(pedestal, machinery, this.scene, o.x, .35, o.z, o.radius, .7, o.radius);
+        this.mesh(pedestal, casing, this.scene, o.x, .76, o.z, o.radius * .87, .15, o.radius * .87);
+        this.mesh(box, metal, this.scene, o.x, .98, o.z, o.radius * 1.05, .35, o.radius * 1.05).rotation.y = .3;
+        const ring = this.mesh(coil, wiring, this.scene, o.x, .86, o.z, o.radius * .8, o.radius * .8, o.radius * .8); ring.rotation.x = Math.PI / 2;
+        for (let j = 0; j < 3; j++) this.mesh(box, dark, this.scene, o.x - o.radius * .3 + j * o.radius * .3, 1.17, o.z, .09, .04, o.radius * .7);
+      }
+      const markings = this.pool(box, this.standard(0x8e9865), 56);
+      for (let i = 0; i < 56; i++) {
+        const side = i % 4, a = side * Math.PI / 2, along = (Math.floor(i / 4) - 6.5) * 2.7;
+        const x = Math.cos(a) * along - Math.sin(a) * 18.5, z = -Math.sin(a) * along - Math.cos(a) * 18.5;
+        this.instance(markings, i, x, .018, z, .65, .012, .085, a + .45);
+      }
+      this.finish(markings, 56);
     }
-    for (const o of this.arena.obstacles) {
-      this.mesh(pedestal, machinery, this.scene, o.x, .35, o.z, o.radius, .7, o.radius);
-      this.mesh(pedestal, casing, this.scene, o.x, .76, o.z, o.radius * .87, .15, o.radius * .87);
-      this.mesh(box, metal, this.scene, o.x, .98, o.z, o.radius * 1.05, .35, o.radius * 1.05).rotation.y = .3;
-      const ring = this.mesh(coil, wiring, this.scene, o.x, .86, o.z, o.radius * .8, o.radius * .8, o.radius * .8); ring.rotation.x = Math.PI / 2;
-      for (let j = 0; j < 3; j++) this.mesh(box, dark, this.scene, o.x - o.radius * .3 + j * o.radius * .3, 1.17, o.z, .09, .04, o.radius * .7);
-    }
-    const markings = this.pool(box, this.standard(0x8e9865), 56);
-    for (let i = 0; i < 56; i++) {
-      const side = i % 4, a = side * Math.PI / 2, along = (Math.floor(i / 4) - 6.5) * 2.7;
-      const x = Math.cos(a) * along - Math.sin(a) * 18.5, z = -Math.sin(a) * along - Math.cos(a) * 18.5;
-      this.instance(markings, i, x, .018, z, .65, .012, .085, a + .45);
-    }
-    this.finish(markings, 56);
     this.gun.name = 'weapon';
     this.suit = this.standard(0xb6c8ad); this.scene.add(this.marine); this.marine.add(this.gun);
     this.marine.scale.setScalar(1.15);
@@ -296,10 +351,10 @@ export class SurvivalWorld {
   setMapPhase(phase: number) {
     const next = Math.max(0, Math.floor(Number.isFinite(phase) ? phase : 0)); if (next === this.mapPhase) return; this.mapPhase = next;
     const arcadePalette = [
-      { floor: 0xaf95ac, glow: 0x452941, bg: 0x180e24, fog: 0x271731, torch: 0xffdfbb },
-      { floor: 0xa585a0, glow: 0x57223d, bg: 0x210d24, fog: 0x33142f, torch: 0xffc38f },
-      { floor: 0xa180ac, glow: 0x661b51, bg: 0x240b2d, fog: 0x361339, torch: 0xf8c4f1 },
-      { floor: 0x8d9aaf, glow: 0x243a59, bg: 0x16162d, fog: 0x202543, torch: 0x9ee5ff },
+      { floor: 0xffffff, bg: 0x180e24, fog: 0x271731, torch: 0xffdfbb },
+      { floor: 0xffedf2, bg: 0x210d24, fog: 0x33142f, torch: 0xffc38f },
+      { floor: 0xf5ddf6, bg: 0x240b2d, fog: 0x361339, torch: 0xf8c4f1 },
+      { floor: 0xe2f0ff, bg: 0x16162d, fog: 0x202543, torch: 0x9ee5ff },
     ];
     const legacyPalette = [
       { floor: 0x98acb0, glow: 0x0b2026, bg: 0x03090f, fog: 0x06111a, torch: 0xbde9cf },
@@ -308,7 +363,11 @@ export class SurvivalWorld {
       { floor: 0x707983, glow: 0x102b42, bg: 0x030711, fog: 0x0a1524, torch: 0x83d8ff },
     ];
     const palette = (this.arena.id === 'colony' ? arcadePalette : legacyPalette)[next % 4];
-    this.floorMaterial.color.setHex(palette.floor); this.floorMaterial.emissive.setHex(palette.glow); this.floorMaterial.emissiveIntensity = next === 0 ? .08 : .12 + (next % 3) * .025;
+    this.floorMaterial.color.setHex(palette.floor);
+    if (this.floorMaterial instanceof THREE.MeshStandardMaterial) {
+      this.floorMaterial.emissive.setHex(legacyPalette[next % 4].glow);
+      this.floorMaterial.emissiveIntensity = next === 0 ? .08 : .12 + (next % 3) * .025;
+    }
     this.scene.background = new THREE.Color(palette.bg); this.scene.fog = new THREE.FogExp2(palette.fog, .008); this.torch.color.setHex(palette.torch);
     this.contamination.visible = next > 0; this.roots.visible = next > 0; this.eggs.visible = next > 0;
     const contaminationMaterial = this.contamination.material as THREE.MeshBasicMaterial;
