@@ -12,8 +12,8 @@ test(
         process.execPath,
         [
           "--experimental-strip-types",
-          "--experimental-loader",
-          "./tests/trading-islands/helpers/ts-extension-loader.mjs",
+          "--import",
+          "./tests/trading-islands/helpers/ts-register.mjs",
           "--test",
           "tests/trading-islands/recovery-history-activity-runtime.scenario.ts",
         ],

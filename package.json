@@ -25,7 +25,10 @@
     "typecheck:neon-arena": "tsc -p tsconfig.neon-arena.json",
     "test:websites-builder": "node --experimental-strip-types --test tests/websites-builder/*.test.ts",
     "infra:migrate": "node --experimental-strip-types --import ./tests/pulse/ts-resolve-register.mjs ./src/server/infrastructure/postgresql/PostgresMigrationCli.ts",
-    "test:deployment": "node --test tests/deployment/*.test.mjs"
+    "test:deployment": "node --test tests/deployment/*.test.mjs",
+    "test:trading:quick": "node --import tsx --test tests/trading-islands/c0-functional.test.mjs",
+    "test:trading": "node --experimental-strip-types --import ./tests/trading-islands/helpers/ts-register.mjs --test --test-concurrency=2 tests/trading-islands/*.test.ts",
+    "check:trading": "npm run test:trading:quick && npm run test:trading && npm run build"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
