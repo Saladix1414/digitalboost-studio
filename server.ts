@@ -1,6 +1,5 @@
 import express from 'express';
 import { GoogleGenAI } from '@google/genai';
-import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -33,6 +32,17 @@ function getGeminiClient() {
 }
 
 async function startServer() {
+  const portValue = process.env.PORT ?? "3000";
+  if (!/^\d+$/.test(portValue) || Number(portValue) < 1 || Number(portValue) > 65535) {
+    throw new Error("PORT must be an integer between 1 and 65535.");
+  }
+  const PORT = Number(portValue);
+  const production = process.env.NODE_ENV === "production";
+  const distPath = path.resolve(process.cwd(), "dist");
+  if (production && !fs.existsSync(path.join(distPath, "index.html"))) {
+    throw new Error("Missing dist/index.html. Run npm run build before npm start.");
+  }
+
   const infrastructureConfiguration =
     readInfrastructureEnvironment(
       process.env
@@ -59,13 +69,19 @@ async function startServer() {
   );
 
   const app = express();
-  const PORT = 3000;
+  app.disable("x-powered-by");
+
+  // Liveness only confirms that the process can serve HTTP, not feature readiness.
+  app.get("/api/health/live", (_req, res) => {
+    res.set("Cache-Control", "no-store").json({ status: "alive" });
+  });
 
   app.use(express.json({ limit: '10mb' }));
 
   app.get(
-    "/api/health/infrastructure",
+    ["/api/health/infrastructure", "/api/health/ready"],
     async (_req, res) => {
+      res.set("Cache-Control", "no-store");
       try {
         const readiness =
           await checkUnifiedInfrastructureReadiness({
@@ -116,7 +132,7 @@ async function startServer() {
 
   registerOpenClawRoutes(app);
 
-  const commerceSyncClients = new Set();
+  const commerceSyncClients = new Set<express.Response>();
   app.get("/api/commerce/sync", (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
@@ -367,7 +383,13 @@ IMPORTANTE: Devuelve SOLAMENTE el código HTML puro. No uses Markdown (\`\`\`htm
     }
   });
 
-  if (process.env.NODE_ENV !== "production") {
+  // Unknown API routes must never fall through to the SPA document.
+  app.use("/api", (_req, res) => {
+    res.status(404).json({ error: "api_not_found" });
+  });
+
+  if (!production) {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       root: process.cwd(),
       server: { middlewareMode: true },
@@ -397,9 +419,12 @@ IMPORTANTE: Devuelve SOLAMENTE el código HTML puro. No uses Markdown (\`\`\`htm
       }
     });
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*all', (req, res) => {
+    app.use("/assets", (_req, res) => {
+      res.status(404).json({ error: "asset_not_found" });
+    });
+    app.get('/{*all}', (req, res, next) => {
+      if (path.extname(req.path) || !req.accepts("html")) return next();
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
@@ -415,6 +440,14 @@ IMPORTANTE: Devuelve SOLAMENTE el código HTML puro. No uses Markdown (\`\`\`htm
         );
       }
     );
+
+  httpServer.once("error", () => {
+    console.error("[server] HTTP listener failed; check PORT and address availability.");
+    process.exitCode = 1;
+    void infrastructure.close().catch(() => {
+      console.error("[infra] cleanup after listener failure failed.");
+    });
+  });
 
   let shutdownStarted =
     false;
@@ -437,12 +470,22 @@ IMPORTANTE: Devuelve SOLAMENTE el código HTML puro. No uses Markdown (\`\`\`htm
         `[server] shutdown requested: ${signal}`
       );
 
+      // SSE connections otherwise keep server.close waiting indefinitely.
+      for (const client of commerceSyncClients) client.end();
+      commerceSyncClients.clear();
+      const deadline = setTimeout(() => {
+        console.error("[server] graceful shutdown timed out.");
+        process.exit(1);
+      }, 10000);
+      deadline.unref();
+
       httpServer.close(
         () => {
           void infrastructure
             .close()
             .then(
               () => {
+                clearTimeout(deadline);
                 process.exitCode =
                   0;
               }
@@ -478,4 +521,11 @@ IMPORTANTE: Devuelve SOLAMENTE el código HTML puro. No uses Markdown (\`\`\`htm
   );
 }
 
-startServer();
+startServer().catch((error: unknown) => {
+  // Only local configuration errors are safe to print; provider errors may contain secrets.
+  const message = error instanceof Error && /^(PORT must|Missing dist\/index.html)/.test(error.message)
+    ? error.message
+    : "Server startup failed. Check runtime configuration and provider connectivity.";
+  console.error(`[server] ${message}`);
+  process.exitCode = 1;
+});
