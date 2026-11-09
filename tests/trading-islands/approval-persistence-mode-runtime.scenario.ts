@@ -185,7 +185,7 @@ test(
                 null,
 
               revision:
-                21,
+                null,
             }),
             {
               status:
@@ -225,7 +225,7 @@ test(
 
     assert.equal(
       loaded.revision,
-      21
+      null
     );
   }
 );

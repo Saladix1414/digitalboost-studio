@@ -291,7 +291,7 @@ test(
           authoritative:
             true as false,
         }),
-      /cannot be authoritative/
+      /authoritative must be false/
     );
   }
 );

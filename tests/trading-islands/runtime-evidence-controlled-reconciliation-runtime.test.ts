@@ -22,8 +22,7 @@ test(
             process.cwd(),
           encoding:
             "utf8",
-          env:
-            process.env,
+          env: { ...process.env, NODE_TEST_CONTEXT: undefined },
         }
       );
 

@@ -365,7 +365,7 @@ test(
 
 
 test(
-  "rapid evidence writes persist in recording order",
+  "queued evidence writes preserve every session in recording order",
   async () => {
     resetRuntimeEvidenceHistoryForTests();
 
@@ -404,21 +404,15 @@ test(
       3
     );
 
-    assert.deepEqual(
-      adapter.saves.map(
-        snapshot =>
-          snapshot.history.entries
-            .at(
-              -1
-            )
-            ?.sessionId
-      ),
-      [
+    // Each queued write reads current memory inside the coordinated section.
+    // All three sessions must survive, ordered and without duplication.
+    for (const snapshot of adapter.saves) {
+      assert.deepEqual(snapshot.history.entries.map(entry => entry.sessionId), [
         "runtime-bot-1-origin-1",
         "runtime-bot-1-origin-2",
         "runtime-bot-1-origin-3",
-      ]
-    );
+      ]);
+    }
 
     assert.equal(
       getRuntimeEvidenceLifecycle()

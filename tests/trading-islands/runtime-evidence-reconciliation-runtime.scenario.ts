@@ -1,8 +1,8 @@
+import { RUNTIME_EVIDENCE_HISTORY_LIMIT } from "../../src/trading/runtime/runtimeEvidenceConstants.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
-  RUNTIME_EVIDENCE_HISTORY_LIMIT,
 } from "../../src/trading/runtime/runtimeEvidenceStore.ts";
 
 import {

@@ -43,7 +43,7 @@ test(
                 null,
 
               revision:
-                12,
+                null,
             }),
             {
               status:
@@ -86,7 +86,7 @@ test(
 
     assert.equal(
       result.revision,
-      12
+      null
     );
 
     assert.equal(
