@@ -1,6 +1,8 @@
+type CoverKind = 'reactor' | 'coolant' | 'freight';
+
 export type ArenaDefinition = Readonly<{
   id: 'legacy' | 'colony'; halfExtent: number; floorSize: number; wall: number; wallThickness: number; spawnRadius: number;
-  obstacles: readonly Readonly<{ x: number; z: number; radius: number }>[];
+  obstacles: readonly Readonly<{ x: number; z: number; radius: number; kind?: CoverKind }>[];
 }>;
 const obstacles = Object.freeze([
   { x: -11, z: -8, radius: 1.7 }, { x: 10, z: -10, radius: 1.5 },
@@ -9,5 +11,8 @@ const obstacles = Object.freeze([
 ].map(o => Object.freeze(o)));
 /** Legacy retains exact coordinates/operations for the accepted seeded campaign. */
 export const LEGACY_ARENA: ArenaDefinition = Object.freeze({ id: 'legacy', halfExtent: 21, floorSize: 49, wall: 22, wallThickness: .8, spawnRadius: 20, obstacles });
-export const COLONY_ARENA: ArenaDefinition = Object.freeze({ id: 'colony', halfExtent: 25, floorSize: 57, wall: 25.4, wallThickness: .8, spawnRadius: 24, obstacles });
+const colonyKinds: readonly CoverKind[] = ['coolant', 'reactor', 'freight', 'freight', 'coolant', 'freight'];
+const colonyObstacles = Object.freeze(obstacles.map((o, i) => Object.freeze({ ...o, kind: colonyKinds[i] })));
+
+export const COLONY_ARENA: ArenaDefinition = Object.freeze({ id: 'colony', halfExtent: 25, floorSize: 57, wall: 25.4, wallThickness: .8, spawnRadius: 24, obstacles: colonyObstacles });
 export const DEFAULT_ARENA = COLONY_ARENA;
