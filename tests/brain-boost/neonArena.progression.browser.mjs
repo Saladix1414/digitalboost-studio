@@ -18,14 +18,20 @@ try {
     window.qaBoss = 'brood';
     GameSimulation.prototype.start = function () {
       const result = original.call(this); if (!result) return result;
-      const kind = window.qaBoss; this.wave = kind === 'brood' ? 5 : kind === 'maw' ? 10 : 15;
+      const kind = window.qaBoss;
+      const stage = ['brood', 'maw', 'sovereign'].indexOf(kind);
+      this.wave = [5, 12, 20][stage]; this.bossesKilled = this.mapPhase = stage;
       const enemy = createEnemy(kind, 900000, this.player.x + 3, this.player.z, this.wave); enemy.speed = 0;
       this.enemies = [enemy]; window.qaEncounter = this; return result;
     };
   });
   await page.getByRole('button', { name: 'Nightmare Protocolo', exact: true }).click();
   const select = () => page.getByRole('button', { name: /Neon Arena: Virus Survivor/ }).click();
-  for (const [boss, weapon] of [['brood', 'flame'], ['maw', 'cascade'], ['sovereign', 'rail']]) {
+  for (const [boss, weapon, nextWave, sector] of [
+    ['brood', 'flame', 12, 'Nido Contaminado'],
+    ['maw', 'cascade', 20, 'Cámara de Cría'],
+    ['sovereign', 'rail', 29, 'Núcleo en Penumbra'],
+  ]) {
     await page.evaluate(value => { window.qaBoss = value; }, boss);
     await select(); await page.waitForSelector('[data-neon-phase="READY"]');
     await page.getByRole('button', { name: 'Iniciar supervivencia →', exact: true }).click();
@@ -34,14 +40,16 @@ try {
     await page.evaluate(() => { const enemy = window.qaEncounter.enemies.find(e => e.boss); enemy.hp = 1; enemy.warning = 1; });
     await page.getByRole('button', { name: /SHOCKWAVE/ }).click();
     await page.waitForFunction(id => JSON.parse(localStorage.getItem('digitalboost:brain-boost:neon-arena:arsenal:v1') || '{}').unlocked?.includes(id), weapon);
-    await page.waitForSelector('.na-notice');
+    await page.locator('.na-notice').filter({ hasText: sector }).waitFor();
+    assert.ok((await page.locator('.na-hud').innerText()).includes(sector.toUpperCase()));
     await page.waitForSelector('[data-na-director]');
-    assert.match(await page.locator('[data-na-director]').innerText(), new RegExp(`OLA ${boss === 'brood' ? 10 : boss === 'maw' ? 15 : 20}`));
+    assert.match(await page.locator('[data-na-director]').innerText(), new RegExp(`OLA ${nextWave}`));
     assert.equal(await page.locator('.na-weapon-bar button').count() >= 2, true);
     await page.getByRole('button', { name: 'Salir', exact: true }).click();
     console.log(`${boss}: real HUD + Shockwave defeat + immediate persisted ${weapon} unlock PASS`);
   }
   await select(); await page.waitForSelector('[data-neon-phase="READY"]');
+  await page.getByRole('button', { name: 'Arsenal', exact: true }).click();
   const loadout = page.locator('.na-loadout');
   await loadout.getByRole('button', { name: 'Lanzallamas', exact: true }).click();
   assert.equal(await loadout.getByRole('button', { name: 'Lanzallamas', exact: true }).getAttribute('aria-pressed'), 'true');

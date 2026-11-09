@@ -48,6 +48,7 @@ try {
     assert.equal(await page.locator('[data-na-fire]').getAttribute('data-active'), 'false');
     if (touch) {
       await page.getByRole('button', { name: 'Pausa', exact: true }).click();
+      await page.getByRole('button', { name: 'Ajustes', exact: true }).click();
       await page.getByRole('combobox', { name: 'Modo de apuntado', exact: true }).selectOption('modern');
       await page.getByRole('button', { name: 'Reanudar partida', exact: true }).click();
       const cdp = await context.newCDPSession(page), cx = fire.x + fire.width / 2, cy = fire.y + fire.height / 2;

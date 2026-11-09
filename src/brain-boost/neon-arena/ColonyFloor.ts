@@ -8,7 +8,7 @@ const PLATFORMS = {
   freight: { base: '#373048', rim: '#66527d', signal: '#a284b2' },
 };
 
-export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefinition, size: number) {
+export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefinition, size: number, sector = 0) {
   const scale = size / arena.floorSize;
   const edge = arena.halfExtent;
   ctx.setTransform(scale, 0, 0, scale, size / 2, size / 2);
@@ -153,4 +153,59 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
     }
     ctx.restore();
   }
+  // These marks stay on the deck. Keep them out of the center and below
+  // the contrast of enemy attack tells and supply pickups.
+  if (sector === 1) {
+    for (const { x, z, kind } of arena.obstacles) {
+      if (kind !== 'coolant') continue;
+      const direction = Math.sign(x);
+      for (let i = 0; i < 11; i++) {
+        const angle = i * Math.PI * 2 / 11;
+        const dx = Math.cos(angle), dz = Math.sin(angle);
+        const trunk: Point[] = [[x + dx, z + dz], [x + dx * 3, z + dz * 3],
+          [x + dx * 4 + dz * .65, z + dz * 4], [x + dx * 6 + direction * .45, z + dz * 5.5]];
+        line(trunk, '#14291f', .48);
+        line(trunk, '#608361a6', .13);
+        line([trunk[2], [x + dx * 5 + dz * 1.2, z + dz * 5 - dx]], '#60836188', .1);
+      }
+    }
+  } else if (sector === 2) {
+    for (const { x, z, radius, kind } of arena.obstacles) {
+      if (kind !== 'freight') continue;
+      for (let i = 0; i < 15; i++) {
+        const angle = i * 2.39996;
+        const reach = radius + .55 + random() * 2.6;
+        ctx.beginPath();
+        ctx.ellipse(x + Math.cos(angle) * reach, z + Math.sin(angle) * reach,
+          .38 + random() * .5, .25 + random() * .3, angle, 0, Math.PI * 2);
+        ctx.fillStyle = '#522b53c2';
+        ctx.fill();
+        ctx.strokeStyle = '#a5649a80';
+        ctx.lineWidth = .1;
+        ctx.stroke();
+      }
+    }
+  } else if (sector === 3) {
+    ctx.fillStyle = '#080d1d50';
+    ctx.fillRect(-edge, -edge, edge * 2, edge * 2);
+    for (let side = 0; side < 4; side++) {
+      ctx.save();
+      ctx.rotate(side * Math.PI / 2);
+      for (const x of [-17, -9, 0, 9, 17]) {
+        const strip: Point[] = [[x - 1.1, -edge + 2.8], [x - .7, -edge + 2.4], [x + .7, -edge + 2.4], [x + 1.1, -edge + 2.8]];
+        line(strip, '#467d9955', .65);
+        line(strip, '#83b9d4bd', .15);
+      }
+      ctx.restore();
+    }
+    const reactor = arena.obstacles.find(o => o.kind === 'reactor');
+    if (reactor) {
+      const { x, z } = reactor;
+      const fracture: Point[] = [[x + 1, z - 1], [x + 3, z - 2], [x + 4, z - 1.6], [x + 6, z - 3.4],
+        [x + 7, z - 3], [x + 9, z - 4.2], [x + 10, z - 4]];
+      line(fracture, '#111a2c', .65);
+      line(fracture, '#80bbd99c', .16);
+    }
+  }
+
 }

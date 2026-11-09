@@ -11,6 +11,26 @@ try {
   await page.evaluate(async()=>{const {GameSimulation}=await import('/src/brain-boost/neon-arena/GameSimulation.ts');const start=GameSimulation.prototype.start;GameSimulation.prototype.start=function(){window.qaRotate=this;return start.call(this)};window.qaNative=HTMLElement.prototype.requestFullscreen;HTMLElement.prototype.requestFullscreen=function(){return Promise.reject(new Error('fixture: denied'))};});
   await page.getByRole('button',{name:'Nightmare Protocolo',exact:true}).click(); await page.getByRole('button',{name:/Neon Arena: Virus Survivor/}).click();await page.waitForSelector('[data-neon-phase="READY"]');
   assert.equal(await page.locator('.na-game').getAttribute('data-neon-fullscreen'),'off');
+  const deploy = page.getByRole('button', { name: 'Iniciar supervivencia →', exact: true });
+  const assertDeployVisible = async () => {
+    const bounds = await deploy.boundingBox();
+    const viewport = page.viewportSize();
+    assert.ok(bounds && bounds.y >= 0 && bounds.y + bounds.height <= viewport.height, 'deploy fits without scrolling');
+    assert.ok(await deploy.evaluate(button => {
+      const { x, y, width, height } = button.getBoundingClientRect();
+      return button.contains(document.elementFromPoint(x + width / 2, y + height / 2));
+    }), 'deploy is not clipped by either scroll container');
+  };
+  assert.deepEqual(await page.locator('.na-campaign li small').allTextContents(),
+    ['Ola 5 · BROOD MOTHER', 'Ola 12 · IRON MAW', 'Ola 20 · HIVE SOVEREIGN', 'Ola 29 · BROOD MOTHER']);
+  await assertDeployVisible();
+  await page.setViewportSize({ width: 844, height: 390 });
+  for (const view of ['Arsenal', 'Ajustes', 'Misión']) {
+    await page.getByRole('button', { name: view, exact: true }).click();
+    await assertDeployVisible();
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Ajustes', exact: true }).click();
   await page.getByLabel('Diagnóstico de rendimiento').check();
   await page.getByRole('button',{name:'Iniciar supervivencia →',exact:true}).click();
   const canvas=await page.locator('.na-canvas canvas').elementHandle(), elapsed=await page.evaluate(()=>window.qaRotate.elapsed);

@@ -34,6 +34,7 @@ try {
     await page.getByRole('button', { name: /Neon Arena: Virus Survivor/ }).click(); await page.waitForSelector('[data-neon-phase="READY"]');
     await page.getByRole('combobox', { name: 'Cantidad de jugadores', exact: true }).selectOption('2');
     await page.waitForSelector('[data-neon-players="2"]'); assert.equal(await page.locator('.na-canvas canvas').count(), 1); assert.equal(await page.evaluate(() => window.qaCoopFrames()), 1);
+    await page.getByRole('button', { name: 'Arsenal', exact: true }).click();
     await page.getByRole('combobox', { name: 'Arma inicial P1', exact: true }).selectOption('shotgun');
     await page.getByRole('combobox', { name: 'Arma inicial P2', exact: true }).selectOption('flame');
     await page.getByRole('button', { name: 'Iniciar supervivencia →', exact: true }).click(); await page.waitForSelector('[data-neon-phase="PLAYING"]');
