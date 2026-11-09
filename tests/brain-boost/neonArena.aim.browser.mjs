@@ -24,6 +24,7 @@ try {
   });
   await page.getByRole('button', { name: 'Nightmare Protocolo', exact: true }).click();
   await page.getByRole('button', { name: /Neon Arena: Virus Survivor/ }).click(); await page.waitForSelector('[data-neon-phase="READY"]');
+  await page.getByRole('button', { name: 'Ajustes', exact: true }).click();
   assert.equal(await page.getByRole('combobox', { name: 'Modo de apuntado', exact: true }).inputValue(), 'assisted');
   await page.getByRole('button', { name: 'Iniciar supervivencia →', exact: true }).click();
   await page.waitForFunction(() => window.qaAim?.player.targetId === 900000);
@@ -33,6 +34,7 @@ try {
   assert.equal(await page.evaluate(() => window.qaAim.player.x === 0 && window.qaAim.player.z === 3), true);
   console.log('stationary marine kills enemy behind using F PASS');
   await page.getByRole('button', { name: 'Pausa', exact: true }).click();
+  await page.getByRole('button', { name: 'Ajustes', exact: true }).click();
   await page.getByRole('combobox', { name: 'Modo de apuntado', exact: true }).selectOption('modern');
   await page.getByRole('button', { name: 'Reanudar partida', exact: true }).click();
   const expected = await page.evaluate(async () => {

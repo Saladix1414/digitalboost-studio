@@ -3,6 +3,7 @@ import { CONFIG, type GameSimulation } from './GameSimulation';
 import { splitViewports, type Viewport } from './LocalControls';
 import { LEGACY_ARENA, type ArenaDefinition } from './ArenaDefinition';
 import { paintColonyFloor } from './ColonyFloor';
+import { COLONY_SECTORS } from './ColonySectors';
 
 const ARCADE_MARINE_URL = '/brain-boost/neon-arena/marine-arcade-pop.glb';
 
@@ -17,6 +18,7 @@ export class SurvivalWorld {
   private geometries = new Set<THREE.BufferGeometry>(); private materials = new Set<THREE.Material>(); private textures = new Set<THREE.Texture>();
   private dummy = new THREE.Object3D(); private color = new THREE.Color(); private marine = new THREE.Group();
   private floorMaterial!: THREE.MeshStandardMaterial | THREE.MeshBasicMaterial; private mapPhase = -1;
+  private sectorLamps?: THREE.InstancedMesh;
   private reactorCore?: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
   private disposed = false;
   private gun = new THREE.Group(); private boots: THREE.Mesh[] = []; private suit!: THREE.MeshStandardMaterial;
@@ -213,6 +215,7 @@ export class SurvivalWorld {
       }
     }
     this.finish(ribs, 80); this.finish(lamps, 80, true);
+    if (arcade) this.sectorLamps = lamps;
     const vents = this.pool(box, this.standard(0x445158), 48), slots = this.pool(box, this.standard(0x0b161a), 192);
     for (let i = 0; i < 48; i++) {
       const side = i % 4, a = side * Math.PI / 2, offset = (Math.floor(i / 4) - 5.5) * 4.1;
@@ -349,7 +352,24 @@ export class SurvivalWorld {
   }
   setRemains(enabled: boolean) { this.remains = enabled; }
   setMapPhase(phase: number) {
-    const next = Math.max(0, Math.floor(Number.isFinite(phase) ? phase : 0)); if (next === this.mapPhase) return; this.mapPhase = next;
+    const next = Math.max(0, Math.floor(Number.isFinite(phase) ? phase : 0));
+    if (next === this.mapPhase) return;
+    const sector = next % COLONY_SECTORS.length;
+    const previousSector = Math.max(0, this.mapPhase) % COLONY_SECTORS.length;
+    this.mapPhase = next;
+    if (this.sectorLamps && sector !== previousSector) {
+      const map = this.floorMaterial.map;
+      if (map instanceof THREE.CanvasTexture) {
+        const canvas = map.image as HTMLCanvasElement;
+        paintColonyFloor(canvas.getContext('2d')!, this.arena, canvas.width, sector);
+        map.needsUpdate = true;
+      }
+      const palette = [[0x62b8cc, 0xe8a64f], [0x669477, 0xbbcc79], [0x885f97, 0xe287c4], [0x3c5470, 0x9bd7f5]][sector];
+      for (let i = 0; i < this.sectorLamps.count; i++) {
+        this.sectorLamps.setColorAt(i, this.color.setHex(palette[i % 5 ? 0 : 1]));
+      }
+      this.sectorLamps.instanceColor!.needsUpdate = true;
+    }
     const arcadePalette = [
       { floor: 0xffffff, bg: 0x180e24, fog: 0x271731, torch: 0xffdfbb },
       { floor: 0xffedf2, bg: 0x210d24, fog: 0x33142f, torch: 0xffc38f },

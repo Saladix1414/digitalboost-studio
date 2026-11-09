@@ -34,6 +34,7 @@ try{
    const decoded=await page.evaluate(()=>window.qaDecoded);assert.ok(decoded.every(b=>Math.abs(b.duration-15)<.08));console.log(`${format}: four synchronized stems, decoded PCM ${(decoded.reduce((s,b)=>s+b.bytes,0)/1048576).toFixed(2)} MiB, measured RMS ${await page.evaluate(()=>window.qaRms())} PASS`);
   }else assert.equal(await page.evaluate(()=>window.qaLoops.size),0);
   await page.getByRole('button',{name:'Pausa',exact:true}).click();await page.waitForFunction(()=>window.qaLoops.size===0&&window.qaTimers.size===0);await page.waitForTimeout(650);assert.ok(await page.evaluate(()=>window.qaRms())<.0001);
+  await page.getByRole('button', { name: 'Ajustes', exact: true }).click();
   await page.getByRole('slider',{name:'Volumen de música',exact:true}).focus();await page.keyboard.press('Home');for(let i=0;i<7;i++)await page.keyboard.press('ArrowRight');
   await page.getByRole('button',{name:'Reanudar partida',exact:true}).click();await page.waitForFunction(()=>window.qaTimers.size===1);
   if(!blocked){await page.waitForFunction(()=>window.qaLoops.size===4);assert.equal(await page.evaluate(()=>window.qaDecoded.length),4,'decoded cache is bounded and reused across pause');}
