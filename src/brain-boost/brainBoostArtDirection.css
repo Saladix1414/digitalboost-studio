@@ -358,3 +358,64 @@
   }
 }
 
+
+/* Neon Arena uses the same cabinet palette inside and outside the game. */
+[data-brain-boost-window="neon-arena"],
+.na-game {
+  --na-ink: #191322;
+  --na-panel: #241b30;
+  --na-panel-raised: #38243e;
+  --na-rim: #835b7a;
+  --na-cream: #fff1e3;
+  --na-muted: #d6bad8;
+  --na-peach: #ffc28e;
+  --na-orchid: #e6b1f2;
+}
+
+[data-brain-boost-window="neon-arena"]:not([data-neon-immersive=true]) {
+  --bb-frame: #f0ac8055;
+  --na-cabinet-art:
+    radial-gradient(ellipse at 14% 0%, #bd6c7440, transparent 53%),
+    radial-gradient(ellipse at 100% 90%, #8a499840, transparent 57%),
+    repeating-linear-gradient(135deg, #ecb6de0c 0 1px, transparent 1px 22px),
+    linear-gradient(165deg, #2c1c33, #191322 65%);
+  background-image: var(--na-cabinet-art);
+}
+
+[data-brain-boost-window="neon-arena"] > div:first-child p:first-child {
+  color: var(--na-peach);
+}
+
+[data-brain-boost-window="neon-arena"] #brain-boost-dialog-title {
+  color: var(--na-cream);
+}
+
+[data-brain-boost-window="neon-arena"] > div:first-child p:last-child {
+  color: var(--na-muted);
+}
+
+[data-brain-boost-window="neon-arena"] > div:first-child button {
+  background: var(--na-panel);
+  border-color: var(--na-rim);
+  color: var(--na-cream);
+}
+
+[data-brain-boost-window="neon-arena"] > div:first-child button:hover {
+  background: var(--na-panel-raised);
+  border-color: var(--na-peach);
+}
+
+[data-brain-boost-window="neon-arena"] > div:first-child button:focus-visible {
+  outline: 2px solid var(--na-peach);
+  outline-offset: 2px;
+}
+
+[data-brain-boost-window="neon-arena"][data-neon-immersive=true]::after {
+  display: none;
+}
+
+@media (max-aspect-ratio: 3/4) {
+  [data-brain-boost-overlay="game"] > [data-brain-boost-window="neon-arena"]:not([data-neon-immersive=true]) {
+    background-image: var(--na-cabinet-art) !important;
+  }
+}
