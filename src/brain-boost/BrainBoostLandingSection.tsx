@@ -40,7 +40,7 @@ type GameArtDirection = {
 };
 
 const gameArtDirections: Record<string, GameArtDirection> = {
-  "neon-arena": { primary: "#00f3ff", secondary: "#ff1744", surface: "#06142d", glow: "rgba(0,243,255,.24)" },
+  "neon-arena": { primary: "#ffc28e", secondary: "#d78ae5", surface: "#211628", glow: "rgba(216,124,193,.24)" },
   sequence: { primary: "#22d3ee", secondary: "#e879f9", surface: "#07152c", glow: "rgba(34,211,238,.24)" },
   pairs: { primary: "#2dd4bf", secondary: "#60a5fa", surface: "#05202b", glow: "rgba(45,212,191,.23)" },
   "originx-dragons": { primary: "#fbbf24", secondary: "#fb7185", surface: "#21101a", glow: "rgba(251,191,36,.24)" },
@@ -547,7 +547,7 @@ export default function BrainBoostLandingSection() {
           >
             <div className="relative z-10 flex items-start justify-between gap-4">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-200">{activeGame?.id === "neon-arena" ? "NIGHTMARE PROTOCOLO / NEON ARENA" : activeGame?.id === "baseline" ? "NEURAL ARCADE / NEURAL BASELINE" : activeGame?.id === "routes" ? "NEURAL ARCADE / VECTOR ROUTES" : activeGame?.id === "signals" ? "NEURAL ARCADE / SIGNAL HUNT" : activeGame?.id === "targets" ? "NEURAL ARCADE / FOCUS PROTOCOL" : activeGame?.id === "rotation" ? "NEURAL ARCADE / SPATIAL RIFT" : activeGame?.id === "number" ? "NEURAL ARCADE / NUMBER PATTERNS" : activeGame?.id === "deduction" ? "NEURAL ARCADE / LOGIC REACTOR" : activeGame?.id === "sequence" ? "NEURAL ARCADE / MEMORY MATRIX" : activeGame?.id === "pairs" ? "NEURAL ARCADE / OCEAN ECHOES" : activeGame?.id === "originx-dragons" ? "ORIGIN X / DRAGON RELICS" : activeCategory.id === "nightmare" ? "HORROR · SUPERVIVENCIA · PSICOLÓGICO" : activeCategory.id === "daily" ? "NEURAL ARCADE / DAILY RUN" : "NEURAL ARCADE / MODE SELECT"}</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-200">{activeGame?.id === "neon-arena" ? "NIGHTMARE PROTOCOLO / ARCADE POP" : activeGame?.id === "baseline" ? "NEURAL ARCADE / NEURAL BASELINE" : activeGame?.id === "routes" ? "NEURAL ARCADE / VECTOR ROUTES" : activeGame?.id === "signals" ? "NEURAL ARCADE / SIGNAL HUNT" : activeGame?.id === "targets" ? "NEURAL ARCADE / FOCUS PROTOCOL" : activeGame?.id === "rotation" ? "NEURAL ARCADE / SPATIAL RIFT" : activeGame?.id === "number" ? "NEURAL ARCADE / NUMBER PATTERNS" : activeGame?.id === "deduction" ? "NEURAL ARCADE / LOGIC REACTOR" : activeGame?.id === "sequence" ? "NEURAL ARCADE / MEMORY MATRIX" : activeGame?.id === "pairs" ? "NEURAL ARCADE / OCEAN ECHOES" : activeGame?.id === "originx-dragons" ? "ORIGIN X / DRAGON RELICS" : activeCategory.id === "nightmare" ? "HORROR · SUPERVIVENCIA · PSICOLÓGICO" : activeCategory.id === "daily" ? "NEURAL ARCADE / DAILY RUN" : "NEURAL ARCADE / MODE SELECT"}</p>
                 <h3 id="brain-boost-dialog-title" className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">{activeGame ? activeGame.title : activeCategory.name}</h3>
                 <p className={activeGame?.id === "neon-arena" ? "hidden sm:mt-2 sm:block sm:text-sm sm:leading-6 sm:text-slate-400" : "mt-2 text-sm leading-6 text-slate-400"}>{activeGame ? activeGame.description : activeCategory.description}</p>
               </div>
