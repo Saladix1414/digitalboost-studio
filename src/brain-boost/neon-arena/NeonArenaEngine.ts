@@ -34,7 +34,7 @@ export class NeonArenaEngine {
       this.renderer.info.autoReset = false;
       this.renderer.outputColorSpace = THREE.SRGBColorSpace; this.renderer.toneMapping = THREE.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.15;
       canvas.tabIndex = 0; canvas.setAttribute('aria-label', 'Arena 3D. P1: WASD, F y espacio. P2 cooperativo: flechas, J y K. P: pausa.'); host.append(canvas);
-      this.world = new SurvivalWorld(this.reduced, this.simulation.arena); this.configureComposer(); this.bind(canvas);
+      this.world = new SurvivalWorld(this.reduced, this.simulation.arena, () => { this.needsRender = true; }); this.configureComposer(); this.bind(canvas);
       this.observer = new ResizeObserver(() => this.resize()); this.observer.observe(host); this.resize();
       this.modes.forEach((mode, i) => this.simulation.setAimMode(mode, i)); this.simulation.ready(); this.world.draw(this.simulation); this.notify(this.simulation.snapshot()); this.raf = requestAnimationFrame(this.frame);
     } catch (error) { this.dispose(); throw error; }
