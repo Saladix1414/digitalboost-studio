@@ -12,7 +12,7 @@ export const mockTradingBots:
         "BTC Momentum Paper Bot",
 
       strategyId:
-        "btc-ema-momentum",
+        "btc-ema-rsi-long",
 
       symbol:
         "BTC",

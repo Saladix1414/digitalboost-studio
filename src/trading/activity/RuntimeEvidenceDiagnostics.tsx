@@ -84,7 +84,7 @@ export function RuntimeEvidenceDiagnostics() {
 
   const coordinationHealth =
     useSyncExternalStore(
-      subscribeRuntimeEvidence,
+      subscribeRuntimeEvidenceHistory,
       getRuntimeEvidenceCoordinationHealth,
       getRuntimeEvidenceCoordinationHealth
     );

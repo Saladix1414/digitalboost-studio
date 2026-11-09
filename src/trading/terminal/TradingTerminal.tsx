@@ -111,16 +111,16 @@ export function TradingTerminal() {
     ) &&
     numericPaperAmount > 0;
 
+  const market =
+    marketData.getMarket(
+      symbol
+    )!;
+
   const paperNotional =
     paperAmountValid
       ? numericPaperAmount *
         market.price
       : 0;
-
-  const market =
-    marketData.getMarket(
-      symbol
-    )!;
 
   const candles =
     useMemo(

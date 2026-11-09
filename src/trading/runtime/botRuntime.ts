@@ -289,6 +289,11 @@ export function runBotRuntimeStep(
 
     orderId,
 
+    approvalReviewId: context.approval.id,
+    approvalBotId: context.approval.botId,
+    approvalStrategyId: context.approval.strategyId,
+    approvalBindingFingerprint: context.approval.bindingFingerprint,
+
     liveExecution:
       false,
   };
