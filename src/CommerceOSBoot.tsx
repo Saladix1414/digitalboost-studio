@@ -61,7 +61,7 @@ export default function CommerceOSBoot({
               </div>
 
               <p className="text-[10px] font-bold uppercase tracking-[.32em] text-cyan-300/80">
-                DigitalBoost
+                OriginX Foundation
               </p>
 
               <h1 className="mt-2 text-2xl font-semibold tracking-tight">
@@ -120,7 +120,7 @@ export default function CommerceOSBoot({
               </div>
 
               <p className="mt-6 text-[10px] text-slate-600">
-                DIGITALBOOST COMMERCE OS
+                ORIGINX FOUNDATION COMMERCE OS
               </p>
 
             </div>

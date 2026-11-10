@@ -152,7 +152,7 @@ function createBlock(type: BlockType, index: number): BuilderBlock {
   const defaults: Record<BlockType, Partial<BuilderBlock>> = {
     hero: {
       label: "Hero",
-      text: "Una experiencia digital creada con DigitalBoost.",
+      text: "Una experiencia digital creada con OriginX Foundation.",
       fontSize: 38,
       padding: 64,
       align: "center",

@@ -36,7 +36,7 @@ export const ToolWorkspace = ({ initialMode, onBack }: ToolWorkspaceProps) => {
   ]);
   
   // Dynamic Project Customization State
-  const [siteTitle, setSiteTitle] = useState('Mi Proyecto DigitalBoost');
+  const [siteTitle, setSiteTitle] = useState('Mi Proyecto OriginX Foundation');
   const [siteSubtitle, setSiteSubtitle] = useState('Construido con inteligencia artificial y optimizado para máxima conversión.');
   const [hasPricing, setHasPricing] = useState(true);
   const [hasFaq, setHasFaq] = useState(true);
@@ -203,7 +203,7 @@ export const ToolWorkspace = ({ initialMode, onBack }: ToolWorkspaceProps) => {
 
         case 'modernize':
           setSiteTitle(prev =>
-            prev === 'Mi Proyecto DigitalBoost'
+            prev === 'Mi Proyecto OriginX Foundation'
               ? 'Experiencias Digitales de Próxima Generación'
               : prev
           );
@@ -311,7 +311,7 @@ export const ToolWorkspace = ({ initialMode, onBack }: ToolWorkspaceProps) => {
             title="Volver a la Página Principal"
           >
             <ArrowLeft size={16} className="text-[#38bdf8]"/>
-            <span className="hidden md:inline">Volver a DigitalBoost</span>
+            <span className="hidden md:inline">Volver a OriginX Foundation</span>
           </button>
 
           <div className="h-6 w-px bg-slate-800 hidden sm:block"></div>
@@ -417,7 +417,7 @@ export const ToolWorkspace = ({ initialMode, onBack }: ToolWorkspaceProps) => {
             {viewTab === 'code' ? (
               /* PESTAÑA DE CÓDIGO FUENTE */
               <div className="p-6 font-mono text-xs text-slate-300 bg-[#040408] min-h-[600px] overflow-x-auto leading-relaxed">
-                <div className="text-slate-500 mb-4">// Código generado por DigitalBoost AI Engine v2.6</div>
+                <div className="text-slate-500 mb-4">// Código generado por OriginX Foundation AI Engine v2.6</div>
                 <div className="text-[#f472b6]">&lt;!DOCTYPE html&gt;</div>
                 <div className="text-[#38bdf8]">&lt;html lang="es" class="dark"&gt;</div>
                 <div className="pl-4 text-slate-400">&lt;head&gt;</div>
@@ -427,7 +427,7 @@ export const ToolWorkspace = ({ initialMode, onBack }: ToolWorkspaceProps) => {
                 <div className="pl-4 text-slate-400">&lt;/head&gt;</div>
                 <div className="pl-4 text-slate-400">&lt;body class="bg-black text-white"&gt;</div>
                 <div className="pl-8 text-[#38bdf8]">&lt;header class="border-b border-white/10 p-6 flex justify-between"&gt;</div>
-                <div className="pl-12 text-[#fde047]">&lt;div class="font-bold"&gt;DIGITALBOOST APP&lt;/div&gt;</div>
+                <div className="pl-12 text-[#fde047]">&lt;div class="font-bold"&gt;ORIGINX FOUNDATION APP&lt;/div&gt;</div>
                 <div className="pl-8 text-[#38bdf8]">&lt;/header&gt;</div>
                 <div className="pl-8 text-[#38bdf8]">&lt;main class="max-w-6xl mx-auto px-6 py-20"&gt;</div>
                 <div className="pl-12 text-[#a855f7]">&lt;h1 class="text-5xl font-extrabold"&gt;{siteTitle}&lt;/h1&gt;</div>
@@ -676,7 +676,7 @@ export const ToolWorkspace = ({ initialMode, onBack }: ToolWorkspaceProps) => {
                     <div className="bg-[#020204] border border-[#1e293b] rounded-xl p-4 font-mono text-xs text-slate-300">
                       <div className="flex items-center gap-2 text-slate-500 mb-3 border-b border-slate-800 pb-2">
                         <Terminal size={14} className="text-[#38bdf8]"/>
-                        <span>DigitalBoost CLI Engine Terminal</span>
+                        <span>OriginX Foundation CLI Engine Terminal</span>
                       </div>
                       <div className="space-y-1 text-[11px]">
                         <p className="text-emerald-400">$ digitalboost audit --performance --seo</p>
@@ -705,7 +705,7 @@ export const ToolWorkspace = ({ initialMode, onBack }: ToolWorkspaceProps) => {
                 <Sparkles size={14}/>
               </div>
               <div>
-                <h3 className="text-xs font-bold text-white">DigitalBoost Copilot</h3>
+                <h3 className="text-xs font-bold text-white">OriginX Foundation Copilot</h3>
                 <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Activo
                 </span>

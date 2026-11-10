@@ -8,11 +8,11 @@ export const nftCollectionsFixture:
   readonly NftCollection[] = [
     {
       id: "collection-origin-001",
-      name: "DigitalBoost Origins",
+      name: "OriginX Foundation Origins",
       symbol: "DBO",
       description:
         "Deterministic collection fixture for the NFT Forge product foundation.",
-      creator: "DigitalBoost Studio",
+      creator: "OriginX Foundation Studio",
       status: "ACTIVE",
       version: 1,
       assetIds: [
@@ -30,7 +30,7 @@ export const nftCollectionsFixture:
       symbol: "SGNL",
       description:
         "Experimental digital objects created inside the local Forge workspace.",
-      creator: "DigitalBoost Studio",
+      creator: "OriginX Foundation Studio",
       status: "DRAFT",
       version: 1,
       assetIds: [
@@ -50,7 +50,7 @@ export const nftAssetsFixture:
       title: "Origin Node 01",
       collectionId:
         "collection-origin-001",
-      creator: "DigitalBoost Studio",
+      creator: "OriginX Foundation Studio",
       mediaKind: "image",
       status: "READY",
       traits: [
@@ -66,7 +66,7 @@ export const nftAssetsFixture:
       metadata: {
         name: "Origin Node 01",
         description:
-          "Genesis deterministic asset for the DigitalBoost Origins collection.",
+          "Genesis deterministic asset for the OriginX Foundation Origins collection.",
         attributes: [
           {
             traitType: "Edition",
@@ -87,7 +87,7 @@ export const nftAssetsFixture:
       title: "Origin Node 02",
       collectionId:
         "collection-origin-001",
-      creator: "DigitalBoost Studio",
+      creator: "OriginX Foundation Studio",
       mediaKind: "interactive",
       status: "DRAFT",
       traits: [
@@ -99,7 +99,7 @@ export const nftAssetsFixture:
       metadata: {
         name: "Origin Node 02",
         description:
-          "Prototype interactive asset in the DigitalBoost Origins collection.",
+          "Prototype interactive asset in the OriginX Foundation Origins collection.",
         attributes: [
           {
             traitType: "Edition",
@@ -116,7 +116,7 @@ export const nftAssetsFixture:
       title: "Signal Construct 01",
       collectionId:
         "collection-signal-001",
-      creator: "DigitalBoost Studio",
+      creator: "OriginX Foundation Studio",
       mediaKind: "image",
       status: "DRAFT",
       traits: [
@@ -150,7 +150,7 @@ export const nftForgeActivityFixture:
       collectionId:
         "collection-origin-001",
       label:
-        "DigitalBoost Origins collection created",
+        "OriginX Foundation Origins collection created",
       timestamp:
         "2026-09-01T12:00:00.000Z",
       authoritative: false,
@@ -163,7 +163,7 @@ export const nftForgeActivityFixture:
       assetId:
         "asset-origin-001",
       label:
-        "Origin Node 01 attached to DigitalBoost Origins",
+        "Origin Node 01 attached to OriginX Foundation Origins",
       timestamp:
         "2026-09-01T12:05:00.000Z",
       authoritative: false,

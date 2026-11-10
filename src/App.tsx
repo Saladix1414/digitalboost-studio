@@ -187,7 +187,7 @@ const AppLogo = ({ className = "w-7 h-7" }: { className?: string }) => {
     return (
       <img 
         src={ASSETS.logo} 
-        alt="DigitalBoost Logo" 
+        alt="OriginX Foundation Logo"
         className={`${className} object-contain rounded-md`}
         onError={() => setError(true)} 
       />
@@ -320,7 +320,7 @@ const TEMPLATES: Record<string, { name: string; category: string; description: s
 
   <!-- Footer -->
   <footer class="py-8 border-t border-slate-800/80 text-center text-xs text-slate-500">
-    © 2025 AURA Growth Agency. Potenciado con DigitalBoost AI.
+    © 2025 AURA Growth Agency. Potenciado con OriginX Foundation AI.
   </footer>
 </body>
 </html>`
@@ -558,7 +558,7 @@ const BootScreen = ({ onDone }: { onDone: () => void }) => {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_55%,rgba(70,100,180,0.13),transparent_34%),#000]" />
       <div className="relative z-10 text-center px-6">
         <h1 className="font-extrabold tracking-[0.18em] text-[34px] sm:text-[48px] leading-tight">
-          BIENVENIDO A<br />DIGITAL<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#9d65ff] to-[#6e4bdb]">BOOST</span>
+          BIENVENIDO A<br />OriginX<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#9d65ff] to-[#6e4bdb]"> Foundation</span>
         </h1>
         <p className="mt-3 text-[10px] sm:text-[12px] tracking-[0.28em] text-slate-500 uppercase">TU SISTEMA OPERATIVO CREATIVO</p>
         <div className="mt-7 mx-auto w-28 h-[2px] bg-gradient-to-r from-transparent via-[#6f75ff] to-transparent animate-pulse" />
@@ -583,7 +583,7 @@ const SplashScreen = ({ onContinue }: { onContinue: () => void }) => {
   return (
     <div className="fixed inset-0 z-[95] bg-black text-white overflow-hidden">
       <div className="absolute inset-0">
-        <img src={ASSETS.splashBg} alt="DigitalBoost cyber dragon" className="w-full h-full object-cover object-center" />
+        <img src={ASSETS.splashBg} alt="OriginX Foundation cyber dragon" className="w-full h-full object-cover object-center" />
         <div className="absolute inset-0 bg-black/20" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/55" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_44%,transparent_22%,rgba(0,0,0,0.42)_82%)]" />
@@ -620,7 +620,7 @@ const SplashScreen = ({ onContinue }: { onContinue: () => void }) => {
 
       <div className="absolute top-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
         <AppLogo className="w-8 h-8 drop-shadow-[0_0_18px_rgba(56,189,248,.55)]" />
-        <div className="font-extrabold text-xl tracking-wider">DIGITAL<span className="text-[#8f58ff]">BOOST</span></div>
+        <div className="font-extrabold text-xl tracking-wider">OriginX<span className="text-[#8f58ff]"> Foundation</span></div>
       </div>
       <button onClick={onContinue} className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 text-[10px] uppercase tracking-[0.24em] text-slate-300/90 hover:text-white transition-colors">Toca para continuar</button>
     </div>
@@ -636,7 +636,7 @@ const IntroScreen = ({ onStart }: { onStart: () => void }) => (
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <AppLogo className="w-8 h-8" />
-          <div className="font-extrabold tracking-wider">DIGITAL<span className="text-[#7f55ff]">BOOST</span></div>
+          <div className="font-extrabold tracking-wider">OriginX<span className="text-[#7f55ff]"> Foundation</span></div>
         </div>
         <button onClick={onStart} className="text-xs font-semibold text-slate-300 hover:text-white transition-colors">
           Entrar a la plataforma <ArrowRight size={14} className="inline ml-1" />
@@ -653,7 +653,7 @@ const IntroScreen = ({ onStart }: { onStart: () => void }) => (
             <span className="text-sky-400">Escala.</span> <span className="text-[#ae68ff]">Innova.</span>
           </h1>
           <p className="mt-6 max-w-xl text-[15px] sm:text-[17px] leading-relaxed text-slate-300">
-            DigitalBoost reúne creación web con IA, tiendas virtuales, landing pages, NFTs y herramientas profesionales en un solo sistema creativo.
+            OriginX Foundation reúne creación web con IA, tiendas virtuales, landing pages, NFTs y herramientas profesionales en un solo sistema creativo.
           </p>
           <div className="mt-8">
             <button onClick={onStart} className="rounded-xl bg-gradient-to-r from-[#8b3dff] to-[#2e9eff] px-7 py-3.5 font-bold shadow-[0_0_30px_rgba(98,81,255,.35)] hover:scale-[1.02] transition-transform">
@@ -667,7 +667,7 @@ const IntroScreen = ({ onStart }: { onStart: () => void }) => (
 
         <div className="relative flex justify-center lg:justify-end min-h-[330px] sm:min-h-[480px] items-center">
           <div className="absolute inset-0 bg-[#3b82f6]/10 blur-[90px] rounded-full" />
-          <img src={ASSETS.heroDragon} alt="DigitalBoost Dragon" className="relative w-[300px] sm:w-[460px] object-contain drop-shadow-[0_0_70px_rgba(40,144,255,.28)]" />
+          <img src={ASSETS.heroDragon} alt="OriginX Foundation Dragon" className="relative w-[300px] sm:w-[460px] object-contain drop-shadow-[0_0_70px_rgba(40,144,255,.28)]" />
         </div>
       </div>
 
@@ -717,7 +717,7 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-[70px] flex items-center justify-between">
           <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2.5">
             <AppLogo className="w-8 h-8" />
-            <span className="font-bold text-xl text-white tracking-tight">DIGITAL<span className="text-[#6366f1]">BOOST</span></span>
+            <span className="font-bold text-xl text-white tracking-tight">OriginX<span className="text-[#6366f1]"> Foundation</span></span>
           </button>
 
           <div className="hidden lg:flex items-center gap-7 text-[14px] font-medium text-slate-300">
@@ -767,7 +767,7 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#c084fc] to-[#f472b6]">Innova.</span>
             </h1>
             <p className="mt-6 max-w-[640px] text-[14px] sm:text-[16px] leading-relaxed text-slate-300">
-              DigitalBoost es la plataforma todo en uno para desarrolladores, <strong className="text-white">emprendedores</strong> y creadores.
+              OriginX Foundation es la plataforma todo en uno para desarrolladores, <strong className="text-white">emprendedores</strong> y creadores.
             </p>
             <p className="mt-2 max-w-[640px] text-[14px] sm:text-[16px] leading-relaxed text-slate-300">
               Desarrolla web con IA, tiendas virtuales, landing pages, NFTs y <strong className="text-white">herramientas</strong> profesionales para llevar tus ideas al siguiente nivel.
@@ -785,7 +785,7 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
           <div className="lg:col-span-6 flex justify-center relative min-h-[390px] sm:min-h-[520px] items-center">
             <div className="absolute w-[360px] sm:w-[540px] h-[360px] sm:h-[540px] bg-[#1d4ed8]/20 blur-[100px] rounded-full" />
             {!heroImgError ? (
-              <img src={ASSETS.heroDragon} alt="DigitalBoost dragon" className="relative z-10 w-[320px] sm:w-[480px] xl:w-[540px] object-contain drop-shadow-[0_0_70px_rgba(56,189,248,0.38)]" onError={() => setHeroImgError(true)} />
+              <img src={ASSETS.heroDragon} alt="OriginX Foundation dragon" className="relative z-10 w-[320px] sm:w-[480px] xl:w-[540px] object-contain drop-shadow-[0_0_70px_rgba(56,189,248,0.38)]" onError={() => setHeroImgError(true)} />
             ) : <HeroDragonCircle className="relative z-10 w-[320px] sm:w-[500px]" />}
           </div>
         </div>
@@ -847,7 +847,7 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
                 ))}
               </div>
               <div className="bg-[#040711] p-6 sm:p-8 flex flex-col justify-between min-h-[300px]">
-                <div className="flex items-center justify-between pb-4 border-b border-white/5"><div className="flex items-center gap-2"><AppLogo className="w-5 h-5"/><span className="text-xs font-bold text-white">DIGITAL<span className="text-[#6366f1]">BOOST</span></span></div><Menu size={16} className="text-slate-400"/></div>
+                <div className="flex items-center justify-between pb-4 border-b border-white/5"><div className="flex items-center gap-2"><AppLogo className="w-5 h-5"/><span className="text-xs font-bold text-white">OriginX<span className="text-[#6366f1]"> Foundation</span></span></div><Menu size={16} className="text-slate-400"/></div>
                 <div className="py-8"><h3 className="text-2xl font-bold text-white leading-tight">Impulsa tu negocio<br/>al siguiente nivel</h3><p className="mt-3 text-xs text-slate-400 max-w-sm">Herramientas digitales para crear, escalar e innovar sin límites.</p><span className="inline-flex mt-6 bg-[#7d4cf7] text-white px-5 py-2.5 rounded-md text-xs font-bold">Comenzar ahora</span></div>
                 <div className="text-[10px] text-sky-400 font-mono">✨ Clic para abrir el editor completo</div>
               </div>
@@ -876,12 +876,12 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
         <div className="rounded-2xl border border-[#1e2b42] bg-gradient-to-r from-[#070b18] via-[#0b0b1b] to-[#14072a] p-8 sm:p-10 lg:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 overflow-hidden relative">
           <div className="relative z-10 max-w-2xl">
             <h2 className="text-3xl sm:text-4xl font-semibold text-white leading-tight">¿Listo para llevar tus ideas al siguiente nivel?</h2>
-            <p className="mt-4 text-sm text-slate-400">Únete a miles de creadores, desarrolladores y emprendedores que ya están construyendo el futuro con DigitalBoost.</p>
+            <p className="mt-4 text-sm text-slate-400">Únete a miles de creadores, desarrolladores y emprendedores que ya están construyendo el futuro con OriginX Foundation.</p>
             <button onClick={goToTools} className="mt-7 bg-gradient-to-r from-[#8b5cf6] to-[#2498ff] text-white px-7 py-3.5 rounded-lg text-sm font-bold inline-flex items-center gap-2">Comenzar ahora gratis <ArrowRight size={16}/></button>
             <div className="mt-3 text-[11px] text-slate-500">No se requiere tarjeta de crédito</div>
           </div>
           <div className="relative w-52 h-52 sm:w-64 sm:h-64 shrink-0 flex items-center justify-center">
-            {!ctaImgError ? <img src={ASSETS.ctaDragon} alt="DigitalBoost dragon" className="w-full h-full object-contain drop-shadow-[0_0_35px_rgba(56,189,248,.35)]" onError={() => setCtaImgError(true)} /> : <DragonLogo className="w-32 h-32 text-sky-400" />}
+            {!ctaImgError ? <img src={ASSETS.ctaDragon} alt="OriginX Foundation dragon" className="w-full h-full object-contain drop-shadow-[0_0_35px_rgba(56,189,248,.35)]" onError={() => setCtaImgError(true)} /> : <DragonLogo className="w-32 h-32 text-sky-400" />}
           </div>
         </div>
       </section>
@@ -890,12 +890,12 @@ const LandingPage = ({ onSelectTool }: { onSelectTool: (mode: ToolMode) => void 
       <footer className="border-t border-[#1e293b] bg-[#020205] pt-14 pb-10">
         <div className="max-w-[1400px] mx-auto px-5 sm:px-8 grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2">
-            <div className="flex items-center gap-2.5 mb-4"><AppLogo className="w-7 h-7"/><span className="font-bold text-lg text-white">DIGITAL<span className="text-[#6366f1]">BOOST</span></span></div>
+            <div className="flex items-center gap-2.5 mb-4"><AppLogo className="w-7 h-7"/><span className="font-bold text-lg text-white">OriginX<span className="text-[#6366f1]"> Foundation</span></span></div>
             <p className="text-xs text-slate-400 max-w-sm leading-relaxed">El sistema creativo impulsado por IA para diseñar, programar, optimizar y escalar productos digitales de alto impacto.</p>
           </div>
           <div><h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Producto</h4><div className="space-y-2.5 text-xs text-slate-400"><button onClick={() => onSelectTool('forge')} className="block hover:text-white">Herramientas</button><button onClick={() => onSelectTool('store')} className="block hover:text-white">Tiendas</button><button onClick={() => onSelectTool('nexus')} className="block hover:text-white">Nexus</button><button onClick={() => onSelectTool('websites')} className="block hover:text-white">NFTs</button></div></div>
           <div><h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Recursos</h4><div className="space-y-2.5 text-xs text-slate-400"><button onClick={() => onSelectTool('islands')} className="block hover:text-white">Dev Tools</button><button onClick={() => onSelectTool('forge')} className="block hover:text-white">Copilot IA</button><button onClick={goToTools} className="block hover:text-white">Comunidad</button></div></div>
-          <div><h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Empresa</h4><div className="space-y-2.5 text-xs text-slate-400"><span className="block">Sobre nosotros</span><span className="block">Contacto</span><span className="block">Trabaja con nosotros</span><span className="block">© 2026 DigitalBoost</span></div></div>
+          <div><h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Empresa</h4><div className="space-y-2.5 text-xs text-slate-400"><span className="block">Sobre nosotros</span><span className="block">Contacto</span><span className="block">Trabaja con nosotros</span><span className="block">© 2026 OriginX Foundation</span></div></div>
         </div>
       </footer>
     </div>
@@ -923,7 +923,7 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
   const [aiHistory, setAiHistory] = useState<Array<{ role: string; message: string; timestamp: string }>>([
     {
       role: "Copilot",
-      message: "¡Hola! Soy tu AI Copilot de DigitalBoost. Puedo crear tu sitio web desde cero, optimizar el diseño, cambiar el hero, añadir secciones de precios o mejorar la conversión. ¿Qué deseas hacer?",
+      message: "¡Hola! Soy tu AI Copilot de OriginX Foundation. Puedo crear tu sitio web desde cero, optimizar el diseño, cambiar el hero, añadir secciones de precios o mejorar la conversión. ¿Qué deseas hacer?",
       timestamp: "Ahora"
     }
   ]);
@@ -1011,7 +1011,7 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
       } else {
         // Enriquecer el contenido general con el prompt del usuario
         updatedHtml = updatedHtml.replace(/<h1>.*?<\/h1>/i, `<h1>${instruction}</h1>`)
-          .replace(/<title>.*?<\/title>/i, `<title>${instruction} - DigitalBoost</title>`);
+          .replace(/<title>.*?<\/title>/i, `<title>${instruction} - OriginX Foundation</title>`);
       }
 
       setHtmlCode(updatedHtml);
@@ -1098,7 +1098,7 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
           </button>
           <div className="h-4 w-px bg-slate-800"></div>
           <AppLogo className="w-6 h-6" />
-          <span className="font-bold text-sm tracking-wide hidden sm:inline">DigitalBoost Studio</span>
+          <span className="font-bold text-sm tracking-wide hidden sm:inline">OriginX Foundation Studio</span>
         </div>
         
         {/* Modos Rápidos */}
@@ -1237,7 +1237,7 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
             {isGenerating && (
               <div className="p-3 bg-purple-950/40 border border-purple-800/60 rounded-xl text-purple-300 flex items-center gap-2 text-xs">
                 <Sparkles size={15} className="animate-spin text-purple-400"/>
-                <span>DigitalBoost AI está analizando y rediseñando los componentes...</span>
+                <span>OriginX Foundation AI está analizando y rediseñando los componentes...</span>
               </div>
             )}
           </div>
@@ -1374,7 +1374,7 @@ const InternalWorkspace = ({ initialMode, onBack }: { initialMode: ToolMode; onB
               >
                 <iframe 
                   srcDoc={htmlCode}
-                  title="DigitalBoost Preview"
+                  title="OriginX Foundation Preview"
                   className="w-full h-full border-0 bg-white"
                   sandbox="allow-scripts allow-forms allow-modals"
                 />

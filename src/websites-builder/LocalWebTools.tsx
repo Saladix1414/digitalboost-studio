@@ -207,7 +207,7 @@ export default function LocalWebTools({ tool, project, pageId, blocks, onSeoChan
           <label className="db-tool-label">Título · {page.seo.title.length}/60<input maxLength={60} value={page.seo.title} onChange={(event) => onSeoChange({ title: event.target.value })}/></label>
           <label className="db-tool-label">Descripción · {page.seo.description.length}/160<textarea maxLength={160} rows={3} value={page.seo.description} onChange={(event) => onSeoChange({ description: event.target.value })}/></label>
           <label className="db-tool-check"><input type="checkbox" checked={page.seo.indexable} onChange={(event) => onSeoChange({ indexable: event.target.checked })}/> Permitir indexación en la configuración del proyecto</label>
-          <div className="db-seo-preview"><small>VISTA PREVIA DE BÚSQUEDA · {page.name}</small><strong>{page.seo.title || "Título de la página"}</strong><span>digitalboost.local › {page.slug}</span><p>{page.seo.description || "Agregá una descripción para previsualizar el resultado."}</p></div>
+          <div className="db-seo-preview"><small>VISTA PREVIA DE BÚSQUEDA · {page.name}</small><strong>{page.seo.title || "Título de la página"}</strong><span>sitio.example › {page.slug}</span><p>{page.seo.description || "Agregá una descripción para previsualizar el resultado."}</p></div>
         </> : <div className="db-tool-message">Creá o aplicá un proyecto para preparar la vista previa SEO.</div>}
       </div>}
       {tool === "image-optimizer" && selectedImage && <MediaAltEditor key={selectedImage.id} selectedImage={selectedImage} onUpdate={onUpdateMediaAlt}/>}

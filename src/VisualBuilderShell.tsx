@@ -198,7 +198,7 @@ export default function VisualBuilderShell() {
             </h1>
 
             <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-slate-500">
-              Creá una experiencia digital moderna conectada a DigitalBoost
+              Creá una experiencia digital moderna conectada a OriginX Foundation
               CommerceOS.
             </p>
 
@@ -269,7 +269,7 @@ export default function VisualBuilderShell() {
             {block.content}
           </div>
           <div className="mt-2 text-[10px] text-slate-400">
-            © 2026 · Powered by DigitalBoost
+            © 2026 · Powered by OriginX Foundation
           </div>
         </div>
       );
@@ -306,7 +306,7 @@ export default function VisualBuilderShell() {
 
           <div>
             <div className="text-xs font-semibold">
-              DigitalBoost Visual Builder
+              OriginX Foundation Visual Builder
             </div>
             <div className="text-[10px] text-slate-500">
               {mode === "store" ? "Tienda online" : "Sitio web"}

@@ -275,7 +275,7 @@ export default function WebsiteBuilderV1({
                 Website Builder
               </div>
               <div className="hidden text-[10px] text-slate-400 sm:block">
-                DigitalBoost Studio
+                OriginX Foundation Studio
               </div>
             </div>
           </div>
@@ -506,7 +506,7 @@ export default function WebsiteBuilderV1({
                                 <p className="mt-4 max-w-md text-xs leading-6 text-slate-300 sm:text-sm">
                                   Diseñá experiencias digitales modernas y
                                   convertí visitantes en clientes desde
-                                  DigitalBoost.
+                                  OriginX Foundation.
                                 </p>
 
                                 <div className="mt-6 flex flex-wrap gap-2">
@@ -585,7 +585,7 @@ export default function WebsiteBuilderV1({
                                         {title}
                                       </div>
                                       <p className="mt-1 text-[10px] leading-4 text-slate-400">
-                                        Experiencia creada con DigitalBoost.
+                                        Experiencia creada con OriginX Foundation.
                                       </p>
                                     </div>
                                   ))}
@@ -656,7 +656,7 @@ export default function WebsiteBuilderV1({
                                 TU MARCA
                               </div>
                               <div className="mt-2 text-[10px] text-slate-400">
-                                Creado con DigitalBoost Studio
+                                Creado con OriginX Foundation Studio
                               </div>
                             </footer>
                           )}
@@ -856,7 +856,7 @@ export default function WebsiteBuilderV1({
         </div>
 
         <div className="flex items-center gap-3">
-          <span>DigitalBoost Engine</span>
+          <span>OriginX Foundation Engine</span>
           <span>V1</span>
         </div>
       </div>

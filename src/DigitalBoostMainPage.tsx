@@ -227,7 +227,7 @@ export default function DigitalBoostMainPage({
             </h1>
 
             <p className="mt-5 max-w-[570px] text-[15px] leading-6 text-slate-300">
-              DigitalBoost es la plataforma todo en uno para desarrolladores,
+              OriginX Foundation es la plataforma todo en uno para desarrolladores,
               emprendedores y creadores.
             </p>
 
@@ -284,7 +284,7 @@ export default function DigitalBoostMainPage({
 
             <img
               src="/sky-islands/hero-dragon-medallion.jpg"
-              alt="Dragón azul pixelado de DigitalBoost dentro de un medallón celeste"
+              alt="Dragón azul pixelado de OriginX Foundation dentro de un medallón celeste"
               fetchPriority="high"
               className="sky-hero-dragon-art relative z-20 block w-full object-cover"
             />
@@ -378,7 +378,7 @@ export default function DigitalBoostMainPage({
             </button>
 
             <button
-              onClick={() => alert("💳 Stripe será conectado al sistema de pagos de DigitalBoost.")}
+              onClick={() => alert("💳 Stripe será conectado al sistema de pagos de OriginX Foundation.")}
               className="transition hover:scale-105 hover:text-white"
               title="Stripe"
             >
@@ -386,7 +386,7 @@ export default function DigitalBoostMainPage({
             </button>
 
             <button
-              onClick={() => alert("💙 PayPal será conectado al checkout de DigitalBoost.")}
+              onClick={() => alert("💙 PayPal será conectado al checkout de OriginX Foundation.")}
               className="text-blue-400 transition hover:scale-105 hover:text-blue-300"
               title="PayPal"
             >
@@ -450,7 +450,7 @@ export default function DigitalBoostMainPage({
           </h2>
 
           <p className="mx-auto mt-3 max-w-xl text-center text-sm text-slate-400">
-            Empieza gratis y escala DigitalBoost cuando tu proyecto lo necesite.
+            Empieza gratis y escala OriginX Foundation cuando tu proyecto lo necesite.
           </p>
 
           <div className="mt-7 grid gap-4 md:grid-cols-3">
@@ -522,7 +522,7 @@ export default function DigitalBoostMainPage({
 
             <p className="mt-3 text-sm text-slate-400">
               Únete a miles de creadores, desarrolladores y emprendedores
-              que ya están construyendo el futuro con DigitalBoost.
+              que ya están construyendo el futuro con OriginX Foundation.
             </p>
           </div>
 
@@ -548,7 +548,7 @@ export default function DigitalBoostMainPage({
           <div className="relative z-10 mt-6 flex h-[100px] w-[130px] shrink-0 items-center justify-center md:mt-0">
             <img
               src="/digitalboost-dragon-logo.png"
-              alt="DigitalBoost"
+              alt="OriginX Foundation"
               className="max-h-[76px] max-w-[120px] object-contain drop-shadow-[0_6px_14px_rgba(20,80,150,.18)]"
             />
           </div>
@@ -568,9 +568,9 @@ export default function DigitalBoostMainPage({
 
           <div>
             <div className="text-lg font-black">
-              DIGITAL
+              OriginX
               <span className="text-violet-500">
-                BOOST
+                 Foundation
               </span>
             </div>
           </div>
@@ -628,7 +628,7 @@ export default function DigitalBoostMainPage({
                     } else if (item === "Comunidad") {
                       go("footer");
                     } else {
-                      alert(`DigitalBoost: ${item} estará disponible próximamente.`);
+                      alert(`OriginX Foundation: ${item} estará disponible próximamente.`);
                     }
                   }}
                 >
@@ -643,7 +643,7 @@ export default function DigitalBoostMainPage({
         <div data-sky-footer-meta className="mx-auto flex max-w-[1320px] items-center justify-between border-t border-white/[.06] px-5 py-5 text-xs text-slate-500">
 
           <div>
-            © 2025 DigitalBoost.
+            © 2025 OriginX Foundation.
             <br />
             Todos los derechos reservados.
           </div>
@@ -651,7 +651,7 @@ export default function DigitalBoostMainPage({
           <div className="flex items-center gap-3">
 
             <button
-              onClick={() => alert("GitHub de DigitalBoost próximamente.")}
+              onClick={() => alert("GitHub de OriginX Foundation próximamente.")}
               className="transition hover:text-cyan-300"
               title="GitHub"
             >
@@ -659,7 +659,7 @@ export default function DigitalBoostMainPage({
             </button>
 
             <button
-              onClick={() => alert("X / Twitter de DigitalBoost próximamente.")}
+              onClick={() => alert("X / Twitter de OriginX Foundation próximamente.")}
               className="transition hover:text-cyan-300"
               title="X"
             >
@@ -667,7 +667,7 @@ export default function DigitalBoostMainPage({
             </button>
 
             <button
-              onClick={() => alert("Comunidad DigitalBoost próximamente.")}
+              onClick={() => alert("Comunidad OriginX Foundation próximamente.")}
               className="transition hover:text-cyan-300"
               title="Comunidad"
             >
@@ -675,7 +675,7 @@ export default function DigitalBoostMainPage({
             </button>
 
             <button
-              onClick={() => alert("Instagram de DigitalBoost próximamente.")}
+              onClick={() => alert("Instagram de OriginX Foundation próximamente.")}
               className="transition hover:text-cyan-300"
               title="Instagram"
             >
@@ -683,7 +683,7 @@ export default function DigitalBoostMainPage({
             </button>
 
             <button
-              onClick={() => alert("YouTube de DigitalBoost próximamente.")}
+              onClick={() => alert("YouTube de OriginX Foundation próximamente.")}
               className="transition hover:text-cyan-300"
               title="YouTube"
             >
@@ -716,7 +716,7 @@ export default function DigitalBoostMainPage({
 
             <div className="mb-7">
               <div className="text-xl font-black">
-                DIGITAL<span className="text-violet-500">BOOST</span>
+                OriginX<span className="text-violet-500"> Foundation</span>
               </div>
 
               <h2 className="mt-5 text-2xl font-bold">
@@ -780,7 +780,7 @@ export default function DigitalBoostMainPage({
             </form>
 
             <p className="mt-6 text-center text-[11px] text-slate-600">
-              Al continuar aceptás los términos y condiciones de DigitalBoost.
+              Al continuar aceptás los términos y condiciones de OriginX Foundation.
             </p>
 
           </div>

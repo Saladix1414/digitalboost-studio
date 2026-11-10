@@ -113,7 +113,7 @@ function CanvasView({ blocks, selected, hover, onSelect, onHover, page, pages, o
       <div className="mt-4 px-5 py-8 text-[10px]" style={{ borderTop: "1px solid color-mix(in srgb, var(--store-text) 12%, transparent)", color: "var(--store-muted)" }}>
         <div className="text-[11px] font-semibold tracking-[0.16em]" style={{ color: "var(--store-text)" }}>NIMBUS</div>
         <div className="mt-2">Envios · Cambios · Contacto · Instagram</div>
-        <div className="mt-3">© Nimbus. Hecho con DigitalBoost.</div>
+        <div className="mt-3">© Nimbus. Hecho con OriginX Foundation.</div>
       </div>
     </div>
   );

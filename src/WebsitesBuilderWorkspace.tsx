@@ -575,7 +575,7 @@ export default function WebsitesBuilderWorkspace({
 
             <div className="min-w-0">
               <div className="db-brand-title">
-                DigitalBoost Websites
+                OriginX Foundation Websites
               </div>
 
               <div className="db-brand-subtitle">
@@ -1258,7 +1258,7 @@ export default function WebsitesBuilderWorkspace({
               storageKey={
                 currentPage?.slug === "/" ? CANVAS_KEY : `${CANVAS_KEY}:${activePageId}`
               }
-              studioTitle="DigitalBoost Websites"
+              studioTitle="OriginX Foundation Websites"
               studioEyebrow="Visual canvas"
               designTokens={websiteProject?.designTokens ?? applied.tokens}
               backLabel="← Operator"
@@ -1310,7 +1310,7 @@ export default function WebsitesBuilderWorkspace({
 
                 <p className="mt-3 text-xs leading-relaxed text-slate-500">
                   Definí la intención del sitio.
-                  DigitalBoost prepara la dirección,
+                  OriginX Foundation prepara la dirección,
                   estructura y sistema visual antes
                   de aplicar cambios al canvas.
                 </p>

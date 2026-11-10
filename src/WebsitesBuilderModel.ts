@@ -127,8 +127,8 @@ export function createFallbackBrief(
     kind,
     projectName:
       kind === "landing"
-        ? "Landing DigitalBoost"
-        : "Proyecto DigitalBoost",
+        ? "Landing OriginX Foundation"
+        : "Proyecto OriginX Foundation",
 
     audience: "Audiencia por definir",
 

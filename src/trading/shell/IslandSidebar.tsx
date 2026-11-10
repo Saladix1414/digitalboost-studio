@@ -149,7 +149,7 @@ export function IslandSidebar({
         {!collapsed ? (
           <div className="ti-shell-sidebar__identity">
             <strong>Trading Islands</strong>
-            <span>DigitalBoost Studio</span>
+            <span>OriginX Foundation Studio</span>
           </div>
         ) : null}
       </div>

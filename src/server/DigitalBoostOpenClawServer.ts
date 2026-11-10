@@ -482,7 +482,7 @@ export function registerOpenClawRoutes(app: any) {
       }
 
       const finalPrompt = [
-        "Rol: PULSE IA de DigitalBoost.",
+        "Rol: PULSE IA de OriginX Foundation.",
         "Idioma: español rioplatense.",
         "No ejecutes acciones.",
         "No cambies action, risk, intent, confirm ni approval.",

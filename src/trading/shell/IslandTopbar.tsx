@@ -47,7 +47,7 @@ export function IslandTopbar({
               />
             }
             onClick={onBack}
-            aria-label="Back to DigitalBoost Studio"
+            aria-label="Back to OriginX Foundation Studio"
           >
             Back
           </ActionButton>

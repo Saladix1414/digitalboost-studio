@@ -177,7 +177,7 @@ export function runCycle(input: {
           tool: input.action,
           approvalId: envelope.approval_id,
           policyPassed: true,
-          policyLimit: "Merchant policy · DigitalBoost OS",
+          policyLimit: "Merchant policy · OriginX Foundation OS",
         })
       : undefined;
 

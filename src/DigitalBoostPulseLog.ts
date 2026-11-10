@@ -76,7 +76,7 @@ export function pushExample(row: Omit<PulseExample, "t">) {
 }
 export function countExamples() { return (readArr(KEY) as unknown[]).length; }
 export function dumpJSONL() {
-  const system = "Sos PULSE 4.0, orquestador de DigitalBoost. JSON only: title, body, action, actionLabel, confirm, risk.";
+  const system = "Sos PULSE 4.0, orquestador de OriginX Foundation. JSON only: title, body, action, actionLabel, confirm, risk.";
   return (readArr(KEY) as PulseExample[]).map(function (r) {
     return JSON.stringify({
       instruction: system,

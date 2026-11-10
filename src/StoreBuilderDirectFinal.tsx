@@ -96,7 +96,7 @@ export default function StoreBuilderDirectFinal({
       <div className="dbf-shell dbf-preview-shell" data-db-store-builder-final="true">
         <div className="dbf-preview-header">
           <div>
-            <span className="dbf-kicker">DIGITALBOOST</span>
+            <span className="dbf-kicker">ORIGINX FOUNDATION</span>
             <h2>Vista previa de la tienda</h2>
           </div>
 
@@ -116,7 +116,7 @@ export default function StoreBuilderDirectFinal({
 
             <header className="dbf-preview-nav">
               <div className="dbf-preview-logo">
-                DIGITAL<span>BOOST</span>
+                OriginX<span> Foundation</span>
               </div>
 
               <nav>
@@ -359,14 +359,14 @@ export default function StoreBuilderDirectFinal({
               className={`dbf-device dbf-device-${device}`}
             >
               <div className="dbf-browser-bar">
-                <span>digitalboost.store</span>
+                <span>Vista previa de tienda</span>
                 <span>PREVIEW</span>
               </div>
 
               <div className="dbf-site">
                 <header className="dbf-site-header">
                   <div className="dbf-site-logo">
-                    DIGITAL<span>BOOST</span>
+                    OriginX<span> Foundation</span>
                   </div>
 
                   <nav>
@@ -585,7 +585,7 @@ export default function StoreBuilderDirectFinal({
           </label>
 
           <div className="dbf-inspector-section">
-            <span>PALETA DIGITALBOOST</span>
+            <span>PALETA ORIGINX FOUNDATION</span>
 
             <div className="dbf-palette">
               {palette.map((item) => (

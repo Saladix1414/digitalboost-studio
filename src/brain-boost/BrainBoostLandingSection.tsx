@@ -363,7 +363,7 @@ export default function BrainBoostLandingSection() {
         </div>
         <header data-sky-bb-heading className="mb-8 max-w-3xl">
           <p data-sky-bb-kicker className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-cyan-300">
-            DIGITALBOOST ARCADE / NEURAL GAMING SYSTEM
+            ORIGINX FOUNDATION ARCADE / NEURAL GAMING SYSTEM
           </p>
           <h2 className="text-3xl font-black tracking-tight sm:text-5xl">
             Brain <span className="bg-gradient-to-r from-cyan-200 via-white to-violet-300 bg-clip-text text-transparent">Boost</span> <span className="bg-gradient-to-r from-cyan-200 via-white to-violet-300 bg-clip-text text-transparent">Gamez</span>

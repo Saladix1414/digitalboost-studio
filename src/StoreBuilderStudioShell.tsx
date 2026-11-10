@@ -77,7 +77,7 @@ export default function StoreBuilderStudioShell({
       <div className="studio-v2 studio-preview">
         <div className="studio-preview-top">
           <div>
-            <span className="studio-eyebrow">DIGITALBOOST</span>
+            <span className="studio-eyebrow">ORIGINX FOUNDATION</span>
             <span className="studio-preview-title">
               Store Builder Preview
             </span>

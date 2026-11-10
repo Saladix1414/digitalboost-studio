@@ -14,8 +14,8 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error("DIGITALBOOST REACT ERROR:", error);
-    console.error("DIGITALBOOST COMPONENT STACK:", info.componentStack);
+    console.error("ORIGINX FOUNDATION REACT ERROR:", error);
+    console.error("ORIGINX FOUNDATION COMPONENT STACK:", info.componentStack);
   }
 
   render() {
@@ -33,7 +33,7 @@ class ErrorBoundary extends React.Component<
           }}
         >
           <h1 style={{ color: "#f87171", fontSize: "22px" }}>
-            DigitalBoost — Error de React
+            OriginX Foundation — Error de React
           </h1>
 
           <p style={{ color: "#fbbf24" }}>

@@ -134,7 +134,7 @@ export default function StoreBuilderFinalStudio({ onBack }: Props) {
         <div className="db-final-preview-top">
           <div>
             <div className="db-final-eyebrow">
-              DIGITALBOOST
+              ORIGINX FOUNDATION
             </div>
 
             <div className="db-final-preview-title">
@@ -158,7 +158,7 @@ export default function StoreBuilderFinalStudio({ onBack }: Props) {
 
             <nav className="db-preview-nav">
               <div className="db-preview-logo">
-                DIGITAL<span>BOOST</span>
+                OriginX<span> Foundation</span>
               </div>
 
               <div className="db-preview-links">
@@ -455,14 +455,14 @@ export default function StoreBuilderFinalStudio({ onBack }: Props) {
               className={`db-final-device db-final-device-${device}`}
             >
               <div className="db-site-toolbar">
-                <span>digitalboost.store</span>
+                <span>Vista previa de tienda</span>
                 <span>100%</span>
               </div>
 
               <div className="db-site-frame">
                 <div className="db-site-header">
                   <div className="db-site-logo">
-                    DIGITAL<span>BOOST</span>
+                    OriginX<span> Foundation</span>
                   </div>
 
                   <div className="db-site-nav">
@@ -729,7 +729,7 @@ export default function StoreBuilderFinalStudio({ onBack }: Props) {
             </div>
 
             <div className="db-color-row">
-              <span>Paleta DigitalBoost</span>
+              <span>Paleta OriginX Foundation</span>
               <i className="violet" />
               <i className="blue" />
               <i className="cyan" />

@@ -107,7 +107,7 @@ export default function StoreBuilderEnvironment({
 
           <div className="text-center">
             <div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.32em] text-cyan-300">
-              DIGITALBOOST
+              ORIGINX FOUNDATION
             </div>
 
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
