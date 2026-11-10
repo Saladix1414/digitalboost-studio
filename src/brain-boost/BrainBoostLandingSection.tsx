@@ -304,6 +304,7 @@ export default function BrainBoostLandingSection() {
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [activeGame, setActiveGame] = useState<Game | null>(null);
   const activeArt = activeGame ? gameArtDirections[activeGame.id] : undefined;
+  const nightmareCatalog = activeCategory?.id === "nightmare" && !activeGame;
 
   function openCategory(category: Category) {
     setActiveCategory(category);
@@ -568,10 +569,20 @@ export default function BrainBoostLandingSection() {
             </div>
 
             <div data-brain-boost-game-layout={activeGame ? "active" : "catalog"} className={`relative z-10 mt-6 grid flex-1 content-start gap-5 ${
-              activeGame ? "grid-cols-1" : "md:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]"
+              activeGame || nightmareCatalog ? "grid-cols-1" : "md:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]"
             }`}>
-              <div data-brain-boost-mode-list={activeCategory.id} className={activeGame ? "hidden" : "grid content-start gap-3 sm:grid-cols-2 md:grid-cols-1"}>
-                {activeCategory.games.map((game, index) => (
+              <div data-brain-boost-mode-list={activeCategory.id} className={activeGame ? "hidden" : nightmareCatalog ? "grid gap-3" : "grid content-start gap-3 sm:grid-cols-2 md:grid-cols-1"}>
+                {activeCategory.games.map((game, index) => nightmareCatalog && game.id === "neon-arena" ? (
+                  <button key={game.id} type="button" className="nightmare-feature" onClick={() => setActiveGame(game)}>
+                    <span className="nightmare-feature-copy">
+                      <span className="nightmare-feature-tag">01 / Arcade Pop</span>
+                      <span className="nightmare-feature-title">{game.title}</span>
+                      <span className="nightmare-feature-description">Sobreviví a la horda y avanzá por los cuatro sectores de la colonia.</span>
+                      <span className="nightmare-feature-modes">Individual · Cooperativo local</span>
+                      <span className="nightmare-feature-action">Abrir Neon Arena <span aria-hidden="true">→</span></span>
+                    </span>
+                  </button>
+                ) : (
                   <button
                     key={game.id}
                     type="button"
@@ -609,7 +620,7 @@ export default function BrainBoostLandingSection() {
                 ))}
               </div>
 
-              <div data-brain-boost-stage={activeGame?.id ?? activeCategory.id}
+              {!nightmareCatalog && <div data-brain-boost-stage={activeGame?.id ?? activeCategory.id}
                 className={activeGame?.id === "neon-arena" ? "relative min-w-0 overflow-hidden rounded-2xl border" : activeGame ? "relative min-w-0 overflow-hidden rounded-2xl border p-3 transition-colors duration-300 sm:p-5" : "relative isolate flex min-h-[330px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-cyan-300/35 bg-gradient-to-br from-[#0b1d3a] via-[#070d20] to-[#180d35] p-5 text-center shadow-[0_0_38px_rgba(34,211,238,.12),inset_0_0_34px_rgba(139,92,246,.09)]"}
                 style={activeArt ? {
                   borderColor: activeArt.primary,
@@ -663,8 +674,8 @@ export default function BrainBoostLandingSection() {
                         <circle cx="32" cy="32" r="4" fill="#A5F3FC"/>
                       </svg>
                     </div>
-                    <p className="text-[9px] font-black uppercase tracking-[0.22em] text-cyan-300">{activeCategory.id === "nightmare" ? "Nightmare Protocolo" : "Neural Core / Ready"}</p>
-                    <h4 className="mt-3 text-xl font-black tracking-tight text-white sm:text-2xl">{activeCategory.id === "nightmare" ? "Elegí tu próxima pesadilla" : "Seleccioná tu modo"}</h4>
+                    <p className="text-[9px] font-black uppercase tracking-[0.22em] text-cyan-300">Neural Core / Ready</p>
+                    <h4 className="mt-3 text-xl font-black tracking-tight text-white sm:text-2xl">Seleccioná tu modo</h4>
                     <p className="mt-3 max-w-xs text-sm leading-6 text-slate-400">
                       Elegí una actividad para entrar a su experiencia. Cada nodo tiene su propio desafío.
                     </p>
@@ -674,7 +685,7 @@ export default function BrainBoostLandingSection() {
                     </div>
                   </>
                 )}
-              </div>
+              </div>}
             </div>
           </section>
         </div>

@@ -25,7 +25,6 @@
 [data-brain-boost-window="spatial"][role="dialog"],
 [data-brain-boost-window="focus"][role="dialog"],
 [data-brain-boost-window="tests"][role="dialog"],
-[data-brain-boost-window="nightmare"][role="dialog"],
 [data-brain-boost-window="daily"][role="dialog"] {
   min-height: min(76dvh, 820px);
   border-color: var(--cat-main) !important;
@@ -169,20 +168,90 @@
   }
 }
 
-/* Nightmare Protocolo uses the same catalog/portal as the existing disciplines. */
-[data-brain-boost-window="nightmare"] {
-  --cat-main: #c4b5fd; --cat-second: #fb7185; --cat-glow: rgba(167,139,250,.24);
-}
+/* The Nightmare catalog shares the art and warm accents of the game cabinet. */
 [data-brain-boost-window="nightmare"][role="dialog"] {
-  border-radius: 24px 8px 24px 8px;
-  background-image: radial-gradient(ellipse at 10% 0,rgba(139,92,246,.23),transparent 55%),radial-gradient(ellipse at 100% 100%,rgba(190,24,93,.12),transparent 50%),linear-gradient(145deg,#160d2c,#080b1c 70%,#200d25);
+  --bb-frame: #ffc28e45;
+  border-color: #a76d89;
+  border-radius: 18px 7px 18px 7px;
+  background: linear-gradient(145deg, #40233c, #1e1429 68%);
+  box-shadow: 0 16px 50px #1e101fbd;
 }
 [data-brain-boost-window="nightmare"] #brain-boost-dialog-title {
-  color: var(--cat-main); text-shadow: 0 0 22px var(--cat-glow);
+  color: #fff1e3;
 }
-[data-brain-boost-category-emblem="nightmare"]::after { content: "◬"; }
-[data-brain-boost-stage="nightmare"] {
-  border-color: #a78bfa !important;
-  background-image: radial-gradient(ellipse at 50% 0,rgba(139,92,246,.2),transparent 65%),linear-gradient(145deg,#170d2c,#080b1c) !important;
+[data-brain-boost-window="nightmare"] > div:first-child p:first-child {
+  color: #ffc28e;
 }
-[data-brain-boost-mode-list="nightmare"] > button { border-left: 4px solid #c4b5fd !important; }
+[data-brain-boost-window="nightmare"] > div:first-child p:last-child {
+  display: none;
+}
+[data-brain-boost-window="nightmare"] > div:first-child button {
+  background: #362239;
+  border-color: #a76d89;
+  color: #fff1e3;
+}
+[data-brain-boost-window="nightmare"] > [data-brain-boost-game-layout="catalog"] {
+  margin-top: 14px;
+}
+.nightmare-feature {
+  position: relative;
+  width: 100%;
+  min-height: 260px;
+  display: flex;
+  align-items: end;
+  padding: clamp(14px, 4vw, 30px);
+  border: 1px solid #a76d89;
+  border-bottom: 3px solid #ffb585;
+  border-radius: 13px 5px;
+  text-align: left;
+  color: #fff1e3;
+  background:
+    linear-gradient(90deg, #211126fa 0%, #211126e6 35%, #21112615 78%),
+    url('/brain-boost/neon-arena/arcade-cabinet.webp') center 37% / cover no-repeat,
+    #38213a;
+}
+.nightmare-feature:hover { border-color: #ffc28e; }
+.nightmare-feature:focus-visible,
+[data-brain-boost-window="nightmare"] > div:first-child button:focus-visible {
+  outline: 2px solid #ffc28e;
+  outline-offset: 3px;
+}
+.nightmare-feature-copy { display: grid; gap: 8px; justify-items: start; max-width: 47%; }
+.nightmare-feature-tag, .nightmare-feature-modes {
+  color: #ffcead;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .05em;
+}
+.nightmare-feature-tag { text-transform: uppercase; }
+.nightmare-feature-title {
+  font-size: clamp(24px, 5vw, 46px);
+  font-style: italic;
+  font-weight: 950;
+  letter-spacing: -.045em;
+  line-height: .98;
+}
+.nightmare-feature-description { font-size: 13px; line-height: 1.4; color: #f0dbe9; }
+.nightmare-feature-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 7px 12px;
+  margin-top: 4px;
+  border-radius: 6px 3px;
+  background: linear-gradient(#ffd2a8, #ffa774);
+  color: #351b2f;
+  font-size: 13px;
+  font-weight: 900;
+}
+@media (max-width: 520px) {
+  .nightmare-feature {
+    min-height: 295px;
+    background:
+      linear-gradient(0deg, #211126 6%, #211126e8 36%, transparent 78%),
+      url('/brain-boost/neon-arena/arcade-cabinet.webp') 68% 0 / auto 82% no-repeat,
+      #38213a;
+  }
+  .nightmare-feature-copy { max-width: min(100%, 260px); }
+}
