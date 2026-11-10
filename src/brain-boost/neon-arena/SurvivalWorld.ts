@@ -7,7 +7,35 @@ import { COLONY_SECTORS } from './ColonySectors';
 
 const ARCADE_MARINE_URL = '/brain-boost/neon-arena/marine-arcade-pop.glb';
 
+const reactorColors = [0xff963d, 0xe5b052, 0xc95b9f, 0x68b6cd];
+
 type MarineArmor = THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
+
+/** Leaf-shaped wing with an inked outline, bright membrane and a raised spine. */
+function spitterWingGeometry() {
+  const contour = [[0, 0], [-.27, -.24], [-.33, -.61], [-.18, -.9], [0, -1], [.18, -.9], [.33, -.61], [.27, -.24]];
+  const positions: number[] = [], colors: number[] = [], faces: number[] = [];
+  const ink = new THREE.Color(0x221c2d), membrane = new THREE.Color(0xcced70);
+  for (const [x, z] of contour) {
+    positions.push(x, 0, z);
+    colors.push(ink.r, ink.g, ink.b);
+  }
+  for (const [x, z] of contour) {
+    positions.push(x * .8, .025, -.48 + (z + .48) * .87);
+    colors.push(membrane.r, membrane.g, membrane.b);
+  }
+  positions.push(0, .1, -.47);
+  colors.push(.68, .8, .27);
+  for (let i = 0; i < contour.length; i++) {
+    const j = (i + 1) % contour.length, inner = i + contour.length, nextInner = j + contour.length;
+    faces.push(i, j, inner, j, nextInner, inner, inner, nextInner, 2 * contour.length);
+  }
+  const wing = new THREE.BufferGeometry();
+  wing.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  wing.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  wing.setIndex(faces);
+  return wing;
+}
 
 /** All world geometry is shared or instanced; combat is read-only here. */
 export class SurvivalWorld {
@@ -24,6 +52,7 @@ export class SurvivalWorld {
   private gun = new THREE.Group(); private boots: THREE.Mesh[] = []; private suit!: THREE.MeshStandardMaterial;
   private body!: THREE.InstancedMesh; private heads!: THREE.InstancedMesh; private legs!: THREE.InstancedMesh; private plates!: THREE.InstancedMesh;
   private bossParts!: THREE.InstancedMesh;
+  private spitterWings?: THREE.InstancedMesh; private shellSeams?: THREE.InstancedMesh;
   private thoraxes!: THREE.InstancedMesh; private feelers!: THREE.InstancedMesh; private eyes!: THREE.InstancedMesh; private elytra!: THREE.InstancedMesh; private cores!: THREE.InstancedMesh; private fangs!: THREE.InstancedMesh; private spines!: THREE.InstancedMesh; private sacs!: THREE.InstancedMesh; private reticles!: THREE.InstancedMesh; private fragments!: THREE.InstancedMesh;
   private items!: THREE.InstancedMesh; private crosses!: THREE.InstancedMesh; private dropMedkits!: THREE.InstancedMesh; private dropArmor!: THREE.InstancedMesh; private dropAmmo!: THREE.InstancedMesh; private dropGrenades!: THREE.InstancedMesh; private bullets!: THREE.InstancedMesh; private warnings!: THREE.InstancedMesh;
   private stains!: THREE.InstancedMesh; private enemyShadows!: THREE.InstancedMesh; private blasts!: THREE.InstancedMesh; private trails!: THREE.LineSegments; private flame!: THREE.Group; private shock!: THREE.Mesh;
@@ -133,9 +162,10 @@ export class SurvivalWorld {
   private buildColonyCover(box: THREE.BoxGeometry, pedestal: THREE.CylinderGeometry, coil: THREE.TorusGeometry, dark: THREE.Material) {
     const copper = this.standard(0xad6a49), violet = this.standard(0x67517e), steel = this.standard(0x34545c);
     const tube = this.geo(new THREE.CylinderGeometry(1, 1, 1, 10));
-    const crystal = this.geo(new THREE.IcosahedronGeometry(1, 0));
+    const chamber = this.geo(new THREE.CylinderGeometry(1, 1, 1, 12));
+    const lid = this.geo(new THREE.CylinderGeometry(.8, 1, 1, 8));
     const light = (color: number) => this.mat(new THREE.MeshBasicMaterial({ color, toneMapped: false }));
-    const turquoise = light(0x74c4c6), orchid = light(0xa98bbf), gold = light(0xe2a566);
+    const turquoise = light(0x74c4c6), orchid = light(0xa98bbf), gold = light(0xffbb66);
     for (const { x, z, radius: r, kind } of this.arena.obstacles) {
       const machine = new THREE.Group();
       machine.name = `colony-${kind}`;
@@ -143,17 +173,19 @@ export class SurvivalWorld {
       this.scene.add(machine);
       this.mesh(pedestal, dark, machine, 0, .18, 0, r, .36, r);
       if (kind === 'reactor') {
-        this.mesh(pedestal, copper, machine, 0, .45, 0, r * .88, .28, r * .88);
-        this.mesh(coil, gold, machine, 0, .65, 0, r * .78, r * .78, r * .78).rotation.x = Math.PI / 2;
-        for (const angle of [0, Math.PI * 2 / 3, Math.PI * 4 / 3]) {
-          const support = this.mesh(box, copper, machine, Math.cos(angle) * r * .72, .78, Math.sin(angle) * r * .72, r * .32, .65, r * .18);
-          support.rotation.y = -angle;
-        }
-        const core = new THREE.Mesh(crystal, light(0xca8263));
-        core.position.y = 1.09;
-        core.scale.set(r * .47, .58, r * .47);
+        this.mesh(lid, copper, machine, 0, .46, 0, r * .94, .3, r * .94);
+        this.mesh(coil, gold, machine, 0, .66, 0, r * .75, r * .75, r * .75).rotation.x = Math.PI / 2;
+        const core = new THREE.Mesh(chamber, light(0xff943d));
+        core.position.y = 1.02;
+        core.scale.set(r * .64, .73, r * .64);
         machine.add(core);
         this.reactorCore = core;
+        this.mesh(lid, dark, machine, 0, 1.5, 0, r * .72, .22, r * .72);
+        this.mesh(coil, gold, machine, 0, 1.61, 0, r * .41, r * .41, r * .41).rotation.x = Math.PI / 2;
+        for (const angle of [0, Math.PI / 2, Math.PI, Math.PI * 1.5]) {
+          const support = this.mesh(box, steel, machine, Math.cos(angle) * r * .68, 1.03, Math.sin(angle) * r * .68, r * .22, .82, r * .16);
+          support.rotation.y = -angle;
+        }
       } else if (kind === 'coolant') {
         machine.rotation.y = x > 0 ? Math.PI / 2 : 0;
         for (const side of [-1, 1]) {
@@ -162,16 +194,22 @@ export class SurvivalWorld {
           for (const end of [-1, 1]) {
             this.mesh(tube, dark, machine, offset, .66, end * r * .5, r * .29, r * .18, r * .29).rotation.x = Math.PI / 2;
           }
-          this.mesh(box, turquoise, machine, offset, .66 + r * .26, 0, r * .12, .04, r * .61);
+          this.mesh(tube, turquoise, machine, offset, .67, 0, r * .27, r * .79, r * .27).rotation.x = Math.PI / 2;
+          this.mesh(box, steel, machine, offset, .67 + r * .22, 0, r * .52, .13, r * .16);
         }
       } else {
         machine.rotation.y = x > 0 ? -.25 : .35;
-        this.mesh(box, violet, machine, 0, .56, 0, r * 1.55, .54, r * .94);
+        this.mesh(box, dark, machine, 0, .56, 0, r * 1.55, .54, r * .96);
+        this.mesh(box, violet, machine, 0, .88, 0, r * 1.47, .18, r * .9);
         for (const side of [-1, 1]) {
-          this.mesh(box, copper, machine, side * r * .56, .84, 0, r * .16, .12, r);
+          this.mesh(box, copper, machine, side * r * .55, .99, 0, r * .11, .05, r * .95);
+          for (const end of [-1, 1]) {
+            this.mesh(box, copper, machine, side * r * .65, .75, end * r * .38, r * .14, .38, r * .15);
+          }
         }
-        this.mesh(box, dark, machine, 0, .87, 0, r * .52, .07, r * .58);
-        this.mesh(box, orchid, machine, 0, .92, 0, r * .31, .05, r * .12);
+        for (const stripe of [-1, 0, 1]) {
+          this.mesh(box, orchid, machine, stripe * r * .14, .982, 0, r * .05, .018, r * .22).rotation.y = .55;
+        }
       }
     }
   }
@@ -294,13 +332,25 @@ export class SurvivalWorld {
     this.mesh(box, metal, this.gun, .15, .91, .75, arcade ? .31 : .22, .24, .95);
     this.mesh(box, arcade ? cyan : amber, this.gun, .15, .93, 1.25, arcade ? .18 : .12, .13, .12);
     this.boots.forEach((boot, i) => { boot.name = `boot-${i}`; });
-    this.body = this.pool(sphere, shell, CONFIG.maxEnemies);
-    this.heads = this.pool(sphere, shell, CONFIG.maxEnemies);
-    this.legs = this.pool(box, this.standard(0xa39a68), CONFIG.maxEnemies * 12);
-    this.thoraxes = this.pool(sphere, shell, CONFIG.maxEnemies);
-    this.feelers = this.pool(box, this.standard(0xd9c695), CONFIG.maxEnemies * 6);
+    let insectShell: THREE.Material = shell;
+    if (arcade) {
+      const ramp = new THREE.DataTexture(new Uint8Array([58, 138, 244]), 3, 1, THREE.RedFormat);
+      ramp.minFilter = ramp.magFilter = THREE.NearestFilter;
+      ramp.needsUpdate = true;
+      this.textures.add(ramp);
+      insectShell = this.mat(new THREE.MeshToonMaterial({ gradientMap: ramp }));
+      this.spitterWings = this.pool(this.geo(spitterWingGeometry()),
+        this.mat(new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide })), CONFIG.maxEnemies * 2);
+      this.shellSeams = this.pool(this.geo(new THREE.SphereGeometry(1, 6, 3)),
+        this.mat(new THREE.MeshBasicMaterial({ color: 0x452133 })), CONFIG.maxEnemies * 4);
+    }
+    this.body = this.pool(sphere, insectShell, CONFIG.maxEnemies);
+    this.heads = this.pool(sphere, insectShell, CONFIG.maxEnemies);
+    this.legs = this.pool(box, this.standard(arcade ? 0x584153 : 0xa39a68), CONFIG.maxEnemies * 12);
+    this.thoraxes = this.pool(sphere, insectShell, CONFIG.maxEnemies);
+    this.feelers = this.pool(box, this.standard(arcade ? 0x926879 : 0xd9c695), CONFIG.maxEnemies * 6);
     this.eyes = this.pool(sphere, this.mat(new THREE.MeshBasicMaterial({ color: 0xffffff })), CONFIG.maxEnemies * 4);
-    this.elytra = this.pool(sphere, this.mat(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .38, metalness: .25 })), CONFIG.maxEnemies * 2);
+    this.elytra = this.pool(sphere, arcade ? insectShell : this.mat(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .38, metalness: .25 })), CONFIG.maxEnemies * 2);
     this.cores = this.pool(sphere, this.mat(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .28, metalness: .08, emissive: 0xffffff, emissiveIntensity: .85 })), CONFIG.maxEnemies);
     this.fangs = this.pool(this.geo(new THREE.ConeGeometry(1, 1, 5)), this.mat(new THREE.MeshStandardMaterial({ color: 0xe6d9b1, roughness: .45, metalness: .05 })), CONFIG.maxEnemies * 2);
     this.spines = this.pool(this.geo(new THREE.ConeGeometry(1, 1, 6)), this.mat(new THREE.MeshStandardMaterial({ color: 0x422a2d, roughness: .72, metalness: .08 })), CONFIG.maxEnemies * 4);
@@ -408,7 +458,7 @@ export class SurvivalWorld {
     const t = s.elapsed, dt = Math.max(0, Math.min(.1, t - this.lastTime)); this.lastTime = t;
     if (this.reactorCore) {
       const pulse = this.reduced || s.mapPhase < 2 ? 0 : (1 + Math.sin(t * 4.6)) * .17;
-      const base = s.mapPhase >= 2 ? 0xb85180 : s.mapPhase === 1 ? 0xeb8a58 : 0xad7264;
+      const base = reactorColors[s.mapPhase % COLONY_SECTORS.length];
       this.reactorCore.material.color.setHex(base).lerp(this.color.setHex(0xffb4c6), pulse);
     }
     const living = s.players.filter(p => p.health > 0);
@@ -447,6 +497,7 @@ export class SurvivalWorld {
     const steamPosition = this.steam.geometry.getAttribute('position') as THREE.BufferAttribute;
     for (let i = 0; i < 32; i++) { const side = i % 4, a = side * Math.PI / 2, along = Math.sin(Math.floor(i / 4) * 3.9) * (this.arena.wall - 1), rise = this.reduced ? (i % 5) * .2 : (t * .35 + i * .17) % 2; steamPosition.setXYZ(i, Math.cos(a) * along - Math.sin(a) * (this.arena.wall - .8) + Math.sin(i + rise) * .25, .4 + rise, -Math.sin(a) * along - Math.cos(a) * (this.arena.wall - .8)); } steamPosition.needsUpdate = true;
     let count = 0, lc = 0, pc = 0, wc = 0, bossCount = 0, fc = 0, fangCount = 0, ec = 0, shellCount = 0, spineCount = 0, sacCount = 0, shadowCount = 0;
+    let wingCount = 0, seamCount = 0;
     for (const e of s.enemies) {
       const scale = e.state === 'DYING' ? Math.max(.01, 1 - e.age / .35) : e.state === 'SPAWNING' ? Math.min(1, e.age / .65) : 1;
       const target = s.nearestPlayer(e.x, e.z);
@@ -504,10 +555,18 @@ export class SurvivalWorld {
         part(this.feelers, fc++, side * (beetle ? .35 : .23), .4, beetle ? 2.23 : 1.72, .075, .12, beetle ? .36 : .15, side * .8);
         if (beetle) {
           part(this.elytra, shellCount, side * .38, .7, -.37, .46, .62, 1.06);
-          this.elytra.setColorAt(shellCount++, this.color.setHex(flash ? 0xfff3d3 : e.boss ? 0x8d3151 : 0x6d263e));
+          this.elytra.setColorAt(shellCount++, this.color.setHex(flash ? 0xfff3d3 : e.boss ? 0x8d3151 : this.shellSeams ? 0xc63d50 : 0x6d263e));
+          if (this.shellSeams) for (const seam of [-.68, -.14]) {
+            part(this.shellSeams, seamCount++, side * .38, .7, seam, .43, .635, .052);
+          }
         } else if (acid) {
           part(this.elytra, shellCount, side * .74, .69, -.55, .37 * swell, .42 * swell, .63);
           this.elytra.setColorAt(shellCount++, this.color.setHex(flash ? 0xfff3d3 : e.kind === 'brood' ? 0xb7e943 : 0x4dcc55));
+          if (this.spitterWings && e.kind === 'spitter') {
+            const flap = this.reduced ? 0 : Math.sin(t * 26 + e.id) * .18;
+            part(this.spitterWings, wingCount++, side * .32, 1.12 + flap, .37,
+              .86, 1, 1.7 + flap, -side * (.59 + flap + charge * .18));
+          }
         }
       }
       count++;
@@ -545,6 +604,8 @@ export class SurvivalWorld {
     this.finish(this.body, count, true); this.finish(this.heads, count, true); this.finish(this.cores, count, true); this.finish(this.fangs, fangCount); this.finish(this.legs, lc); this.finish(this.plates, pc, true); this.finish(this.warnings, wc);
     this.finish(this.bossParts, bossCount, true); this.finish(this.thoraxes, count, true); this.finish(this.feelers, fc); this.finish(this.eyes, ec, true); this.finish(this.elytra, shellCount, true); this.finish(this.spines, spineCount, true); this.finish(this.sacs, sacCount, true);
     this.finish(this.enemyShadows, shadowCount);
+    if (this.spitterWings) this.finish(this.spitterWings, wingCount);
+    if (this.shellSeams) this.finish(this.shellSeams, seamCount);
     let rc = 0;
     for (const p of s.players) {
       const target = s.enemies.find(e => e.id === p.targetId && e.state === 'ADVANCING');

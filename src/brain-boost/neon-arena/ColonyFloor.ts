@@ -25,9 +25,9 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
   };
 
   const deck = ctx.createLinearGradient(-edge, -edge, edge, edge);
-  deck.addColorStop(0, '#28343f');
-  deck.addColorStop(.55, '#292439');
-  deck.addColorStop(1, '#382a40');
+  deck.addColorStop(0, '#343b48');
+  deck.addColorStop(.55, '#383041');
+  deck.addColorStop(1, '#44364b');
   ctx.fillStyle = deck;
   ctx.fillRect(-arena.floorSize / 2, -arena.floorSize / 2, arena.floorSize, arena.floorSize);
 
@@ -45,8 +45,16 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
       ctx.fillRect(x + .07, z + .08, 6.86, 3.84);
       line([[x, z + 3.9], [x, z], [x + 7, z]], '#131421b5', .09);
       line([[x + .13, z + 3.75], [x + .13, z + .14], [x + 6.7, z + .14]], '#ced3e017', .055);
-      ctx.fillStyle = '#b9acc04d';
-      for (const dx of [.29, 6.65]) ctx.fillRect(x + dx, z + .34, .1, .1);
+      ctx.fillStyle = '#171420';
+      for (const dx of [.29, 6.58]) for (const dz of [.32, 3.55]) {
+        ctx.fillRect(x + dx, z + dz, .13, .13);
+      }
+      ctx.fillStyle = '#b9acc066';
+      for (const dx of [.29, 6.58]) for (const dz of [.32, 3.55]) {
+        ctx.fillRect(x + dx + .015, z + dz, .09, .045);
+      }
+      const scratchX = x + 1 + random() * 4, scratchZ = z + .8 + random() * 2;
+      line([[scratchX, scratchZ], [scratchX + .62, scratchZ + .09]], '#c0aec021', .045);
     }
   }
 
@@ -68,11 +76,13 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
     line(points, '#171323', 1.45);
     line(points, '#6d587088', 1.13);
     line(points, '#24202e', .94);
-    line(points, color, .17);
+    line(points, '#b0a3b037', .65);
+    line(points, '#24202e', .52);
+    line(points, color, .19);
   };
-  conduit([[-edge, -8], [-11, -8], [-4, -15], [-4, -edge]], '#538d97');
-  conduit([[10, -edge], [10, -10], [17, -3], [edge, -3]], '#ad7551');
-  conduit([[-edge, 10], [-12, 10], [-7, 15], [5, 15], [12, 9], [edge, 9]], '#826d9d');
+  conduit([[-edge, -8], [-11, -8], [-4, -15], [-4, -edge]], '#68aeb5');
+  conduit([[10, -edge], [10, -10], [17, -3], [edge, -3]], '#c48756');
+  conduit([[-edge, 10], [-12, 10], [-7, 15], [5, 15], [12, 9], [edge, 9]], '#a181ad');
 
   ctx.strokeStyle = '#151424';
   ctx.lineWidth = 1.55;
@@ -125,13 +135,18 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
     line(outline(reach - .32), rim, .06, true);
 
     if (kind === 'reactor') {
+      line(outline(reach - .58), '#ba7a47', .11, true);
+      line(outline(reach - .78), '#231b27', .12, true);
       for (let side = 0; side < 4; side++) {
         ctx.save();
         ctx.rotate(side * Math.PI / 2);
         ctx.fillStyle = '#211e30';
         ctx.fillRect(-.76, reach * .92 - .55, 1.52, .4);
         ctx.fillStyle = signal;
-        for (let step = 0; step < 5; step++) ctx.fillRect(-.63 + step * .25, reach * .92 - .42, .15, .1);
+        for (let step = 0; step < 5; step++) {
+          const markX = -.67 + step * .29, markZ = reach * .92 - .52;
+          line([[markX, markZ], [markX + .19, markZ + .3]], signal, .12);
+        }
         ctx.restore();
       }
     } else if (kind === 'coolant') {
