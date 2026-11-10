@@ -7,7 +7,7 @@ import { COLONY_REACTOR_COLORS, COLONY_SECTORS } from './ColonySectors';
 
 const ARCADE_MARINE_URL = '/brain-boost/neon-arena/marine-arcade-pop.glb';
 
-const COLONY_CAMERA = { rise: 36, setback: 32 };
+const COLONY_CAMERA = { rise: 34, setback: 36 };
 const LEGACY_CAMERA = { rise: 48, setback: 8 };
 
 type MarineArmor = THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
@@ -418,8 +418,16 @@ export class SurvivalWorld {
     this.viewports.forEach((rect, i) => {
       if (!rect.width || !rect.height) return;
       const aspect = rect.width / rect.height, frame = this.frames[i], camera = this.cameras[i];
-      frame.width = count === 2 ? Math.min(32, Math.max(20, 28 * aspect)) : Math.min(46, Math.max(27, 42 * aspect)); frame.height = frame.width / aspect;
-      const maxX = Math.max(0, this.arena.wall - frame.width / 2), maxZ = Math.max(0, this.arena.wall - frame.height / 2);
+      if (this.arena.id === 'colony') {
+        const maxWidth = count === 2 ? 29 : 40;
+        const desiredWidth = Math.max(count === 2 ? 19 : 23, aspect * (count === 2 ? 23 : 29));
+        const maxHeight = this.arena.floorSize * this.groundProjection;
+        frame.width = Math.min(desiredWidth, maxWidth, maxHeight * aspect);
+      } else {
+        frame.width = count === 2 ? Math.min(32, Math.max(20, 28 * aspect)) : Math.min(46, Math.max(27, 42 * aspect));
+      }
+      frame.height = frame.width / aspect;
+      const maxX = Math.max(0, this.arena.wall - frame.width / 2), maxZ = this.cameraTravelZ(frame.height);
       frame.follow.x = Math.max(-maxX, Math.min(maxX, frame.follow.x)); frame.follow.y = Math.max(-maxZ, Math.min(maxZ, frame.follow.y));
       camera.left = -frame.width / 2; camera.right = frame.width / 2; camera.top = frame.height / 2; camera.bottom = -frame.height / 2; camera.updateProjectionMatrix();
     });
