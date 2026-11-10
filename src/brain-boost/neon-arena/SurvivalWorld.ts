@@ -3,9 +3,12 @@ import { CONFIG, type GameSimulation } from './GameSimulation';
 import { splitViewports, type Viewport } from './LocalControls';
 import { LEGACY_ARENA, type ArenaDefinition } from './ArenaDefinition';
 import { paintColonyFloor } from './ColonyFloor';
-import { COLONY_SECTORS } from './ColonySectors';
+import { COLONY_REACTOR_COLORS, COLONY_SECTORS } from './ColonySectors';
 
 const ARCADE_MARINE_URL = '/brain-boost/neon-arena/marine-arcade-pop.glb';
+
+const COLONY_CAMERA = { rise: 36, setback: 32 };
+const LEGACY_CAMERA = { rise: 48, setback: 8 };
 
 type MarineArmor = THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
 
@@ -87,7 +90,7 @@ export class SurvivalWorld {
   private geo<T extends THREE.BufferGeometry>(g: T) { this.geometries.add(g); return g; }
   private mat<T extends THREE.Material>(m: T) { this.materials.add(m); return m; }
   private standard(color: number, emissive = 0, intensity = 0) { return this.mat(new THREE.MeshStandardMaterial({ color, roughness: .8, metalness: .12, emissive, emissiveIntensity: intensity })); }
-  private mesh(g: THREE.BufferGeometry, m: THREE.Material, parent: THREE.Object3D, x = 0, y = 0, z = 0, sx = 1, sy = 1, sz = 1) {
+  private mesh<M extends THREE.Material>(g: THREE.BufferGeometry, m: M, parent: THREE.Object3D, x = 0, y = 0, z = 0, sx = 1, sy = 1, sz = 1) {
     const mesh = new THREE.Mesh(g, m); mesh.position.set(x, y, z); mesh.scale.set(sx, sy, sz); parent.add(mesh); return mesh;
   }
   private pool<M extends THREE.Material>(g: THREE.BufferGeometry, m: M, count: number) { const pool = new THREE.InstancedMesh(g, m, count); pool.instanceMatrix.setUsage(THREE.DynamicDrawUsage); pool.frustumCulled = false; pool.count = 0; this.scene.add(pool); return pool; }
@@ -130,49 +133,118 @@ export class SurvivalWorld {
     this.textures.add(map);
     return this.mat(new THREE.MeshBasicMaterial({ map, toneMapped: false }));
   }
-  private buildColonyCover(box: THREE.BoxGeometry, pedestal: THREE.CylinderGeometry, coil: THREE.TorusGeometry, dark: THREE.Material) {
-    const copper = this.standard(0xad6a49), violet = this.standard(0x67517e), steel = this.standard(0x34545c);
-    const tube = this.geo(new THREE.CylinderGeometry(1, 1, 1, 10));
-    const crystal = this.geo(new THREE.IcosahedronGeometry(1, 0));
-    const light = (color: number) => this.mat(new THREE.MeshBasicMaterial({ color, toneMapped: false }));
-    const turquoise = light(0x74c4c6), orchid = light(0xa98bbf), gold = light(0xe2a566);
+  private buildColonyCover(box: THREE.BoxGeometry, coil: THREE.TorusGeometry, dark: THREE.Material) {
+    const copper = this.standard(0xba794d), violet = this.standard(0x795385), steel = this.standard(0x526c7f);
+    const tube = this.geo(new THREE.CylinderGeometry(1, 1, 1, 12));
+    const casing = this.geo(new THREE.CylinderGeometry(.88, 1, 1, 8));
+    // Stretch an octagonal prism into a square plate with clipped corners.
+    const octagon = new THREE.CylinderGeometry(1, 1, 1, 8).rotateY(Math.PI / 8);
+    const plate = this.geo(octagon.toNonIndexed());
+    octagon.dispose();
+    const platePositions = plate.getAttribute('position');
+    const clipped = (value: number) => Math.abs(value) > .7 ? Math.sign(value) * .5 : value / Math.sin(Math.PI / 8) * .34;
+    for (let i = 0; i < platePositions.count; i++) {
+      platePositions.setXYZ(i, clipped(platePositions.getX(i)), platePositions.getY(i), clipped(platePositions.getZ(i)));
+    }
+    plate.computeVertexNormals();
+
+    // Bake highlights into the energy cylinders so low graphics get the same readable core.
+    const chamber = this.geo(new THREE.CylinderGeometry(1, 1, 1, 24, 12));
+    const positions = chamber.getAttribute('position');
+    const colors = new Float32Array(positions.count * 3);
+    for (let i = 0; i < positions.count; i++) {
+      const height = positions.getY(i) + .5, angle = Math.atan2(positions.getZ(i), positions.getX(i));
+      const band = .5 + .5 * Math.sin(height * 21 + Math.sin(angle * 5) * 1.7);
+      const reflection = Math.pow(Math.max(0, Math.cos(angle - .9)), 8);
+      const intensity = .27 + .39 * band + .34 * reflection;
+      colors.set([intensity, intensity, intensity], i * 3);
+    }
+    chamber.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const light = (color: THREE.ColorRepresentation, vertexColors = false) => this.mat(new THREE.MeshBasicMaterial({ color, vertexColors, toneMapped: false }));
+    const coolant = light(0x82fff3, true), orchid = light(0xb49ac8), gold = light(0xffbb66);
+    const scenery = new Map<THREE.Material, THREE.Mesh[]>();
     for (const { x, z, radius: r, kind } of this.arena.obstacles) {
       const machine = new THREE.Group();
       machine.name = `colony-${kind}`;
       machine.position.set(x, 0, z);
       this.scene.add(machine);
-      this.mesh(pedestal, dark, machine, 0, .18, 0, r, .36, r);
       if (kind === 'reactor') {
-        this.mesh(pedestal, copper, machine, 0, .45, 0, r * .88, .28, r * .88);
-        this.mesh(coil, gold, machine, 0, .65, 0, r * .78, r * .78, r * .78).rotation.x = Math.PI / 2;
-        for (const angle of [0, Math.PI * 2 / 3, Math.PI * 4 / 3]) {
-          const support = this.mesh(box, copper, machine, Math.cos(angle) * r * .72, .78, Math.sin(angle) * r * .72, r * .32, .65, r * .18);
-          support.rotation.y = -angle;
-        }
-        const core = new THREE.Mesh(crystal, light(0xca8263));
-        core.position.y = 1.09;
-        core.scale.set(r * .47, .58, r * .47);
-        machine.add(core);
+        this.mesh(casing, dark, machine, 0, .16, 0, r, .32, r);
+        this.mesh(casing, steel, machine, 0, .4, 0, r * .89, .3, r * .89);
+        const core = this.mesh(chamber, light(COLONY_REACTOR_COLORS[0], true), machine, 0, 1.37, 0, r * .62, 1.75, r * .62);
         this.reactorCore = core;
-      } else if (kind === 'coolant') {
-        machine.rotation.y = x > 0 ? Math.PI / 2 : 0;
-        for (const side of [-1, 1]) {
-          const offset = side * r * .38;
-          this.mesh(tube, steel, machine, offset, .66, 0, r * .26, r * 1.38, r * .26).rotation.x = Math.PI / 2;
-          for (const end of [-1, 1]) {
-            this.mesh(tube, dark, machine, offset, .66, end * r * .5, r * .29, r * .18, r * .29).rotation.x = Math.PI / 2;
-          }
-          this.mesh(box, turquoise, machine, offset, .66 + r * .26, 0, r * .12, .04, r * .61);
+        this.mesh(casing, dark, machine, 0, 2.25, 0, r * .74, .35, r * .74);
+        this.mesh(casing, steel, machine, 0, 2.49, 0, r * .56, .23, r * .56);
+        this.mesh(casing, dark, machine, 0, 2.64, 0, r * .35, .14, r * .35);
+        for (const [height, size] of [[.55, .76], [.71, .68], [2.06, .69], [2.58, .43]]) {
+          this.mesh(coil, height === .71 || height === 2.06 ? gold : copper, machine, 0, height, 0, r * size, r * size, r * size).rotation.x = Math.PI / 2;
         }
-      } else {
-        machine.rotation.y = x > 0 ? -.25 : .35;
-        this.mesh(box, violet, machine, 0, .56, 0, r * 1.55, .54, r * .94);
+        for (let i = 0; i < 6; i++) {
+          const angle = Math.PI * i / 3, dx = Math.cos(angle), dz = Math.sin(angle);
+          this.mesh(box, dark, machine, dx * r * .67, 1.38, dz * r * .67, r * .2, 1.58, r * .14).rotation.y = -angle;
+          this.mesh(box, steel, machine, dx * r * .77, .6, dz * r * .77, r * .21, .46, r * .18).rotation.y = -angle;
+          this.mesh(box, copper, machine, dx * r * .76, 1.89, dz * r * .76, r * .13, .28, r * .14).rotation.y = -angle;
+          this.mesh(box, gold, machine, dx * r * .87, .57, dz * r * .87, r * .04, .085, r * .12).rotation.y = -angle;
+        }
+      } else if (kind === 'coolant') {
+        this.mesh(plate, dark, machine, 0, .12, 0, r * 1.57, .24, r * 1.15);
+        this.mesh(plate, steel, machine, 0, .34, 0, r * 1.43, .27, r * .98);
+        this.mesh(box, dark, machine, 0, 1.93, 0, r * .9, .19, r * .24);
         for (const side of [-1, 1]) {
-          this.mesh(box, copper, machine, side * r * .56, .84, 0, r * .16, .12, r);
+          const offset = side * r * .36;
+          this.mesh(chamber, coolant, machine, offset, 1.13, 0, r * .24, 1.28, r * .24);
+          for (const height of [.58, 1.72]) {
+            this.mesh(casing, dark, machine, offset, height, 0, r * .3, .24, r * .3);
+            this.mesh(tube, steel, machine, offset, height + .08, 0, r * .28, .09, r * .28);
+          }
+          this.mesh(tube, steel, machine, offset, 1.91, 0, r * .13, .33, r * .13);
+          for (const brace of [-1, 1]) {
+            this.mesh(box, steel, machine, offset + brace * r * .17, 1.15, r * .15, r * .045, 1.1, r * .08);
+          }
+          this.mesh(box, copper, machine, side * r * .52, .29, r * .51, r * .15, .12, .09);
+        }
+        this.mesh(box, orchid, machine, 0, .34, r * .51, r * .29, .07, .06);
+      } else {
+        machine.rotation.y = x > 0 ? -.16 : .16;
+        this.mesh(plate, dark, machine, 0, .13, 0, r * 1.55, .26, r * 1.17);
+        this.mesh(plate, violet, machine, 0, .72, 0, r * 1.47, 1.03, r * 1.08);
+        this.mesh(plate, dark, machine, 0, 1.24, 0, r * 1.53, .15, r * 1.12);
+        this.mesh(plate, violet, machine, 0, 1.34, 0, r * 1.34, .08, r * .94);
+        for (const end of [-1, 1]) {
+          this.mesh(plate, dark, machine, 0, .73, end * r * .545, r * 1.08, .57, .05);
+          for (const side of [-1, 1]) {
+            this.mesh(box, steel, machine, 0, .73, end * r * .572, r * 1.15, .067, .047).rotation.z = side * .34;
+            this.mesh(box, copper, machine, side * r * .61, .73, end * r * .46, r * .14, 1.13, r * .14);
+            this.mesh(box, steel, machine, side * r * .46, 1.39, end * r * .34, r * .22, .045, r * .19);
+          }
+          this.mesh(box, gold, machine, 0, .33, end * r * .551, r * .19, .063, .025);
+        }
+        for (const stripe of [-1, 0, 1]) {
+          this.mesh(box, orchid, machine, stripe * r * .18, 1.387, 0, r * .068, .018, r * .29).rotation.y = .55;
         }
         this.mesh(box, dark, machine, 0, .87, 0, r * .52, .07, r * .58);
         this.mesh(box, orchid, machine, 0, .92, 0, r * .31, .05, r * .12);
       }
+      machine.updateMatrixWorld(true);
+      for (const part of machine.children) {
+        if (!(part instanceof THREE.Mesh) || part === this.reactorCore) continue;
+        const batch = scenery.get(part.material);
+        if (batch) batch.push(part);
+        else scenery.set(part.material, [part]);
+      }
+    }
+    // Static pieces share one draw per paint, while the reactor can still pulse.
+    for (const [material, parts] of scenery) {
+      const pieces = parts.map(part => {
+        const geometry = part.geometry.index ? part.geometry.toNonIndexed() : part.geometry.clone();
+        return geometry.applyMatrix4(part.matrixWorld);
+      });
+      const merged = mergeGeometries(pieces);
+      pieces.forEach(piece => piece.dispose());
+      if (!merged) continue;
+      this.mesh(this.geo(merged), material, this.scene).name = 'colony-cover';
+      parts.forEach(part => part.removeFromParent());
     }
   }
   private build() {
@@ -254,14 +326,14 @@ export class SurvivalWorld {
     }
     this.finish(contamination, 18); this.finish(roots, 48); this.finish(eggs, 24, true);
     this.contamination = contamination; this.roots = roots; this.eggs = eggs;
-    this.contact = this.pool(this.geo(new THREE.CircleGeometry(1, 24)), this.mat(new THREE.MeshBasicMaterial({ color: 0x020709, transparent: true, opacity: .4, depthWrite: false })), this.arena.obstacles.length + 2);
+    this.contact = this.pool(this.geo(new THREE.CircleGeometry(1, 24)), this.mat(new THREE.MeshBasicMaterial({ color: 0x020709, transparent: true, opacity: .4, depthWrite: false })), (arcade ? 0 : this.arena.obstacles.length) + 2);
     const steamGeometry = this.geo(new THREE.BufferGeometry()); steamGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(32 * 3), 3));
     this.steam = new THREE.Points(steamGeometry, this.mat(new THREE.PointsMaterial({ color: 0x92c1c7, size: .55, transparent: true, opacity: .12, depthWrite: false, sizeAttenuation: true }))); this.steam.frustumCulled = false; this.scene.add(this.steam);
-    // Circular generator bases match the simulation's cover exactly; fittings stay inside.
-    const pedestal = this.geo(new THREE.CylinderGeometry(1, 1, 1, 16)), coil = this.geo(new THREE.TorusGeometry(1, .045, 5, 28));
+    const coil = this.geo(new THREE.TorusGeometry(1, .045, 5, 28));
     if (arcade) {
-      this.buildColonyCover(box, pedestal, coil, dark);
+      this.buildColonyCover(box, coil, dark);
     } else {
+      const pedestal = this.geo(new THREE.CylinderGeometry(1, 1, 1, 16));
       const casing = this.standard(0x67777b), machinery = this.standard(0x28383c), wiring = this.standard(0x7eb9ac, 0x187d75, .35);
       for (const o of this.arena.obstacles) {
         this.mesh(pedestal, machinery, this.scene, o.x, .35, o.z, o.radius, .7, o.radius);
@@ -409,9 +481,9 @@ export class SurvivalWorld {
     this.setMapPhase(s.mapPhase);
     const t = s.elapsed, dt = Math.max(0, Math.min(.1, t - this.lastTime)); this.lastTime = t;
     if (this.reactorCore) {
-      const pulse = this.reduced || s.mapPhase < 2 ? 0 : (1 + Math.sin(t * 4.6)) * .17;
-      const base = s.mapPhase >= 2 ? 0xb85180 : s.mapPhase === 1 ? 0xeb8a58 : 0xad7264;
-      this.reactorCore.material.color.setHex(base).lerp(this.color.setHex(0xffb4c6), pulse);
+      const pulse = this.reduced ? 0 : (1 + Math.sin(t * 3.2)) * (s.mapPhase < 2 ? .075 : .17);
+      const base = COLONY_REACTOR_COLORS[s.mapPhase % COLONY_REACTOR_COLORS.length];
+      this.reactorCore.material.color.set(base).lerp(this.color.setHex(0xffb4c6), pulse);
     }
     const living = s.players.filter(p => p.health > 0);
     const critical = living.length > 0 && living.some(p => p.health < 32);
@@ -443,7 +515,7 @@ export class SurvivalWorld {
       view.torch.distance = critical ? 11.5 : 14;
     });
     let shadows = 0;
-    for (const o of this.arena.obstacles) this.instance(this.contact, shadows++, o.x + .15, .025, o.z + .1, o.radius * 1.15, o.radius * 1.15, 1, 0, -Math.PI / 2);
+    if (!arcade) for (const o of this.arena.obstacles) this.instance(this.contact, shadows++, o.x + .15, .025, o.z + .1, o.radius * 1.15, o.radius * 1.15, 1, 0, -Math.PI / 2);
     for (const p of s.players) this.instance(this.contact, shadows++, p.x, .028, p.z, .65, .65, 1, 0, -Math.PI / 2);
     this.finish(this.contact, shadows);
     const steamPosition = this.steam.geometry.getAttribute('position') as THREE.BufferAttribute;
