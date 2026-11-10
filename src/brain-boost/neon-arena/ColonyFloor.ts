@@ -1,4 +1,5 @@
 import type { ArenaDefinition } from './ArenaDefinition';
+import { COLONY_REACTOR_COLORS } from './ColonySectors';
 
 type Point = readonly [number, number];
 
@@ -36,7 +37,9 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
     if (kind !== 'reactor' && kind !== 'coolant') continue;
     const radius = kind === 'reactor' ? 8.5 : 5;
     const pool = ctx.createRadialGradient(x, z, .5, x, z, radius);
-    pool.addColorStop(0, kind === 'reactor' ? '#f4805070' : '#57c3bc50');
+    const reflection = kind === 'reactor' ? COLONY_REACTOR_COLORS[sector] ?? COLONY_REACTOR_COLORS[0] : '#57c3bc';
+    pool.addColorStop(0, `${reflection}87`);
+    pool.addColorStop(.48, `${reflection}26`);
     pool.addColorStop(1, '#ffffff00');
     ctx.fillStyle = pool;
     ctx.fillRect(x - radius, z - radius, radius * 2, radius * 2);
@@ -200,6 +203,13 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
     ctx.fill();
     line(outline(reach), rim, .14, true);
     line(outline(reach - .32), rim, .06, true);
+    // Soft contact shadow sits under the fittings without a hard pedestal outline.
+    const shadow = ctx.createRadialGradient(.15, .21, radius * .32, .15, .21, radius * 1.39);
+    shadow.addColorStop(0, '#0f1017b8');
+    shadow.addColorStop(.53, '#0f101779');
+    shadow.addColorStop(1, '#0f101700');
+    ctx.fillStyle = shadow;
+    ctx.fillRect(-radius * 1.4, -radius * 1.4, radius * 3, radius * 3);
     for (const direction of [-1, 1]) {
       for (let mark = 0; mark < 4; mark++) {
         const sx = -.82 + mark * .4, sz = direction * (reach * .78 + .34);
@@ -209,6 +219,8 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
     }
 
     if (kind === 'reactor') {
+      const reflectedLight = COLONY_REACTOR_COLORS[sector] ?? COLONY_REACTOR_COLORS[0];
+      line(outline(radius * 1.08), `${reflectedLight}43`, .19, true);
       line(outline(reach - .58), '#ba7a47', .11, true);
       line(outline(reach - .78), '#231b27', .12, true);
       for (let side = 0; side < 4; side++) {
