@@ -1,3 +1,4 @@
+import { Boxes, Crosshair, Heart, MapPin, Maximize, Minimize, Pause, Play, Radio, Settings, User, Users, Volume2, VolumeX, X } from 'lucide-react';
 import { getContainmentStatus, subscribeContainmentStatus } from './ContainmentScore';
 import type { ArenaDiagnostics } from './RenderMetrics';
 import { useEffect, useRef, useState } from 'react';
@@ -23,12 +24,26 @@ const campaign = COLONY_SECTORS.map((sector, index) => {
   if (index > 0) encounter = nextBossEncounter(encounter.wave, true, DEFAULT_ARENA);
   return { ...sector, encounter };
 });
+const weaponMarks: Record<WeaponId, string> = {
+  machinegun: 'M1 7h5V5h11v2h6v2h-8l-2 4h-3l1-4H7l-3 2H1Z',
+  shotgun: 'M1 8h5l3-2h14v3H12l-2 2H6l-4 2H1Z',
+  flame: 'M12 1c2 5 7 6 7 11a7 7 0 0 1-14 0c0-3 2-5 4-7 0 3 1 4 2 4 1-2 2-5 1-8Zm1 9c-1 3-4 4-4 6a3 3 0 0 0 6 0c0-2-1-3-2-6Z',
+  cascade: 'M8 4h8v3l3 3v5l-3 3H8l-3-3v-5l3-3Zm2-3h7v2h-7Z',
+  rail: 'M1 8h4V5h13l2 2h3v3h-9l-2 3H9l1-3H5l-4 2Zm9-2v2h6V6Z',
+};
 const menuViews = { mission: 'Misión', arsenal: 'Arsenal', settings: 'Ajustes' } as const;
 type MenuView = keyof typeof menuViews;
 function MarineControls({ marine, active, onShock, coop }: { marine: Snapshot['marines'][number]; active: boolean; onShock: () => void; coop: boolean }) {
   return <div className="na-combat-controls" hidden={!active || !marine.alive}>
     <div className="na-joystick" data-na-stick="" data-na-player={marine.id} aria-label={`Joystick de movimiento P${marine.id + 1}`}><span /><small>MOVER {coop ? `P${marine.id + 1}` : ''}</small></div>
-    <div className="na-right-controls"><button type="button" className="na-shock-button" aria-label={`SHOCKWAVE P${marine.id + 1}`} onPointerDown={e => e.preventDefault()} disabled={marine.cooldown > 0} onClick={onShock}>◉ {coop ? '' : 'SHOCKWAVE '}{marine.cooldown > 0 ? `${Math.ceil(marine.cooldown)}s` : 'LISTA'}</button><button type="button" data-na-fire="" data-na-player={marine.id} className="na-fire-button" aria-label={coop ? `Mantener para disparar P${marine.id + 1}` : 'Mantener para disparar'}><span className="na-aim-knob" />FUEGO {coop ? `P${marine.id + 1}` : ''}</button></div>
+    <div className="na-right-controls">
+      <button type="button" className="na-shock-button" aria-label={`Shockwave P${marine.id + 1}`} onPointerDown={e => e.preventDefault()} disabled={marine.cooldown > 0} onClick={onShock}>
+        <Radio size={18} aria-hidden="true" /><span>{marine.cooldown > 0 ? `${Math.ceil(marine.cooldown)}s` : 'SHOCK'}</span>
+      </button>
+      <button type="button" data-na-fire="" data-na-player={marine.id} className="na-fire-button" aria-label={coop ? `Mantener para disparar P${marine.id + 1}` : 'Mantener para disparar'}>
+        <Crosshair className="na-aim-knob" size={21} aria-hidden="true" />FUEGO {coop ? `P${marine.id + 1}` : ''}
+      </button>
+    </div>
   </div>;
 }
 export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
@@ -113,9 +128,16 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
   const sector = COLONY_SECTORS[snapshot.mapPhase % COLONY_SECTORS.length];
   const visibleViews: MenuView[] = lobby ? ['mission', 'arsenal', 'settings'] : ['mission', 'settings'];
   const hud = <div className="na-hud" aria-label="Estado de partida">
-    <span><small>{coop ? 'TEAM SCORE' : 'SCORE'}</small><b>{String(snapshot.score).padStart(5, '0')}</b></span><span><small>WAVE</small><b>{String(snapshot.wave).padStart(2, '0')}</b></span><span><small>SECTOR</small><b>{sector.name.toUpperCase()}</b></span>
-    {coop ? <span className="na-team-badge">COOP LOCAL · 2P</span> : <span className={`na-health${danger ? ' na-critical' : ''}`}><small>MARINE · {snapshot.health}%</small><span role="progressbar" aria-label="Salud del marine" aria-valuenow={snapshot.health} aria-valuemin={0} aria-valuemax={100} className="na-meter"><i style={{ width: `${snapshot.health}%` }} /></span></span>}
-    <button type="button" disabled={!['PLAYING', 'WAVE_TRANSITION', 'PAUSED'].includes(snapshot.phase) || !!error} onClick={() => engine.current?.togglePause()}>{snapshot.phase === 'PAUSED' ? 'Reanudar' : 'Pausa'}</button>
+    <span className="na-hud-stat"><small>{coop ? 'EQUIPO' : 'PUNTOS'}</small><b>{String(snapshot.score).padStart(5, '0')}</b></span>
+    <span className="na-hud-stat"><small>OLEADA</small><b>{String(snapshot.wave).padStart(2, '0')}</b></span>
+    <span className="na-hud-sector"><MapPin size={14} aria-hidden="true" /><b>{sector.name}</b></span>
+    {coop ? <span className="na-team-badge">COOP LOCAL · 2P</span> : <span className={`na-health${danger ? ' na-critical' : ''}`}>
+      <span className="na-health-number"><Heart size={14} aria-hidden="true" /><b>{snapshot.health}%</b></span>
+      <span role="progressbar" aria-label="Salud del marine" aria-valuenow={snapshot.health} aria-valuemin={0} aria-valuemax={100} className="na-meter"><i style={{ width: `${snapshot.health}%` }} /></span>
+    </span>}
+    <button type="button" className="na-pause-button" aria-label={paused ? 'Reanudar' : 'Pausa'} title={paused ? 'Reanudar' : 'Pausa'} disabled={!['PLAYING', 'WAVE_TRANSITION', 'PAUSED'].includes(snapshot.phase) || !!error} onClick={() => engine.current?.togglePause()}>
+      {paused ? <Play size={18} aria-hidden="true" /> : <Pause size={18} aria-hidden="true" />}
+    </button>
   </div>;
   const encounter = <>
     {active && !snapshot.boss && <div className="na-director" data-na-director=""><span>EN CAMPO <b>{snapshot.activeEnemies}</b> · LLEGANDO <b>{snapshot.pendingEnemies}</b></span><span>JEFE · OLA {snapshot.nextEncounter.wave}</span></div>}
@@ -123,12 +145,15 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
   </>;
   return <div ref={root} className={`na-game${view.immersive ? ' na-game--immersive' : ''}${coop ? ' na-game--coop' : ''}`} data-neon-fullscreen={view.native ? 'native' : view.immersive ? 'viewport' : 'off'} data-neon-phase={error ? 'ERROR' : snapshot.phase} data-neon-players={playerCount} data-menu-open={menuOpen}>
     <div className="na-toolbar"><span><b>NEON ARENA</b><small>{coop ? 'COOPERATIVO LOCAL / PANTALLA DIVIDIDA' : 'NIGHTMARE PROTOCOLO / ALIEN HORDE SURVIVAL'}</small></span><div>
-      <button type="button" aria-pressed={audio} onClick={() => setBrainBoostAudioEnabled(!audio)}>{audio ? 'Sonido ON' : 'Sonido OFF'}</button><button type="button" aria-pressed={view.immersive} onClick={() => view.immersive ? view.leave() : view.enter()}>{view.immersive ? 'Reducir' : 'Expandir'}</button>{view.immersive && !view.native && <button type="button" onClick={view.enter}>Pantalla completa</button>}<button type="button" onClick={exit}>Salir</button>
+      <button type="button" aria-label="Sonido" aria-pressed={audio} onClick={() => setBrainBoostAudioEnabled(!audio)}>{audio ? <Volume2 size={17} aria-hidden="true" /> : <VolumeX size={17} aria-hidden="true" />}<span>{audio ? 'Sonido ON' : 'Sonido OFF'}</span></button>
+      <button type="button" aria-label={view.immersive ? 'Reducir' : 'Expandir'} aria-pressed={view.immersive} onClick={() => view.immersive ? view.leave() : view.enter()}>{view.immersive ? <Minimize size={17} aria-hidden="true" /> : <Maximize size={17} aria-hidden="true" />}<span>{view.immersive ? 'Reducir' : 'Expandir'}</span></button>
+      {view.immersive && !view.native && <button type="button" aria-label="Pantalla completa" onClick={view.enter}><Maximize size={17} aria-hidden="true" /><span>Pantalla completa</span></button>}
+      <button type="button" aria-label="Salir" onClick={exit}><X size={17} aria-hidden="true" /><span>Salir</span></button>
     </div></div>
     {coop && !menuOpen && <div className="na-team-header">{hud}{encounter}</div>}
     <div className="na-stage" data-playing={active}>
       <div className="na-canvas" ref={host} />
-      {!coop && !menuOpen && <>{hud}{encounter}</>}
+      {!coop && !menuOpen && <div className="na-combat-status">{hud}{encounter}</div>}
       <div className="na-player-panels">{snapshot.marines.map(marine => <div className="na-player-pane" key={marine.id} data-player-id={marine.id}>
         {coop && !menuOpen && <div className="na-player-stats"><b>P{marine.id + 1} · {marine.alive ? `${marine.health}%` : 'CAÍDO'}</b><span>{WEAPONS[marine.weapon].name} · {marine.weapon === 'machinegun' ? '∞' : marine.ammo}</span><span className="na-meter" role="progressbar" aria-label={`Salud P${marine.id + 1}`} aria-valuenow={marine.health} aria-valuemin={0} aria-valuemax={100}><i style={{ width: `${marine.health}%` }} /></span></div>}
         {coop && !marine.alive && active && <div className="na-fallen" role="status">P{marine.id + 1} CAÍDO<small>Tu compañero puede recuperarte al completar la oleada.</small></div>}
@@ -178,7 +203,30 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
         <div className="na-menu-actions"><button ref={startButton} type="button" className="na-primary" disabled={!error && snapshot.phase === 'LOADING'} onClick={error || snapshot.phase === 'GAME_OVER' ? restart : snapshot.phase === 'PAUSED' ? () => engine.current?.togglePause() : start}>{error ? 'Reintentar escena' : snapshot.phase === 'GAME_OVER' ? 'Nueva partida' : snapshot.phase === 'PAUSED' ? 'Reanudar partida' : snapshot.phase === 'LOADING' ? 'Cargando escena…' : 'Iniciar supervivencia →'}</button><button type="button" onClick={exit}>Volver a Nightmare Protocolo</button></div>
       </section></div>}
     </div>
-    <div className="na-arsenal-rows" hidden={menuOpen}>{snapshot.marines.map(marine => <div className="na-weapon-bar" key={marine.id} data-arsenal-player={marine.id}><span className="na-active-weapon"><b>{coop ? `P${marine.id + 1} · ` : ''}{WEAPONS[marine.weapon].name}</b> · {marine.weapon === 'machinegun' ? '∞' : marine.ammo}{marine.shield > 0 ? ' · ESCUDO' : ''}{marine.haste > 0 ? ' · CADENCIA +' : ''}{!marine.alive ? ' · CAÍDO' : ''}</span><div className="na-weapon-slots" aria-label={`Cambio rápido de armas${coop ? ` P${marine.id + 1}` : ''}`}>{snapshot.unlocked.map(id => <button type="button" key={id} className={marine.weapon === id ? 'na-weapon-slot is-active' : 'na-weapon-slot'} onPointerDown={e => e.preventDefault()} aria-label={`Equipar ${WEAPONS[id].name}${coop ? ` P${marine.id + 1}` : ''}`} aria-pressed={marine.weapon === id} disabled={!marine.alive || !['READY', 'PLAYING', 'WAVE_TRANSITION'].includes(snapshot.phase)} onClick={() => choose(id, marine.id)}><kbd>{WEAPON_IDS.indexOf(id) + 1}</kbd><strong>{WEAPONS[id].name.replace('Granada de ', '').replace('Ametralladora', 'AMG').replace('Lanzallamas', 'FLM')}</strong><small>{id === 'machinegun' ? '∞' : marine.ammoByWeapon[id]}</small></button>)}</div></div>)}</div>
+    <div className="na-arsenal-rows" hidden={menuOpen}>
+      {snapshot.marines.map(marine => <div className="na-weapon-bar" key={marine.id} data-arsenal-player={marine.id}>
+        <span className="na-active-weapon">
+          <b>{coop ? `P${marine.id + 1} · ` : ''}{WEAPONS[marine.weapon].name}</b> · {marine.weapon === 'machinegun' ? '∞' : marine.ammo}
+          {marine.shield > 0 ? ' · ESCUDO' : ''}{marine.haste > 0 ? ' · CADENCIA +' : ''}{!marine.alive ? ' · CAÍDO' : ''}
+        </span>
+        <div className="na-weapon-slots" aria-label={`Cambio rápido de armas${coop ? ` P${marine.id + 1}` : ''}`}>
+          {snapshot.unlocked.map(id => <button
+            type="button" key={id}
+            className={marine.weapon === id ? 'na-weapon-slot is-active' : 'na-weapon-slot'}
+            onPointerDown={e => e.preventDefault()}
+            aria-label={`Equipar ${WEAPONS[id].name}${coop ? ` P${marine.id + 1}` : ''}`}
+            title={WEAPONS[id].name}
+            aria-pressed={marine.weapon === id}
+            disabled={!marine.alive || !['READY', 'PLAYING', 'WAVE_TRANSITION'].includes(snapshot.phase)}
+            onClick={() => choose(id, marine.id)}
+          >
+            <kbd>{WEAPON_IDS.indexOf(id) + 1}</kbd>
+            <svg className="na-weapon-mark" viewBox="0 0 24 20" aria-hidden="true"><path d={weaponMarks[id]} /></svg>
+            <small>{id === 'machinegun' ? '∞' : marine.ammoByWeapon[id]}</small>
+          </button>)}
+        </div>
+      </div>)}
+    </div>
     <p className="na-footer" hidden={menuOpen}>{coop ? 'Cooperativo local · récord de equipo' : 'Marine · hordas · suministros · Récord'} {best}<span>{Math.floor(snapshot.elapsed / 60)}:{String(Math.floor(snapshot.elapsed % 60)).padStart(2, '0')}</span></p>
   </div>;
 }

@@ -188,11 +188,11 @@ export class SurvivalWorld {
     }));
     this.floorMaterial = floor;
     const ground = this.mesh(this.geo(new THREE.PlaneGeometry(this.arena.floorSize, this.arena.floorSize)), floor, this.scene); ground.rotation.x = -Math.PI / 2;
-    const rubbleCount = arcade ? 276 : 420;
+    const rubbleCount = arcade ? 36 : 420;
     const rubble = this.pool(this.geo(new THREE.IcosahedronGeometry(1, 0)), olive, rubbleCount);
     for (let i = 0; i < rubbleCount; i++) {
       const a = i * 2.39996;
-      const boundary = i < 240, side = i % 4, along = (Math.floor(i / 4) / 59 * 2 - 1) * this.arena.wall;
+      const boundary = !arcade && i < 240, side = i % 4, along = (Math.floor(i / 4) / 59 * 2 - 1) * this.arena.wall;
       const o = this.arena.obstacles[i % this.arena.obstacles.length];
       const distance = arcade ? o.radius + .22 + i % 4 * .12 : 1.9 + i % 4 * .12;
       const x = boundary ? side === 0 || side === 2 ? along : (side === 1 ? 1 : -1) * (this.arena.wall + .6) : o.x + Math.cos(a) * distance;
@@ -224,13 +224,15 @@ export class SurvivalWorld {
       for (let j = 0; j < 4; j++) this.instance(slots, i * 4 + j, x + Math.cos(a) * (j - 1.5) * .4, 1.62, z - Math.sin(a) * (j - 1.5) * .4, .17, .025, .8, a);
     }
     this.finish(vents, 48); this.finish(slots, 192);
-    const membrane = this.pool(sphere, this.standard(0x435533, 0x1d300d, .15), 90);
-    for (let i = 0; i < 90; i++) {
-      const side = i % 4, a = side * Math.PI / 2, along = Math.sin(i * 12.7) * (wallDistance - 1), inward = 1.3 + i % 4 * .3;
-      const x = Math.cos(a) * along - Math.sin(a) * (wallDistance - inward), z = -Math.sin(a) * along - Math.cos(a) * (wallDistance - inward);
-      this.instance(membrane, i, x, .035, z, .5 + i % 4 * .4, .06, .4 + i % 5 * .3, i);
+    if (!arcade) {
+      const membrane = this.pool(sphere, this.standard(0x435533, 0x1d300d, .15), 90);
+      for (let i = 0; i < 90; i++) {
+        const side = i % 4, a = side * Math.PI / 2, along = Math.sin(i * 12.7) * (wallDistance - 1), inward = 1.3 + i % 4 * .3;
+        const x = Math.cos(a) * along - Math.sin(a) * (wallDistance - inward), z = -Math.sin(a) * along - Math.cos(a) * (wallDistance - inward);
+        this.instance(membrane, i, x, .035, z, .5 + i % 4 * .4, .06, .4 + i % 5 * .3, i);
+      }
+      this.finish(membrane, 90);
     }
-    this.finish(membrane, 90);
     // Organic sectors stay low and peripheral so they add material variety
     // without hiding advancing enemies or changing the logical arena.
     const contamination = this.pool(this.geo(new THREE.CircleGeometry(1, 18)), this.mat(new THREE.MeshBasicMaterial({ color: 0x18351f, transparent: true, opacity: .42, depthWrite: false })), 18);
@@ -502,7 +504,13 @@ export class SurvivalWorld {
         part(this.feelers, fc++, side * .4, .67, 1.63, .055, .055, .65, side * .38);
         part(this.feelers, fc++, side * (beetle ? .48 : .28), .4, beetle ? 1.65 : 1.48, beetle ? .17 : .09, .13, beetle ? .85 : .35, -side * .36);
         part(this.feelers, fc++, side * (beetle ? .35 : .23), .4, beetle ? 2.23 : 1.72, .075, .12, beetle ? .36 : .15, side * .8);
-        if (beetle) {
+        if (arcade && skitter) {
+          part(this.elytra, shellCount, side * .26, .66 + bob, -.43, .35, .49, .79, side * -.1);
+          this.elytra.setColorAt(shellCount++, this.color.setHex(flash ? 0xfff3d3 : 0xb43950));
+          if (!flash && this.shellSeams) {
+            part(this.shellSeams, seamCount++, side * .24, .66 + bob, -.34, .352, .494, .045, side * -.1);
+          }
+        } else if (beetle) {
           part(this.elytra, shellCount, side * .38, .7, -.37, .46, .62, 1.06);
           this.elytra.setColorAt(shellCount++, this.color.setHex(flash ? 0xfff3d3 : e.boss ? 0x8d3151 : 0x6d263e));
         } else if (acid) {
@@ -562,7 +570,12 @@ export class SurvivalWorld {
       attr.setXYZ(lines++, b.x, .65, b.z); attr.setXYZ(lines++, b.x - b.vx * .025, .65, b.z - b.vz * .025);
     }
     for (const e of s.enemies) if (e.warning > 0 && ['stalker', 'maw', 'spitter', 'sovereign'].includes(e.kind)) { attr.setXYZ(lines++, e.x, .1, e.z); attr.setXYZ(lines++, e.x + e.aimX * 7, .1, e.z + e.aimZ * 7); }
-    for (const p of s.players) if (p.health > 0) { attr.setXYZ(lines++, p.x, .15, p.z); attr.setXYZ(lines++, p.x + Math.cos(p.fireAngle) * 2.7, .15, p.z + Math.sin(p.fireAngle) * 2.7); }
+    for (const p of s.players) {
+      // Arcade assisted aiming already has a target ring; keep the line for manual aiming.
+      if (p.health <= 0 || (arcade && p.aimMode === 'assisted')) continue;
+      attr.setXYZ(lines++, p.x, .15, p.z);
+      attr.setXYZ(lines++, p.x + Math.cos(p.fireAngle) * 2.7, .15, p.z + Math.sin(p.fireAngle) * 2.7);
+    }
     attr.needsUpdate = true; this.trails.geometry.setDrawRange(0, lines); this.finish(this.bullets, bc, true);
     let ic = 0, genericc = 0, medc = 0, armorc = 0, ammoc = 0, grenadec = 0;
     for (const item of s.pickups) {
