@@ -126,6 +126,46 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
       ctx.fillStyle = '#3e344b';
       ctx.fillRect(x + .74, -edge + 1, 1.7, .17);
     }
+    // Recessed perimeter channel. Raised walls and rails supply the depth.
+    ctx.fillStyle = '#1b1523';
+    ctx.fillRect(-edge, -edge - 2.3, edge * 2, 1.9);
+    line([[-edge + .45, -edge - 1.87], [edge - .45, -edge - 1.87]], '#605169', .16);
+    line([[-edge + .45, -edge - 1.58], [edge - .45, -edge - 1.58]], '#3f354a', .1);
+    for (const x of [-18, -9, 0, 9, 18]) {
+      ctx.fillStyle = '#3c3046';
+      ctx.fillRect(x - 1.75, -edge - 1.5, 3.5, .8);
+      for (let stripe = -1.5; stripe <= 1.25; stripe += .44) {
+        line([[x + stripe, -edge - .79], [x + stripe + .26, -edge - 1.37]], '#be855a', .11);
+      }
+    }
+
+    // Organic patches cling to the seams. Their highlights are baked into the deck.
+    const [shadow, skin, vein] = [
+      ['#242c29', '#3b493a', '#667858'],
+      ['#183025', '#365643', '#72a069'],
+      ['#39253b', '#5b3c58', '#a075a1'],
+      ['#192b37', '#2e4250', '#58748a'],
+    ][sector] ?? ['#242c29', '#3b493a', '#667858'];
+    for (const [j, offset] of [-20, -8.6, 8.9, 19.4].entries()) {
+      const x = offset + (i % 2 ? 1.2 : 0);
+      const z = -edge + .56;
+      const depth = (sector === 1 ? 2.55 : 1.8) + (j % 2) * .38;
+      const shape: Point[] = [[x - 1.8, z], [x + 1.65, z], [x + 1.35, z + .64],
+        [x + .75, z + .84], [x + .84, z + depth - .35], [x + .25, z + depth],
+        [x - .22, z + depth - .48], [x - .85, z + depth - .1], [x - 1.16, z + .8]];
+      line(shape, shadow, .24, true);
+      ctx.fillStyle = skin;
+      ctx.fill();
+      line([[x - .7, z + .17], [x - .54, z + .62], [x + .18, z + 1.02], [x + .28, z + depth - .19]], vein, .09);
+      line([[x - .53, z + .61], [x - .77, z + 1.14], [x - .86, z + depth - .25]], vein, .055);
+      for (let pore = 0; pore < 6; pore++) {
+        const px = x + (pore % 3 - 1) * .36, pz = z + .27 + Math.floor(pore / 3) * .42;
+        ctx.fillStyle = shadow;
+        ctx.fillRect(px, pz, .13, .075);
+        ctx.fillStyle = vein;
+        ctx.fillRect(px + .018, pz + .09, .07, .032);
+      }
+    }
     for (const x of [-edge + 6, edge - 6]) {
       ctx.fillStyle = '#191725';
       ctx.fillRect(x - 2, -edge + 1.75, 4, .8);
@@ -160,6 +200,13 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
     ctx.fill();
     line(outline(reach), rim, .14, true);
     line(outline(reach - .32), rim, .06, true);
+    for (const direction of [-1, 1]) {
+      for (let mark = 0; mark < 4; mark++) {
+        const sx = -.82 + mark * .4, sz = direction * (reach * .78 + .34);
+        line([[sx, sz], [sx + .24, sz + .14]], '#1e1826', .19);
+        line([[sx, sz], [sx + .24, sz + .14]], signal, .075);
+      }
+    }
 
     if (kind === 'reactor') {
       line(outline(reach - .58), '#ba7a47', .11, true);
