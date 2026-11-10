@@ -32,14 +32,14 @@ try {
     });
     await page.getByRole('button', { name: 'Nightmare Protocolo', exact: true }).click();
     await page.getByRole('button', { name: /Neon Arena: Virus Survivor/ }).click(); await page.waitForSelector('[data-neon-phase="READY"]');
-    await page.getByRole('combobox', { name: 'Cantidad de jugadores', exact: true }).selectOption('2');
+    await page.getByRole('button', { name: 'Cooperativo', exact: true }).click();
     await page.waitForSelector('[data-neon-players="2"]'); assert.equal(await page.locator('.na-canvas canvas').count(), 1); assert.equal(await page.evaluate(() => window.qaCoopFrames()), 1);
     await page.getByRole('button', { name: 'Arsenal', exact: true }).click();
     await page.getByRole('combobox', { name: 'Arma inicial P1', exact: true }).selectOption('shotgun');
     await page.getByRole('combobox', { name: 'Arma inicial P2', exact: true }).selectOption('flame');
     await page.getByRole('button', { name: 'Iniciar supervivencia →', exact: true }).click(); await page.waitForSelector('[data-neon-phase="PLAYING"]');
     await page.locator('.na-stage').evaluate(e => e.scrollIntoView({ block: 'center' }));
-    assert.equal(await page.getByRole('combobox', { name: 'Cantidad de jugadores', exact: true }).count(), 0, 'lobby mode cannot change during play');
+    assert.equal(await page.getByRole('group', { name: 'Cantidad de jugadores', exact: true }).count(), 0, 'lobby mode cannot change during play');
     const canvas = await page.locator('.na-canvas canvas').elementHandle();
     const before = await page.evaluate(() => window.qaTeam.players.map(p => ({ x: p.x, z: p.z, ammo: p.ammo[p.equipped] })));
     if (mobile) {
@@ -99,7 +99,7 @@ try {
     await page.waitForSelector('[data-neon-phase="GAME_OVER"]'); await page.waitForFunction(() => localStorage.getItem('digitalboost:brain-boost:neon-arena:best:coop:v1') !== null);
     assert.equal(await page.evaluate(() => localStorage.getItem('digitalboost:brain-boost:neon-arena:best:v1')), '777');
     await page.getByRole('button', { name: 'Nueva partida', exact: true }).click(); await page.waitForSelector('[data-neon-phase="READY"]'); assert.equal(await page.locator('.na-game').getAttribute('data-neon-players'), '2');
-    await page.getByRole('combobox', { name: 'Cantidad de jugadores', exact: true }).selectOption('1'); assert.equal(await page.locator('.na-player-pane').count(), 1);
+    await page.getByRole('button', { name: 'Individual', exact: true }).click(); assert.equal(await page.locator('.na-player-pane').count(), 1);
     await page.getByRole('button', { name: 'Salir', exact: true }).click(); await page.waitForTimeout(100);
     assert.equal(await page.evaluate(() => window.qaCoopFrames()), 0); assert.equal(await page.locator('.na-canvas canvas').count(), 0);
     assert.equal(await canvas.evaluate(c => c.getContext('webgl2').isContextLost()), true);
