@@ -8,7 +8,7 @@ import { COLONY_REACTOR_COLORS, COLONY_SECTORS } from './ColonySectors';
 
 const ARCADE_MARINE_URL = '/brain-boost/neon-arena/marine-arcade-pop.glb';
 
-const COLONY_CAMERA = { rise: 36, setback: 32 };
+const COLONY_CAMERA = { rise: 34, setback: 36 };
 const LEGACY_CAMERA = { rise: 48, setback: 8 };
 
 type MarineArmor = THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
@@ -498,8 +498,8 @@ export class SurvivalWorld {
       if (!rect.width || !rect.height) return;
       const aspect = rect.width / rect.height, frame = this.frames[i], camera = this.cameras[i];
       if (this.arena.id === 'colony') {
-        const maxWidth = count === 2 ? 29 : 38;
-        const desiredWidth = Math.max(count === 2 ? 19 : 23, aspect * (count === 2 ? 23 : 28));
+        const maxWidth = count === 2 ? 29 : 40;
+        const desiredWidth = Math.max(count === 2 ? 19 : 23, aspect * (count === 2 ? 23 : 29));
         const maxHeight = this.arena.floorSize * this.groundProjection;
         frame.width = Math.min(desiredWidth, maxWidth, maxHeight * aspect);
       } else {
