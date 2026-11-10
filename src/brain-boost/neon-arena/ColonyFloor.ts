@@ -31,6 +31,17 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
   ctx.fillStyle = deck;
   ctx.fillRect(-arena.floorSize / 2, -arena.floorSize / 2, arena.floorSize, arena.floorSize);
 
+  // Wide pools of reflected color are baked into the same floor texture.
+  for (const { x, z, kind } of arena.obstacles) {
+    if (kind !== 'reactor' && kind !== 'coolant') continue;
+    const radius = kind === 'reactor' ? 8.5 : 5;
+    const pool = ctx.createRadialGradient(x, z, .5, x, z, radius);
+    pool.addColorStop(0, kind === 'reactor' ? '#f4805070' : '#57c3bc50');
+    pool.addColorStop(1, '#ffffff00');
+    ctx.fillStyle = pool;
+    ctx.fillRect(x - radius, z - radius, radius * 2, radius * 2);
+  }
+
   // Long staggered plates keep the open lanes quieter than the machinery.
   let seed = 713;
   const random = () => {
@@ -54,7 +65,23 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
         ctx.fillRect(x + dx + .015, z + dz, .09, .045);
       }
       const scratchX = x + 1 + random() * 4, scratchZ = z + .8 + random() * 2;
-      line([[scratchX, scratchZ], [scratchX + .62, scratchZ + .09]], '#c0aec021', .045);
+      line([[scratchX, scratchZ], [scratchX + .62, scratchZ + .09]], '#c0aec033', .045);
+      for (let i = 0; i < 9; i++) {
+        const fleckX = x + .23 + random() * 6.55, fleckZ = z + .2 + random() * 3.55;
+        ctx.fillStyle = i % 3 ? '#140e201c' : '#dbc0b820';
+        ctx.fillRect(fleckX, fleckZ, .07 + random() * .2, .04 + random() * .08);
+      }
+      if ((col + row * 3) % 13 === 0) {
+        ctx.fillStyle = '#191622';
+        ctx.fillRect(x + .72, z + 2.2, 1.8, .66);
+        ctx.strokeStyle = '#7a637d';
+        ctx.lineWidth = .055;
+        ctx.strokeRect(x + .72, z + 2.2, 1.8, .66);
+        for (let slot = 0; slot < 7; slot++) {
+          ctx.fillStyle = '#5e5065';
+          ctx.fillRect(x + .86 + slot * .23, z + 2.31, .065, .45);
+        }
+      }
     }
   }
 

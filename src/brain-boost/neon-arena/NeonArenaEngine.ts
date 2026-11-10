@@ -93,7 +93,7 @@ export class NeonArenaEngine {
         const dx = e.clientX - active.x, dz = e.clientY - active.y, distance = Math.max(38, Math.hypot(dx, dz)), input = this.inputs[active.playerId]; input.x = dx / distance; input.z = dz / distance;
         active.element.style.setProperty('--stick-x', `${input.x * 24}px`); active.element.style.setProperty('--stick-y', `${input.z * 24}px`);
       } else if (active?.element.hasAttribute('data-na-fire') && this.modes[active.playerId] === 'modern') {
-        const dx = e.clientX - active.x, dz = e.clientY - active.y; const input = this.inputs[active.playerId], d = Math.hypot(dx, dz); input.aim = d > 8 ? Math.atan2(dz, dx) : null; active.element.style.setProperty('--stick-x', `${dx / Math.max(38, d) * 20}px`); active.element.style.setProperty('--stick-y', `${dz / Math.max(38, d) * 20}px`);
+        const dx = e.clientX - active.x, dz = e.clientY - active.y; const input = this.inputs[active.playerId], d = Math.hypot(dx, dz); input.aim = d > 8 ? this.screenAim(dz, dx) : null; active.element.style.setProperty('--stick-x', `${dx / Math.max(38, d) * 20}px`); active.element.style.setProperty('--stick-y', `${dz / Math.max(38, d) * 20}px`);
       } else if (e.pointerType === 'mouse') aimAt(e, active?.playerId ?? playerAt(e));
     }) as EventListener);
     const release = ((e: PointerEvent) => {
@@ -114,6 +114,10 @@ export class NeonArenaEngine {
     listen(canvas, 'blur', () => this.releaseInputs()); listen(window, 'blur', () => this.pause());
     listen(document, 'visibilitychange', () => { if (document.hidden) this.pause(); this.lastTime = 0; this.clock.reset(); });
     listen(canvas, 'webglcontextlost', ((e: Event) => { e.preventDefault(); this.simulation.transition('ERROR'); this.releaseInputs(); cancelAnimationFrame(this.raf); this.notify(this.simulation.snapshot()); this.fail('Se perdió el contexto gráfico. Reiniciá la escena para volver a jugar.'); }) as EventListener);
+  }
+  private screenAim(screenY: number, screenX: number) {
+    const projection = this.simulation.arena.id === 'colony' ? this.world.groundProjection : 1;
+    return Math.atan2(screenY / projection, screenX);
   }
   private releaseInputs() {
     const active = [...this.pointers]; this.pointers.clear();
@@ -159,7 +163,7 @@ export class NeonArenaEngine {
       const pads = this.pads.sample(rawPads, this.simulation.players.length);
       if (pads.disconnected && ['PLAYING', 'WAVE_TRANSITION'].includes(this.simulation.phase)) this.pause();
       else if (pads.inputs.some(p => p.pause)) this.togglePause();
-      pads.inputs.forEach((p, i) => { if (p.shock) this.simulation.shock(i); if (p.cycle) this.cycle(i); if (this.modes[i] === 'modern' && p.aim !== null) this.inputs[i].aim = p.aim; });
+      pads.inputs.forEach((p, i) => { if (p.shock) this.simulation.shock(i); if (p.cycle) this.cycle(i); if (this.modes[i] === 'modern' && p.aim !== null) this.inputs[i].aim = this.screenAim(Math.sin(p.aim), Math.cos(p.aim)); });
       const s = this.simulation;
       const updateStart = performance.now();
       this.clock.advance(delta, () => {
