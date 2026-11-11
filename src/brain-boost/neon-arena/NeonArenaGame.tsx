@@ -33,6 +33,13 @@ const weaponMarks: Record<WeaponId, string> = {
 };
 const menuViews = { mission: 'Misión', arsenal: 'Arsenal', settings: 'Ajustes' } as const;
 type MenuView = keyof typeof menuViews;
+const menuIcons = { mission: Crosshair, arsenal: Boxes, settings: Settings };
+const sectorArt = [
+  'M0 66h22V47h24V35h12v31h16V23h20V8h11v38h8V20h9v42h18v28H0z M7 78h61 M28 58h10 M77 37h13 M77 46h13 M100 69h32',
+  'M5 88c5-18 16-19 26-20 0-30 33-39 43-5 5-12 10-20 24-17 9 2 12 9 16 16 12-11 24-4 27 9v19z M80 0l8 25 23 8 13 16 M105 0l7 12 20 9 M32 62l8-6 M45 73l7-6 M86 65l6-6 M106 73l4-5',
+  'M36 0v15l18 13v10 M123 0v15l-18 13v10 M27 0v20l17 14 M130 0v20l-16 14 M27 89h105l-12-13H39z M54 72c-12-15 9-43 23-43 14 0 35 28 23 43-10 10-36 10-46 0z M73 51l5 6 M87 60l5 5',
+  'M8 90l23-24h20l7-15h13V0h10v51h13V0h10v51h13l7 15h10l6 24z M17 84h108 M46 75h66 M64 61h44 M84 67V41 M94 69V32',
+] as const;
 function MarineControls({ marine, active, onShock, coop }: { marine: Snapshot['marines'][number]; active: boolean; onShock: () => void; coop: boolean }) {
   return <div className="na-combat-controls" hidden={!active || !marine.alive}>
     <div className="na-joystick" data-na-stick="" data-na-player={marine.id} aria-label={`Joystick de movimiento P${marine.id + 1}`}><span /><small>MOVER {coop ? `P${marine.id + 1}` : ''}</small></div>
@@ -167,27 +174,32 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
       {metrics && diagnostics && <output className="na-diagnostics">{Math.round(metrics.fps)} FPS · p95 {metrics.frameP95.toFixed(1)}ms · CPU update {metrics.updateMs.toFixed(1)}ms / render {metrics.renderMs.toFixed(1)}ms<br />{metrics.calls} draws · {metrics.triangles} tris · G {metrics.geometries} / T {metrics.textures} · {metrics.enemies} enemigos</output>}
       {notice && <div className="na-notice" role="status">{notice}</div>}
       {snapshot.phase === 'WAVE_TRANSITION' && !error && <div className="na-wave" role="status"><b>OLEADA {snapshot.wave} SUPERADA</b><small>{coop ? 'Los marines caídos regresan con 35 de salud.' : 'Respirá. La siguiente horda se acerca.'}</small><em>REARME DISPONIBLE · REVISÁ TU ARSENAL ABAJO</em></div>}
-      {menuOpen && <div className="na-overlay"><section className="na-menu" aria-label="Menú de Neon Arena">
+      {menuOpen && <div className="na-overlay"><section className="na-menu" data-cabinet={lobby} aria-label="Menú de Neon Arena">
         <header className="na-menu-header">
-          <p className="na-eyebrow">{error ? 'Sistema gráfico' : 'Nightmare Protocolo · Virus Survivor'}</p>
+          <p className="na-eyebrow">{error ? 'Sistema gráfico' : 'OriginX Foundation · Nightmare Protocolo · Virus Survivor'}</p>
+          {lobby && <span className="na-cabinet-title">Neon Arena</span>}
           <h4>{error ? 'Escena no disponible' : paused ? 'En pausa' : snapshot.phase === 'GAME_OVER' ? 'La horda ganó' : 'Sobreviví al nido'}</h4>
         </header>
         {(lobby || paused) && <nav className="na-menu-nav" aria-label="Vistas del menú">
-          {visibleViews.map(view => <button key={view} type="button" aria-pressed={menuView === view} onClick={() => setMenuView(view)}>{menuViews[view]}</button>)}
+          {visibleViews.map(view => {
+            const Icon = menuIcons[view];
+            return <button key={view} type="button" aria-pressed={menuView === view} onClick={() => setMenuView(view)}>
+              <Icon size={16} aria-hidden="true" />{menuViews[view]}
+            </button>;
+          })}
         </nav>}
         <div className="na-menu-body" key={menuView}>
           {(menuView === 'mission' || (!lobby && !paused)) && <>
-            {lobby ? <div className="na-brief">
-              <div>
-                <p>{coop ? 'Dos marines en pantalla dividida.' : 'Entrá a la colonia y sobreviví a la horda.'}</p>
-                <label className="na-mode">Jugadores <select aria-label="Cantidad de jugadores" value={playerCount} onChange={e => changeCount(Number(e.target.value) as 1 | 2)}><option value={1}>Individual</option><option value={2}>Cooperativo local · 2 jugadores</option></select></label>
-                <p className="na-menu-record">Récord {coop ? 'cooperativo' : 'individual'} <b>{best}</b> · {progress.unlocked.length}/5 armas</p>
-              </div>
+            {lobby ? <>
               <ol className="na-campaign" aria-label="Ruta de la colonia">{campaign.map(({ name, condition, encounter }, index) => <li key={name} data-sector={index} title={condition}>
-                <span>0{index + 1}</span><b>{name}</b>
+                <svg className="na-sector-art" viewBox="0 0 140 90" aria-hidden="true">
+                  <path d={sectorArt[index]} fill="currentColor" fillOpacity=".18" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                </svg>
+                <b>{name}</b>
                 <small>Ola {encounter.wave} · {encounter.name}</small>
               </li>)}</ol>
-            </div> : <>
+              <p className="na-menu-record">Récord {coop ? 'cooperativo' : 'individual'} <b>{best}</b> · {progress.unlocked.length}/5 armas</p>
+            </> : <>
               <p>{error || (snapshot.phase === 'GAME_OVER' ? `${snapshot.score} puntos · ${snapshot.kills} criaturas · oleada ${snapshot.wave} · ${Math.floor(snapshot.elapsed)}s · ${snapshot.bossesKilled} jefes derrotados` : paused ? `${sector.name} · oleada ${snapshot.wave}` : 'Preparando la colonia…')}</p>
               {!error && snapshot.phase === 'GAME_OVER' && <p className="na-run-unlocks">{snapshot.unlockedThisRun.length ? `ARMAS OBTENIDAS · ${snapshot.unlockedThisRun.map(id => WEAPONS[id].name).join(' · ')}` : 'Tu arsenal sigue disponible para la próxima partida.'}</p>}
               {paused && <p className="na-menu-next">En campo {snapshot.activeEnemies} · Llegando {snapshot.pendingEnemies} · Próximo jefe {snapshot.nextEncounter.name} · ola {snapshot.nextEncounter.wave}</p>}
@@ -204,6 +216,10 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
           </>}
           {lobby && menuView === 'arsenal' && (coop ? <div className="na-coop-loadout">{snapshot.marines.map(marine => <label className="na-mode" key={marine.id}>Arma P{marine.id + 1}<select aria-label={`Arma inicial P${marine.id + 1}`} value={marine.weapon} onChange={e => choose(e.target.value as WeaponId, marine.id)}>{WEAPON_IDS.map(id => <option key={id} value={id} disabled={!progress.unlocked.includes(id)}>{WEAPONS[id].name}{!progress.unlocked.includes(id) ? ' · bloqueada' : ''}</option>)}</select></label>)}</div> : <div className="na-loadout" aria-label="Arsenal inicial">{WEAPON_IDS.map(id => <button type="button" key={id} disabled={!progress.unlocked.includes(id)} aria-pressed={snapshot.weapon === id} title={unlockDescriptions[id]} onClick={() => choose(id)}>{WEAPONS[id].name}{!progress.unlocked.includes(id) && <small>{unlockDescriptions[id]}</small>}</button>)}</div>)}
         </div>
+        {lobby && <div className="na-cabinet-mode" role="group" aria-label="Cantidad de jugadores">
+          <button type="button" aria-pressed={!coop} onClick={() => changeCount(1)}><User size={16} aria-hidden="true" />Individual</button>
+          <button type="button" aria-pressed={coop} onClick={() => changeCount(2)}><Users size={16} aria-hidden="true" />Cooperativo</button>
+        </div>}
         <div className="na-menu-actions"><button ref={startButton} type="button" className="na-primary" disabled={!error && snapshot.phase === 'LOADING'} onClick={error || snapshot.phase === 'GAME_OVER' ? restart : snapshot.phase === 'PAUSED' ? () => engine.current?.togglePause() : start}>{error ? 'Reintentar escena' : snapshot.phase === 'GAME_OVER' ? 'Nueva partida' : snapshot.phase === 'PAUSED' ? 'Reanudar partida' : snapshot.phase === 'LOADING' ? 'Cargando escena…' : 'Iniciar supervivencia →'}</button><button type="button" onClick={exit}>Volver a Nightmare Protocolo</button></div>
       </section></div>}
     </div>

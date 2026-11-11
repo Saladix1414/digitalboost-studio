@@ -95,7 +95,9 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
     line(points, '#171323', 1.45);
     line(points, '#6d587088', 1.13);
     line(points, '#24202e', .94);
-    line(points, color, .17);
+    line(points, '#b0a3b037', .65);
+    line(points, '#24202e', .52);
+    line(points, color, .19);
   };
   conduit([[-edge, -8], [-11, -8], [-4, -15], [-4, -edge]], '#669ba9');
   conduit([[10, -edge], [10, -10], [17, -3], [edge, -3]], '#bd885d');
@@ -235,7 +237,10 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
         ctx.fillStyle = '#211e30';
         ctx.fillRect(-.76, reach * .92 - .55, 1.52, .4);
         ctx.fillStyle = signal;
-        for (let step = 0; step < 5; step++) ctx.fillRect(-.63 + step * .25, reach * .92 - .42, .15, .1);
+        for (let step = 0; step < 5; step++) {
+          const markX = -.67 + step * .29, markZ = reach * .92 - .52;
+          line([[markX, markZ], [markX + .19, markZ + .3]], signal, .12);
+        }
         ctx.restore();
       }
     } else if (kind === 'coolant') {
