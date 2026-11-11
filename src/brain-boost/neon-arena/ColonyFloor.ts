@@ -26,51 +26,38 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
   };
 
   const deck = ctx.createLinearGradient(-edge, -edge, edge, edge);
-  deck.addColorStop(0, '#343b48');
-  deck.addColorStop(.55, '#383041');
-  deck.addColorStop(1, '#44364b');
+  deck.addColorStop(0, '#302d3c');
+  deck.addColorStop(.52, '#403744');
+  deck.addColorStop(1, '#302b3d');
   ctx.fillStyle = deck;
   ctx.fillRect(-arena.floorSize / 2, -arena.floorSize / 2, arena.floorSize, arena.floorSize);
 
-  // Wide pools of reflected color are baked into the same floor texture.
-  for (const { x, z, kind } of arena.obstacles) {
-    if (kind !== 'reactor' && kind !== 'coolant') continue;
-    const radius = kind === 'reactor' ? 8.5 : 5;
-    const pool = ctx.createRadialGradient(x, z, .5, x, z, radius);
-    const reflection = kind === 'reactor' ? COLONY_REACTOR_COLORS[sector] ?? COLONY_REACTOR_COLORS[0] : '#57c3bc';
-    pool.addColorStop(0, `${reflection}87`);
-    pool.addColorStop(.48, `${reflection}26`);
-    pool.addColorStop(1, '#ffffff00');
-    ctx.fillStyle = pool;
-    ctx.fillRect(x - radius, z - radius, radius * 2, radius * 2);
-  }
-
-  // Long staggered plates keep the open lanes quieter than the machinery.
+  // Staggered steel plates alternate dimensions without filling the lanes with detail.
   let seed = 713;
   const random = () => {
     seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
     return seed / 4294967296;
   };
-  for (let row = 0; row < 15; row++) {
-    const z = -28 + row * 4;
-    for (let col = 0; col < 9; col++) {
-      const x = -33 + col * 7 + (row % 2) * 3.5;
+  for (let row = 0, z = -29; z < 29; row++) {
+    const height = row % 4 === 0 ? 3.1 : 4.1;
+    for (let col = 0, x = -33 + (row % 2) * 2.5; x < 29; col++) {
+      const width = [4.2, 6.3, 5.15, 7.25][(col + row * 3) % 4];
       ctx.fillStyle = random() > .4 ? '#a4b3d10b' : '#09081522';
-      ctx.fillRect(x + .07, z + .08, 6.86, 3.84);
-      line([[x, z + 3.9], [x, z], [x + 7, z]], '#131421b5', .09);
-      line([[x + .13, z + 3.75], [x + .13, z + .14], [x + 6.7, z + .14]], '#ced3e017', .055);
+      ctx.fillRect(x + .07, z + .08, width - .14, height - .16);
+      line([[x, z + height - .1], [x, z], [x + width, z]], '#131421b5', .09);
+      line([[x + .13, z + height - .25], [x + .13, z + .14], [x + width - .3, z + .14]], '#ced3e017', .055);
       ctx.fillStyle = '#171420';
-      for (const dx of [.29, 6.58]) for (const dz of [.32, 3.55]) {
+      for (const dx of [.29, width - .42]) for (const dz of [.32, height - .45]) {
         ctx.fillRect(x + dx, z + dz, .13, .13);
       }
       ctx.fillStyle = '#b9acc066';
-      for (const dx of [.29, 6.58]) for (const dz of [.32, 3.55]) {
+      for (const dx of [.29, width - .42]) for (const dz of [.32, height - .45]) {
         ctx.fillRect(x + dx + .015, z + dz, .09, .045);
       }
-      const scratchX = x + 1 + random() * 4, scratchZ = z + .8 + random() * 2;
+      const scratchX = x + 1 + random() * (width - 2), scratchZ = z + .8 + random() * 2;
       line([[scratchX, scratchZ], [scratchX + .62, scratchZ + .09]], '#c0aec033', .045);
       for (let i = 0; i < 9; i++) {
-        const fleckX = x + .23 + random() * 6.55, fleckZ = z + .2 + random() * 3.55;
+        const fleckX = x + .23 + random() * (width - .45), fleckZ = z + .2 + random() * (height - .45);
         ctx.fillStyle = i % 3 ? '#140e201c' : '#dbc0b820';
         ctx.fillRect(fleckX, fleckZ, .07 + random() * .2, .04 + random() * .08);
       }
@@ -85,7 +72,9 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
           ctx.fillRect(x + .86 + slot * .23, z + 2.31, .065, .45);
         }
       }
+      x += width;
     }
+    z += height;
   }
 
   const serviceBay = (outline: readonly Point[], fill: string, seam: string) => {
@@ -110,9 +99,25 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
     line(points, '#24202e', .52);
     line(points, color, .19);
   };
-  conduit([[-edge, -8], [-11, -8], [-4, -15], [-4, -edge]], '#68aeb5');
-  conduit([[10, -edge], [10, -10], [17, -3], [edge, -3]], '#c48756');
-  conduit([[-edge, 10], [-12, 10], [-7, 15], [5, 15], [12, 9], [edge, 9]], '#a181ad');
+  conduit([[-edge, -8], [-11, -8], [-4, -15], [-4, -edge]], '#669ba9');
+  conduit([[10, -edge], [10, -10], [17, -3], [edge, -3]], '#bd885d');
+  conduit([[-edge, 10], [-12, 10], [-7, 15], [5, 15], [12, 9], [edge, 9]], '#9778a8');
+
+  // Cross-light falls over plate seams and painted utility channels.
+  // Wide pools of reflected color are baked into the same floor texture.
+  for (const { x, z, kind } of arena.obstacles) {
+    if (kind !== 'reactor' && kind !== 'coolant') continue;
+    const radius = kind === 'reactor' ? 8.6 : 5.8;
+    const pool = ctx.createRadialGradient(x + .55, z + 1, .6, x + .55, z + 1, radius);
+    const reflection = kind === 'reactor' ? COLONY_REACTOR_COLORS[sector] ?? COLONY_REACTOR_COLORS[0] : '#57c3bc';
+    pool.addColorStop(0, `${reflection}76`);
+    pool.addColorStop(.53, `${reflection}2e`);
+    pool.addColorStop(1, '#ffffff00');
+    ctx.fillStyle = pool;
+    ctx.fillRect(x - radius, z - radius, radius * 2, radius * 2);
+  }
+
+
 
   ctx.strokeStyle = '#151424';
   ctx.lineWidth = 1.55;
@@ -183,7 +188,7 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
   for (const { x, z, radius, kind } of arena.obstacles) {
     if (!kind) continue;
     const { base, rim, signal } = PLATFORMS[kind];
-    const reach = radius + (kind === 'reactor' ? 2.2 : 1.15);
+    const reach = radius + (kind === 'reactor' ? 2.45 : 1.05);
     const outline = (r: number): Point[] => {
       if (kind === 'reactor') {
         return Array.from({ length: 8 }, (_, i) => {
@@ -204,13 +209,16 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
     line(outline(reach), rim, .14, true);
     line(outline(reach - .32), rim, .06, true);
     // Soft contact shadow sits under the fittings without a hard pedestal outline.
-    const shadow = ctx.createRadialGradient(.15, .21, radius * .32, .15, .21, radius * 1.39);
-    shadow.addColorStop(0, '#0f1017b8');
+    const shadow = ctx.createRadialGradient(.34, .35, radius * .42, .34, .35, radius * 1.49);
+    shadow.addColorStop(0, '#0f1017e8');
     shadow.addColorStop(.53, '#0f101779');
     shadow.addColorStop(1, '#0f101700');
     ctx.fillStyle = shadow;
     ctx.fillRect(-radius * 1.4, -radius * 1.4, radius * 3, radius * 3);
     for (const direction of [-1, 1]) {
+      const side = direction * (reach * .63);
+      line([[side, -.55], [side, .55]], '#0f0e17b0', .22);
+      line([[side, -.48], [side, .48]], '#d6b5c350', .06);
       for (let mark = 0; mark < 4; mark++) {
         const sx = -.82 + mark * .4, sz = direction * (reach * .78 + .34);
         line([[sx, sz], [sx + .24, sz + .14]], '#1e1826', .19);
@@ -303,7 +311,7 @@ export function paintColonyFloor(ctx: CanvasRenderingContext2D, arena: ArenaDefi
     if (reactor) {
       const { x, z } = reactor;
       const fracture: Point[] = [[x + 1, z - 1], [x + 3, z - 2], [x + 4, z - 1.6], [x + 6, z - 3.4],
-        [x + 7, z - 3], [x + 9, z - 4.2], [x + 10, z - 4]];
+        [x + 8, z - 3], [x + 9, z - 4.2], [x + 10, z - 4]];
       line(fracture, '#111a2c', .65);
       line(fracture, '#80bbd99c', .16);
     }

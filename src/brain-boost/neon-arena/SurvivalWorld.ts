@@ -179,7 +179,7 @@ export class SurvivalWorld {
   }
   private colonyFloor() {
     const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = 1024;
+    canvas.width = canvas.height = 2048;
     paintColonyFloor(canvas.getContext('2d')!, this.arena, canvas.width);
     const map = new THREE.CanvasTexture(canvas);
     map.colorSpace = THREE.SRGBColorSpace;
@@ -187,7 +187,8 @@ export class SurvivalWorld {
     return this.mat(new THREE.MeshBasicMaterial({ map, toneMapped: false }));
   }
   private buildColonyCover(box: THREE.BoxGeometry, coil: THREE.TorusGeometry, dark: THREE.Material) {
-    const copper = this.standard(0xba794d), violet = this.standard(0x795385), steel = this.standard(0x526c7f);
+    const copper = this.standard(0xa97958), violet = this.standard(0x674575), steel = this.standard(0x606578);
+    const glassFrame = this.standard(0x333244);
     const tube = this.geo(new THREE.CylinderGeometry(1, 1, 1, 12));
     const casing = this.geo(new THREE.CylinderGeometry(.88, 1, 1, 8));
     // Stretch an octagonal prism into a square plate with clipped corners.
@@ -207,15 +208,16 @@ export class SurvivalWorld {
     const colors = new Float32Array(positions.count * 3);
     for (let i = 0; i < positions.count; i++) {
       const height = positions.getY(i) + .5, angle = Math.atan2(positions.getZ(i), positions.getX(i));
-      const band = .5 + .5 * Math.sin(height * 21 + Math.sin(angle * 5) * 1.7);
+      const band = .5 + .5 * Math.sin(height * 26 + Math.sin(angle * 5 + height * 9) * 2.3);
+      const cells = .5 + .5 * Math.sin(angle * 13 - height * 21) * Math.cos(angle * 17 + height * 45);
       const reflection = Math.pow(Math.max(0, Math.cos(angle - .9)), 8);
-      const intensity = .27 + .39 * band + .34 * reflection;
+      const intensity = .31 + .25 * band + .16 * cells + .28 * reflection;
       colors.set([intensity, intensity, intensity], i * 3);
     }
     chamber.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const light = (color: THREE.ColorRepresentation, vertexColors = false) => this.mat(new THREE.MeshBasicMaterial({ color, vertexColors, toneMapped: false }));
-    const coolant = light(0x82fff3, true), orchid = light(0xb49ac8), gold = light(0xffbb66);
+    const coolant = light(0x68ffe9, true), orchid = light(0xb49ac8), gold = light(0xffb662);
     const scenery = new Map<THREE.Material, THREE.Mesh[]>();
     for (const { x, z, radius: r, kind } of this.arena.obstacles) {
       const machine = new THREE.Group();
@@ -223,6 +225,7 @@ export class SurvivalWorld {
       machine.position.set(x, 0, z);
       this.scene.add(machine);
       if (kind === 'reactor') {
+        machine.scale.y = 1.52;
         this.mesh(casing, dark, machine, 0, .16, 0, r, .32, r);
         this.mesh(casing, steel, machine, 0, .4, 0, r * .89, .3, r * .89);
         const core = this.mesh(chamber, light(COLONY_REACTOR_COLORS[0], true), machine, 0, 1.37, 0, r * .62, 1.75, r * .62);
@@ -235,12 +238,19 @@ export class SurvivalWorld {
         }
         for (let i = 0; i < 6; i++) {
           const angle = Math.PI * i / 3, dx = Math.cos(angle), dz = Math.sin(angle);
-          this.mesh(box, dark, machine, dx * r * .67, 1.38, dz * r * .67, r * .2, 1.58, r * .14).rotation.y = -angle;
+          this.mesh(box, glassFrame, machine, dx * r * .67, 1.38, dz * r * .67, r * .19, 1.58, r * .13).rotation.y = -angle;
           this.mesh(box, steel, machine, dx * r * .77, .6, dz * r * .77, r * .21, .46, r * .18).rotation.y = -angle;
           this.mesh(box, copper, machine, dx * r * .76, 1.89, dz * r * .76, r * .13, .28, r * .14).rotation.y = -angle;
-          this.mesh(box, gold, machine, dx * r * .87, .57, dz * r * .87, r * .04, .085, r * .12).rotation.y = -angle;
+          const bay = this.mesh(box, dark, machine, dx * r * .93, .39, dz * r * .93, r * .07, .23, r * .29);
+          bay.rotation.y = -angle;
+          for (const offset of [-.075, 0, .075]) {
+            this.mesh(box, gold, machine, r * (dx * .977 - dz * offset), .4,
+              r * (dz * .977 + dx * offset), r * .016, .108, r * .048).rotation.y = -angle;
+          }
+          this.mesh(box, copper, machine, dx * r * .7, 2.21, dz * r * .7, r * .08, .08, r * .12).rotation.y = -angle;
         }
       } else if (kind === 'coolant') {
+        machine.scale.y = 1.55;
         this.mesh(plate, dark, machine, 0, .12, 0, r * 1.57, .24, r * 1.15);
         this.mesh(plate, steel, machine, 0, .34, 0, r * 1.43, .27, r * .98);
         this.mesh(box, dark, machine, 0, 1.93, 0, r * .9, .19, r * .24);
@@ -251,17 +261,22 @@ export class SurvivalWorld {
             this.mesh(casing, dark, machine, offset, height, 0, r * .3, .24, r * .3);
             this.mesh(tube, steel, machine, offset, height + .08, 0, r * .28, .09, r * .28);
           }
-          this.mesh(tube, steel, machine, offset, 1.91, 0, r * .13, .33, r * .13);
+          this.mesh(tube, steel, machine, offset, 2.02, 0, r * .15, .46, r * .15);
+          this.mesh(tube, glassFrame, machine, offset, 2.22, -.19, r * .145, .44, r * .145).rotation.x = Math.PI / 2;
+          this.mesh(tube, steel, machine, offset, 2.22, -.4, r * .18, .09, r * .18).rotation.x = Math.PI / 2;
           for (const brace of [-1, 1]) {
             this.mesh(box, steel, machine, offset + brace * r * .17, 1.15, r * .15, r * .045, 1.1, r * .08);
           }
           this.mesh(box, copper, machine, side * r * .52, .29, r * .51, r * .15, .12, .09);
         }
-        this.mesh(box, orchid, machine, 0, .34, r * .51, r * .29, .07, .06);
+        this.mesh(box, dark, machine, 0, .39, r * .49, r * .57, .25, r * .15);
+        this.mesh(box, coolant, machine, 0, .4, r * .566, r * .34, .06, .025);
+        this.mesh(box, gold, machine, 0, .18, r * .578, r * .19, .044, .025);
       } else {
         machine.rotation.y = x > 0 ? -.16 : .16;
         this.mesh(plate, dark, machine, 0, .13, 0, r * 1.55, .26, r * 1.17);
         this.mesh(plate, violet, machine, 0, .72, 0, r * 1.47, 1.03, r * 1.08);
+        this.mesh(box, glassFrame, machine, 0, .63, 0, r * 1.5, .68, r * .88);
         this.mesh(plate, dark, machine, 0, 1.24, 0, r * 1.53, .15, r * 1.12);
         this.mesh(plate, violet, machine, 0, 1.34, 0, r * 1.34, .08, r * .94);
         for (const end of [-1, 1]) {
@@ -270,8 +285,13 @@ export class SurvivalWorld {
             this.mesh(box, steel, machine, 0, .73, end * r * .572, r * 1.15, .067, .047).rotation.z = side * .34;
             this.mesh(box, copper, machine, side * r * .61, .73, end * r * .46, r * .14, 1.13, r * .14);
             this.mesh(box, steel, machine, side * r * .46, 1.39, end * r * .34, r * .22, .045, r * .19);
+            this.mesh(box, copper, machine, side * r * .45, 1.415, end * r * .38, r * .17, .04, r * .10);
+            this.mesh(box, dark, machine, side * r * .47, 1.442, end * r * .38, .065, .02, .065);
           }
           this.mesh(box, gold, machine, 0, .33, end * r * .551, r * .19, .063, .025);
+          for (const offset of [-.37, -.25, -.13, .13, .25, .37]) {
+            this.mesh(box, copper, machine, offset * r, .27, end * r * .558, r * .06, .16, .022).rotation.z = end * -.36;
+          }
         }
         for (const stripe of [-1, 0, 1]) {
           this.mesh(box, orchid, machine, stripe * r * .18, 1.387, 0, r * .068, .018, r * .29).rotation.y = .55;
@@ -289,6 +309,12 @@ export class SurvivalWorld {
     for (const [material, parts] of scenery) {
       const pieces = parts.map(part => {
         const geometry = part.geometry.index ? part.geometry.toNonIndexed() : part.geometry.clone();
+        // Only the energy paint reads vertex colors. Solid paints can then batch
+        // clipped plates and ordinary meshes without mismatched attributes.
+        if (!(material instanceof THREE.MeshBasicMaterial && material.vertexColors)) geometry.deleteAttribute('color');
+        else if (!geometry.hasAttribute('color')) {
+          geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(geometry.getAttribute('position').count * 3).fill(1), 3));
+        }
         return geometry.applyMatrix4(part.matrixWorld);
       });
       const merged = mergeGeometries(pieces);
@@ -302,8 +328,8 @@ export class SurvivalWorld {
     const arcade = this.arena.id === 'colony';
     this.scene.background = new THREE.Color(arcade ? 0x1d1828 : 0x03090f);
     this.scene.fog = new THREE.FogExp2(arcade ? 0x272033 : 0x06111a, arcade ? .004 : .008);
-    this.scene.add(new THREE.HemisphereLight(arcade ? 0xffe7d9 : 0xa9c9d7, arcade ? 0x705871 : 0x202a24, arcade ? 2 : 1.6));
-    const key = new THREE.DirectionalLight(arcade ? 0xffebda : 0xc2e4f5, arcade ? 2.8 : 2.6); key.position.set(-12, 30, 9); this.scene.add(key, this.torch, this.flash);
+    this.scene.add(new THREE.HemisphereLight(arcade ? 0xffe7d9 : 0xa9c9d7, arcade ? 0x705871 : 0x202a24, arcade ? 1.35 : 1.6));
+    const key = new THREE.DirectionalLight(arcade ? 0xffebda : 0xc2e4f5, arcade ? 3.05 : 2.6); key.position.set(-12, 30, 9); this.scene.add(key, this.torch, this.flash);
     const box = this.geo(new THREE.BoxGeometry(1, 1, 1)), sphere = this.geo(new THREE.SphereGeometry(1, 10, 7));
     const shell = this.standard(0xffffff), olive = this.standard(arcade ? 0x62515a : 0x5d6733), metal = this.standard(arcade ? 0x575064 : 0x3b4c49), dark = this.standard(arcade ? 0x2a2238 : 0x17221b);
     const cyan = this.standard(0x88e7ff, 0x00bfff, .8), amber = this.standard(0xffc86c, 0xff6313, 1);
