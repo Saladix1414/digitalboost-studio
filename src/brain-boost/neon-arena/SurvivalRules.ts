@@ -8,7 +8,8 @@ export const WEAPONS: Record<WeaponId, { name: string; interval: number; damage:
   rail: { name: 'Rail Lance', interval: .9, damage: 110, speed: 75, life: .55, pellets: 1, spread: 0, pierce: 4, reserve: 28 },
 };
 export const WEAPON_IDS = Object.keys(WEAPONS) as WeaponId[];
-export const PROGRESS_KEY = 'digitalboost:brain-boost:neon-arena:arsenal:v1';
+export const PROGRESS_KEY = 'originx:brain-boost:neon-arena:arsenal:v1';
+export const LEGACY_PROGRESS_KEY = 'digitalboost:brain-boost:neon-arena:arsenal:v1';
 export type Progress = { version: 1; unlocked: WeaponId[]; bosses: string[] };
 export function normalizeProgress(raw: unknown): Progress {
   const p = raw && typeof raw === 'object' ? raw as Record<string, unknown> : {};
@@ -17,13 +18,31 @@ export function normalizeProgress(raw: unknown): Progress {
   const bosses = p.version === 1 && Array.isArray(p.bosses) ? [...new Set(p.bosses.filter((v): v is string => typeof v === 'string' && ['brood', 'maw', 'sovereign'].includes(v)))] : [];
   return { version: 1, unlocked, bosses };
 }
-export function readProgress(storage?: Pick<Storage, 'getItem'>): Progress {
-  try { return normalizeProgress(JSON.parse(storage?.getItem(PROGRESS_KEY) || 'null')); } catch { return normalizeProgress(null); }
+type ProgressStorage = Pick<Storage, 'getItem'> & Partial<Pick<Storage, 'setItem'>>;
+function parseProgress(raw: string | null): Progress | null {
+  if (!raw) return null;
+  try { return normalizeProgress(JSON.parse(raw)); } catch { return null; }
+}
+export function readProgress(storage?: ProgressStorage): Progress {
+  let current: Progress | null = null, legacy: Progress | null = null;
+  try {
+    current = parseProgress(storage?.getItem(PROGRESS_KEY) ?? null);
+    legacy = parseProgress(storage?.getItem(LEGACY_PROGRESS_KEY) ?? null);
+  } catch { return normalizeProgress(null); }
+  const merged = current && legacy
+    ? normalizeProgress({ version: 1, unlocked: [...current.unlocked, ...legacy.unlocked], bosses: [...current.bosses, ...legacy.bosses] })
+    : current ?? legacy ?? normalizeProgress(null);
+  if (legacy && storage?.setItem) try { storage.setItem(PROGRESS_KEY, JSON.stringify(merged)); } catch { /* Migration is best effort. */ }
+  return merged;
 }
 export function saveProgress(progress: Progress, storage?: Pick<Storage, 'getItem' | 'setItem'>) {
   const old = readProgress(storage);
   const merged = normalizeProgress({ version: 1, unlocked: [...old.unlocked, ...progress.unlocked], bosses: [...old.bosses, ...progress.bosses] });
-  try { storage?.setItem(PROGRESS_KEY, JSON.stringify(merged)); } catch { /* In-memory progress remains valid. */ }
+  try {
+    const serialized = JSON.stringify(merged);
+    storage?.setItem(PROGRESS_KEY, serialized);
+    storage?.setItem(LEGACY_PROGRESS_KEY, serialized);
+  } catch { /* In-memory progress remains valid. */ }
   return merged;
 }
 export const OBSTACLES = LEGACY_ARENA.obstacles;

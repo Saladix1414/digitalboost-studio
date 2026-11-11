@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { CONFIG, FixedClock, GameSimulation, createEnemy } from '../../src/brain-boost/neon-arena/GameSimulation.ts';
-import { OBSTACLES, WEAPONS, PROGRESS_KEY, bossForWave, nextBossEncounter, supplyForRoll, normalizeProgress, readProgress, saveProgress } from '../../src/brain-boost/neon-arena/SurvivalRules.ts';
+import { LEGACY_PROGRESS_KEY, OBSTACLES, WEAPONS, PROGRESS_KEY, bossForWave, nextBossEncounter, supplyForRoll, normalizeProgress, readProgress, saveProgress } from '../../src/brain-boost/neon-arena/SurvivalRules.ts';
 function game(progress?: unknown) { const s = new GameSimulation(72, progress); s.ready(); s.start(); return s; }
 function run(s: GameSimulation, seconds: number) { for (let i = 0; i < seconds * 60; i++) s.step(); }
 const all = { version: 1, unlocked: ['machinegun', 'shotgun', 'flame', 'cascade', 'rail'], bosses: [] };
@@ -75,6 +75,13 @@ test('corrupt progress fails safe, merges without losing unlocks and supports un
   assert.deepEqual(readProgress({ getItem: () => '{bad' }).unlocked, ['machinegun']);
   assert.doesNotThrow(() => saveProgress(normalizeProgress(all), { getItem: () => { throw Error(); }, setItem: () => { throw Error(); } }));
   assert.equal(normalizeProgress({ version: 90, unlocked: ['rail'] }).unlocked.length, 1);
+});
+test('OriginX imports legacy Neon Arena progress without losing unlocks', () => {
+  const values = new Map<string, string>([[LEGACY_PROGRESS_KEY, JSON.stringify({ version: 1, unlocked: ['machinegun', 'flame'], bosses: ['brood'] })]]);
+  const storage = { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => { values.set(key, value); } };
+  const migrated = readProgress(storage);
+  assert.deepEqual(migrated, { version: 1, unlocked: ['machinegun', 'flame'], bosses: ['brood'] });
+  assert.deepEqual(JSON.parse(values.get(PROGRESS_KEY)!), migrated);
 });
 test('stress remains bounded and reproducible for seeded input; catch-up is capped', () => {
   const a = game(all), b = game(all); for (let i = 0; i < 12000; i++) { if (i % 90 === 0) { for (const s of [a, b]) { s.setInput(Math.cos(i), Math.sin(i), true); s.shock(); } } a.step(); b.step(); assert.ok(a.enemies.length <= a.maxEnemies); assert.ok(a.projectiles.length <= CONFIG.maxProjectiles); assert.ok(a.events.length <= CONFIG.maxEvents); assert.ok(a.pickups.length <= CONFIG.maxPickups); }

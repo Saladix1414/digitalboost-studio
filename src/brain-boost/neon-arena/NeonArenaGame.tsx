@@ -13,11 +13,25 @@ import { useImmersiveArena } from './useImmersiveArena';
 import './NeonArenaGame.css';
 const initial = new GameSimulation(undefined, null, undefined, 1, DEFAULT_ARENA).snapshot();
 type Snapshot = typeof initial;
-const BEST_KEY = 'digitalboost:brain-boost:neon-arena:best:v1';
-const COOP_BEST_KEY = 'digitalboost:brain-boost:neon-arena:best:coop:v1';
+const BEST_KEY = 'originx:brain-boost:neon-arena:best:v1';
+const COOP_BEST_KEY = 'originx:brain-boost:neon-arena:best:coop:v1';
+const LEGACY_BEST_KEY = 'digitalboost:brain-boost:neon-arena:best:v1';
+const LEGACY_COOP_BEST_KEY = 'digitalboost:brain-boost:neon-arena:best:coop:v1';
 const bestKey = (count: number) => count === 2 ? COOP_BEST_KEY : BEST_KEY;
+const legacyBestKey = (count: number) => count === 2 ? LEGACY_COOP_BEST_KEY : LEGACY_BEST_KEY;
 function storage() { try { return window.localStorage; } catch { return undefined; } }
-function readBest(count = 1) { try { const n = Number(storage()?.getItem(bestKey(count))); return Number.isSafeInteger(n) && n >= 0 ? n : 0; } catch { return 0; } }
+function validBest(raw: string | null | undefined) { const n = Number(raw); return Number.isSafeInteger(n) && n >= 0 ? n : 0; }
+function writeBest(count: number, score: number) {
+  try { storage()?.setItem(bestKey(count), String(score)); storage()?.setItem(legacyBestKey(count), String(score)); } catch { /* Storage is optional. */ }
+}
+function readBest(count = 1) {
+  try {
+    const current = validBest(storage()?.getItem(bestKey(count))), legacy = validBest(storage()?.getItem(legacyBestKey(count)));
+    const best = Math.max(current, legacy);
+    if (legacy > current) storage()?.setItem(bestKey(count), String(best));
+    return best;
+  } catch { return 0; }
+}
 const unlockDescriptions: Record<WeaponId, string> = { machinegun: 'Disponible', shotgun: 'Eliminá 30 criaturas en una partida', flame: 'Derrotá a Brood Mother · oleada 5', cascade: 'Derrotá a Iron Maw · oleada 12', rail: 'Derrotá a Hive Sovereign · oleada 20' };
 let encounter = nextBossEncounter(1, false, DEFAULT_ARENA);
 const campaign = COLONY_SECTORS.map((sector, index) => {
@@ -115,7 +129,7 @@ export default function NeonArenaGame({ onExit }: { onExit: () => void }) {
   useEffect(() => {
     if (snapshot.phase !== 'GAME_OVER' || resultSaved.current) return;
     resultSaved.current = true; const next = Math.max(readBest(playerCount), snapshot.score); setBest(next);
-    try { storage()?.setItem(bestKey(playerCount), String(next)); } catch { /* Storage is optional. */ }
+    writeBest(playerCount, next);
     stopBrainBoostMusic('neon-arena'); playBrainBoostSfx('neon-arena', 'game-over');
   }, [snapshot.phase, snapshot.score, playerCount]);
   const changeCount = (count: 1 | 2) => { if (engine.current?.setPlayerCount(count)) { setPlayerCount(count); setBest(readBest(count)); } };
