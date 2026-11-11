@@ -12,6 +12,58 @@ const LEGACY_CAMERA = { rise: 48, setback: 8 };
 
 type MarineArmor = THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
 
+/** Leaf-shaped wing with an inked outline, bright membrane and a raised spine. */
+function spitterWingGeometry() {
+  const contour = [[0, 0], [-.27, -.24], [-.33, -.61], [-.18, -.9], [0, -1], [.18, -.9], [.33, -.61], [.27, -.24]];
+  const positions: number[] = [], colors: number[] = [], faces: number[] = [];
+  const ink = new THREE.Color(0x221c2d), membrane = new THREE.Color(0xcced70);
+  for (const [x, z] of contour) {
+    positions.push(x, -z * .48, z);
+    colors.push(ink.r, ink.g, ink.b);
+  }
+  for (const [x, z] of contour) {
+    const innerZ = -.48 + (z + .48) * .87;
+    positions.push(x * .8, .028 - innerZ * .48, innerZ);
+    colors.push(membrane.r, membrane.g, membrane.b);
+  }
+  positions.push(0, .35, -.47);
+  colors.push(.68, .8, .27);
+  for (let i = 0; i < contour.length; i++) {
+    const j = (i + 1) % contour.length, inner = i + contour.length, nextInner = j + contour.length;
+    faces.push(i, j, inner, j, nextInner, inner, inner, nextInner, 2 * contour.length);
+  }
+  const wing = new THREE.BufferGeometry();
+  wing.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  wing.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  wing.setIndex(faces);
+  return wing;
+}
+
+/** Five detached bars communicate a locked attack lane without implying area damage. */
+function directionalWarningGeometry() {
+  const pieces = Array.from({ length: 5 }, (_, index) => {
+    const depth = .09 + index * .012;
+    const piece = new THREE.BoxGeometry(1, .018, depth);
+    piece.translate(0, 0, .16 + index * .18);
+    return piece;
+  });
+  const warning = mergeGeometries(pieces);
+  pieces.forEach(piece => piece.dispose());
+  return warning;
+}
+
+/** The only expanding area ring represents the marine's real Shockwave radius. */
+function segmentedShockGeometry() {
+  const pieces = Array.from({ length: 12 }, (_, index) => {
+    const arc = new THREE.TorusGeometry(1, .045, 4, 5, Math.PI / 9);
+    arc.rotateZ(index * Math.PI / 6);
+    return arc;
+  });
+  const ring = mergeGeometries(pieces);
+  pieces.forEach(piece => piece.dispose());
+  return ring;
+}
+
 /** All world geometry is shared or instanced; combat is read-only here. */
 export class SurvivalWorld {
   readonly scene = new THREE.Scene();
@@ -28,13 +80,13 @@ export class SurvivalWorld {
   private body!: THREE.InstancedMesh; private heads!: THREE.InstancedMesh; private legs!: THREE.InstancedMesh; private plates!: THREE.InstancedMesh;
   private bossParts!: THREE.InstancedMesh;
   private thoraxes!: THREE.InstancedMesh; private feelers!: THREE.InstancedMesh; private eyes!: THREE.InstancedMesh; private elytra!: THREE.InstancedMesh; private cores!: THREE.InstancedMesh; private fangs!: THREE.InstancedMesh; private spines!: THREE.InstancedMesh; private sacs!: THREE.InstancedMesh; private reticles!: THREE.InstancedMesh; private fragments!: THREE.InstancedMesh;
-  private items!: THREE.InstancedMesh; private crosses!: THREE.InstancedMesh; private dropMedkits!: THREE.InstancedMesh; private dropArmor!: THREE.InstancedMesh; private dropAmmo!: THREE.InstancedMesh; private dropGrenades!: THREE.InstancedMesh; private bullets!: THREE.InstancedMesh; private warnings!: THREE.InstancedMesh;
+  private items!: THREE.InstancedMesh; private crosses!: THREE.InstancedMesh; private supplyRings?: THREE.InstancedMesh; private dropMedkits!: THREE.InstancedMesh; private dropArmor!: THREE.InstancedMesh; private dropAmmo!: THREE.InstancedMesh; private dropGrenades!: THREE.InstancedMesh; private bullets!: THREE.InstancedMesh; private warnings!: THREE.InstancedMesh; private impactSparks!: THREE.InstancedMesh;
   private stains!: THREE.InstancedMesh; private enemyShadows!: THREE.InstancedMesh; private blasts!: THREE.InstancedMesh; private trails!: THREE.LineSegments; private flame!: THREE.Group; private shock!: THREE.Mesh;
   private torch = new THREE.PointLight(0xbde9cf, 12, 14, 1.8); private flash = new THREE.PointLight(0xff9c35, 0, 9, 2);
   private lastTime = 0; private steam!: THREE.Points; private contact!: THREE.InstancedMesh;
   private contamination!: THREE.InstancedMesh; private roots!: THREE.InstancedMesh; private eggs!: THREE.InstancedMesh;
   private frames = Array.from({ length: 2 }, () => ({ width: 44, height: 44, follow: new THREE.Vector2(), lastPlayer: new THREE.Vector2(0, 3) }));
-  private marineViews: { body: THREE.Group; gun: THREE.Group; boots: THREE.Mesh[]; suit: THREE.MeshStandardMaterial; armor?: MarineArmor; torch: THREE.PointLight; flash: THREE.PointLight; flame: THREE.Group; shock: THREE.Mesh }[] = [];
+  private marineViews: { body: THREE.Group; gun: THREE.Group; boots: THREE.Mesh[]; suit: THREE.MeshStandardMaterial; armor?: MarineArmor; legs?: MarineArmor[]; visor?: THREE.Mesh; muzzle?: THREE.Mesh; torch: THREE.PointLight; flash: THREE.PointLight; flame: THREE.Group; shock: THREE.Mesh }[] = [];
   private corpses: { x: number; z: number; born: number; id: number }[] = []; private lastEvent = 0;
   private remains = true; private followTarget = new THREE.Vector2();
   private up = new THREE.Vector3(0, 1, 0); private flameAxis = new THREE.Vector3();
@@ -69,13 +121,20 @@ export class SurvivalWorld {
         else if (resource instanceof THREE.Material) this.materials.add(resource);
         else this.geometries.add(resource);
       });
-      armor.material.toneMapped = false;
+      const visorGeometry = this.geo(new THREE.BoxGeometry(1, 1, 1));
+      const visorPaint = this.mat(new THREE.MeshBasicMaterial({ color: 0x7ff5ff, toneMapped: false }));
       this.marineViews.forEach(view => {
         const model = armor.clone() as MarineArmor;
         model.material = this.mat(armor.material.clone());
         view.body.getObjectByName('fallback-armor')!.visible = false;
-        view.body.add(model);
-        view.armor = model;
+        for (const boot of view.boots) boot.visible = false;
+        for (const piece of view.gun.children) if (piece !== view.muzzle) piece.visible = false;
+        view.body.add(armor, leftLeg, rightLeg);
+        view.gun.add(rifle);
+        view.armor = armor;
+        view.legs = [leftLeg, rightLeg];
+        view.visor = this.mesh(visorGeometry, visorPaint, armor, 0, 1.76, .45, .31, .105, .055);
+        view.muzzle?.position.set(.13, 1.28, 1.55);
       });
       invalidate?.();
     } catch {
@@ -418,11 +477,12 @@ export class SurvivalWorld {
     this.dropGrenades = this.pool(this.geo(new THREE.SphereGeometry(1, 10, 7)), this.standard(0xff9138, 0x8b250b, .65), CONFIG.maxPickups);
     this.crosses = this.pool(box, this.standard(0xc6ff87, 0x559922, 1), CONFIG.maxPickups * 2);
     this.bullets = this.pool(sphere, this.mat(new THREE.MeshBasicMaterial({ color: 0xffffff })), CONFIG.maxProjectiles);
-    this.warnings = this.pool(this.geo(new THREE.RingGeometry(.88, 1, 32)), this.mat(new THREE.MeshBasicMaterial({ color: 0xff4a25, side: THREE.DoubleSide, transparent: true, opacity: .8 })), CONFIG.maxEnemies);
+    this.warnings = this.pool(this.geo(directionalWarningGeometry()), this.mat(new THREE.MeshBasicMaterial({ color: 0xff334f, transparent: true, opacity: .86, depthWrite: false, toneMapped: false })), CONFIG.maxEnemies);
+    this.impactSparks = this.pool(this.geo(new THREE.TetrahedronGeometry(1)), this.mat(new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false })), (CONFIG.maxEnemies + CONFIG.maxEvents) * 4);
     this.stains = this.pool(this.geo(new THREE.CircleGeometry(1, 9)), this.mat(new THREE.MeshBasicMaterial({ color: 0x542c1e, transparent: true, opacity: .48, depthWrite: false })), 80);
     this.enemyShadows = this.pool(this.geo(new THREE.CircleGeometry(1, 16)), this.mat(new THREE.MeshBasicMaterial({ color: 0x020608, transparent: true, opacity: .38, depthWrite: false })), CONFIG.maxEnemies);
     this.blasts = this.pool(sphere, this.mat(new THREE.MeshBasicMaterial({ color: 0xff9922, transparent: true, opacity: .4, depthWrite: false, blending: THREE.AdditiveBlending })), CONFIG.maxEvents);
-    this.shock = this.mesh(this.geo(new THREE.TorusGeometry(1, .04, 5, 64)), cyan, this.scene); this.shock.rotation.x = Math.PI / 2;
+    this.shock = this.mesh(this.geo(segmentedShockGeometry()), cyan, this.scene); this.shock.rotation.x = Math.PI / 2;
     // Layered flame: orange pressure envelope, hot yellow body and white core.
     // Separate meshes make the fire read as volume instead of a flat triangle.
     this.flame = new THREE.Group(); this.flame.name = 'flamethrower-fire'; this.scene.add(this.flame);
@@ -431,8 +491,11 @@ export class SurvivalWorld {
       this.mesh(this.geo(new THREE.ConeGeometry(1.95, 4.9, 12, 3, true)), this.mat(new THREE.MeshBasicMaterial({ color: 0xff9d18, transparent: true, opacity: .48, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })), this.flame),
       this.mesh(this.geo(new THREE.ConeGeometry(.92, 3.7, 10, 3, true)), this.mat(new THREE.MeshBasicMaterial({ color: 0xfff2a0, transparent: true, opacity: .78, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })), this.flame),
     ];
-    const lineGeo = this.geo(new THREE.BufferGeometry()); lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array((CONFIG.maxProjectiles + CONFIG.maxEnemies + 2) * 6), 3));
-    this.trails = new THREE.LineSegments(lineGeo, this.mat(new THREE.LineBasicMaterial({ color: 0xe4db9a, transparent: true, opacity: .65 }))); this.trails.frustumCulled = false; this.scene.add(this.trails);
+    const lineGeo = this.geo(new THREE.BufferGeometry());
+    const lineCapacity = (CONFIG.maxProjectiles + CONFIG.maxEnemies + 2) * 6;
+    lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(lineCapacity), 3));
+    lineGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(lineCapacity), 3));
+    this.trails = new THREE.LineSegments(lineGeo, this.mat(new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: .78 }))); this.trails.frustumCulled = false; this.scene.add(this.trails);
     this.marineViews.push({ body: this.marine, gun: this.gun, boots: this.boots, suit: this.suit, torch: this.torch, flash: this.flash, flame: this.flame, shock: this.shock });
     const second = this.marine.clone(true), secondSuit = this.mat(this.suit.clone()); secondSuit.color.setHex(0xd49e61);
     second.traverse(node => { if (node instanceof THREE.Mesh) { if (node.material === this.suit) node.material = secondSuit; else if (node.material === cyan) node.material = amber; } });
@@ -440,6 +503,14 @@ export class SurvivalWorld {
     torch.color.setHex(0xffd59b); shock.material = this.standard(0xffda98, 0xff9019, .8);
     this.scene.add(second, torch, flash, flame, shock);
     this.marineViews.push({ body: second, gun: second.getObjectByName('weapon') as THREE.Group, boots: [second.getObjectByName('boot-0') as THREE.Mesh, second.getObjectByName('boot-1') as THREE.Mesh], suit: secondSuit, torch, flash, flame, shock });
+    if (arcade) {
+      const burst = this.geo(new THREE.OctahedronGeometry(1));
+      for (const view of this.marineViews) {
+        const flashPaint = this.mat(new THREE.MeshBasicMaterial({ color: 0xffda86, toneMapped: false }));
+        view.muzzle = this.mesh(burst, flashPaint, view.gun, .15, .93, 1.28, .23, .23, .55);
+        view.muzzle.visible = false;
+      }
+    }
   }
   resize(width: number, height: number, count = 1) {
     this.viewports = splitViewports(width, height, count);
@@ -542,6 +613,8 @@ export class SurvivalWorld {
       if (view.armor) {
         const armorTint = i === 0 ? 0xffffff : 0xffd4a0;
         view.armor.material.color.setHex(p.health <= 0 ? 0x83728b : p.invulnerable > 0 ? 0xff9880 : p.shield > 0 ? 0x9dffff : armorTint);
+        view.armor.rotation.y = view.gun.rotation.y;
+        if (view.visor) view.visor.visible = p.health > 0;
       }
       const moving = s.phase === 'PLAYING' && p.health > 0 && Math.hypot(p.x - frame.lastPlayer.x, p.z - frame.lastPlayer.y) > .001; frame.lastPlayer.set(p.x, p.z);
       view.boots.forEach((boot, j) => { boot.position.z = -.45 + (this.reduced || !moving ? 0 : Math.sin(t * 13 + j * Math.PI) * .16); });
@@ -556,7 +629,8 @@ export class SurvivalWorld {
     this.finish(this.contact, shadows);
     const steamPosition = this.steam.geometry.getAttribute('position') as THREE.BufferAttribute;
     for (let i = 0; i < 32; i++) { const side = i % 4, a = side * Math.PI / 2, along = Math.sin(Math.floor(i / 4) * 3.9) * (this.arena.wall - 1), rise = this.reduced ? (i % 5) * .2 : (t * .35 + i * .17) % 2; steamPosition.setXYZ(i, Math.cos(a) * along - Math.sin(a) * (this.arena.wall - .8) + Math.sin(i + rise) * .25, .4 + rise, -Math.sin(a) * along - Math.cos(a) * (this.arena.wall - .8)); } steamPosition.needsUpdate = true;
-    let count = 0, lc = 0, pc = 0, wc = 0, bossCount = 0, fc = 0, fangCount = 0, ec = 0, shellCount = 0, spineCount = 0, sacCount = 0, shadowCount = 0;
+    let count = 0, lc = 0, pc = 0, wc = 0, bossCount = 0, fc = 0, fangCount = 0, ec = 0, shellCount = 0, spineCount = 0, sacCount = 0, shadowCount = 0, impactCount = 0;
+    let wingCount = 0, seamCount = 0;
     for (const e of s.enemies) {
       const scale = e.state === 'DYING' ? Math.max(.01, 1 - e.age / .35) : e.state === 'SPAWNING' ? Math.min(1, e.age / .65) : 1;
       const target = s.nearestPlayer(e.x, e.z);
@@ -564,9 +638,12 @@ export class SurvivalWorld {
       // spines and acid sacs remain readable beside the HUD.
       const visualScale = e.boss ? 1.14 : 1.28;
       const r = e.radius * scale * visualScale;
-      const spitterWindup = this.arena.id === 'colony' && e.kind === 'spitter' && e.state === 'ADVANCING' && e.warning > 0;
-      const a = spitterWindup ? Math.atan2(e.aimX, e.aimZ) : Math.atan2(target.x - e.x, target.z - e.z);
-      this.instance(this.enemyShadows, shadowCount++, e.x, .025, e.z, r * 1.3, r * .42, r * 1.3, a, -Math.PI / 2);
+      const directedAttack = ['stalker', 'maw', 'spitter', 'sovereign'].includes(e.kind);
+      const attackWindup = this.arena.id === 'colony' && directedAttack && e.state === 'ADVANCING' && e.warning > 0;
+      const spitterWindup = attackWindup && e.kind === 'spitter';
+      const a = attackWindup ? Math.atan2(e.aimX, e.aimZ) : Math.atan2(target.x - e.x, target.z - e.z);
+      const cos = Math.cos(a), sin = Math.sin(a);
+      this.instance(this.enemyShadows, shadowCount++, e.x, .025, e.z, r * 1.3, r * (arcade ? .85 : .42), r * 1.3, a, -Math.PI / 2);
       const skitter = e.kind === 'skitter', beetle = e.kind === 'carapace' || e.kind === 'maw', mantis = e.kind === 'stalker', acid = e.kind === 'spitter' || e.kind === 'brood';
       const bossPhase = e.boss && e.hp <= e.maxHp / 2 ? 2 : 1;
       const flash = !this.reduced && e.hitFlash > 0;
@@ -656,7 +733,22 @@ export class SurvivalWorld {
         this.instance(this.bossParts, bossCount, e.x + Math.sin(angle) * distance, jaw ? .35 : r * (.7 + (bossPhase === 2 ? .1 : 0)), e.z + Math.cos(angle) * distance, r * (jaw ? .18 : .38) * phasePulse, r * .3 * phasePulse, r * (jaw ? .85 : .5), angle);
         this.bossParts.setColorAt(bossCount++, this.color.setHex(e.warning > 0 ? 0xffc36b : bossPhase === 2 ? (e.kind === 'sovereign' ? 0xff3d82 : jaw ? 0xff704f : 0xb9d94a) : e.kind === 'sovereign' ? 0xbb668b : jaw ? 0xd5bc7c : 0x769b43));
       }
-      if (e.warning > 0) { this.instance(this.warnings, wc++, e.x, .09, e.z, r * 1.8, r * 1.8, r * 1.8, 0, -Math.PI / 2); }
+      if (attackWindup) {
+        const warningWidth = e.kind === 'sovereign' ? 2.4 : e.kind === 'maw' ? 1.35 : .72;
+        const warningLength = e.kind === 'stalker' || e.kind === 'maw' ? 5.4 : 7.2;
+        this.instance(this.warnings, wc++, e.x, .075, e.z, warningWidth, 1, warningLength, a);
+      }
+      if (e.hitFlash > 0) {
+        const pieces = this.reduced ? 2 : 4;
+        const progress = 1 - Math.min(1, e.hitFlash / .12);
+        for (let j = 0; j < pieces; j++) {
+          const sparkAngle = e.id * 1.91 + j * Math.PI * 2 / pieces;
+          const distance = .16 + progress * (.42 + j * .08);
+          this.instance(this.impactSparks, impactCount, e.x + Math.cos(sparkAngle) * distance, .4 + Math.sin(progress * Math.PI) * .5,
+            e.z + Math.sin(sparkAngle) * distance, .055, .055, .18 + progress * .12, sparkAngle);
+          this.impactSparks.setColorAt(impactCount++, this.color.setHex(j % 2 ? 0xffb547 : 0xffffd2));
+        }
+      }
     }
     this.finish(this.body, count, true); this.finish(this.heads, count, true); this.finish(this.cores, count, true); this.finish(this.fangs, fangCount); this.finish(this.legs, lc); this.finish(this.plates, pc, true); this.finish(this.warnings, wc);
     this.finish(this.bossParts, bossCount, true); this.finish(this.thoraxes, count, true); this.finish(this.feelers, fc); this.finish(this.eyes, ec, true); this.finish(this.elytra, shellCount, true); this.finish(this.spines, spineCount, true); this.finish(this.sacs, sacCount, true);
@@ -672,22 +764,33 @@ export class SurvivalWorld {
     this.finish(this.reticles, rc, true);
     let lines = 0, bc = 0;
     const attr = this.trails.geometry.getAttribute('position') as THREE.BufferAttribute;
+    const trailColors = this.trails.geometry.getAttribute('color') as THREE.BufferAttribute;
+    const segment = (x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, color: number) => {
+      const paint = this.color.setHex(color);
+      attr.setXYZ(lines, x1, y1, z1); trailColors.setXYZ(lines++, paint.r, paint.g, paint.b);
+      attr.setXYZ(lines, x2, y2, z2); trailColors.setXYZ(lines++, paint.r, paint.g, paint.b);
+    };
     for (const b of s.projectiles) {
-      this.instance(this.bullets, bc, b.x, .65, b.z, b.hostile ? .22 : .09, .1, b.hostile ? .22 : .09);
-      this.bullets.setColorAt(bc++, this.color.setHex(b.hostile ? 0x91ff35 : b.weapon === 'rail' ? 0x55eeff : b.weapon === 'cascade' ? 0xff8833 : 0xffe8a0));
-      attr.setXYZ(lines++, b.x, .65, b.z); attr.setXYZ(lines++, b.x - b.vx * .025, .65, b.z - b.vz * .025);
+      const width = b.hostile ? .22 : .09;
+      const trailColor = b.hostile ? 0x8cff36 : b.weapon === 'rail' ? 0x55eeff : b.weapon === 'cascade' ? 0xff8833 : 0xffdda0;
+      this.instance(this.bullets, bc, b.x, .65, b.z, width, .1, arcade ? (b.hostile ? .38 : .29) : width,
+        arcade ? Math.atan2(b.vx, b.vz) : 0);
+      this.bullets.setColorAt(bc++, this.color.setHex(trailColor));
+      segment(b.x, .65, b.z, b.x - b.vx * .025, .65, b.z - b.vz * .025, trailColor);
     }
-    for (const e of s.enemies) if (e.warning > 0 && ['stalker', 'maw', 'spitter', 'sovereign'].includes(e.kind)) { attr.setXYZ(lines++, e.x, .1, e.z); attr.setXYZ(lines++, e.x + e.aimX * 7, .1, e.z + e.aimZ * 7); }
     for (const p of s.players) {
       // Arcade assisted aiming already has a target ring; keep the line for manual aiming.
       if (p.health <= 0 || (arcade && p.aimMode === 'assisted')) continue;
-      attr.setXYZ(lines++, p.x, .15, p.z);
-      attr.setXYZ(lines++, p.x + Math.cos(p.fireAngle) * 2.7, .15, p.z + Math.sin(p.fireAngle) * 2.7);
+      segment(p.x, .15, p.z, p.x + Math.cos(p.fireAngle) * 2.7, .15, p.z + Math.sin(p.fireAngle) * 2.7, p.id === 0 ? 0x78e8ff : 0xffce7a);
     }
-    attr.needsUpdate = true; this.trails.geometry.setDrawRange(0, lines); this.finish(this.bullets, bc, true);
+    attr.needsUpdate = true; trailColors.needsUpdate = true; this.trails.geometry.setDrawRange(0, lines); this.finish(this.bullets, bc, true);
     let ic = 0, genericc = 0, medc = 0, armorc = 0, ammoc = 0, grenadec = 0;
     for (const item of s.pickups) {
-      const color = item.kind === 'medkit' ? 0xff655c : item.kind === 'shield' ? 0x61d9ff : item.kind === 'haste' ? 0xe8bb4b : 0x9ed950;
+      const color = item.kind === 'medkit' ? 0xd69aff : item.kind === 'ammo' ? 0xffb84f : item.kind === 'shield' ? 0x61d9ff : item.kind === 'grenade' ? 0xff7b3c : 0xe8d14b;
+      if (this.supplyRings) {
+        this.instance(this.supplyRings, ic, item.x, .045, item.z, .63, .63, 1, 0, -Math.PI / 2);
+        this.supplyRings.setColorAt(ic, this.color.setHex(color));
+      }
       if (item.kind === 'medkit') {
         this.instance(this.dropMedkits, medc++, item.x, .42, item.z, .72, .3, .46, .2);
         this.instance(this.crosses, ic * 2, item.x, .62, item.z, .12, .045, .42); this.crosses.setColorAt(ic * 2, this.color.setHex(0xffffff));
@@ -731,16 +834,41 @@ export class SurvivalWorld {
         }
       }
       if (event.kind === 'explosion') { const r = .3 + event.age * 7; this.instance(this.blasts, blastCount++, event.x, .5, event.z, r, .5, r); }
+      if (event.kind === 'impact' && event.age < .24) {
+        const pieces = this.reduced ? 2 : 4;
+        const progress = event.age / .24;
+        for (let j = 0; j < pieces; j++) {
+          const sparkAngle = event.id * 1.37 + j * Math.PI * 2 / pieces;
+          const distance = .12 + progress * (.65 + j * .08);
+          this.instance(this.impactSparks, impactCount, event.x + Math.cos(sparkAngle) * distance,
+            .24 + Math.sin(progress * Math.PI) * .72, event.z + Math.sin(sparkAngle) * distance,
+            .065, .065, .22 * (1 - progress) + .04, sparkAngle);
+          this.impactSparks.setColorAt(impactCount++, this.color.setHex(j % 2 ? 0xff5a3d : 0xffc45e));
+        }
+      }
       if (event.kind === 'shot' && event.age < .06) firing[event.playerId ?? 0] = true;
       if (event.kind === 'flame' && event.age < .15) flaming[event.playerId ?? 0] = true;
       this.lastEvent = Math.max(this.lastEvent, event.id);
     }
+    this.finish(this.impactSparks, impactCount, true);
     this.finish(this.fragments, fragmentCount, true);
     this.corpses = this.corpses.filter(c => t - c.born < 18).slice(-80);
     this.corpses.forEach((c, i) => this.instance(this.stains, i, c.x, .018 + i * .0001, c.z, .8, 1, .8, 0, -Math.PI / 2)); this.finish(this.stains, this.remains ? this.corpses.length : 0); this.finish(this.blasts, blastCount);
     for (const [i, p] of s.players.entries()) {
       const view = this.marineViews[i];
-      view.flash.position.set(p.x + Math.cos(p.fireAngle), 1.5, p.z + Math.sin(p.fireAngle)); view.flash.intensity = p.health <= 0 ? 0 : firing[i] ? 18 : flaming[i] ? 28 : 0;
+      const muzzleReach = { machinegun: 1.55, shotgun: 1.48, flame: 1.32, cascade: 1.56, rail: 1.78 }[p.equipped];
+      const muzzleColor = p.equipped === 'rail' ? 0x72f5ff : p.equipped === 'cascade' || p.equipped === 'flame' ? 0xff8c38 : 0xffdc84;
+      const worldReach = muzzleReach * (arcade ? 1.24 : 1.15);
+      view.flash.color.setHex(muzzleColor);
+      view.flash.position.set(p.x + Math.cos(p.fireAngle) * worldReach, view.armor ? 1.58 : 1.25, p.z + Math.sin(p.fireAngle) * worldReach);
+      view.flash.intensity = p.health <= 0 ? 0 : firing[i] ? 18 : flaming[i] ? 28 : 0;
+      if (view.muzzle) {
+        view.muzzle.visible = p.health > 0 && firing[i];
+        view.muzzle.position.set(.13, view.armor ? 1.28 : .93, muzzleReach);
+        view.muzzle.scale.set(.23, .23, p.equipped === 'shotgun' ? .72 : p.equipped === 'rail' ? .82 : .55);
+        const material = view.muzzle.material;
+        if (material instanceof THREE.MeshBasicMaterial) material.color.setHex(muzzleColor);
+      }
       view.flame.visible = p.health > 0 && flaming[i];
       const flamePulse = 1 + (this.reduced ? 0 : Math.sin(t * 38 + i * 2.1) * .12);
       const flameReach = 2.7 + (this.reduced ? 0 : Math.sin(t * 31 + i) * .14);

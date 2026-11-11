@@ -43,6 +43,9 @@ export async function installIndustrialFixture() {
         step.call(s);
       }
     };
+    // Uses the authoritative damage path so the critical frame includes the
+    // same impact event, invulnerability and HUD state as an ordinary hit.
+    window.qaCritical = () => s.hurt(60, player);
     window.qaAdvance(9);
     return true;
   };

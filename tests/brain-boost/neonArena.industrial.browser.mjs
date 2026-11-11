@@ -52,6 +52,19 @@ async function capture(session, name) {
   console.log(JSON.stringify({ name, ...metrics }));
 }
 
+async function captureSequence({ page, errors }) {
+  const frame = async (name, action) => {
+    await page.evaluate(action);
+    await page.waitForTimeout(100);
+    assert.deepEqual(errors, []);
+    await page.screenshot({ path: resolve(output, name + '.png') });
+  };
+  await frame('05-secuencia-movimiento', () => window.qaAdvance(12, true));
+  await frame('06-secuencia-disparo', () => window.qaAdvance(4, false));
+  await frame('07-secuencia-acido', () => window.qaAdvance(36, false));
+  await frame('08-secuencia-salud-critica', () => window.qaCritical());
+}
+
 try {
   await mkdir(output, { recursive: true });
   await server.listen();
@@ -60,6 +73,7 @@ try {
   const landscape = { width: 1536, height: 864 };
   const solo = await open(landscape);
   await capture(solo, baseline ? '01-antes' : '02-despues');
+  if (!baseline) await captureSequence(solo);
   await solo.context.close();
   if (!baseline && process.env.NEON_LANDSCAPE_ONLY !== '1') {
     const mobile = await open({ width: 390, height: 844 }, { reduced: true });
