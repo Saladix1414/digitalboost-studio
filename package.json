@@ -43,7 +43,7 @@
   "optionalDependencies": {
     "@rolldown/binding-android-arm64": "^1.2.6"
   },
-  "name": "digitalboost-studio",
+  "name": "originx-foundation",
   "version": "0.1.0",
   "private": true,
   "license": "UNLICENSED"

@@ -214,7 +214,7 @@ async function startServer() {
       }
 
       const instruction = `
-You are DigitalBoost Web Operator.
+You are the OriginX Foundation Web Operator.
 
 AUTHORITY:
 - Proposal only.
@@ -351,7 +351,7 @@ ${prompt.trim()}
         return res.status(500).json({ error: "Falta la API Key de Gemini." });
       }
 
-      const systemInstruction = `Eres el "AI Copilot" de DigitalBoost, un entorno avanzado de desarrollo visual.
+      const systemInstruction = `Eres el "AI Copilot" de OriginX Foundation, un entorno avanzado de desarrollo visual.
 Tu trabajo es generar código HTML válido estructurado para aplicaciones web.
 Usa clases de Tailwind CSS para todos los estilos.
 Tus diseños deben ser de nivel mundial (World-Class).
